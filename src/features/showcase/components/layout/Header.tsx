@@ -1,0 +1,449 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { ROUTES } from '../../../../routes';
+import {
+  ShoppingCartOutlined,
+  MenuOutlined,
+  CloseOutlined,
+  GlobalOutlined,
+  DownOutlined,
+  DeleteOutlined,
+  ArrowRightOutlined,
+} from '@ant-design/icons';
+import Container from '../ui/Container';
+import { useCart } from '../../context/CartContext';
+
+const Header: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState('VI');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const cartRef = useRef<HTMLDivElement | null>(null);
+  const cartButtonRef = useRef<HTMLDivElement | null>(null);
+  const cartDrawerRef = useRef<HTMLDivElement | null>(null);
+  const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart } = useCart();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close cart when clicking outside (Desktop only, mobile uses full screen overlay)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (window.innerWidth < 1024) return;
+
+      const target = event.target as Node;
+
+      const clickedButton =
+        cartButtonRef.current && cartButtonRef.current.contains(target);
+
+      const clickedDrawer =
+        cartDrawerRef.current && cartDrawerRef.current.contains(target);
+
+      if (!clickedButton && !clickedDrawer) {
+        setIsCartOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const languages = [
+    { code: 'VI', label: 'Tiếng Việt', flag: '🇻🇳' },
+    { code: 'EN', label: 'English', flag: '🇺🇸' },
+    { code: 'ZH', label: '中文', flag: '🇨🇳' }
+  ];
+
+  const navLinks = [
+    {
+      title: 'Giới thiệu',
+      href: ROUTES.TRANG_CHU,
+      submenu: [
+        { title: 'Về Nội Thất Hochi', href: ROUTES.GIOI_THIEU },
+        { title: 'Vì sao chọn chúng tôi', href: ROUTES.VI_SAO_CHON_CHUNG_TOI }
+      ]
+    },
+    {
+      title: 'Sản phẩm',
+      href: ROUTES.SAN_PHAM,
+      submenu: [
+        { title: 'Biệt thự Gỗ Óc Chó', href: '/san-pham/biet-thu-go-oc-cho-1' },
+        { title: 'Nội thất Phòng Khách', href: '/san-pham/sofa-go-oc-cho' },
+        { title: 'Nội thất Phòng Ngủ', href: '/san-pham/giuong-ngu-go-oc-cho' },
+        { title: 'Nội thất Phòng Bếp', href: '/san-pham/ban-an-go-oc-cho' }
+      ]
+    },
+    {
+      title: 'Công trình',
+      href: ROUTES.CONG_TRINH,
+      submenu: [
+        { title: 'Nhà ở', href: '/cong-trinh' },
+        { title: 'Thương mại', href: '/cong-trinh' },
+        { title: 'Công nghiệp', href: '/cong-trinh' }
+      ]
+    },
+    { title: 'Đối tác', href: ROUTES.DOI_TAC },
+    { title: 'Video', href: ROUTES.VIDEO },
+    { title: 'Liên hệ', href: ROUTES.LIEN_HE },
+    { title: 'Tuyển dụng', href: ROUTES.TUYEN_DUNG },
+    { title: 'Nội bộ', href: ROUTES.DANG_NHAP, target: '_blank' }
+  ];
+
+  const isDetailLikePage =
+    location.pathname.startsWith('/san-pham/') ||
+    location.pathname.startsWith('/checkout') ||
+    location.pathname.startsWith('/cong-trinh/') ||
+    location.pathname.startsWith('/doi-tac/');
+
+  const isDarkHeader = isScrolled || isDetailLikePage;
+
+  return (
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isDarkHeader ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-6'
+          }`}
+      >
+        <Container className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="relative z-50 transition-transform hover:scale-105">
+            <div className="w-[100px] sm:w-[120px]">
+              <img
+                src="/assets/images/image-logo.png"
+                alt="Nội Thất Hochi"
+                className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? 'brightness-0 invert' : ''}`}
+              />
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-x-8">
+            {navLinks.map((link) => (
+              <div key={link.title} className="relative group">
+                <Link
+                  to={link.href}
+                  target={link.target}
+                  className={`text-[13px] font-bold uppercase tracking-widest transition-all duration-300 hover:text-showcase-primary flex items-center gap-1 ${isDarkHeader ? '!text-gray-800' : '!text-white'
+                    }`}
+                >
+                  {link.title}
+                  {link.submenu && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
+                </Link>
+
+                {link.submenu && (
+                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                    <div className="bg-white shadow-2xl rounded-xl py-4 min-w-[240px] border border-gray-100 overflow-hidden">
+                      {link.submenu.map((sub) => (
+                        <Link
+                          key={sub.title}
+                          to={sub.href}
+                          className="flex items-center justify-between px-6 py-3 text-[13px] font-medium !text-gray-700 hover:text-showcase-primary hover:bg-gray-50 transition-colors"
+                        >
+                          {sub.title}
+                          <ArrowRightOutlined className="text-[10px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Language Switcher - Desktop */}
+            <div className="hidden md:block relative group">
+              <button
+                className={`flex items-center gap-1.5 text-[12px] font-black tracking-tighter uppercase px-3 py-1.5 rounded-full border transition-all ${isDarkHeader
+                  ? 'text-gray-700 border-gray-200 hover:bg-gray-50'
+                  : 'text-white border-white/20 hover:bg-white/10'
+                  }`}
+              >
+                <GlobalOutlined className="text-sm" />
+                {currentLang}
+                <DownOutlined className="text-[8px]" />
+              </button>
+
+              <div className="absolute right-0 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                <div className="bg-white shadow-2xl rounded-xl py-2 min-w-[180px] border border-gray-100 overflow-hidden">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => setCurrentLang(lang.code)}
+                      className="flex items-center justify-between w-full px-5 py-3 text-sm hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="text-lg">{lang.flag}</span>
+                        <span className={currentLang === lang.code ? 'font-bold text-showcase-primary' : 'text-gray-600'}>
+                          {lang.label}
+                        </span>
+                      </span>
+                      {currentLang === lang.code && <div className="w-1.5 h-1.5 rounded-full bg-showcase-primary" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Cart Button */}
+            <div className="relative" ref={cartButtonRef}>
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isDarkHeader
+                  ? 'text-gray-800 hover:bg-gray-100'
+                  : 'text-white hover:bg-white/10'
+                  }`}
+              >
+                <ShoppingCartOutlined className="text-xl" />
+                <AnimatePresence>
+                  {cartCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -top-0.5 -right-0.5 bg-showcase-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            </div>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className={`lg:hidden flex items-center justify-center w-10 h-10 rounded-full transition-all ${isDarkHeader ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                }`}
+              onClick={() => setIsMenuOpen(true)}
+            >
+              <MenuOutlined className="text-xl" />
+            </button>
+          </div>
+        </Container>
+      </header>
+
+      {/* Cart Drawer - Improved for Mobile & Desktop */}
+      <AnimatePresence>
+        {isCartOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsCartOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            />
+            <motion.div
+              ref={cartDrawerRef}
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-full sm:w-[450px] bg-white z-[70] shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-stone-100">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Giỏ hàng</h2>
+                  <p className="text-sm text-gray-500 mt-1">Bạn có {cartCount} sản phẩm trong giỏ</p>
+                </div>
+                <button
+                  onClick={() => setIsCartOpen(false)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <CloseOutlined className="text-lg" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {cartItems.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
+                      <ShoppingCartOutlined className="text-4xl text-gray-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Giỏ hàng trống</h3>
+                      <p className="text-gray-500 text-sm mt-1">Hãy chọn cho mình những sản phẩm ưng ý nhất nhé!</p>
+                    </div>
+                    <button
+                      onClick={() => setIsCartOpen(false)}
+                      className="px-8 py-3 bg-showcase-primary text-white rounded-full font-bold hover:opacity-90 transition-opacity"
+                    >
+                      Tiếp tục mua sắm
+                    </button>
+                  </div>
+                ) : (
+                  cartItems.map((item) => (
+                    <div key={item.id} className="flex gap-4 group">
+                      <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 flex-shrink-0">
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                          <div className="flex justify-between items-start gap-2">
+                            <h4 className="text-sm font-bold !text-gray-900 line-clamp-2 leading-tight">{item.title}</h4>
+                            <button
+                              onClick={() => removeFromCart(item.id)}
+                              className="text-gray-400 hover:text-red-500 transition-colors"
+                            >
+                              <DeleteOutlined />
+                            </button>
+                          </div>
+                          <p className="text-showcase-primary font-black mt-1">{item.price.toLocaleString('vi-VN')} đ</p>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center bg-gray-50 rounded-full px-2 py-1 border border-stone-100">
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="w-8 h-8 flex items-center justify-center !text-gray-500 hover:text-gray-900"
+                            >
+                              -
+                            </button>
+                            <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="w-8 h-8 flex items-center justify-center !text-gray-500 hover:text-gray-900"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <p className="text-xs font-medium text-gray-400">
+                            Thành tiền: <span className="text-gray-900 font-bold">{(item.price * item.quantity).toLocaleString('vi-VN')} đ</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {cartItems.length > 0 && (
+                <div className="p-6 bg-gray-50 border-t space-y-4 border-stone-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600 font-medium">Tổng cộng:</span>
+                    <span className="text-2xl font-black text-showcase-primary">{totalAmount.toLocaleString('vi-VN')} đ</span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigate('/checkout');
+                        setIsCartOpen(false);
+                      }}
+                      className="w-full py-4 bg-showcase-primary text-white rounded-2xl font-black uppercase tracking-widest hover:shadow-lg hover:shadow-showcase-primary/20 transition-all"
+                    >
+                      Thanh toán ngay
+                    </button>
+                    <button
+                      onClick={() => setIsCartOpen(false)}
+                      className="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold hover:bg-gray-100 transition-all"
+                    >
+                      Tiếp tục mua sắm
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Menu Drawer - Full Screen Slide */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 bg-white z-[100] flex flex-col lg:hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b">
+              <div className="w-[100px]">
+                <img src="/assets/images/image-logo.png" alt="Logo" className="w-full h-auto" />
+              </div>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
+              >
+                <CloseOutlined className="text-lg" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-1">
+                {navLinks.map((link) => (
+                  <div key={link.title} className="border-b border-gray-50 last:border-0">
+                    <div className="flex items-center justify-between py-4">
+                      <Link
+                        to={link.href}
+                        target={link.target}
+                        className="text-lg font-bold !text-gray-900 uppercase tracking-tight"
+                        onClick={() => !link.submenu && setIsMenuOpen(false)}
+                      >
+                        {link.title}
+                      </Link>
+                    </div>
+                    {link.submenu && (
+                      <div className="pb-4 pl-4 space-y-3">
+                        {link.submenu.map((sub) => (
+                          <Link
+                            key={sub.title}
+                            to={sub.href}
+                            className="block !text-gray-500 font-medium hover:text-showcase-primary"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            {sub.title}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-10 space-y-6">
+                <div>
+                  <p className="text-xs font-black uppercase text-gray-400 tracking-widest mb-4">Ngôn ngữ</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => setCurrentLang(lang.code)}
+                        className={`flex flex-col items-center gap-1 p-3 rounded-2xl border transition-all ${currentLang === lang.code
+                          ? 'bg-showcase-primary/10 border-showcase-primary text-showcase-primary'
+                          : 'bg-gray-50 border-transparent text-gray-600'
+                          }`}
+                      >
+                        <span className="text-2xl">{lang.flag}</span>
+                        <span className="text-[10px] font-bold">{lang.code}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gray-900 rounded-3xl text-white">
+                  <p className="text-xs font-bold text-gray-400 mb-2">Liên hệ với chúng tôi</p>
+                  <h3 className="text-xl font-black mb-4">090 123 4567</h3>
+                  <button className="w-full py-3 bg-showcase-primary rounded-xl font-bold text-sm">
+                    Gửi yêu cầu tư vấn
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+export default Header;

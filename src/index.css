@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@layer base {
+  :where(.css-dev-only-do-not-override-mncuj7) a,
+  :where(.css-dev-only-do-not-override-mncuj7) a:visited,
+  :where(.css-dev-only-do-not-override-mncuj7) a:hover,
+  :where(.css-dev-only-do-not-override-mncuj7) a:active {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@theme {
+  --color-showcase-primary: #C5A059;
+  --color-showcase-hover: #A6864A;
+  --color-showcase-light: #F9F5EE;
+}
+
+@layer utilities {
+  @media (max-width: 768px) {
+    .hidden-mobile {
+      display: none !important;
+    }
+  }
+}

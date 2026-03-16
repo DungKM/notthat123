@@ -1,0 +1,250 @@
+import React, { useState } from 'react';
+import Container from '../ui/Container';
+import { StarFilled, UserOutlined } from '@ant-design/icons';
+import { message } from 'antd';
+
+// Dữ liệu mẫu đánh giá của khách hàng
+const initialFeedbacks = [
+  {
+    id: 1,
+    name: 'Nguyễn Văn A',
+    avatar: 'https://i.pravatar.cc/150?img=11',
+    rating: 5,
+    content: 'Đội ngũ thi công rất chuyên nghiệp, thiết kế tinh tế. Tôi hoàn toàn hài lòng với không gian sống mới của gia đình.',
+    date: '10/03/2026',
+  },
+  {
+    id: 2,
+    name: 'Trần Thị B',
+    avatar: 'https://i.pravatar.cc/150?img=5',
+    rating: 5,
+    content: 'Chất lượng gỗ óc chó thực sự khác biệt, mịn màng và sang trọng. Tiến độ hoàn thành đúng như cam kết ban đầu.',
+    date: '05/03/2026',
+  },
+  {
+    id: 3,
+    name: 'Phạm Minh C',
+    avatar: 'https://i.pravatar.cc/150?img=8',
+    rating: 4,
+    content: 'Thiết kế đẹp, tư vấn nhiệt tình. Khâu bảo hành cũng rất nhanh gọn. Tuy nhiên, giá có cao hơn mặt bằng chung một chút nhưng đáng tiền.',
+    date: '28/02/2026',
+  },
+];
+
+const Feedback: React.FC = () => {
+  const [feedbacks, setFeedbacks] = useState(initialFeedbacks);
+
+  // State cho form đánh giá
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    rating: 5,
+    content: '',
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleRatingClick = (ratingValue: number) => {
+    setFormData((prev) => ({ ...prev, rating: ratingValue }));
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear error if user starts typing
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = 'Vui lòng nhập họ tên';
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Vui lòng nhập số điện thoại';
+    } else if (!/^\d{10,11}$/.test(formData.phone)) {
+      newErrors.phone = 'Số điện thoại không hợp lệ';
+    }
+    if (!formData.content.trim()) newErrors.content = 'Vui lòng nhập nội dung đánh giá';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validate()) {
+      // Giả lập lưu feedback mới (Trong thực tế sẽ gọi API)
+      const newFeedback = {
+        id: Date.now(),
+        name: formData.name,
+        // Dùng avatar mặc định nếu không có upload
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`,
+        rating: formData.rating,
+        content: formData.content,
+        // Lấy ngày hiện tại
+        date: new Date().toLocaleDateString('vi-VN'),
+      };
+
+      setFeedbacks([newFeedback, ...feedbacks]);
+      message.success('Cảm ơn bạn đã gửi đánh giá!');
+
+      // Reset form
+      setFormData({
+        name: '',
+        phone: '',
+        rating: 5,
+        content: '',
+      });
+    } else {
+      message.error('Vui lòng điền đầy đủ thông tin bắt buộc.');
+    }
+  };
+
+  // Hàm render số lượng sao tương ứng
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }).map((_, idx) => (
+      <StarFilled
+        key={idx}
+        style={{
+          fontSize: 24,
+          color: idx < rating ? "#facc15" : "#e5e7eb"
+        }}
+      />
+    ));
+  };
+
+  return (
+    <section className="py-24 bg-gray-50 border-t border-gray-100">
+      <Container>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl lg:text-4xl font-bold text-teal-950 uppercase tracking-widest mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+            KHÁCH HÀNG NÓI GÌ
+          </h2>
+          <div className="w-24 h-1 bg-[#C5A059] mx-auto rounded-full"></div>
+          <p className="mt-6 text-gray-500 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+            Sự hài lòng của khách hàng là thước đo thành công lớn nhất của Nội Thất Hochi.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Cột hiển thị danh sách đánh giá */}
+          <div className="lg:col-span-7 space-y-6 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+            {feedbacks.map((fb) => (
+              <div key={fb.id} className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-[#C5A059]/30">
+                    <img src={fb.avatar} alt={fb.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-1">
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-base">{fb.name}</h4>
+                        <span className="text-xs text-gray-400">{fb.date}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {renderStars(fb.rating)}
+                      </div>
+                    </div>
+                    <p className="text-gray-600 mt-3 text-sm md:text-base leading-relaxed">
+                      "{fb.content}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Cột Form đánh giá */}
+          <div className="lg:col-span-5 relative">
+            <div className="sticky top-28 bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-gray-100/50 relative overflow-hidden">
+              {/* Trang trí góc */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-showcase-primary/5 rounded-bl-full -z-10"></div>
+
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-teal-950 mb-2">Gửi Đánh Giá</h3>
+                <p className="text-gray-500 text-sm">Chia sẻ trải nghiệm của bạn với chúng tôi</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Rating Selector */}
+                <div className="mb-6">
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Chất lượng dịch vụ *</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => handleRatingClick(star)}
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
+                        <StarFilled
+                          style={{
+                            fontSize: 24,
+                            color: star <= formData.rating ? "#facc15" : "#e5e7eb"
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Họ và tên *"
+                      className={`w-full px-4 py-3.5 bg-gray-50 rounded-xl border ${errors.name ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-400 text-sm font-medium`}
+                    />
+                    {errors.name && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-widest">{errors.name}</p>}
+                  </div>
+
+                  <div>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Số điện thoại *"
+                      className={`w-full px-4 py-3.5 bg-gray-50 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-400 text-sm font-medium`}
+                    />
+                    {errors.phone && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-widest">{errors.phone}</p>}
+                  </div>
+                </div>
+
+                <div>
+                  <textarea
+                    name="content"
+                    value={formData.content}
+                    onChange={handleChange}
+                    rows={4}
+                    placeholder="Nội dung trải nghiệm của bạn *"
+                    className={`w-full px-4 py-3.5 bg-gray-50 rounded-xl border ${errors.content ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-400 text-sm font-medium resize-none`}
+                  ></textarea>
+                  {errors.content && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-widest">{errors.content}</p>}
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-teal-950 text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-sm hover:bg-[#C5A059] transition-all shadow-lg hover:shadow-[#C5A059]/30"
+                >
+                  GỬI ĐÁNH GIÁ
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+};
+
+export default Feedback;
