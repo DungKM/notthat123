@@ -1,4 +1,4 @@
-import { ChatGroup, ChatMessage } from '../types';
+import { ChatAttachment, ChatGroup, ChatMessage } from '../types';
 import { mockUsers } from '@/src/auth/mockUsers';
 
 type ChatEvent = 'new_message' | 'member_added' | 'member_removed' | 'group_deleted' | 'group_created';
@@ -86,7 +86,7 @@ class ChatService {
     return this.messages[groupId] || [];
   }
 
-  sendMessage(groupId: string, senderId: string, senderName: string, content: string) {
+  sendMessage(groupId: string, senderId: string, senderName: string, content: string, attachments?: ChatAttachment[]) {
     const newMessage: ChatMessage = {
       id: Math.random().toString(36).substr(2, 9),
       groupId,
@@ -94,6 +94,7 @@ class ChatService {
       senderName,
       content,
       timestamp: new Date().toISOString(),
+      ...(attachments && attachments.length > 0 ? { attachments } : {}),
     };
 
     if (!this.messages[groupId]) {

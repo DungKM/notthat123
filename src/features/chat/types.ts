@@ -7,6 +7,14 @@ export interface ChatMember {
   avatar?: string;
 }
 
+export interface ChatAttachment {
+  id: string;
+  name: string;
+  type: string; // MIME type, e.g. 'image/png'
+  url: string;  // base64 data URL
+  size: number; // bytes
+}
+
 export interface ChatMessage {
   id: string;
   groupId: string;
@@ -14,6 +22,7 @@ export interface ChatMessage {
   senderName: string;
   content: string;
   timestamp: string;
+  attachments?: ChatAttachment[];
 }
 
 export interface ChatGroup {
