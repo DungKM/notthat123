@@ -266,27 +266,6 @@ export const MOCK_ATTENDANCE_SUMMARY: AttendanceSummary[] = [
 
 export const MOCK_SHOWCASE_PROJECTS: ShowcaseProject[] = [
   {
-    id: 's1',
-    slug: 'biet-thu-vinhomes-harmony',
-    title: 'Biệt thự Vinhomes Harmony · Gỗ Óc Chó',
-    category: 'Nhà ở',
-    coverImage: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1600',
-    gallery: [
-      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1600607687920-4e2a534ab513?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800',
-    ],
-    location: 'KĐT Vinhomes Harmony, Long Biên, Hà Nội',
-    year: '2025',
-    area: '320 m²',
-    excerpt: 'Không gian sống sang trọng, tận dụng tối đa ánh sáng tự nhiên với chất liệu gỗ óc chó cao cấp, chuẩn mực cho biệt thự hiện đại.',
-    content: [
-      'Biệt thự Vinhomes Harmony được Hochi thiết kế theo phong cách hiện đại tối giản, tập trung vào sự tinh tế trong từng đường nét và xử lý vật liệu. Gỗ óc chó được sử dụng đồng bộ cho phòng khách, bếp và phòng ngủ, tạo nên một tổng thể thống nhất và đẳng cấp.',
-      'Chúng tôi khai thác tối đa chiều cao trần, kết hợp hệ thống đèn gián tiếp và ánh sáng tự nhiên từ hệ cửa kính lớn, giúp không gian luôn thông thoáng, ấm cúng nhưng vẫn sang trọng.',
-      'Toàn bộ sản phẩm được sản xuất tại xưởng của Hochi với tiêu chuẩn tẩm sấy nghiêm ngặt, đảm bảo độ bền và tính ổn định của gỗ trong điều kiện khí hậu Việt Nam.',
-    ],
-  },
-  {
     id: 's2',
     slug: 'penthouse-skylake',
     title: 'Penthouse Skylake · Nội thất cao cấp',
