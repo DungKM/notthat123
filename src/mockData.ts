@@ -30,7 +30,7 @@ export const MOCK_PROJECTS: Project[] = [
     ownerPhone: '0912345678',
     managerId: '5',
     createdBy: 'Hoàng Văn E',
-    status: 'Chờ duyệt',
+    status: 'Duyệt',
     createdAt: dayjs().subtract(10, 'hour').toISOString(),
     details: [
       { id: '6', projectId: '2', name: 'Bàn họp', material: 'Gỗ công nghiệp MDF', unit: 'Cái', quantity: 1, price: 75000000, amount: 75000000, costPrice: 55000000, note: 'MDF phủ veneer sồi' },

@@ -1,21 +1,124 @@
-import React from 'react';
-import { ProTable, ProColumns, ProCard } from '@ant-design/pro-components';
-import { AttendanceRecord, AdvanceRequest } from '@/src/types';
-import { MOCK_ATTENDANCE, MOCK_ADVANCE_REQUESTS, MOCK_EMPLOYEES } from '@/src/mockData';
-import { Card, Row, Col, Statistic, Tag, Descriptions } from 'antd';
+import React, { useState } from "react";
+import {
+  ProTable,
+  ProColumns,
+  ProCard,
+  ModalForm,
+  ProFormDatePicker,
+  ProFormDigit,
+  ProFormSelect,
+  ProFormUploadButton,
+  ProFormTextArea,
+} from "@ant-design/pro-components";
+import { AttendanceRecord, AdvanceRequest } from "@/src/types";
+import {
+  MOCK_ATTENDANCE,
+  MOCK_ADVANCE_REQUESTS,
+  MOCK_EMPLOYEES,
+} from "@/src/mockData";
+import {
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Tag,
+  Descriptions,
+  Button,
+  message,
+  Image,
+} from "antd";
 import {
   DollarOutlined,
   CheckCircleOutlined,
   FieldTimeOutlined,
   WalletOutlined,
-} from '@ant-design/icons';
-import dayjs from 'dayjs';
-import { formatCurrency, formatDateTime, toSafeNumber } from '@/src/utils/format';
-import { useAuth } from '@/src/auth/hooks/useAuth';
+  PlusOutlined,
+  FileImageOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+import {
+  formatCurrency,
+  formatDateTime,
+  toSafeNumber,
+} from "@/src/utils/format";
+import { useAuth } from "@/src/auth/hooks/useAuth";
+
+interface ProjectOption {
+  label: string;
+  value: string;
+  dailyRate: number; // tiền 1 công hành chính
+  otRate: number; // tiền 1 công tăng ca
+}
+
+interface AttendanceWorkRecord extends AttendanceRecord {
+  projectId: string;
+  projectName: string;
+  workingDays: number;
+  otDays: number;
+  amount: number;
+}
+
+const MOCK_PROJECT_OPTIONS: ProjectOption[] = [
+  {
+    label: "Thi công nội thất Vinhomes Grand Park",
+    value: "p1",
+    dailyRate: 400000,
+    otRate: 600000,
+  },
+  {
+    label: "Cải tạo văn phòng Quận 1",
+    value: "p2",
+    dailyRate: 450000,
+    otRate: 650000,
+  },
+  {
+    label: "Lắp đặt showroom Thủ Đức",
+    value: "p3",
+    dailyRate: 500000,
+    otRate: 700000,
+  },
+];
+
+const MOCK_ATTENDANCE_WORK: AttendanceWorkRecord[] = [
+  {
+    id: "1",
+    staffId: "4",
+    date: "2024-03-01",
+    startTime: "08:00",
+    endTime: "17:00",
+    workDay: 1,
+    projectId: "p1",
+    projectName: "Thi công nội thất Vinhomes Grand Park",
+    workingDays: 1,
+    otDays: 0.25,
+    amount: 550000,
+  },
+  {
+    id: "2",
+    staffId: "4",
+    date: "2024-03-02",
+    startTime: "08:00",
+    endTime: "17:00",
+    workDay: 1,
+    projectId: "p2",
+    projectName: "Cải tạo văn phòng Quận 1",
+    workingDays: 0.75,
+    otDays: 0.1,
+    amount: 350000,
+  },
+];
 
 const StatisticsPage: React.FC = () => {
   const { user } = useAuth();
-
+  const [attendanceOpen, setAttendanceOpen] = useState(false);
+  const [advanceOpen, setAdvanceOpen] = useState(false);
+  const [records, setRecords] = useState<AttendanceWorkRecord[]>(
+    user
+      ? MOCK_ATTENDANCE_WORK.filter(
+          (r) => String(r.staffId) === String(user.id),
+        )
+      : [],
+  );
   if (!user) return null;
 
   const employeeInfo = MOCK_EMPLOYEES.find((e) => e.id === user.id) || {
@@ -28,44 +131,91 @@ const StatisticsPage: React.FC = () => {
   };
 
   const myRecords = MOCK_ATTENDANCE.filter((r) => r.staffId === user.id);
-  const myAdvanceRequests = MOCK_ADVANCE_REQUESTS.filter((r) => r.employeeId === user.id) as AdvanceRequest[];
-
+  const myAdvanceRequests = MOCK_ADVANCE_REQUESTS.filter(
+    (r) => r.employeeId === user.id,
+  ) as AdvanceRequest[];
   const totalWorkDays = myRecords.reduce((sum, r) => sum + (r.workDay ?? 0), 0);
   const totalOTHours = myRecords.reduce((sum, r) => sum + (r.otDays ?? 0), 0);
+
+  const totalDays = totalWorkDays + totalOTHours;
+
+  const workHours = totalWorkDays * 8;
+  const otHours = totalOTHours * 8;
+  const totalHours = totalDays * 8;
 
   const baseSalary = toSafeNumber(employeeInfo.baseSalary);
   const bonus = toSafeNumber(employeeInfo.bonus);
   const penalty = toSafeNumber(employeeInfo.penalty);
   const advance = toSafeNumber(employeeInfo.advance);
   const estimatedSalary = baseSalary + bonus - penalty - advance;
+  const handleCreateRequest = async (values: any) => {
+    // Giả lập thêm yêu cầu ứng tiền vào danh sách (có thể thay bằng API)
+    message.success("Yêu cầu ứng tiền đã được gửi");
+    return true;
+  };
+
+  const handleSubmitAttendance = async (values: any) => {
+    const selectedProject = MOCK_PROJECT_OPTIONS.find(
+      (p) => p.value === values.projectId,
+    );
+
+    if (!selectedProject) {
+      message.error("Không tìm thấy dự án");
+      return false;
+    }
+
+    const workingDays = Number(values.workingDays || 0);
+    const otDays = Number(values.otDays || 0);
+
+    const amount =
+      workingDays * selectedProject.dailyRate + otDays * selectedProject.otRate;
+
+    const newRecord: AttendanceWorkRecord = {
+      id: Math.random().toString(36).slice(2, 11),
+      staffId: String(user.id),
+      date: dayjs(values.date).format("YYYY-MM-DD"),
+      startTime: "",
+      endTime: "",
+      workDay: 0,
+      projectId: selectedProject.value,
+      projectName: selectedProject.label,
+      workingDays,
+      otDays,
+      amount,
+    };
+
+    setRecords((prev) => [newRecord, ...prev]);
+    message.success("Chấm công thành công");
+    return true;
+  };
 
   const monthlyAttendanceColumns: ProColumns<AttendanceRecord>[] = [
     {
-      title: 'Ngày',
-      dataIndex: 'dateFilter',
-      valueType: 'date',
+      title: "Ngày",
+      dataIndex: "dateFilter",
+      valueType: "date",
       hideInTable: true,
       search: {
         transform: (value) => ({
-          dateFilter: value?.format('YYYY-MM-DD'),
+          dateFilter: value?.format("YYYY-MM-DD"),
         }),
       },
     },
     {
-      title: 'Ngày',
-      dataIndex: 'date',
-      valueType: 'date',
+      title: "Ngày",
+      dataIndex: "date",
+      valueType: "date",
       hideInSearch: true,
-      render: (_, record) => dayjs(record.date).format('DD/MM/YYYY'),
+      render: (_, record) => dayjs(record.date).format("DD/MM/YYYY"),
     },
     {
-      title: 'Số công hành chính',
-      dataIndex: 'workDay',
+      title: "Số công hành chính",
+      dataIndex: "workDay",
       hideInSearch: true,
     },
     {
-      title: 'Tăng ca',
-      dataIndex: 'otDays',
+      title: "Tăng ca",
+      dataIndex: "otDays",
       hideInSearch: true,
       render: (_, record) =>
         (record.otDays ?? 0) > 0 ? (
@@ -73,18 +223,18 @@ const StatisticsPage: React.FC = () => {
             {record.otDays} công
           </Tag>
         ) : (
-          '-'
+          "-"
         ),
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'amount',
+      title: "Thành tiền",
+      dataIndex: "amount",
       hideInSearch: true,
       render: (_, record) => (
-        <span style={{ fontWeight: 700, color: '#52c41a' }}>
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
+        <span style={{ fontWeight: 700, color: "#52c41a" }}>
+          {new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
           }).format(Number(record.workDay || 0))}
         </span>
       ),
@@ -93,44 +243,45 @@ const StatisticsPage: React.FC = () => {
 
   const advanceColumns: ProColumns<AdvanceRequest>[] = [
     {
-      title: 'Ngày yêu cầu',
-      dataIndex: 'requestDateFilter',
-      valueType: 'date',
+      title: "Ngày yêu cầu",
+      dataIndex: "requestDateFilter",
+      valueType: "date",
       hideInTable: true,
       search: {
         transform: (value) => ({
-          requestDateFilter: value?.format('YYYY-MM-DD'),
+          requestDateFilter: value?.format("YYYY-MM-DD"),
         }),
       },
     },
     {
-      title: 'Ngày yêu cầu',
-      dataIndex: 'requestDate',
-      valueType: 'dateTime',
+      title: "Ngày yêu cầu",
+      dataIndex: "requestDate",
+      valueType: "dateTime",
       hideInSearch: true,
       render: (_, record) => formatDateTime(record.requestDate),
     },
     {
-      title: 'Số tiền',
-      dataIndex: 'amount',
+      title: "Số tiền",
+      dataIndex: "amount",
       hideInSearch: true,
       render: (_, record) => (
-        <strong style={{ color: '#1890ff' }}>
+        <strong style={{ color: "#1890ff" }}>
           {formatCurrency(record.amount)}
         </strong>
       ),
     },
+
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
       hideInSearch: true,
       render: (_, record) => {
         const color =
-          record.status === 'Đã duyệt'
-            ? 'green'
-            : record.status === 'Từ chối'
-              ? 'red'
-              : 'orange';
+          record.status === "Đã duyệt"
+            ? "green"
+            : record.status === "Từ chối"
+              ? "red"
+              : "orange";
 
         return <Tag color={color}>{record.status}</Tag>;
       },
@@ -138,46 +289,69 @@ const StatisticsPage: React.FC = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <Card title="Tổng quan" bordered styles={{ body: { padding: '12px 16px' } }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <Card
+        title="Tổng quan"
+        bordered
+        styles={{ body: { padding: "12px 16px" } }}
+      >
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={6}>
-            <ProCard style={{ background: '#e6f7ff' }} bordered>
+          <Col xs={24} sm={12} md={4}>
+            <ProCard style={{ background: "#e6f7ff" }} bordered>
               <Statistic
                 title="Tổng công"
                 value={totalWorkDays}
                 suffix="công"
-                prefix={<CheckCircleOutlined style={{ color: '#1890ff' }} />}
+                prefix={<CheckCircleOutlined style={{ color: "#1890ff" }} />}
               />
+              <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
+                ≈ {workHours} giờ
+              </div>
             </ProCard>
           </Col>
-          <Col xs={24} sm={12} md={6}>
-            <ProCard style={{ background: '#fff7e6' }} bordered>
+          <Col xs={24} sm={12} md={4}>
+            <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
                 title="Công OT"
                 value={totalOTHours}
                 suffix="công"
-                prefix={<FieldTimeOutlined style={{ color: '#fa8c16' }} />}
+                prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
               />
+              <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
+                ≈ {otHours} giờ
+              </div>
+            </ProCard>
+          </Col>
+          <Col xs={24} sm={12} md={4}>
+            <ProCard style={{ background: "#fff7e6" }} bordered>
+              <Statistic
+                title="Tổng công hành chính và OT"
+                value={totalDays}
+                suffix="công"
+                prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
+              />
+              <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
+                ≈ {totalHours} giờ
+              </div>
             </ProCard>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <ProCard style={{ background: '#f6ffed' }} bordered>
+            <ProCard style={{ background: "#f6ffed" }} bordered>
               <Statistic
                 title="Lương cơ bản"
                 value={baseSalary}
                 formatter={(val) => formatCurrency(val)}
-                prefix={<DollarOutlined style={{ color: '#52c41a' }} />}
+                prefix={<DollarOutlined style={{ color: "#52c41a" }} />}
               />
             </ProCard>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <ProCard style={{ background: '#fff1f0' }} bordered>
+            <ProCard style={{ background: "#fff1f0" }} bordered>
               <Statistic
                 title="Đã ứng"
                 value={advance}
                 formatter={(val) => formatCurrency(val)}
-                prefix={<WalletOutlined style={{ color: '#ff4d4f' }} />}
+                prefix={<WalletOutlined style={{ color: "#ff4d4f" }} />}
               />
             </ProCard>
           </Col>
@@ -186,14 +360,22 @@ const StatisticsPage: React.FC = () => {
 
       <ProCard title="Lương tạm tính (Dự kiến)" bordered headerBordered>
         <Descriptions column={{ xs: 1, sm: 2 }} bordered>
-          <Descriptions.Item label="Lương cơ bản">{formatCurrency(baseSalary)}</Descriptions.Item>
-          <Descriptions.Item label="Thưởng">+{formatCurrency(bonus)}</Descriptions.Item>
-          <Descriptions.Item label="Phạt">-{formatCurrency(penalty)}</Descriptions.Item>
-          <Descriptions.Item label="Đã ứng">-{formatCurrency(advance)}</Descriptions.Item>
+          <Descriptions.Item label="Lương cơ bản">
+            {formatCurrency(baseSalary)}
+          </Descriptions.Item>
+          <Descriptions.Item label="Thưởng">
+            +{formatCurrency(bonus)}
+          </Descriptions.Item>
+          <Descriptions.Item label="Phạt">
+            -{formatCurrency(penalty)}
+          </Descriptions.Item>
+          <Descriptions.Item label="Đã ứng">
+            -{formatCurrency(advance)}
+          </Descriptions.Item>
           <Descriptions.Item label="Thực lĩnh" span={2}>
             <strong
               style={{
-                color: estimatedSalary >= 0 ? '#52c41a' : '#ff4d4f',
+                color: estimatedSalary >= 0 ? "#52c41a" : "#ff4d4f",
                 fontSize: 18,
               }}
             >
@@ -203,61 +385,155 @@ const StatisticsPage: React.FC = () => {
         </Descriptions>
       </ProCard>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={12}>
-          <Card title="Lịch sử ứng tiền" bordered styles={{ body: { padding: '0' } }}>
-            <ProTable<AdvanceRequest>
-              columns={advanceColumns}
-              rowKey="id"
-              search={{ labelWidth: 'auto', defaultCollapsed: false }}
-              request={async (params) => {
-                let data = myAdvanceRequests;
+      <Card
+        title="Lịch sử ứng tiền"
+        bordered
+        styles={{ body: { padding: "0" } }}
+        extra={
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setAdvanceOpen(true)}
+          >
+            Tạo ứng tiền
+          </Button>
+        }
+      >
+      
+        <ProTable<AdvanceRequest>
+          columns={advanceColumns}
+          rowKey="id"
+          search={{ labelWidth: "auto", defaultCollapsed: false }}
+          request={async (params) => {
+            let data = myAdvanceRequests;
+            if (params.requestDateFilter) {
+              data = data.filter((item) =>
+                dayjs(item.requestDate).isSame(params.requestDateFilter, "day"),
+              );
+            }
+            return {
+              data,
+              success: true,
+            };
+          }}
+          pagination={{ pageSize: 5 }}
+          options={false}
+          scroll={{ x: 500 }}
+        />
+      </Card>
 
-                if (params.requestDateFilter) {
-                  data = data.filter((item) =>
-                    dayjs(item.requestDate).isSame(params.requestDateFilter, 'day')
-                  );
-                }
+      <Card
+        title="Chi tiết công"
+        bordered
+        styles={{ body: { padding: "16px" } }}
+        extra={
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setAttendanceOpen(true)}
+          >
+            Chấm công hôm nay
+          </Button>
+        }
+      >
+        <ProTable<AttendanceRecord>
+          columns={monthlyAttendanceColumns}
+          rowKey="id"
+          search={{ labelWidth: "auto", defaultCollapsed: false }}
+          request={async (params) => {
+            let data = myRecords;
 
-                return {
-                  data,
-                  success: true,
-                };
-              }}
-              pagination={{ pageSize: 5 }}
-              options={false}
-              scroll={{ x: 500 }}
-            />
-          </Card>
-        </Col>
+            if (params.dateFilter) {
+              data = data.filter((item) =>
+                dayjs(item.date).isSame(params.dateFilter, "day"),
+              );
+            }
 
-        <Col xs={24} lg={12}>
-          <Card title="Chi tiết công" bordered styles={{ body: { padding: '0' } }}>
-            <ProTable<AttendanceRecord>
-              columns={monthlyAttendanceColumns}
-              rowKey="id"
-              search={{ labelWidth: 'auto', defaultCollapsed: false }}
-              request={async (params) => {
-                let data = myRecords;
+            return {
+              data,
+              success: true,
+            };
+          }}
+          pagination={{ pageSize: 5 }}
+          options={false}
+          scroll={{ x: 500 }}
+        />
+      </Card>
+      {/* ModalForm tạo yêu cầu ứng tiền */}
+      <ModalForm
+        key="add"
+        title="Tạo yêu cầu ứng tiền mới"
+        open={advanceOpen}
+        modalProps={{
+          destroyOnClose: true,
+          onCancel: () => setAdvanceOpen(false),
+        }}
+        onOpenChange={setAdvanceOpen}
+        onFinish={handleCreateRequest}
+        width={500}
+      >
+        <ProFormDigit
+          label="Số tiền muốn ứng"
+          name="amount"
+          min={0}
+          fieldProps={{
+            formatter: (value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            parser: (value) => value!.replace(/\$\s?|,*/g, ""),
+            addonAfter: "đ",
+            style: { width: "100%" },
+          }}
+          rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
+        />
+        <ProFormTextArea
+          label="Lý do ứng tiền"
+          name="reason"
+          placeholder="Ví dụ: Ứng tiền mua vật tư gấp, ứng lương đợt 1..."
+          rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
+        />
+    
+      </ModalForm>
+      <ModalForm
+        title="Thêm chấm công"
+        open={attendanceOpen}
+        modalProps={{
+          destroyOnClose: true,
+          onCancel: () => setAttendanceOpen(false),
+        }}
+        onOpenChange={setAttendanceOpen}
+        onFinish={handleSubmitAttendance}
+      >
+        <ProFormDatePicker
+          name="date"
+          label="Ngày tháng năm"
+          rules={[{ required: true, message: "Vui lòng chọn ngày" }]}
+        />
 
-                if (params.dateFilter) {
-                  data = data.filter((item) =>
-                    dayjs(item.date).isSame(params.dateFilter, 'day')
-                  );
-                }
+        <ProFormSelect
+          name="projectId"
+          label="Dự án"
+          options={MOCK_PROJECT_OPTIONS}
+          rules={[{ required: true, message: "Vui lòng chọn dự án" }]}
+        />
 
-                return {
-                  data,
-                  success: true,
-                };
-              }}
-              pagination={{ pageSize: 5 }}
-              options={false}
-              scroll={{ x: 500 }}
-            />
-          </Card>
-        </Col>
-      </Row>
+        <ProFormDigit
+          name="workingDays"
+          label="số giờ hành chính làm được"
+          min={0}
+          max={1}
+          fieldProps={{ precision: 2 }}
+          rules={[{ required: true, message: "Vui lòng nhập số giờ làm" }]}
+        />
+
+        <ProFormDigit
+          name="otDays"
+          label="số giờ tăng ca"
+          min={0}
+          max={1}
+          initialValue={0}
+          fieldProps={{ precision: 2 }}
+        />
+      </ModalForm>
     </div>
   );
 };
