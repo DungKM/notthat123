@@ -1,29 +1,52 @@
 import React, { useRef, useState } from 'react';
 import { Input, Button, Upload } from 'antd';
-import { SendOutlined, PaperClipOutlined } from '@ant-design/icons';
-import type { UploadFile, UploadProps } from 'antd';
+import { SendOutlined, PictureOutlined, PaperClipOutlined, CloseCircleFilled } from '@ant-design/icons';
+import type { UploadProps } from 'antd';
+import { ChatAttachment } from '@/src/features/chat/types';
 
 interface ChatInputProps {
-  onSendMessage: (content: string, files?: File[]) => void;
+  onSendMessage: (content: string, attachments?: ChatAttachment[]) => void;
   disabled?: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
   const [message, setMessage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [imageFiles, setImageFiles] = useState<{ file: File; preview: string; uid: string }[]>([]);
   const inputRef = useRef<any>(null);
 
-  const handleSend = () => {
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSend = async () => {
     const trimmed = message.trim();
-    const files = fileList
-      .map((file) => file.originFileObj)
-      .filter((file): file is File => !!file);
+    if (!trimmed && imageFiles.length === 0) return;
 
-    if (!trimmed && files.length === 0) return;
+    let attachments: ChatAttachment[] | undefined;
 
-    onSendMessage(trimmed, files);
+    if (imageFiles.length > 0) {
+      attachments = await Promise.all(
+        imageFiles.map(async (item) => {
+          const base64Url = await fileToBase64(item.file);
+          return {
+            id: Math.random().toString(36).substr(2, 9),
+            name: item.file.name,
+            type: item.file.type,
+            url: base64Url,
+            size: item.file.size,
+          };
+        })
+      );
+    }
+
+    onSendMessage(trimmed, attachments);
     setMessage('');
-    setFileList([]);
+    setImageFiles([]);
     inputRef.current?.focus?.();
   };
 
@@ -34,17 +57,26 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
     }
   };
 
-  const uploadProps: UploadProps = {
+  const imageUploadProps: UploadProps = {
+    accept: 'image/*',
     multiple: true,
-    fileList,
+    showUploadList: false,
     beforeUpload: (file) => {
-      setFileList((prev) => [...prev, file]);
+      const previewUrl = URL.createObjectURL(file);
+      setImageFiles((prev) => [
+        ...prev,
+        { file, preview: previewUrl, uid: Math.random().toString(36).substr(2, 9) },
+      ]);
       return false;
     },
-    onRemove: (file) => {
-      setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
-    },
-    showUploadList: false,
+  };
+
+  const removeImage = (uid: string) => {
+    setImageFiles((prev) => {
+      const item = prev.find((i) => i.uid === uid);
+      if (item) URL.revokeObjectURL(item.preview);
+      return prev.filter((i) => i.uid !== uid);
+    });
   };
 
   return (
@@ -55,40 +87,54 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
         borderTop: '1px solid #f1ebe5',
       }}
     >
-      {fileList.length > 0 && (
+      {/* Image preview area */}
+      {imageFiles.length > 0 && (
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
             gap: 8,
             marginBottom: 10,
+            padding: 8,
+            background: '#fff',
+            borderRadius: 12,
+            border: '1px solid #ebe3dc',
           }}
         >
-          {fileList.map((file) => (
+          {imageFiles.map((item) => (
             <div
-              key={file.uid}
+              key={item.uid}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 10px',
-                background: '#fff',
-                border: '1px solid #ebe3dc',
-                borderRadius: 999,
-                fontSize: 13,
-                color: '#5d4037',
+                position: 'relative',
+                width: 72,
+                height: 72,
+                borderRadius: 8,
+                overflow: 'hidden',
+                border: '1px solid #e8e0d8',
               }}
             >
-              <PaperClipOutlined />
-              <span>{file.name}</span>
-              <span
-                onClick={() =>
-                  setFileList((prev) => prev.filter((item) => item.uid !== file.uid))
-                }
-                style={{ cursor: 'pointer', color: '#999' }}
-              >
-                ×
-              </span>
+              <img
+                src={item.preview}
+                alt={item.file.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+              <CloseCircleFilled
+                onClick={() => removeImage(item.uid)}
+                style={{
+                  position: 'absolute',
+                  top: 2,
+                  right: 2,
+                  fontSize: 18,
+                  color: 'rgba(0,0,0,0.55)',
+                  cursor: 'pointer',
+                  background: '#fff',
+                  borderRadius: '50%',
+                }}
+              />
             </div>
           ))}
         </div>
@@ -98,7 +144,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
         style={{
           display: 'flex',
           alignItems: 'flex-end',
-          gap: 10,
+          gap: 6,
           background: '#fff',
           border: '1px solid #e7ddd6',
           borderRadius: 18,
@@ -106,16 +152,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
           boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
         }}
       >
-        <Upload {...uploadProps}>
+        {/* Image upload button */}
+        <Upload {...imageUploadProps}>
           <Button
             type="text"
-            icon={<PaperClipOutlined />}
+            icon={<PictureOutlined />}
             disabled={disabled}
+            title="Gửi ảnh"
             style={{
               width: 40,
               height: 40,
               borderRadius: 12,
-              color: '#6d4c41',
+              color: '#43a047',
               flexShrink: 0,
             }}
           />
@@ -142,7 +190,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
           type="primary"
           icon={<SendOutlined />}
           onClick={handleSend}
-          disabled={disabled || (!message.trim() && fileList.length === 0)}
+          disabled={disabled || (!message.trim() && imageFiles.length === 0)}
           style={{
             height: 40,
             borderRadius: 12,

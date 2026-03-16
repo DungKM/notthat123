@@ -4,7 +4,7 @@ import { MoreOutlined, UserAddOutlined, UserDeleteOutlined, DeleteOutlined } fro
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Role } from '@/src/auth/types';
 import { chatService } from '@/src/features/chat/services/chatService';
-import { ChatGroup, ChatMessage } from '@/src/features/chat/types';
+import { ChatAttachment, ChatGroup, ChatMessage } from '@/src/features/chat/types';
 import ChatSidebar from './components/ChatSidebar';
 import ChatMessages from './components/ChatMessages';
 import ChatInput from './components/ChatInput';
@@ -84,9 +84,9 @@ const ChatPage: React.FC = () => {
         }
     }, [selectedGroupId]);
 
-    const handleSendMessage = (content: string) => {
+    const handleSendMessage = (content: string, attachments?: ChatAttachment[]) => {
         if (selectedGroupId && user) {
-            chatService.sendMessage(selectedGroupId, user.id, user.name, content);
+            chatService.sendMessage(selectedGroupId, user.id, user.name, content, attachments);
         }
     };
 
