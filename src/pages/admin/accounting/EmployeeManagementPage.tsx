@@ -12,7 +12,7 @@ import {
 } from '@ant-design/pro-components';
 import { Employee, User, AttendanceRecord } from '@/src/types';
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from '@/src/mockData';
-import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col } from 'antd';
+import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col, Image } from 'antd';
 import dayjs from 'dayjs';
 import { HistoryOutlined, CreditCardOutlined, PlusOutlined } from '@ant-design/icons';
 
@@ -33,6 +33,16 @@ interface RewardPenaltyRecord {
   projectName: string;
   content: string;
   createdAt: string;
+}
+
+interface PaymentHistoryRecord {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  amountPaid: number;
+  paymentDate: string;
+  note?: string;
+  proof?: string;
 }
 
 const MOCK_PROJECT_OPTIONS = [
@@ -84,6 +94,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
   const [employees, setEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
   const [rewardPenaltyRecords, setRewardPenaltyRecords] =
     useState<RewardPenaltyRecord[]>(MOCK_REWARD_PENALTY);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryRecord[]>([]);
 
   const [detailVisible, setDetailVisible] = useState(false);
   const [rewardPenaltyVisible, setRewardPenaltyVisible] = useState(false);
@@ -282,6 +293,56 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
     );
   }, [rewardPenaltyRecords, selectedEmployee]);
 
+  const paymentHistoryColumns: ProColumns<PaymentHistoryRecord>[] = [
+    {
+      title: 'Ngày thanh toán',
+      dataIndex: 'paymentDate',
+      hideInSearch: true,
+      render: (_, record) => dayjs(record.paymentDate).format('DD/MM/YYYY'),
+    },
+    {
+      title: 'Số tiền thanh toán',
+      dataIndex: 'amountPaid',
+      hideInSearch: true,
+      render: (_, record) => (
+        <Text strong style={{ color: '#1890ff' }}>
+          {new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+          }).format(record.amountPaid)}
+        </Text>
+      ),
+    },
+    {
+      title: 'Ghi chú',
+      dataIndex: 'note',
+      hideInSearch: true,
+    },
+    {
+      title: 'Ảnh chứng từ',
+      dataIndex: 'proof',
+      hideInSearch: true,
+      render: (val) =>
+        val ? (
+          <Image
+            src={String(val)}
+            width={40}
+            height={40}
+            style={{ borderRadius: 4, objectFit: 'cover' }}
+          />
+        ) : (
+          '-'
+        ),
+    },
+  ];
+
+  const selectedEmployeePaymentHistory = useMemo(() => {
+    if (!selectedEmployee) return [];
+    return paymentHistory.filter(
+      (item) => String(item.employeeId) === String(selectedEmployee.id)
+    );
+  }, [paymentHistory, selectedEmployee]);
+
   // Logic tính toán Lịch sử chấm công (Công & OT)
   const attendanceHistory = useMemo(() => {
     if (!selectedEmployee || !historyRange) return { list: [], totalWorkDays: 0, totalOTDays: 0 };
@@ -353,6 +414,28 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
   const handleFinishPayment = async (values: any) => {
     if (!selectedEmployee) return false;
 
+    const amountPaid = Number(values.amountPaid || 0);
+    const paymentDate: string = values.paymentDate
+      ? (values.paymentDate as dayjs.Dayjs).toISOString()
+      : new Date().toISOString();
+    const note: string | undefined = values.note;
+    const proof: string | undefined =
+      values.proof?.[0]?.url ||
+      values.proof?.[0]?.thumbUrl ||
+      values.proof?.[0]?.response?.url;
+
+    const newPayment: PaymentHistoryRecord = {
+      id: Math.random().toString(36).slice(2, 11),
+      employeeId: String(selectedEmployee.id),
+      employeeName: selectedEmployee.name,
+      amountPaid,
+      paymentDate,
+      note,
+      proof,
+    };
+
+    setPaymentHistory((prev) => [newPayment, ...prev]);
+
     // Cập nhật state nhân viên: reset về 0
     setEmployees((prev) =>
       prev.map((item) => {
@@ -402,14 +485,26 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         footer={null}
         width={900}
       >
-        <ProTable<RewardPenaltyRecord>
-          columns={detailColumns}
-          dataSource={selectedEmployeeHistory}
-          rowKey="id"
-          search={false}
-          pagination={{ pageSize: 5 }}
-          options={false}
-        />
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <ProTable<RewardPenaltyRecord>
+            columns={detailColumns}
+            dataSource={selectedEmployeeHistory}
+            rowKey="id"
+            search={false}
+            pagination={{ pageSize: 5 }}
+            options={false}
+          />
+
+          <ProTable<PaymentHistoryRecord>
+            columns={paymentHistoryColumns}
+            dataSource={selectedEmployeePaymentHistory}
+            rowKey="id"
+            search={false}
+            pagination={{ pageSize: 5 }}
+            options={false}
+            headerTitle="Lịch sử thanh toán lương"
+          />
+        </Space>
       </Modal>
 
       <ModalForm
@@ -568,7 +663,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         <Text type="secondary" style={{ fontStyle: 'italic' }}>
           * Lưu ý: Khi xác nhận thanh toán, các khoản Thưởng, Phạt và Tiền ứng sẽ được đưa về 0.
         </Text>
-      </ModalForm>9
+      </ModalForm>
     </div>
   );
 };

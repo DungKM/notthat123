@@ -152,23 +152,33 @@ const UsersPage: React.FC = () => {
       title: 'Thao tác',
       valueType: 'option',
       width: 260,
+    
       render: (_, record) => {
-        const isSelf = record.id === currentUser?.id;
+  const isSelf = record.id === currentUser?.id;
 
-        return (
-          <Space>
-            <a onClick={() => handleOpenEdit(record)}>Sửa</a>
+  // kế toán không được thao tác với giám đốc
+  const isAccountantEditDirector =
+    currentUser?.role === Role.ACCOUNTANT && record.role === Role.DIRECTOR;
 
-            {!isSelf && (
-              <a
-                onClick={() => handleToggleStatus(record.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                {record.status === 'ACTIVE' ? 'Đóng băng tài khoản' : 'Mở khóa'}
-              </a>
-            )}
+  const disabled = isSelf || isAccountantEditDirector;
 
-            {/* {!isSelf && (
+  return (
+    <Space>
+      {!isAccountantEditDirector && (
+        <a onClick={() => handleOpenEdit(record)}>Sửa</a>
+      )}
+
+      {!disabled && (
+        <a
+          onClick={() => handleToggleStatus(record.id)}
+          style={{ cursor: 'pointer' }}
+        >
+          {record.status === 'ACTIVE'
+            ? 'Đóng băng tài khoản'
+            : 'Mở khóa'}
+        </a>
+      )}
+         {/* {!isSelf && (
               <Popconfirm
                 title="Bạn có chắc chắn muốn xóa tài khoản này không?"
                 onConfirm={() => handleDelete(record.id)}
@@ -179,9 +189,9 @@ const UsersPage: React.FC = () => {
                 <a style={{ color: '#ff4d4f' }}>Xóa</a>
               </Popconfirm>
             )} */}
-          </Space>
-        );
-      },
+    </Space>
+  );
+}
     },
   ];
 

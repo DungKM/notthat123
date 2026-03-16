@@ -33,8 +33,8 @@ const ProjectListPage: React.FC = () => {
 
   // Lọc dự án theo quyền
   const displayProjects = isSiteManager
-    ? projects.filter(p => p.managerId === user.id)
-    : projects;
+    ? projects.filter(p => p.managerId === user.id && p.status === "Duyệt")
+    : projects.filter(p => p.status === 'Duyệt');;
 
   const handleCreate = async (values: any) => {
     const newProject: Project = {

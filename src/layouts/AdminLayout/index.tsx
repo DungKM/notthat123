@@ -46,21 +46,21 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
     ];
 
     const commonMenus = [
-      { path: ROUTES.ADMIN_CHAM_CONG_CA_NHAN, name: 'Chấm công cá nhân', icon: <CalendarOutlined /> },
+      // { path: ROUTES.ADMIN_CHAM_CONG_CA_NHAN, name: 'Chấm công cá nhân', icon: <CalendarOutlined /> },
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      { path: ROUTES.ADMIN_YEU_CAU_UNG_TIEN, name: 'Yêu cầu ứng tiền', icon: <DollarOutlined /> },
-      { path: ROUTES.ADMIN_THONG_KE, name: 'Thống kê lương', icon: <BarChartOutlined /> },
+      // { path: ROUTES.ADMIN_YEU_CAU_UNG_TIEN, name: 'Yêu cầu ứng tiền', icon: <DollarOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
 
       // { path: ROUTES.ADMIN_THONG_KE, name: 'Thống kê', icon: <BarChartOutlined /> },
     ];
 
     const staffMenus: any[] = [
-      { path: ROUTES.ADMIN_CHAM_CONG_CA_NHAN, name: 'Chấm công cá nhân', icon: <CalendarOutlined /> },
+      // { path: ROUTES.ADMIN_CHAM_CONG_CA_NHAN, name: 'Chấm công cá nhân', icon: <CalendarOutlined /> },
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      { path: ROUTES.ADMIN_YEU_CAU_UNG_TIEN, name: 'Yêu cầu ứng tiền', icon: <DollarOutlined /> },
-       { path: ROUTES.ADMIN_THONG_KE, name: 'Thống kê lương', icon: <BarChartOutlined /> },
+      // { path: ROUTES.ADMIN_YEU_CAU_UNG_TIEN, name: 'Yêu cầu ứng tiền', icon: <DollarOutlined /> },
+       { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
     ];
 
     if (user?.role === Role.DIRECTOR) {
