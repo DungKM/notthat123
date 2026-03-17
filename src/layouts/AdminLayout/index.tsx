@@ -79,6 +79,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
     if (user?.role === Role.STAFF) {
       return [...staffMenus];
     }
+    if (user?.role === Role.CUSTOMER) {
+      return [
+        { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn', icon: <MessageOutlined /> },
+      ];
+    }
 
     return [];
   };

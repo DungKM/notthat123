@@ -4,6 +4,7 @@ export enum Role {
   ACCOUNTANT = 'Kế toán',
   STAFF = 'Nhân viên',
   SITE_MANAGER = 'Công trình',
+  CUSTOMER = 'Khách hàng',
 }
 
 export interface User {

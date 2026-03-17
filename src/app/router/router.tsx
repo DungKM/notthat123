@@ -250,7 +250,7 @@ const AppRouter: React.FC = () => {
           <Route
             path={ROUTES.TRO_CHUYEN}
             element={
-              <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT, Role.SITE_MANAGER, Role.STAFF]}>
+              <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT, Role.SITE_MANAGER, Role.STAFF, Role.CUSTOMER]}>
                 <ChatPage />
               </ProtectedAdminRoute>
             }
