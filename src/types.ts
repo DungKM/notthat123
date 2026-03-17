@@ -128,3 +128,25 @@ export interface ShowcaseProject {
   excerpt: string;
   content: string[];
 }
+
+export interface Partner {
+  slug: string;
+  year: string;
+  title: string;
+  description: string;
+  image: string;
+  content: string;
+}
+
+export interface TaskNotification {
+  id: string;
+  projectId: string;
+  projectName: string;
+  assigneeId: string;       // ID người được giao
+  assigneeName: string;
+  assignedById: string;     // ID người giao (Giám đốc)
+  assignedByName: string;
+  taskDescription: string;
+  createdAt: string;
+  isRead: boolean;
+}

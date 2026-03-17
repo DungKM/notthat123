@@ -1,4 +1,5 @@
-import React,{useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useState} from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
@@ -9,8 +10,17 @@ import { ShowcaseProjectCategory } from '@/src/types';
 
 const ProjectsPage: React.FC = () => {
   const projects = MOCK_SHOWCASE_PROJECTS;
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'Tất cả');
+
+  // Update selectedCategory when URL changes
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
 
   const categories = ['Tất cả', 'Nhà ở', 'Thương mại', 'Công nghiệp'];
 
@@ -22,6 +32,16 @@ const ProjectsPage: React.FC = () => {
       return matchesSearch && matchesCategory;
     });
   }, [searchQuery, selectedCategory]);
+
+  const handleCategorySelect = (cat: string) => {
+    setSelectedCategory(cat);
+    if (cat === 'Tất cả') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', cat);
+    }
+    setSearchParams(searchParams);
+  };
 
   return (
     <div className="bg-gray-50">
@@ -103,7 +123,7 @@ const ProjectsPage: React.FC = () => {
                         <button
                           key={cat}
                           type="button"
-                          onClick={() => setSelectedCategory(cat)}
+                          onClick={() => handleCategorySelect(cat)}
                           className={`w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all ${
                             selectedCategory === cat
                               ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'

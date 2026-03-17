@@ -3,6 +3,9 @@ import Container from '@/src/features/showcase/components/ui/Container';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import SEO from '@/src/components/common/SEO';
 
+import { useSearchParams } from 'react-router-dom';
+import { Search, X, Filter } from 'lucide-react';
+
 const ProductsPage: React.FC = () => {
   const products = [
     { slug: 'biet-thu-go-oc-cho-1', title: 'Biệt thự gỗ óc chó 1', image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800', tag: 'HOT', category: 'Biệt Thự' },
@@ -19,60 +22,169 @@ const ProductsPage: React.FC = () => {
     { slug: 'ban-tra-go-oc-cho', title: 'Bàn trà gỗ óc chó', image: 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800', category: 'Phòng Khách' },
   ];
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState(searchParams.get('category') || 'Tất cả');
+
+  // Update selectedCategory when URL changes
+  React.useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
+
+  // Derived categories from products
+  const categories = React.useMemo(() => {
+    const cats = new Set(products.map(p => p.category));
+    return ['Tất cả', ...Array.from(cats).sort()];
+  }, [products]);
+
+  const filteredProducts = React.useMemo(() => {
+    return products.filter(prod => {
+      const matchesSearch = prod.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prod.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'Tất cả' || prod.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory, products]);
+
+  const handleCategorySelect = (cat: string) => {
+    setSelectedCategory(cat);
+    if (cat === 'Tất cả') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', cat);
+    }
+    setSearchParams(searchParams);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <SEO 
-        title="Sản phẩm" 
+      <SEO
+        title="Sản phẩm"
         description="Khám phá bộ sưu tập nội thất gỗ óc chó cao cấp của Hochi, từ sofa, bàn ăn đến trọn gói nội thất biệt thự."
       />
+
+      {/* Hero Banner */}
       <section className="relative h-[400px] flex items-center pt-20">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600"
-            alt="Contact Office"
+            alt="Products Hero"
             className="w-full h-full object-cover"
             loading="lazy"
           />
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <Container className="relative z-10 text-center text-white">
-          <h1 className="text-5xl font-bold uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>SẢN PHẨM</h1>
+          <div className="inline-block px-4 py-1.5 border border-white/30 rounded-full text-xs font-bold tracking-widest uppercase mb-6 bg-white/10 backdrop-blur-md">
+            BỘ SƯU TẬP
+          </div>
+          <h1 className="text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>SẢN PHẨM</h1>
         </Container>
       </section>
 
-      {/* Search & Filter Header */}
-      <section className="bg-white pt-32 pb-12 border-b border-gray-100 shadow-sm">
+      {/* Filter + Grid Layout */}
+      <section className="py-16 lg:py-24">
         <Container>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <h1 className="text-3xl font-bold text-teal-950 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>SẢN PHẨM</h1>
-            <div className="relative w-full md:w-[400px]">
-              <input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                className="w-full px-6 py-3 bg-gray-50 border border-gray-200 rounded-full focus:ring-2 focus:ring-showcase-primary outline-none transition-all text-sm"
-              />
-              <button className="absolute right-2 top-1.5 bg-teal-900 text-white px-5 py-1.5 rounded-full text-sm font-medium hover:bg-showcase-primary transition-colors">TÌM</button>
+          <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-10 xl:gap-14">
+            {/* Left Filter Sidebar */}
+            <aside className="lg:sticky lg:top-24 h-fit">
+              <div className="bg-white/95 backdrop-blur-sm border border-gray-100 rounded-3xl shadow-sm p-6 lg:p-7">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.25em] text-gray-400">Tìm kiếm</p>
+                    <h2 className="text-lg font-bold text-teal-950 uppercase tracking-widest mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Bộ lọc
+                    </h2>
+                  </div>
+                  <Filter className="w-5 h-5 text-gray-300" />
+                </div>
+
+                <div className="mt-6 space-y-6">
+                  {/* Search */}
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400 mb-3">
+                      Từ khóa
+                    </p>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                        <Search className="w-5 h-5 text-gray-400 group-focus-within:text-showcase-primary transition-colors" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm sản phẩm..."
+                        className="w-full pl-12 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-1 focus:ring-showcase-primary focus:border-showcase-primary transition-all text-sm"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                          type="button"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Categories */}
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400 mb-3">
+                      Danh mục
+                    </p>
+                    <div className="space-y-2">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => handleCategorySelect(cat)}
+                          className={`w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all ${selectedCategory === cat
+                              ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
+                              : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
+                            }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            {/* Right Content */}
+            <div>
+              <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
+                Hiển thị {filteredProducts.length} sản phẩm {searchQuery && `cho "${searchQuery}"`}
+              </div>
+
+              {filteredProducts.length === 0 ? (
+                <div className="py-20 text-center text-gray-400">
+                  <p className="text-lg">Không tìm thấy sản phẩm nào phù hợp.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredProducts.map((product, i) => (
+                    <ProductCard key={i} basePath="/san-pham" {...product} />
+                  ))}
+                </div>
+              )}
+
+              {/* Pagination Placeholder */}
+              {filteredProducts.length > 0 && (
+                <div className="mt-24 flex justify-center gap-2">
+                  {[1, 2, 3, '...'].map((p, i) => (
+                    <button key={i} className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === 1 ? 'bg-teal-900 text-white border-teal-900' : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'}`}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        </Container>
-      </section>
-
-      {/* Product List */}
-      <section className="py-20">
-        <Container>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
-            {products.map((product, i) => (
-              <ProductCard key={i} basePath="/san-pham" {...product} />
-            ))}
-          </div>
-
-          {/* Pagination Placeholder */}
-          <div className="mt-24 flex justify-center gap-2">
-            {[1, 2, 3, '...'].map((p, i) => (
-              <button key={i} className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === 1 ? 'bg-teal-900 text-white border-teal-900' : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'}`}>
-                {p}
-              </button>
-            ))}
           </div>
         </Container>
       </section>

@@ -1,5 +1,5 @@
 
-import { Role, Project, Employee, AttendanceRecord, ProjectDetail, WorkdaySettings, AdvanceRequest, AttendanceSummary, ShowcaseProject } from './types';
+import { Role, Project, Employee, AttendanceRecord, ProjectDetail, WorkdaySettings, AdvanceRequest, AttendanceSummary, ShowcaseProject, Partner } from './types';
 import dayjs from 'dayjs';
 
 export const MOCK_PROJECTS: Project[] = [
@@ -323,5 +323,57 @@ export const MOCK_SHOWCASE_PROJECTS: ShowcaseProject[] = [
     content: [
       'Thiết kế tập trung vào sự linh hoạt trong sử dụng không gian, cho phép gia chủ biến đổi công năng theo từng giai đoạn cuộc sống.',
     ],
+  },
+];
+
+export const MOCK_PARTNERS: Partner[] = [
+  {
+    slug: "aoc-gigabyte-suunto",
+    year: "2025",
+    title: "AOC, Gigabyte, Suunto",
+    description:
+      "Digiworld trở thành đối tác chiến lược của các thương hiệu màn hình, laptop nổi tiếng toàn cầu: AOC, Gigabyte",
+    image: "https://picsum.photos/id/102/4320/3240",
+    content: "Chi tiết về sự hợp tác chiến lược giữa Digiworld và các thương hiệu hàng đầu như AOC, Gigabyte, Suunto. Mở ra kỷ nguyên mới cho các thiết bị công nghệ hiện đại tại thị trường Việt Nam.",
+  },
+  {
+    slug: "whirlpool-joyoung",
+    year: "2021",
+    title: "Whirlpool, Joyoung",
+    description: "Đối tác thiết bị gia dụng hàng đầu.",
+    image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80",
+    content: "Hợp tác toàn diện cùng Whirlpool và Joyoung để cung cấp các giải pháp gia dụng thông minh cho mọi gia đình.",
+  },
+  {
+    slug: "apple-huawei",
+    year: "2020",
+    title: "Apple, Huawei",
+    description: "Đối tác công nghệ đỉnh cao.",
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80",
+    content: "Cột mốc đáng nhớ khi trở thành nhà phân phối chính thức cho Apple và Huawei, hai ông lớn công nghệ thế giới.",
+  },
+  {
+    slug: "htc-nestle",
+    year: "2019",
+    title: "HTC, Nestle",
+    description: "Đa dạng hóa danh mục sản phẩm.",
+    image: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80",
+    content: "Ký kết đối tác song phương với HTC trong lĩnh vực công nghệ và Nestle trong thị trường FMCG.",
+  },
+  {
+    slug: "nokia-eaton",
+    year: "2018",
+    title: "Nokia, EATON",
+    description: "Giải pháp viễn thông và năng lượng.",
+    image: "https://images.unsplash.com/photo-1574406280735-351fc1a7c5e0?auto=format&fit=crop&q=80",
+    content: "Phân phối thiết bị mạng Nokia và các giải pháp quản lý năng lượng từ EATON.",
+  },
+  {
+    slug: "xiaomi-infofabrica",
+    year: "2017",
+    title: "Xiaomi, InfoFabrica",
+    description: "Đột phá thiết bị di động.",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80",
+    content: "Sự kiện lịch sử đưa thương hiệu Xiaomi đến với đông đảo người tiêu dùng Việt Nam qua kênh phân phối chính hãng.",
   },
 ];

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ProCard, PageContainer } from '@ant-design/pro-components';
-import { Button, Descriptions, Tag, Row, Col, message, Spin, Typography } from 'antd';
-import { EditOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { Project, Role } from '@/src/types';
+import { ProCard, PageContainer, ModalForm, ProFormSelect, ProFormTextArea } from '@ant-design/pro-components';
+import { Button, Descriptions, Tag, Row, Col, message, Spin, Typography, Card, List, Space } from 'antd';
+import { EditOutlined, ArrowLeftOutlined, PlusOutlined, SendOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Project, Role, TaskNotification } from '@/src/types';
 import { MOCK_PROJECTS } from '@/src/mockData';
 import { useAuth } from '@/src/auth/hooks/useAuth';
+import { useNotifications } from '@/src/hooks/useNotifications';
+import { mockUsers } from '@/src/auth/mockUsers';
 import ProjectDetailTable from './components/ProjectDetailTable';
 import ProjectForm from './components/ProjectForm';
 import ProjectProgressModal from './components/ProjectProgressModal';
@@ -18,7 +20,12 @@ const ProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [progressModalVisible, setProgressModalVisible] = useState(false);
+  const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { addNotification, allNotifications } = useNotifications(user?.id);
+
+  // Lọc thông báo thuộc dự án hiện tại (tất cả, không chỉ của user)
+  const projectNotifications = allNotifications.filter((n: TaskNotification) => n.projectId === id);
 
   useEffect(() => {
     // Giả lập load dữ liệu từ mock data
@@ -38,6 +45,30 @@ const ProjectDetailPage: React.FC = () => {
 
   const isDirector = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT;
   const isSiteManager = user.role === Role.SITE_MANAGER;
+
+  // Danh sách nhân viên có thể giao việc
+  const assignableUsers = mockUsers.filter(
+    (u) => u.role === Role.STAFF || u.role === Role.SITE_MANAGER
+  );
+
+  const handleAssignTask = async (values: any) => {
+    const assignee = mockUsers.find((u) => u.id === values.assigneeId);
+    if (!assignee || !project) return false;
+
+    addNotification({
+      projectId: project.id,
+      projectName: project.name,
+      assigneeId: assignee.id,
+      assigneeName: assignee.name,
+      assignedById: user.id,
+      assignedByName: user.name,
+      taskDescription: values.taskDescription,
+    });
+
+    message.success(`Đã giao việc cho ${assignee.name}`);
+    setAssignModalVisible(false);
+    return true;
+  };
 
   const handleUpdateProject = async (values: any) => {
     const updated = { ...project, ...values };
@@ -165,6 +196,59 @@ const ProjectDetailPage: React.FC = () => {
             </ProCard>
           </Col>
         )}
+
+        {/* Section Giao việc - chỉ hiển cho Giám đốc/Kế toán */}
+        {isDirector && (
+          <Col span={24}>
+            <Card
+              title={
+                <Typography.Text strong style={{ fontSize: '18px' }}>
+                  📌 Giao việc cho nhân viên
+                </Typography.Text>
+              }
+              bordered
+              extra={
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => setAssignModalVisible(true)}
+                >
+                  Giao việc mới
+                </Button>
+              }
+            >
+              {projectNotifications.length === 0 ? (
+                <Typography.Text type="secondary">Chưa có công việc nào được giao cho dự án này.</Typography.Text>
+              ) : (
+                <List
+                  dataSource={projectNotifications}
+                  renderItem={(item: TaskNotification) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        title={
+                          <Space>
+                            <Typography.Text strong>{item.taskDescription}</Typography.Text>
+                            <Tag color={item.isRead ? 'default' : 'blue'}>
+                              {item.isRead ? 'Đã đọc' : 'Chưa đọc'}
+                            </Tag>
+                          </Space>
+                        }
+                        description={
+                          <Space>
+                            <ClockCircleOutlined />
+                            <span>{dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}</span>
+                            <span>—</span>
+                            <span>Giao cho: <strong>{item.assigneeName}</strong></span>
+                          </Space>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+              )}
+            </Card>
+          </Col>
+        )}
       </Row>
 
       <ProjectForm
@@ -181,7 +265,49 @@ const ProjectDetailPage: React.FC = () => {
         onOpenChange={setProgressModalVisible}
         progress={project.progress || []}
         onUpdate={handleUpdateProgress}
+        onTaskAssigned={(task) => {
+          addNotification({
+            projectId: project.id,
+            projectName: project.name,
+            assigneeId: task.employeeId,
+            assigneeName: task.employeeName,
+            assignedById: user.id,
+            assignedByName: user.name,
+            taskDescription: task.work,
+          });
+        }}
       />
+
+      {/* Modal giao việc */}
+      <ModalForm
+        title="Giao việc mới"
+        open={assignModalVisible}
+        modalProps={{
+          destroyOnClose: true,
+          onCancel: () => setAssignModalVisible(false),
+        }}
+        onOpenChange={setAssignModalVisible}
+        onFinish={handleAssignTask}
+        width={500}
+      >
+        <ProFormSelect
+          name="assigneeId"
+          label="Chọn nhân viên"
+          options={assignableUsers.map((u) => ({
+            label: `${u.name} (${u.role})`,
+            value: u.id,
+          }))}
+          rules={[{ required: true, message: 'Vui lòng chọn nhân viên' }]}
+          placeholder="Chọn nhân viên để giao việc..."
+        />
+        <ProFormTextArea
+          name="taskDescription"
+          label="Mô tả công việc"
+          placeholder="Ví dụ: Khảo sát hiện trạng căn hộ, lắp đặt tủ bếp..."
+          rules={[{ required: true, message: 'Vui lòng nhập mô tả công việc' }]}
+          fieldProps={{ rows: 3 }}
+        />
+      </ModalForm>
     </PageContainer>
   );
 };

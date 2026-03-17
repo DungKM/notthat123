@@ -47,6 +47,7 @@ const CategoryManagementPage = lazy(() => import('@/src/pages/admin/dashboard/Ca
 const RecruitmentManagementPage = lazy(() => import('@/src/pages/admin/dashboard/RecruitmentManagementPage'));
 const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage'));
 const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/ShowcaseProjectManagementPage'));
+const PartnerManagementPage = lazy(() => import('@/src/pages/admin/partner/PartnerManagementPage'));
 
 const Unauthorized = () => (
   <div style={{ padding: 50, textAlign: 'center' }}>
@@ -204,6 +205,14 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
                 <ShowcaseProjectManagementPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_QUAN_LY_DOI_TAC}
+            element={
+              <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
+                <PartnerManagementPage />
               </ProtectedAdminRoute>
             }
           />

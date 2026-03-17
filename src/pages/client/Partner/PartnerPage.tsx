@@ -2,9 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
-import { partnersData } from "./PartnerDetailPage";
+import { usePartners } from "@/src/hooks/usePartners";
 
 const PartnerPage: React.FC = () => {
+  const { partners } = usePartners();
+  
   return (
     <div className="bg-white">
       <SEO
@@ -64,7 +66,7 @@ const PartnerPage: React.FC = () => {
 
           {/* Grid of Partner Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {partnersData.map((partner, index) => (
+            {partners.map((partner, index) => (
               <Link
                 to={`/doi-tac/${partner.slug}`}
                 key={index}
