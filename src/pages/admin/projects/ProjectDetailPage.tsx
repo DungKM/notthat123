@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ProCard, PageContainer } from '@ant-design/pro-components';
 import { Button, Tag, Row, Col, message, Spin, Typography } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
-import { Project, Role, TaskNotification } from '@/src/types';
+import { Project, Role } from '@/src/types';
 import { MOCK_PROJECTS } from '@/src/mockData';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { useNotifications } from '@/src/hooks/useNotifications';
-import { mockUsers } from '@/src/auth/mockUsers';
+
 import ProjectDetailTable from './components/ProjectDetailTable';
 import ProjectForm from './components/ProjectForm';
 import ProjectProgressModal from './components/ProjectProgressModal';
@@ -22,10 +22,7 @@ const ProjectDetailPage: React.FC = () => {
   const [progressModalVisible, setProgressModalVisible] = useState(false);
 
   const [loading, setLoading] = useState(true);
-  const { addNotification, allNotifications } = useNotifications(user?.id);
-
-  // Lọc thông báo thuộc dự án hiện tại (tất cả, không chỉ của user)
-  const projectNotifications = allNotifications.filter((n: TaskNotification) => n.projectId === id);
+  const { addNotification } = useNotifications(user?.id);
 
   useEffect(() => {
     // Giả lập load dữ liệu từ mock data
