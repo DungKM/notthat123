@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
-import { Dropdown, Space, Tag } from 'antd';
-import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined } from '@ant-design/icons';
+import { Dropdown, Space, Tag, Badge } from 'antd';
+import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined } from '@ant-design/icons';
 import { Role } from '@/src/auth/types';
 import { ROUTES } from '@/src/routes/index';
 import logo from '@/src/statics/logo_hochi.jpg';
+import { useNotifications } from '@/src/hooks/useNotifications';
+import NotificationDrawer from '@/src/components/NotificationDrawer';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -16,58 +18,59 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thống Quản lý" }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(user?.id);
 
   // Logic generate menu items dựa trên Role
   const getMenuData = () => {
-    const adminMenus = [
-      { path: ROUTES.ADMIN_TONG_QUAN, name: 'Bảng điều khiển', icon: <DashboardOutlined /> },
+    // ── Menu nhóm cho Giám đốc & Kế toán ──
+    const noiBo = {
+      path: '/quan-tri/noi-bo',
+      name: 'Quản lý nội bộ',
+      icon: <TeamOutlined />,
+      children: [
+        { path: ROUTES.ADMIN_TONG_QUAN, name: 'Bảng điều khiển', icon: <DashboardOutlined /> },
+        { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
+        { path: ROUTES.ADMIN_NHAN_VIEN, name: 'Bảng lương nhân sự', icon: <TeamOutlined /> },
+        { path: ROUTES.ADMIN_DUYET_UNG_TIEN, name: 'Phê duyệt ứng tiền', icon: <DollarOutlined /> },
+        { path: ROUTES.ADMIN_NGUOI_DUNG, name: 'Quản lý người dùng', icon: <UserOutlined /> },
+        { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },
+        { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
+      ],
+    };
+
+    const sanPham = {
+      path: '/quan-tri/san-pham-group',
+      name: 'Quản lý sản phẩm',
+      icon: <AppstoreOutlined />,
+      children: [
+        { path: ROUTES.ADMIN_DON_HANG, name: 'Quản lý đơn hàng', icon: <ShoppingCartOutlined /> },
+        { path: ROUTES.ADMIN_SAN_PHAM, name: 'Quản lý sản phẩm', icon: <AppstoreOutlined /> },
+        { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục', icon: <TagsOutlined /> },
+        { path: ROUTES.ADMIN_SHOWCASE_PROJECTS, name: 'Bài viết công trình', icon: <FileTextOutlined /> },
+        { path: ROUTES.ADMIN_QUAN_LY_DOI_TAC, name: 'Quản lý đối tác', icon: <ProjectOutlined /> },
+      ],
+    };
+
+    const siteManagerMenus: any[] = [];
+
+    const staffMenus: any[] = [
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
-    ];
-    const accountingMenus_kt = [
-      // { path: ROUTES.ADMIN_CHAM_CONG_CA_NHAN, name: 'Chấm công cá nhân', icon: <CalendarOutlined /> },
-    ]
-    const accountingMenus = [
-      { path: ROUTES.ADMIN_NHAN_VIEN, name: 'Bảng lương nhân sự', icon: <TeamOutlined /> },
-      { path: ROUTES.ADMIN_DUYET_UNG_TIEN, name: 'Phê duyệt ứng tiền', icon: <DollarOutlined /> },
-      // { path: ROUTES.ADMIN_QUAN_LY_LUONG, name: 'Quản lý lương', icon: <DollarOutlined /> },
-      // { path: ROUTES.ADMIN_TONG_HOP_CHAM_CONG, name: 'Tổng hợp chấm công', icon: <FileTextOutlined /> },
-      { path: ROUTES.ADMIN_NGUOI_DUNG, name: 'Quản lý người dùng', icon: <UserOutlined /> },
-      { path: ROUTES.ADMIN_DON_HANG, name: 'Quản lý đơn hàng', icon: <ShoppingCartOutlined /> },
-      { path: ROUTES.ADMIN_SAN_PHAM, name: 'Quản lý sản phẩm', icon: <AppstoreOutlined /> },
-      { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục', icon: <TagsOutlined /> },
-      { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      { path: ROUTES.ADMIN_SHOWCASE_PROJECTS, name: 'Bài viết công trình (Showcase)', icon: <FileTextOutlined /> },
-
-    ];
-
-    const siteManagerMenus: any[] = [
-      // { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý công trình', icon: <ProjectOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
     ];
 
     const commonMenus = [
-      // { path: ROUTES.ADMIN_CHAM_CONG_CA_NHAN, name: 'Chấm công cá nhân', icon: <CalendarOutlined /> },
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      // { path: ROUTES.ADMIN_YEU_CAU_UNG_TIEN, name: 'Yêu cầu ứng tiền', icon: <DollarOutlined /> },
       { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
-
-      // { path: ROUTES.ADMIN_THONG_KE, name: 'Thống kê', icon: <BarChartOutlined /> },
-    ];
-
-    const staffMenus: any[] = [
-      // { path: ROUTES.ADMIN_CHAM_CONG_CA_NHAN, name: 'Chấm công cá nhân', icon: <CalendarOutlined /> },
-      { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
-      { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      // { path: ROUTES.ADMIN_YEU_CAU_UNG_TIEN, name: 'Yêu cầu ứng tiền', icon: <DollarOutlined /> },
-       { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
     ];
 
     if (user?.role === Role.DIRECTOR) {
-      return [...adminMenus, ...accountingMenus, ...siteManagerMenus];
+      return [noiBo, sanPham];
     }
     if (user?.role === Role.ACCOUNTANT) {
-      return [...adminMenus, ...accountingMenus_kt, ...accountingMenus];
+      return [noiBo, sanPham];
     }
 
     if (user?.role === Role.SITE_MANAGER) {
@@ -105,28 +108,39 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           src: user?.avatar,
           title: user?.name,
           render: (_, dom) => (
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: 'logout',
-                    icon: <LogoutOutlined />,
-                    label: 'Đăng xuất',
-                    onClick: () => {
-                      logout();
-                      navigate('/login');
+            <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
+              <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+                <BellOutlined
+                  style={{ fontSize: 20, cursor: 'pointer' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setNotifOpen(true);
+                  }}
+                />
+              </Badge>
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'logout',
+                      icon: <LogoutOutlined />,
+                      label: 'Đăng xuất',
+                      onClick: () => {
+                        logout();
+                        navigate('/login');
+                      },
                     },
-                  },
-                ],
-              }}
-            >
-              <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
-                {dom}
-                <Tag color="green" className="hidden-mobile" style={{ margin: 0 }}>
-                  {user?.role}
-                </Tag>
-              </Space>
-            </Dropdown>
+                  ],
+                }}
+              >
+                <Space>
+                  {dom}
+                  <Tag color="green" className="hidden-mobile" style={{ margin: 0 }}>
+                    {user?.role}
+                  </Tag>
+                </Space>
+              </Dropdown>
+            </Space>
           ),
         }}
         headerTitleRender={(logo, title) => (
@@ -140,6 +154,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           {children}
         </PageContainer>
       </ProLayout>
+
+      <NotificationDrawer
+        open={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        notifications={notifications}
+        onMarkAsRead={markAsRead}
+        onMarkAllAsRead={markAllAsRead}
+      />
     </div>
   );
 };

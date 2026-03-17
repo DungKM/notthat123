@@ -115,8 +115,8 @@ const StatisticsPage: React.FC = () => {
   const [records, setRecords] = useState<AttendanceWorkRecord[]>(
     user
       ? MOCK_ATTENDANCE_WORK.filter(
-          (r) => String(r.staffId) === String(user.id),
-        )
+        (r) => String(r.staffId) === String(user.id),
+      )
       : [],
   );
   if (!user) return null;
@@ -270,7 +270,6 @@ const StatisticsPage: React.FC = () => {
         </strong>
       ),
     },
-
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -285,6 +284,17 @@ const StatisticsPage: React.FC = () => {
 
         return <Tag color={color}>{record.status}</Tag>;
       },
+    },
+    {
+      title: "File thanh toán",
+      dataIndex: "transferProof",
+      hideInSearch: true,
+      render: (_, record) =>
+        record.transferProof ? (
+          <Image src={record.transferProof} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QardG0sPDwMBx0YEhT18TA4PUeBXtIHBYlD0wGMzlJuU1A9IMDBQCsIiC4IOCfRKDbyAUG3hYWboKAfYDYi6IA8gViA7H8thwBjglIHbCkLtRJgGYJ3oGBISERBZBiKfyLMlAzGRgYIhh4GBgZUBi0UGA8MlQIol+RKjIIEO0GBgS0iwMDMwgBV0QWBfhmEQSKRKDgYGt4YGBpYoBhC7AcY3R0YGBrYJxklEOViYGBIBov+/8//UYaBAuJQYMDwL/p+BgYWBvjNAABBelRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/Pgo8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIj4KICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIvPgogIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4L+5JfAAAAn0lEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOBtwYEAAUFsJp0AAAAASUVORK5CYII=" width={50} height={50} style={{ objectFit: 'cover', borderRadius: 4 }} />
+        ) : (
+          <span style={{ color: '#aaa' }}>Không có ảnh</span>
+        )
     },
   ];
 
@@ -388,7 +398,6 @@ const StatisticsPage: React.FC = () => {
       <Card
         title="Lịch sử ứng tiền"
         bordered
-        styles={{ body: { padding: "0" } }}
         extra={
           <Button
             type="primary"
@@ -399,7 +408,7 @@ const StatisticsPage: React.FC = () => {
           </Button>
         }
       >
-      
+
         <ProTable<AdvanceRequest>
           columns={advanceColumns}
           rowKey="id"
@@ -425,7 +434,6 @@ const StatisticsPage: React.FC = () => {
       <Card
         title="Chi tiết công"
         bordered
-        styles={{ body: { padding: "16px" } }}
         extra={
           <Button
             type="primary"
@@ -456,7 +464,56 @@ const StatisticsPage: React.FC = () => {
           }}
           pagination={{ pageSize: 5 }}
           options={false}
-          scroll={{ x: 500 }}
+        />
+      </Card>
+
+      <Card
+        title="Lịch sử thanh toán lương"
+        bordered
+      >
+        <ProTable
+          rowKey="id"
+          search={false}
+          options={false}
+          pagination={{ pageSize: 5 }}
+          scroll={{ x: 600 }}
+          dataSource={[
+            // Dữ liệu mẫu tạm thời, có thể kết nối API sau
+            { id: '1', paymentDate: '2024-03-05', amount: 8500000, note: 'Lương tháng 2/2024', imageUrl: '' },
+            { id: '2', paymentDate: '2024-02-05', amount: 9200000, note: 'Lương tháng 1/2024', imageUrl: 'https://images.unsplash.com/photo-1544390041-3e5f2a967f1b?auto=format&fit=crop&q=80&w=200' },
+            { id: '3', paymentDate: '2024-01-05', amount: 8800000, note: 'Lương tháng 12/2023', imageUrl: '' },
+          ]}
+          columns={[
+            {
+              title: "Ngày thanh toán",
+              dataIndex: "paymentDate",
+              valueType: "date",
+              render: (_, record: any) => dayjs(record.paymentDate).format("DD/MM/YYYY"),
+            },
+            {
+              title: "Số tiền thanh toán",
+              dataIndex: "amount",
+              render: (_, record: any) => (
+                <strong style={{ color: "#52c41a" }}>
+                  {formatCurrency(record.amount)}
+                </strong>
+              ),
+            },
+            {
+              title: "Ghi chú",
+              dataIndex: "note",
+            },
+            {
+              title: "Ảnh chứng từ",
+              dataIndex: "imageUrl",
+              render: (_, record: any) =>
+                record.imageUrl ? (
+                  <Image src={record.imageUrl} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QardG0sPDwMBx0YEhT18TA4PUeBXtIHBYlD0wGMzlJuU1A9IMDBQCsIiC4IOCfRKDbyAUG3hYWboKAfYDYi6IA8gViA7H8thwBjglIHbCkLtRJgGYJ3oGBISERBZBiKfyLMlAzGRgYIhh4GBgZUBi0UGA8MlQIol+RKjIIEO0GBgS0iwMDMwgBV0QWBfhmEQSKRKDgYGt4YGBpYoBhC7AcY3R0YGBrYJxklEOViYGBIBov+/8//UYaBAuJQYMDwL/p+BgYWBvjNAABBelRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/Pgo8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIj4KICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIvPgogIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4L+5JfAAAAn0lEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOBtwYEAAUFsJp0AAAAASUVORK5CYII=" width={50} height={50} style={{ objectFit: 'cover', borderRadius: 4 }} />
+                ) : (
+                  <span style={{ color: '#aaa' }}>Không có ảnh</span>
+                )
+            }
+          ]}
         />
       </Card>
       {/* ModalForm tạo yêu cầu ứng tiền */}
@@ -481,7 +538,6 @@ const StatisticsPage: React.FC = () => {
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
             parser: (value) => value!.replace(/\$\s?|,*/g, ""),
             addonAfter: "đ",
-            style: { width: "100%" },
           }}
           rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
         />
@@ -491,7 +547,7 @@ const StatisticsPage: React.FC = () => {
           placeholder="Ví dụ: Ứng tiền mua vật tư gấp, ứng lương đợt 1..."
           rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
         />
-    
+
       </ModalForm>
       <ModalForm
         title="Thêm chấm công"

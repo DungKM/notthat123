@@ -74,21 +74,12 @@ const Header: React.FC = () => {
     {
       title: 'Sản phẩm',
       href: ROUTES.SAN_PHAM,
-      submenu: [
-        { title: 'Biệt thự Gỗ Óc Chó', href: '/san-pham/biet-thu-go-oc-cho-1' },
-        { title: 'Nội thất Phòng Khách', href: '/san-pham/sofa-go-oc-cho' },
-        { title: 'Nội thất Phòng Ngủ', href: '/san-pham/giuong-ngu-go-oc-cho' },
-        { title: 'Nội thất Phòng Bếp', href: '/san-pham/ban-an-go-oc-cho' }
-      ]
+
     },
     {
       title: 'Công trình',
       href: ROUTES.CONG_TRINH,
-      submenu: [
-        { title: 'Nhà ở', href: '/cong-trinh' },
-        { title: 'Thương mại', href: '/cong-trinh' },
-        { title: 'Công nghiệp', href: '/cong-trinh' }
-      ]
+
     },
     { title: 'Đối tác', href: ROUTES.DOI_TAC },
     { title: 'Video', href: ROUTES.VIDEO },

@@ -6,16 +6,14 @@ import {
   HistoryOutlined,
 } from "@ant-design/icons";
 import { ProjectProgress, ProjectStatus } from "@/src/types";
+import { mockUsers } from "@/src/auth/mockUsers";
+import { Role } from "@/src/auth/types";
 import dayjs from "dayjs";
 
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  progress: ProjectProgress[];
-  onUpdate: (data: ProjectProgress[]) => void;
-}
-
-const employees = ["Nguyễn Văn A", "Trần Văn B", "Lê Văn C"];
+// Lấy danh sách nhân viên có thể giao việc (Staff + Site Manager)
+const assignableEmployees = mockUsers.filter(
+  (u) => u.role === Role.STAFF || u.role === Role.SITE_MANAGER
+);
 const statusOptions: ProjectStatus[] = [
   'Tư vấn + gặp khách + khảo sát',
   'Lập dự toán ngân sách',
@@ -25,11 +23,20 @@ const statusOptions: ProjectStatus[] = [
   'Phát sinh hợp đồng',
 ];
 
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  progress: ProjectProgress[];
+  onUpdate: (data: ProjectProgress[]) => void;
+  onTaskAssigned?: (task: { employeeId: string; employeeName: string; work: string }) => void;
+}
+
 const ProjectProgressModal: React.FC<Props> = ({
   open,
   onOpenChange,
   progress,
   onUpdate,
+  onTaskAssigned,
 }) => {
   const [currentStatus, setCurrentStatus] = useState<ProjectProgress | null>(
     null
@@ -60,9 +67,26 @@ const ProjectProgressModal: React.FC<Props> = ({
     }
 
     onUpdate([...progress, currentStatus]);
-    setCurrentStatus(null);
 
-    message.success("Đã lưu tiến độ");
+    // Tạo thông báo cho từng task được giao
+    if (onTaskAssigned) {
+      currentStatus.tasks.forEach((task) => {
+        if (task.employee) {
+          // Tìm user ID từ tên nhân viên
+          const matchedUser = assignableEmployees.find((u) => u.id === task.employee || u.name === task.employee);
+          if (matchedUser) {
+            onTaskAssigned({
+              employeeId: matchedUser.id,
+              employeeName: matchedUser.name,
+              work: task.work,
+            });
+          }
+        }
+      });
+    }
+
+    setCurrentStatus(null);
+    message.success("Đã lưu tiến độ và giao việc");
   };
 
   const addTask = () => {
@@ -185,9 +209,9 @@ const ProjectProgressModal: React.FC<Props> = ({
                         value={record.employee}
                         style={{ width: "100%" }}
                         placeholder="Chọn nhân viên"
-                        options={employees.map((e) => ({
-                          label: e,
-                          value: e,
+                        options={assignableEmployees.map((e) => ({
+                          label: `${e.name} (${e.role})`,
+                          value: e.id,
                         }))}
                         onChange={(value) =>
                           updateTask(record.id, "employee", value)
