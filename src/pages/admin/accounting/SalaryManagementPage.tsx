@@ -118,8 +118,8 @@ const SalaryManagementPage: React.FC = () => {
         onChange={(value) => setDataSource(value as Employee[])}
         editable={{
           type: 'multiple',
-          onSave: async (rowKey, data, row) => {
-            console.log(rowKey, data, row);
+          onSave: async (_rowKey, data, _row) => {
+            setDataSource((prev) => prev.map((e) => (e.id === data.id ? { ...e, ...data } : e)));
             message.success('Cập nhật lương thành công');
           },
         }}

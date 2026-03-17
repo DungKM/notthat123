@@ -5,8 +5,11 @@ import {
   ModalForm, 
   ProFormDigit, 
   ProFormTextArea, 
-  ProFormUploadButton 
+  ProFormUploadButton as RawProFormUploadButton 
 } from '@ant-design/pro-components';
+
+// Workaround: ProFormUploadButton bị export sai type
+const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { AdvanceRequest, User } from '@/src/types';
 import { MOCK_ADVANCE_REQUESTS } from '@/src/mockData';
 import { Button, Tag, Space, Typography, message, Image } from 'antd';
@@ -148,7 +151,7 @@ const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }
               placeholder="Ví dụ: Ứng tiền mua vật tư gấp, ứng lương đợt 1..."
               rules={[{ required: true, message: 'Vui lòng nhập lý do' }]}
             />
-            <ProFormUploadButton
+            <SafeUploadButton
               label="Hình ảnh minh chứng (nếu có)"
               name="image"
               max={1}

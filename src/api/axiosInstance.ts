@@ -1,0 +1,47 @@
+import axios from 'axios';
+import { authService } from '@/src/auth/services/authService';
+
+// ─── Axios Instance ───
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// ─── Request Interceptor: Tự gắn token ───
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ─── Response Interceptor: Xử lý lỗi chung ───
+api.interceptors.response.use(
+  (response) => response.data, // Trả về data luôn, không cần .data
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      // Token hết hạn → logout
+      authService.logout();
+      window.location.href = '/login';
+    }
+
+    // Trả về error message từ server hoặc message mặc định
+    const message =
+      error.response?.data?.error?.message ||
+      error.response?.data?.message ||
+      'Đã xảy ra lỗi. Vui lòng thử lại.';
+
+    return Promise.reject(new Error(message));
+  }
+);
+
+export default api;

@@ -8,8 +8,11 @@ import {
   ProFormTextArea,
   ProFormDateRangePicker,
   ProFormDatePicker,
-  ProFormUploadButton,
+  ProFormUploadButton as RawProFormUploadButton,
 } from '@ant-design/pro-components';
+
+// Workaround: ProFormUploadButton bị export sai type (ForwardRefRenderFunction thay vì JSX component)
+const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { Employee, User, AttendanceRecord } from '@/src/types';
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from '@/src/mockData';
 import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col, Image } from 'antd';
@@ -651,15 +654,13 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           initialValue={dayjs()}
         />
         <ProFormTextArea name="note" label="Ghi chú" placeholder="Ví dụ: Chuyển khoản lương tháng 3" />
-        {(ProFormUploadButton as any) && (
-          <ProFormUploadButton
-            name="proof"
-            label="Ảnh chứng từ / bill chuyển khoản"
-            title="Tải ảnh lên"
-            max={1}
-            action="/api/upload" // Giả lập
-          />
-        )}
+        <SafeUploadButton
+          name="proof"
+          label="Ảnh chứng từ / bill chuyển khoản"
+          title="Tải ảnh lên"
+          max={1}
+          action="/api/upload" // Giả lập
+        />
         <Text type="secondary" style={{ fontStyle: 'italic' }}>
           * Lưu ý: Khi xác nhận thanh toán, các khoản Thưởng, Phạt và Tiền ứng sẽ được đưa về 0.
         </Text>

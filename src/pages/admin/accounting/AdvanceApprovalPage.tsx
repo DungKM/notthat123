@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { ProTable, ProColumns, ModalForm, ProFormTextArea, ProFormUploadButton } from '@ant-design/pro-components';
+import { ProTable, ProColumns, ModalForm, ProFormTextArea, ProFormUploadButton as RawProFormUploadButton } from '@ant-design/pro-components';
+
+// Workaround: ProFormUploadButton bị export sai type
+const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { User, AdvanceRequest } from '@/src/types';
 import { MOCK_ADVANCE_REQUESTS } from '@/src/mockData';
 import { Tag, Button, Space, Typography, Badge, message, Descriptions } from 'antd';
@@ -198,7 +201,7 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
           </Descriptions>
         )}
 
-        <ProFormUploadButton
+        <SafeUploadButton
           name="transferProof"
           label="Tải lên chứng từ chuyển khoản"
           title="Tải ảnh"

@@ -7,7 +7,7 @@ import {
   ProFormDatePicker,
   ProFormDigit,
   ProFormSelect,
-  ProFormUploadButton,
+  ProFormUploadButton as RawProFormUploadButton,
   ProFormTextArea,
 } from "@ant-design/pro-components";
 import { AttendanceRecord, AdvanceRequest } from "@/src/types";

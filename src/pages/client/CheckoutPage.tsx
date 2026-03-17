@@ -38,11 +38,8 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
-    console.log('Đơn hàng:', {
-      customer,
-      cartItems,
-      totalAmount,
-    });
+
+    // TODO: Gửi đơn hàng lên API
 
     alert('Đặt hàng thành công!');
     clearCart();
