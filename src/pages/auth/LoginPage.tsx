@@ -39,6 +39,9 @@ const LoginPage: React.FC = () => {
           case Role.STAFF:
             navigate(ROUTES.ADMIN_CHAM_CONG_CA_NHAN);
             break;
+          case Role.CUSTOMER:
+            navigate(ROUTES.TRO_CHUYEN);
+            break;
           default:
             navigate(ROUTES.TRANG_CHU);
         }

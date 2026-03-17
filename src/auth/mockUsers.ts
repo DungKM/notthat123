@@ -37,5 +37,14 @@ export const mockUsers: (User & { password: string })[] = [
     role: Role.SITE_MANAGER,
     status: 'ACTIVE',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=SiteManager',
+  },
+  {
+    id: '6',
+    username: "khachhang",
+    password: "123456",
+    name: "Lê Khách Hàng",
+    role: Role.CUSTOMER,
+    status: 'ACTIVE',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Customer',
   }
 ];
