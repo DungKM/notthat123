@@ -43,28 +43,9 @@ const ProjectProgressModal: React.FC<Props> = ({
   );
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // thêm trạng thái (chỉ cho phép 1)
-  const addStatus = () => {
-    if (currentStatus) {
-      message.warning("Bạn cần lưu trạng thái hiện tại trước");
-      return;
-    }
-
-    const newStatus: ProjectProgress = {
-      id: Math.random().toString(36).slice(2),
-      status: statusOptions[0],
-      tasks: [],
-    };
-
-    setCurrentStatus(newStatus);
-  }; 
-      
-  // lưu trạng thái
-  const saveStatus = () => {
-    if (!currentStatus) {
-      message.warning("Không có trạng thái để lưu");
-      return;
-    }
+  // Lưu trạng thái hiện tại vào lịch sử (internal)
+  const archiveCurrentStatus = () => {
+    if (!currentStatus) return;
 
     onUpdate([...progress, currentStatus]);
 
@@ -72,7 +53,6 @@ const ProjectProgressModal: React.FC<Props> = ({
     if (onTaskAssigned) {
       currentStatus.tasks.forEach((task) => {
         if (task.employee) {
-          // Tìm user ID từ tên nhân viên
           const matchedUser = assignableEmployees.find((u) => u.id === task.employee || u.name === task.employee);
           if (matchedUser) {
             onTaskAssigned({
@@ -84,9 +64,68 @@ const ProjectProgressModal: React.FC<Props> = ({
         }
       });
     }
+  };
 
-    setCurrentStatus(null);
-    message.success("Đã lưu tiến độ và giao việc");
+  // Thêm trạng thái mới — nếu đang có trạng thái thì cảnh báo trước
+  const addStatus = () => {
+    if (currentStatus) {
+      Modal.confirm({
+        title: <span style={{ fontSize: 18 }}>Thêm trạng thái mới</span>,
+        width: 500,
+        content: (
+          <div style={{ fontSize: 16, lineHeight: 1.8, marginTop: 8 }}>
+            <p>Trạng thái hiện tại <strong>"{currentStatus.status}"</strong> sẽ được lưu vào <strong>lịch sử tiến độ</strong>.</p>
+            <p style={{ marginTop: 12, color: '#000', fontStyle: 'italic' }}>Bạn có muốn tạo trạng thái mới không?</p>
+          </div>
+        ),
+        okText: "Tạo mới",
+        cancelText: "Hủy",
+        okButtonProps: { style: { backgroundColor: '#13d855ff', borderColor: '#13d855ff' } },
+        icon: <HistoryOutlined style={{ color: '#faad14' }} />,
+        onOk: () => {
+          // Lưu trạng thái hiện tại vào lịch sử
+          archiveCurrentStatus();
+
+          // Tạo trạng thái mới
+          const newStatus: ProjectProgress = {
+            id: Math.random().toString(36).slice(2),
+            status: statusOptions[0],
+            tasks: [],
+          };
+          setCurrentStatus(newStatus);
+          message.success("Trạng thái cũ đã lưu vào lịch sử. Đã tạo trạng thái mới.");
+        },
+      });
+      return;
+    }
+
+    // Chưa có trạng thái nào → tạo mới luôn
+    const newStatus: ProjectProgress = {
+      id: Math.random().toString(36).slice(2),
+      status: statusOptions[0],
+      tasks: [],
+    };
+    setCurrentStatus(newStatus);
+  };
+
+  // Lưu — chỉ cập nhật thông tin đang nhập (không đẩy vào lịch sử)
+  const saveStatus = () => {
+    if (!currentStatus) {
+      message.warning("Không có trạng thái để lưu");
+      return;
+    }
+
+    // Cập nhật updatedAt cho tất cả task
+    const updated: ProjectProgress = {
+      ...currentStatus,
+      tasks: currentStatus.tasks.map((t) => ({
+        ...t,
+        updatedAt: dayjs().toISOString(),
+      })),
+    };
+
+    setCurrentStatus(updated);
+    message.success("Đã lưu thông tin trạng thái hiện tại");
   };
 
   const addTask = () => {
