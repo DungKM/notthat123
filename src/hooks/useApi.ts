@@ -27,6 +27,7 @@ export interface UseApiReturn<T> {
   // CRUD methods
   getAll: (params?: QueryParams) => Promise<T[]>;
   getById: (id: string) => Promise<T>;
+  getBySlug: (slug: string) => Promise<T>;
   create: (payload: Partial<T>) => Promise<T>;
   update: (id: string, payload: Partial<T>) => Promise<T>;
   remove: (id: string) => Promise<void>;
@@ -78,6 +79,22 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
     setError(null);
     try {
       const res: ApiResponse<T> = await api.get(`${basePath}/${id}`);
+      setData(res.data);
+      return res.data;
+    } catch (err: any) {
+      handleError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [basePath, handleError]);
+
+  // ─── GET BY SLUG ───
+  const getBySlug = useCallback(async (slug: string): Promise<T> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res: ApiResponse<T> = await api.get(`${basePath}/slug/${slug}`);
       setData(res.data);
       return res.data;
     } catch (err: any) {
@@ -151,6 +168,6 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
 
   return {
     data, list, loading, error, meta,
-    getAll, getById, create, update, remove, request,
+    getAll, getById, getBySlug, create, update, remove, request,
   };
 }

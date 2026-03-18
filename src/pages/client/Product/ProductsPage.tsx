@@ -2,61 +2,45 @@ import React from 'react';
 import Container from '@/src/features/showcase/components/ui/Container';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import SEO from '@/src/components/common/SEO';
+import { useCategoryService, useProductService } from '@/src/api/services';
 
-import { useSearchParams } from 'react-router-dom';
 import { Search, X, Filter } from 'lucide-react';
 
 const ProductsPage: React.FC = () => {
-  const products = [
-    { slug: 'biet-thu-go-oc-cho-1', title: 'Biệt thự gỗ óc chó 1', image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800', tag: 'HOT', category: 'Biệt Thự' },
-    { slug: 'biet-thu-go-oc-cho-2', title: 'Biệt thự gỗ óc chó 2', image: 'https://noithat102.vn/uploads/Sofa%2015.jpg', category: 'Căn Hộ' },
-    { slug: 'sofa-go-oc-cho', title: 'Sofa gỗ óc chó cao cấp', image: 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800', tag: 'NEW', category: 'Phòng Khách' },
-    { slug: 'ban-an-go-oc-cho', title: 'Bàn ăn gỗ óc chó 6 ghế', image: 'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&q=80&w=800', category: 'Phòng Bếp' },
-    { slug: 'giuong-ngu-go-oc-cho', title: 'Giường ngủ gỗ óc chó', image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=800', category: 'Phòng Ngủ' },
-    { slug: 'tu-ruou-go-oc-cho', title: 'Tủ rượu gỗ óc chó', image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800', category: 'Phòng Khách' },
-    { slug: 'ke-tivi-go-oc-cho', title: 'Kệ tivi gỗ óc chó', image: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=800', category: 'Phòng Khách' },
-    { slug: 'noi-that-phong-khach', title: 'Nội thất phòng khách', image: 'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&q=80&w=800', category: 'Trọn Gói' },
-    { slug: 'noi-that-phong-ngu', title: 'Nội thất phòng ngủ', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800', category: 'Trọn Gói' },
-    { slug: 'noi-that-phong-bep', title: 'Nội thất phòng bếp', image: 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?auto=format&fit=crop&q=80&w=800', category: 'Trọn Gói' },
-    { slug: 'sofa-da-bo', title: 'Sofa da bò cao cấp', image: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=800', category: 'Nội Thất' },
-    { slug: 'ban-tra-go-oc-cho', title: 'Bàn trà gỗ óc chó', image: 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800', category: 'Phòng Khách' },
-  ];
-
-  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [selectedCategory, setSelectedCategory] = React.useState(searchParams.get('category') || 'Tất cả');
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState('');
 
-  // Update selectedCategory when URL changes
+  const { list: apiCategories, getAll: getCategories } = useCategoryService();
+  const { list: apiProducts, loading, getAll: getProducts } = useProductService();
+
+  // Load danh mục 1 lần khi vào trang
   React.useEffect(() => {
-    const categoryFromUrl = searchParams.get('category');
-    if (categoryFromUrl) {
-      setSelectedCategory(categoryFromUrl);
-    }
-  }, [searchParams]);
+    getCategories();
+  }, []);
 
-  // Derived categories from products
-  const categories = React.useMemo(() => {
-    const cats = new Set(products.map(p => p.category));
-    return ['Tất cả', ...Array.from(cats).sort()];
-  }, [products]);
-
-  const filteredProducts = React.useMemo(() => {
-    return products.filter(prod => {
-      const matchesSearch = prod.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prod.category.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'Tất cả' || prod.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, selectedCategory, products]);
-
-  const handleCategorySelect = (cat: string) => {
-    setSelectedCategory(cat);
-    if (cat === 'Tất cả') {
-      searchParams.delete('category');
+  // Load Products khi select categoryId thay đổi
+  React.useEffect(() => {
+    if (selectedCategoryId) {
+      getProducts({ categoryId: selectedCategoryId });
     } else {
-      searchParams.set('category', cat);
+      getProducts(); // Load tất cả
     }
-    setSearchParams(searchParams);
+  }, [selectedCategoryId]);
+
+  // Client-side search & filter (nếu muốn search text ngay lập tức)
+  const filteredProducts = React.useMemo(() => {
+    let result = apiProducts || [];
+    if (searchQuery) {
+      result = result.filter((prod: any) =>
+        prod.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return result;
+  }, [searchQuery, apiProducts]);
+
+  const handleCategorySelect = (catId: string) => {
+    // Chỉ lưu state, không đồng bộ lên URL nữa để giấu query string
+    setSelectedCategoryId(catId);
   };
 
   return (
@@ -137,17 +121,27 @@ const ProductsPage: React.FC = () => {
                       Danh mục
                     </p>
                     <div className="space-y-2">
-                      {categories.map((cat) => (
+                      <button
+                        type="button"
+                        onClick={() => handleCategorySelect('')}
+                        className={`w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all ${!selectedCategoryId
+                          ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
+                          }`}
+                      >
+                        Tất cả
+                      </button>
+                      {(apiCategories || []).map((cat: any) => (
                         <button
-                          key={cat}
+                          key={cat.id}
                           type="button"
-                          onClick={() => handleCategorySelect(cat)}
-                          className={`w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all ${selectedCategory === cat
-                              ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
-                              : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
+                          onClick={() => handleCategorySelect(cat.id)}
+                          className={`w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all ${selectedCategoryId === cat.id
+                            ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                             }`}
                         >
-                          {cat}
+                          {cat.name}
                         </button>
                       ))}
                     </div>
@@ -162,14 +156,26 @@ const ProductsPage: React.FC = () => {
                 Hiển thị {filteredProducts.length} sản phẩm {searchQuery && `cho "${searchQuery}"`}
               </div>
 
-              {filteredProducts.length === 0 ? (
+              {loading ? (
+                <div className="py-20 text-center text-gray-400">
+                  <p className="text-lg animate-pulse">Đang tải sản phẩm...</p>
+                </div>
+              ) : filteredProducts.length === 0 ? (
                 <div className="py-20 text-center text-gray-400">
                   <p className="text-lg">Không tìm thấy sản phẩm nào phù hợp.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredProducts.map((product, i) => (
-                    <ProductCard key={i} basePath="/san-pham" {...product} />
+                  {filteredProducts.map((product: any, i: number) => (
+                    <ProductCard
+                      key={product.id || i}
+                      basePath="/san-pham"
+                      slug={product.slug || product.id}
+                      title={product.name}
+                      category={product.categoryId?.name}
+                      price={product.price && product.price > 0 ? `${product.price.toLocaleString()} VNĐ` : 'Liên hệ'}
+                      image={product.images && product.images.length > 0 ? product.images[0].url : 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800'}
+                    />
                   ))}
                 </div>
               )}

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import { useCart } from '@/src/features/showcase/context/CartContext';
+import { useOrderService } from '@/src/api/services';
 import SEO from '@/src/components/common/SEO';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import {
@@ -17,19 +18,22 @@ import {
 
 const CheckoutPage: React.FC = () => {
   const { cartItems, totalAmount, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { request: requestOrder } = useOrderService();
+  const navigate = useNavigate();
 
   const [customer, setCustomer] = useState({
     fullName: '',
     phone: '',
+    email: '',
     address: '',
     note: '',
-    deliveryTime: 'business-hours',
+    deliveryTime: 'business_hours',
     paymentMethod: 'cash',
   });
 
-  const handleOrder = () => {
+  const handleOrder = async () => {
     if (!customer.fullName || !customer.phone || !customer.address) {
-      alert('Vui lòng nhập đầy đủ thông tin khách hàng');
+      alert('Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ!');
       return;
     }
 
@@ -38,11 +42,25 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
+    try {
+      // Gọi API Checkout
+      await requestOrder('POST', '/checkout', {
+        fullName: customer.fullName,
+        phone: customer.phone,
+        email: customer.email || 'guest@hochi.vn', // Dự phòng nếu khách không nhập
+        address: customer.address,
+        deliveryTime: customer.deliveryTime
+      });
 
-    // TODO: Gửi đơn hàng lên API
-
-    alert('Đặt hàng thành công!');
-    clearCart();
+      alert('Tạo đơn hàng thành công! Cảm ơn bạn đã tin tưởng Nội Thất Hochi.');
+      clearCart();
+      navigate('/'); // Quay về trang chủ
+    } catch (err: any) {
+      console.error('Lỗi khi thiết lập đơn hàng:', err);
+      // Hiển thị thông báo lỗi chi tiết nếu có
+      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!';
+      alert(msg);
+    }
   };
 
   return (
@@ -82,7 +100,7 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Họ và tên</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Họ và tên *</label>
                     <input
                       type="text"
                       placeholder="Nhập họ và tên khách hàng"
@@ -93,12 +111,23 @@ const CheckoutPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Số điện thoại</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Số điện thoại *</label>
                     <input
                       type="text"
                       placeholder="Nhập số điện thoại liên lạc"
                       value={customer.phone}
                       onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3.5 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 bg-gray-50/30"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Email (Không bắt buộc)</label>
+                    <input
+                      type="email"
+                      placeholder="Nhập email để nhận hóa đơn"
+                      value={customer.email}
+                      onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
                       className="w-full rounded-xl border border-gray-200 px-4 py-3.5 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 bg-gray-50/30"
                     />
                   </div>
@@ -134,7 +163,7 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-8">
                   <label
-                    className={`flex cursor-pointer items-center justify-between rounded-xl border-2 p-4 transition-all ${customer.deliveryTime === 'business-hours'
+                    className={`flex cursor-pointer items-center justify-between rounded-xl border-2 p-4 transition-all ${customer.deliveryTime === 'business_hours'
                       ? 'border-showcase-primary bg-showcase-light/10 shadow-sm'
                       : 'border-gray-100 hover:border-gray-200'
                       }`}
@@ -144,8 +173,8 @@ const CheckoutPage: React.FC = () => {
                         type="radio"
                         name="deliveryTime"
                         className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
-                        checked={customer.deliveryTime === 'business-hours'}
-                        onChange={() => setCustomer({ ...customer, deliveryTime: 'business-hours' })}
+                        checked={customer.deliveryTime === 'business_hours'}
+                        onChange={() => setCustomer({ ...customer, deliveryTime: 'business_hours' })}
                       />
                       <span className="font-semibold text-teal-950">Trong giờ hành chính</span>
                     </div>
@@ -153,7 +182,7 @@ const CheckoutPage: React.FC = () => {
                   </label>
 
                   <label
-                    className={`flex cursor-pointer items-center justify-between rounded-xl border-2 p-4 transition-all ${customer.deliveryTime === 'after-hours'
+                    className={`flex cursor-pointer items-center justify-between rounded-xl border-2 p-4 transition-all ${customer.deliveryTime === 'outside_business_hours'
                       ? 'border-showcase-primary bg-showcase-light/10 shadow-sm'
                       : 'border-gray-100 hover:border-gray-200'
                       }`}
@@ -163,8 +192,8 @@ const CheckoutPage: React.FC = () => {
                         type="radio"
                         name="deliveryTime"
                         className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
-                        checked={customer.deliveryTime === 'after-hours'}
-                        onChange={() => setCustomer({ ...customer, deliveryTime: 'after-hours' })}
+                        checked={customer.deliveryTime === 'outside_business_hours'}
+                        onChange={() => setCustomer({ ...customer, deliveryTime: 'outside_business_hours' })}
                       />
                       <span className="font-semibold text-teal-950">Ngoài giờ hành chính</span>
                     </div>

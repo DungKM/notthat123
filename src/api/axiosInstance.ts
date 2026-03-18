@@ -1,9 +1,11 @@
 import axios from 'axios';
 import { authService } from '@/src/auth/services/authService';
+import { getOrCreateSessionId } from '../utils/session';
+import { api_url } from './constants';
 
 // ─── Axios Instance ───
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: `${api_url}/api`,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -17,6 +19,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    const sessionId = getOrCreateSessionId();
+    config.headers['x-session-id'] = sessionId;
     return config;
   },
   (error) => Promise.reject(error)
