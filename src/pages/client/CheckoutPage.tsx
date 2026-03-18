@@ -295,8 +295,11 @@ const CheckoutPage: React.FC = () => {
                                   <h3 className="line-clamp-2 text-sm font-bold text-teal-950 transition-colors hover:text-showcase-primary">
                                     {item.title}
                                   </h3>
-                                  <p className="mt-1 text-sm font-bold text-showcase-primary">
-                                    {item.price.toLocaleString('vi-VN')} <span className="text-[10px] uppercase">vnd</span>
+                                  <p className="mt-1 text-xs text-gray-400 font-medium">
+                                    Đơn giá: {item.price.toLocaleString('vi-VN')} đ
+                                  </p>
+                                  <p className="text-sm font-bold text-showcase-primary mt-1">
+                                    {item.subtotal.toLocaleString('vi-VN')} <span className="text-[10px] uppercase">vnd</span>
                                   </p>
                                 </div>
 

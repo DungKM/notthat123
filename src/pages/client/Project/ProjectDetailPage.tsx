@@ -56,54 +56,54 @@ const ProjectDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 gap-12 xl:gap-16">
               {/* Main content */}
               <article className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-              {/* Cover image */}
-              <div className="relative h-[260px] sm:h-[340px] md:h-[420px]">
-                <img
-                  src={project.coverImage}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white">
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <Badge variant="gold">{project.category}</Badge>
-                    {project.year && (
-                      <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
-                        <CalendarOutlined className="mr-1 text-[10px]" />
-                        {project.year}
-                      </span>
-                    )}
-                    {project.area && (
-                      <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
-                        <FullscreenOutlined className="mr-1 text-[10px]" />
-                        {project.area}
-                      </span>
+                {/* Cover image */}
+                <div className="relative h-[260px] sm:h-[340px] md:h-[420px]">
+                  <img
+                    src={project.coverImage}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white">
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <Badge variant="gold">{project.category}</Badge>
+                      {project.year && (
+                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
+                          <CalendarOutlined className="mr-1 text-[10px]" />
+                          {project.year}
+                        </span>
+                      )}
+                      {project.area && (
+                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
+                          <FullscreenOutlined className="mr-1 text-[10px]" />
+                          {project.area}
+                        </span>
+                      )}
+                    </div>
+                    <h1
+                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {project.title}
+                    </h1>
+                    {project.location && (
+                      <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-100">
+                        <EnvironmentOutlined className="mr-2 text-xs" />
+                        {project.location}
+                      </p>
                     )}
                   </div>
-                  <h1
-                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
-                    style={{ fontFamily: "'Inter', sans-serif" }}
-                  >
-                    {project.title}
-                  </h1>
-                  {project.location && (
-                    <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-100">
-                      <EnvironmentOutlined className="mr-2 text-xs" />
-                      {project.location}
-                    </p>
-                  )}
                 </div>
-              </div>
 
-              {/* Body */}
-              <div className="p-6 sm:p-10 space-y-10">
-                {/* Excerpt */}
-                <p className="text-base sm:text-lg text-gray-700 leading-relaxed border-l-4 border-showcase-primary pl-4 sm:pl-6">
-                  {project.excerpt}
-                </p>
+                {/* Body */}
+                <div className="p-6 sm:p-10 space-y-10">
+                  {/* Excerpt */}
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed border-l-4 border-showcase-primary pl-4 sm:pl-6">
+                    {project.excerpt}
+                  </p>
 
-                {/* Info grid */}
+                  {/* Info grid
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100">
                   {project.location && (
                     <div>
@@ -123,50 +123,50 @@ const ProjectDetailPage: React.FC = () => {
                       <p className="text-sm font-semibold text-gray-900">{project.area}</p>
                     </div>
                   )}
-                </div>
+                </div> */}
 
-                {/* Content paragraphs */}
-                <div className="space-y-6">
-                  {project.content.map((paragraph, index) => (
-                    <p key={index} className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
+                  {/* Content paragraphs */}
+                  <div className="space-y-6">
+                    {project.content.map((paragraph, index) => (
+                      <p key={index} className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
 
-                {/* Gallery */}
-                {project.gallery && project.gallery.length > 0 && (
-                  <section className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2
-                        className="text-lg sm:text-xl font-bold uppercase tracking-[0.25em] text-teal-950"
-                        style={{ fontFamily: "'Inter', sans-serif" }}
-                      >
-                        GALLERY CÔNG TRÌNH
-                      </h2>
-                      <span className="text-xs text-gray-400 font-medium">
-                        {project.gallery.length} hình ảnh thực tế
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {project.gallery.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative aspect-4/3 rounded-2xl overflow-hidden group border border-gray-100 bg-gray-100"
+                  {/* Gallery */}
+                  {project.gallery && project.gallery.length > 0 && (
+                    <section className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2
+                          className="text-lg sm:text-xl font-bold uppercase tracking-[0.25em] text-teal-950"
+                          style={{ fontFamily: "'Inter', sans-serif" }}
                         >
-                          <img
-                            src={image}
-                            alt={`${project.title} ${index + 1}`}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
+                          GALLERY CÔNG TRÌNH
+                        </h2>
+                        <span className="text-xs text-gray-400 font-medium">
+                          {project.gallery.length} hình ảnh thực tế
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {project.gallery.map((image, index) => (
+                          <div
+                            key={index}
+                            className="relative aspect-4/3 rounded-2xl overflow-hidden group border border-gray-100 bg-gray-100"
+                          >
+                            <img
+                              src={image}
+                              alt={`${project.title} ${index + 1}`}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </div>
               </article>
             </div>
 

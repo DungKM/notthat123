@@ -33,7 +33,7 @@ export interface UseApiReturn<T> {
   remove: (id: string) => Promise<void>;
 
   // Custom request
-  request: <R = any>(method: string, url: string, payload?: any) => Promise<R>;
+  request: <R = any>(method: string, url: string, payload?: any, params?: Record<string, any>) => Promise<R>;
 }
 
 // ─── Generic CRUD Hook ───
@@ -152,11 +152,11 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
   }, [basePath, handleError]);
 
   // ─── CUSTOM REQUEST (cho API đặc biệt) ───
-  const request = useCallback(async <R = any>(method: string, url: string, payload?: any): Promise<R> => {
+  const request = useCallback(async <R = any>(method: string, url: string, payload?: any, params?: Record<string, any>): Promise<R> => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api({ method, url: `${basePath}${url}`, data: payload });
+      const res = await api({ method, url: `${basePath}${url}`, data: payload, params });
       return res as R;
     } catch (err: any) {
       handleError(err);

@@ -307,7 +307,7 @@ const Header: React.FC = () => {
                             </button>
                           </div>
                           <p className="text-xs font-medium text-gray-400">
-                            Thành tiền: <span className="text-gray-900 font-bold">{(item.price * item.quantity).toLocaleString('vi-VN')} đ</span>
+                            Thành tiền: <span className="text-gray-900 font-bold">{item.subtotal.toLocaleString('vi-VN')} đ</span>
                           </p>
                         </div>
                       </div>

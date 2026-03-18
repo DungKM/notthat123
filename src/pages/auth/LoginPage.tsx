@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (values: any) => {
     try {
-      const user = await login(values.username || values.mobile, values.password || '123456');
+      const user = await login(values.account, values.password);
       if (user) {
         message.success(`Chào mừng trở lại, ${user.name}!`);
         // Điều hướng dựa trên role
@@ -48,9 +48,9 @@ const LoginPage: React.FC = () => {
       } else {
         message.error('Tên đăng nhập hoặc mật khẩu không đúng!');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      message.error('Đã xảy ra lỗi khi đăng nhập!');
+      message.error(error.message || 'Đã xảy ra lỗi khi đăng nhập!');
     }
   };
 
@@ -106,7 +106,7 @@ const LoginPage: React.FC = () => {
           {loginType === 'account' && (
             <>
               <ProFormText
-                name="username"
+                name="account"
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined style={{ color: token.colorPrimary }} />,
