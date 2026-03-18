@@ -44,6 +44,7 @@ const UsersPage = lazy(() => import('@/src/pages/admin/dashboard/UsersPage'));
 const OrderManagementPage = lazy(() => import('@/src/pages/admin/dashboard/OrderManagementPage'));
 const ProductManagementPage = lazy(() => import('@/src/pages/admin/dashboard/ProductManagementPage'));
 const CategoryManagementPage = lazy(() => import('@/src/pages/admin/dashboard/CategoryManagementPage'));
+const ContactManagementPage = lazy(() => import('@/src/pages/admin/dashboard/ContactManagementPage'));
 const RecruitmentManagementPage = lazy(() => import('@/src/pages/admin/dashboard/RecruitmentManagementPage'));
 const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage'));
 const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/ShowcaseProjectManagementPage'));
@@ -186,6 +187,14 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedAdminRoute roles={[Role.ACCOUNTANT, Role.DIRECTOR]}>
                 <RecruitmentManagementPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_QUAN_LY_LIEN_HE}
+            element={
+              <ProtectedAdminRoute roles={[Role.ACCOUNTANT, Role.DIRECTOR]}>
+                <ContactManagementPage />
               </ProtectedAdminRoute>
             }
           />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Container from '../ui/Container';
 import { StarFilled, UserOutlined } from '@ant-design/icons';
 import { message } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 // Dữ liệu mẫu đánh giá của khách hàng
 const initialFeedbacks = [
@@ -32,6 +33,7 @@ const initialFeedbacks = [
 ];
 
 const Feedback: React.FC = () => {
+  const { t } = useTranslation();
   const [feedbacks, setFeedbacks] = useState(initialFeedbacks);
 
   // State cho form đánh giá
@@ -64,13 +66,13 @@ const Feedback: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = 'Vui lòng nhập họ tên';
+    if (!formData.name.trim()) newErrors.name = t('feedback.error_name');
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại';
+      newErrors.phone = t('feedback.error_phone');
     } else if (!/^\d{10,11}$/.test(formData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = t('feedback.error_phone_invalid');
     }
-    if (!formData.content.trim()) newErrors.content = 'Vui lòng nhập nội dung đánh giá';
+    if (!formData.content.trim()) newErrors.content = t('feedback.error_content');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -92,7 +94,7 @@ const Feedback: React.FC = () => {
       };
 
       setFeedbacks([newFeedback, ...feedbacks]);
-      message.success('Cảm ơn bạn đã gửi đánh giá!');
+      message.success(t('feedback.success'));
 
       // Reset form
       setFormData({
@@ -102,7 +104,7 @@ const Feedback: React.FC = () => {
         content: '',
       });
     } else {
-      message.error('Vui lòng điền đầy đủ thông tin bắt buộc.');
+      message.error(t('feedback.error_fill'));
     }
   };
 
@@ -124,11 +126,11 @@ const Feedback: React.FC = () => {
       <Container>
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-teal-950 uppercase tracking-widest mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-            KHÁCH HÀNG NÓI GÌ
+            {t('feedback.title')}
           </h2>
           <div className="w-24 h-1 bg-[#C5A059] mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-500 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-            Sự hài lòng của khách hàng là thước đo thành công lớn nhất của Nội Thất Hochi.
+            {t('feedback.description')}
           </p>
         </div>
 
@@ -167,14 +169,14 @@ const Feedback: React.FC = () => {
               <div className="absolute top-0 right-0 w-32 h-32 bg-showcase-primary/5 rounded-bl-full -z-10"></div>
 
               <div className="mb-8">
-                <h3 className="text-2xl font-bold text-teal-950 mb-2">Gửi Đánh Giá</h3>
-                <p className="text-gray-500 text-sm">Chia sẻ trải nghiệm của bạn với chúng tôi</p>
+                <h3 className="text-2xl font-bold text-teal-950 mb-2">{t('feedback.form_title')}</h3>
+                <p className="text-gray-500 text-sm">{t('feedback.form_desc')}</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Rating Selector */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Chất lượng dịch vụ *</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('feedback.rating_label')}</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -201,7 +203,7 @@ const Feedback: React.FC = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="Họ và tên *"
+                      placeholder={t('feedback.name_placeholder')}
                       className={`w-full px-4 py-3.5 bg-gray-50 rounded-xl border ${errors.name ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-400 text-sm font-medium`}
                     />
                     {errors.name && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-widest">{errors.name}</p>}
@@ -213,7 +215,7 @@ const Feedback: React.FC = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="Số điện thoại *"
+                      placeholder={t('feedback.phone_placeholder')}
                       className={`w-full px-4 py-3.5 bg-gray-50 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-400 text-sm font-medium`}
                     />
                     {errors.phone && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-widest">{errors.phone}</p>}
@@ -226,7 +228,7 @@ const Feedback: React.FC = () => {
                     value={formData.content}
                     onChange={handleChange}
                     rows={4}
-                    placeholder="Nội dung trải nghiệm của bạn *"
+                    placeholder={t('feedback.content_placeholder')}
                     className={`w-full px-4 py-3.5 bg-gray-50 rounded-xl border ${errors.content ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-400 text-sm font-medium resize-none`}
                   ></textarea>
                   {errors.content && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-widest">{errors.content}</p>}
@@ -236,7 +238,7 @@ const Feedback: React.FC = () => {
                   type="submit"
                   className="w-full bg-teal-950 text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-sm hover:bg-[#C5A059] transition-all shadow-lg hover:shadow-[#C5A059]/30"
                 >
-                  GỬI ĐÁNH GIÁ
+                  {t('feedback.submit')}
                 </button>
               </form>
             </div>

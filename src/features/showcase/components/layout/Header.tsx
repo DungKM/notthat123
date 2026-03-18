@@ -13,18 +13,21 @@ import {
 } from '@ant-design/icons';
 import Container from '../ui/Container';
 import { useCart } from '../../context/CartContext';
+import { useTranslation } from 'react-i18next';
 
 const Header: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState('VI');
   const location = useLocation();
   const navigate = useNavigate();
   const cartRef = useRef<HTMLDivElement | null>(null);
   const cartButtonRef = useRef<HTMLDivElement | null>(null);
   const cartDrawerRef = useRef<HTMLDivElement | null>(null);
   const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart } = useCart();
+
+  const currentLang = i18n.language?.toUpperCase().substring(0, 2) || 'VI';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,35 +60,35 @@ const Header: React.FC = () => {
   }, []);
 
   const languages = [
-    { code: 'VI', label: 'Tiếng Việt', flag: '🇻🇳' },
-    { code: 'EN', label: 'English', flag: '🇺🇸' },
-    { code: 'ZH', label: '中文', flag: '🇨🇳' }
+    { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+    { code: 'en', label: 'English', flag: '🇺🇸' },
+    { code: 'zh', label: '中文', flag: '🇨🇳' }
   ];
 
   const navLinks = [
     {
-      title: 'Giới thiệu',
+      title: t('nav.about'),
       href: ROUTES.TRANG_CHU,
       submenu: [
-        { title: 'Về Nội Thất Hochi', href: ROUTES.GIOI_THIEU },
-        { title: 'Vì sao chọn chúng tôi', href: ROUTES.VI_SAO_CHON_CHUNG_TOI }
+        { title: t('nav.about_us'), href: ROUTES.GIOI_THIEU },
+        { title: t('nav.why_choose_us'), href: ROUTES.VI_SAO_CHON_CHUNG_TOI }
       ]
     },
     {
-      title: 'Sản phẩm',
+      title: t('nav.products'),
       href: ROUTES.SAN_PHAM,
 
     },
     {
-      title: 'Công trình',
+      title: t('nav.projects'),
       href: ROUTES.CONG_TRINH,
 
     },
-    { title: 'Đối tác', href: ROUTES.DOI_TAC },
-    { title: 'Video', href: ROUTES.VIDEO },
-    { title: 'Liên hệ', href: ROUTES.LIEN_HE },
-    { title: 'Tuyển dụng', href: ROUTES.TUYEN_DUNG },
-    { title: 'Nội bộ', href: ROUTES.DANG_NHAP, target: '_blank' }
+    { title: t('nav.partners'), href: ROUTES.DOI_TAC },
+    { title: t('nav.videos'), href: ROUTES.VIDEO },
+    { title: t('nav.contact'), href: ROUTES.LIEN_HE },
+    { title: t('nav.recruitment'), href: ROUTES.TUYEN_DUNG },
+    { title: t('nav.internal'), href: ROUTES.DANG_NHAP, target: '_blank' }
   ];
 
   const isDetailLikePage =
@@ -168,16 +171,16 @@ const Header: React.FC = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => setCurrentLang(lang.code)}
+                      onClick={() => i18n.changeLanguage(lang.code)}
                       className="flex items-center justify-between w-full px-5 py-3 text-sm hover:bg-gray-50 transition-colors"
                     >
                       <span className="flex items-center gap-3">
                         <span className="text-lg">{lang.flag}</span>
-                        <span className={currentLang === lang.code ? 'font-bold text-showcase-primary' : 'text-gray-600'}>
+                        <span className={i18n.language === lang.code ? 'font-bold text-showcase-primary' : 'text-gray-600'}>
                           {lang.label}
                         </span>
                       </span>
-                      {currentLang === lang.code && <div className="w-1.5 h-1.5 rounded-full bg-showcase-primary" />}
+                      {i18n.language === lang.code && <div className="w-1.5 h-1.5 rounded-full bg-showcase-primary" />}
                     </button>
                   ))}
                 </div>
@@ -243,8 +246,8 @@ const Header: React.FC = () => {
             >
               <div className="flex items-center justify-between p-6 border-b border-stone-100">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Giỏ hàng</h2>
-                  <p className="text-sm text-gray-500 mt-1">Bạn có {cartCount} sản phẩm trong giỏ</p>
+                  <h2 className="text-xl font-bold text-gray-900">{t('cart.title')}</h2>
+                  <p className="text-sm text-gray-500 mt-1">{t('cart.item_count', { count: cartCount })}</p>
                 </div>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -261,14 +264,14 @@ const Header: React.FC = () => {
                       <ShoppingCartOutlined className="text-4xl text-gray-300" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Giỏ hàng trống</h3>
-                      <p className="text-gray-500 text-sm mt-1">Hãy chọn cho mình những sản phẩm ưng ý nhất nhé!</p>
+                      <h3 className="text-lg font-semibold text-gray-900">{t('cart.empty_title')}</h3>
+                      <p className="text-gray-500 text-sm mt-1">{t('cart.empty_desc')}</p>
                     </div>
                     <button
                       onClick={() => setIsCartOpen(false)}
                       className="px-8 py-3 bg-showcase-primary text-white rounded-full font-bold hover:opacity-90 transition-opacity"
                     >
-                      Tiếp tục mua sắm
+                      {t('cart.continue_shopping')}
                     </button>
                   </div>
                 ) : (
@@ -307,7 +310,7 @@ const Header: React.FC = () => {
                             </button>
                           </div>
                           <p className="text-xs font-medium text-gray-400">
-                            Thành tiền: <span className="text-gray-900 font-bold">{item.subtotal.toLocaleString('vi-VN')} đ</span>
+                            {t('cart.subtotal')}: <span className="text-gray-900 font-bold">{item.subtotal.toLocaleString('vi-VN')} đ</span>
                           </p>
                         </div>
                       </div>
@@ -319,7 +322,7 @@ const Header: React.FC = () => {
               {cartItems.length > 0 && (
                 <div className="p-6 bg-gray-50 border-t space-y-4 border-stone-100">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600 font-medium">Tổng cộng:</span>
+                    <span className="text-gray-600 font-medium">{t('cart.total')}:</span>
                     <span className="text-2xl font-black text-showcase-primary">{totalAmount.toLocaleString('vi-VN')} đ</span>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
@@ -331,13 +334,13 @@ const Header: React.FC = () => {
                       }}
                       className="w-full py-4 bg-showcase-primary text-white rounded-2xl font-black uppercase tracking-widest hover:shadow-lg hover:shadow-showcase-primary/20 transition-all"
                     >
-                      Thanh toán ngay
+                      {t('cart.checkout')}
                     </button>
                     <button
                       onClick={() => setIsCartOpen(false)}
                       className="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold hover:bg-gray-100 transition-all"
                     >
-                      Tiếp tục mua sắm
+                      {t('cart.continue_shopping')}
                     </button>
                   </div>
                 </div>
@@ -403,29 +406,29 @@ const Header: React.FC = () => {
 
               <div className="mt-10 space-y-6">
                 <div>
-                  <p className="text-xs font-black uppercase text-gray-400 tracking-widest mb-4">Ngôn ngữ</p>
+                  <p className="text-xs font-black uppercase text-gray-400 tracking-widest mb-4">{t('common.language')}</p>
                   <div className="grid grid-cols-3 gap-2">
                     {languages.map((lang) => (
                       <button
                         key={lang.code}
-                        onClick={() => setCurrentLang(lang.code)}
-                        className={`flex flex-col items-center gap-1 p-3 rounded-2xl border transition-all ${currentLang === lang.code
+                        onClick={() => i18n.changeLanguage(lang.code)}
+                        className={`flex flex-col items-center gap-1 p-3 rounded-2xl border transition-all ${i18n.language === lang.code
                           ? 'bg-showcase-primary/10 border-showcase-primary text-showcase-primary'
                           : 'bg-gray-50 border-transparent text-gray-600'
                           }`}
                       >
                         <span className="text-2xl">{lang.flag}</span>
-                        <span className="text-[10px] font-bold">{lang.code}</span>
+                        <span className="text-[10px] font-bold">{lang.code.toUpperCase()}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="p-6 bg-gray-900 rounded-3xl text-white">
-                  <p className="text-xs font-bold text-gray-400 mb-2">Liên hệ với chúng tôi</p>
+                  <p className="text-xs font-bold text-gray-400 mb-2">{t('common.contact_us')}</p>
                   <h3 className="text-xl font-black mb-4">090 123 4567</h3>
                   <button className="w-full py-3 bg-showcase-primary rounded-xl font-bold text-sm">
-                    Gửi yêu cầu tư vấn
+                    {t('common.send_request')}
                   </button>
                 </div>
               </div>

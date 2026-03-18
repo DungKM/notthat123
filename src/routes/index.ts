@@ -39,6 +39,7 @@ export const ROUTES = {
   ADMIN_SAN_PHAM: '/quan-tri/san-pham',
   ADMIN_DANH_MUC: '/quan-tri/danh-muc',
   ADMIN_QUAN_LY_TUYEN_DUNG: '/quan-tri/tuyen-dung-noi-bo',
+  ADMIN_QUAN_LY_LIEN_HE: '/quan-tri/quan-ly-lien-he',
   ADMIN_CHAM_CONG_CA_NHAN: '/quan-tri/cham-cong-ca-nhan',
   ADMIN_YEU_CAU_UNG_TIEN: '/quan-tri/yeu-ca-ung-tien',
   ADMIN_THONG_KE: '/quan-tri/thong-ke',

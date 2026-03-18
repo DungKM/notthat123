@@ -70,5 +70,8 @@ export const useChatGroupService = () => useApi<any>('/chat/groups');
 // ─── Upload ───
 export const useUploadService = () => useApi<any>('/upload');
 
+// ─── Contacts ───
+export const useContactService = () => useApi<any>('/contacts');
+
 //Cart
 export const useCartService = () => useApi<any>('/cart');

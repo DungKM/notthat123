@@ -2,18 +2,21 @@ import React from 'react';
 import Container from '../ui/Container';
 import { PlayCircleFilled } from '@ant-design/icons';
 import Button from '../ui/Button';
+import { useTranslation } from 'react-i18next';
 
 const Features: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="bg-gray-50 py-24">
       <Container>
         {/* Title Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6">
           <div className="space-y-4">
-            <span className="text-showcase-primary font-bold tracking-[0.3em] text-xs uppercase">VIDEO TRỰC TUYẾN</span>
-            <h2 className="text-4xl font-bold text-teal-950" style={{ fontFamily: "'Inter', sans-serif" }}>CÔNG TRÌNH THỰC TẾ</h2>
+            <span className="text-showcase-primary font-bold tracking-[0.3em] text-xs uppercase">{t('features.badge')}</span>
+            <h2 className="text-4xl font-bold text-teal-950" style={{ fontFamily: "'Inter', sans-serif" }}>{t('features.title')}</h2>
           </div>
-          <Button variant="ghost" className="text-teal-900 font-bold border-b-2 border-teal-900 rounded-none px-0">Xem tất cả video ›</Button>
+          <Button variant="ghost" className="text-teal-900 font-bold border-b-2 border-teal-900 rounded-none px-0">{t('common.view_all_videos')}</Button>
         </div>
 
         {/* Video Feature Grid */}
@@ -38,12 +41,12 @@ const Features: React.FC = () => {
           <div className="space-y-8 flex flex-col">
             <div className="bg-teal-950 p-8 rounded-2xl flex-grow text-white flex flex-col justify-center space-y-4">
               <span className="text-showcase-primary text-5xl font-bold italic" style={{ fontFamily: "'Inter', sans-serif" }}>20+</span>
-              <h4 className="text-xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>NĂM KINH NGHIỆM</h4>
+              <h4 className="text-xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>{t('features.years')}</h4>
               <p className="text-gray-400 text-sm leading-relaxed font-light">
-                Trong lĩnh vực thiết kế và thi công nội thất biệt thự, chung cư cao cấp. Chúng tôi cam kết mang lại sự hài lòng tuyệt đối về thẩm mỹ và công năng.
+                {t('features.years_desc')}
               </p>
               <div className="pt-4">
-                <span className="block text-gray-500 uppercase text-[10px] tracking-widest mb-1">HOTLINE TƯ VẤN</span>
+                <span className="block text-gray-500 uppercase text-[10px] tracking-widest mb-1">{t('features.hotline_label')}</span>
                 <span className="text-xl font-bold text-showcase-primary">0123 456 789</span>
               </div>
             </div>
