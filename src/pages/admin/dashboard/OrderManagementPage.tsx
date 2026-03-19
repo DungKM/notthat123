@@ -148,7 +148,7 @@ const OrderManagementPage: React.FC = () => {
     {
       title: 'STT',
       dataIndex: 'index',
-      valueType: 'indexBorder',
+      valueType: 'index',
       width: 48,
     },
     {
@@ -238,25 +238,25 @@ const OrderManagementPage: React.FC = () => {
         actionRef={actionRef}
         rowKey="_id"
         headerTitle="Quản lý đơn hàng"
-      search={{ labelWidth: 'auto' }}
-      pagination={{ pageSize: 10 }}
-      request={async (params) => {
-        try {
-          const res = await request('GET', '/list', null, {
-            page: params.current || 1,
-            limit: params.pageSize || 10,
-          });
-          return {
-            data: res?.data || [],
-            total: res?.meta?.total || 0,
-            success: true,
-          };
-        } catch (err) {
-          message.error('Không thể tải danh sách đơn hàng');
-          return { data: [], total: 0, success: false };
-        }
-      }}
-    />
+        search={{ labelWidth: 'auto' }}
+        pagination={{ pageSize: 10 }}
+        request={async (params) => {
+          try {
+            const res = await request('GET', '/list', null, {
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+            });
+            return {
+              data: res?.data || [],
+              total: res?.meta?.total || 0,
+              success: true,
+            };
+          } catch (err) {
+            message.error('Không thể tải danh sách đơn hàng');
+            return { data: [], total: 0, success: false };
+          }
+        }}
+      />
 
       <ModalForm
         title="Sửa thông tin đơn hàng"

@@ -37,12 +37,15 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
           {formatCurrency(Number(val))}
         </Text>
       ),
+      width: 200,
+
     },
     {
       title: 'Lý do',
       dataIndex: 'reason',
       ellipsis: true,
       width: 200,
+
     },
     {
       title: 'Ngày yêu cầu',
@@ -50,6 +53,8 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
       valueType: 'dateTime',
       hideInSearch: true,
       render: (val) => formatDateTime(String(val)),
+      width: 200,
+
     },
     {
       title: 'Trạng thái',
@@ -73,6 +78,9 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
           </Tag>
         );
       },
+      width: 100,
+
+
     },
     {
       title: 'Thao tác',
@@ -119,13 +127,13 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
     const updatedRequests = advanceRequests.map((req) =>
       req.id === selectedRequest.id
         ? {
-            ...req,
-            status: 'Đã duyệt' as const,
-            approvedBy: currentUser.name,
-            approvedDate: dayjs().toISOString(),
-            transferProof: values.transferProof?.[0]?.url || values.transferProof?.[0]?.response?.url,
-            note: values.note,
-          }
+          ...req,
+          status: 'Đã duyệt' as const,
+          approvedBy: currentUser.name,
+          approvedDate: dayjs().toISOString(),
+          transferProof: values.transferProof?.[0]?.url || values.transferProof?.[0]?.response?.url,
+          note: values.note,
+        }
         : req
     );
 
@@ -140,12 +148,12 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
     const updatedRequests = advanceRequests.map((req) =>
       req.id === id
         ? {
-            ...req,
-            status: 'Từ chối' as const,
-            approvedBy: currentUser.name,
-            approvedDate: dayjs().toISOString(),
-            note: 'Yêu cầu không được chấp nhận',
-          }
+          ...req,
+          status: 'Từ chối' as const,
+          approvedBy: currentUser.name,
+          approvedDate: dayjs().toISOString(),
+          note: 'Yêu cầu không được chấp nhận',
+        }
         : req
     );
     setAdvanceRequests(updatedRequests);

@@ -9,6 +9,7 @@ import ChatSidebar from './components/ChatSidebar';
 import ChatMessages from './components/ChatMessages';
 import ChatInput from './components/ChatInput';
 import CreateGroupModal from './components/CreateGroupModal';
+import GroupMembersModal from './components/GroupMembersModal';
 import { mockUsers } from '@/src/auth/mockUsers';
 
 const { Content, Sider } = Layout;
@@ -19,6 +20,7 @@ const ChatPage: React.FC = () => {
     const [selectedGroupId, setSelectedGroupId] = useState<string>();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
     const isAdmin = user?.role === Role.DIRECTOR || user?.role === Role.ACCOUNTANT;
 
@@ -114,94 +116,12 @@ const ChatPage: React.FC = () => {
     };
 
     const handleDeleteGroup = (groupId: string) => {
-        Modal.confirm({
-            title: 'Xóa nhóm chat',
-            content: 'Bạn có chắc chắn muốn xóa nhóm chat này không? Tất cả tin nhắn sẽ bị mất.',
-            okText: 'Xóa',
-            okType: 'danger',
-            cancelText: 'Hủy',
-            onOk: () => {
-                chatService.deleteGroup(groupId);
-                message.success('Đã xóa nhóm chat');
-            },
-        });
+        chatService.deleteGroup(groupId);
+        setIsMembersModalOpen(false);
+        message.success('Đã xóa nhóm chat');
     };
 
     const selectedGroup = groups.find(g => g.id === selectedGroupId);
-
-    const groupMenu = (
-        <Dropdown
-            menu={{
-                items: [
-                    {
-                        key: 'add_member',
-                        label: 'Thêm thành viên',
-                        icon: <UserAddOutlined />,
-                        onClick: () => {
-                            const nonMembers = mockUsers.filter(u => !selectedGroup?.members.includes(u.id));
-                            if (nonMembers.length === 0) {
-                                message.info('Tất cả nhân viên đã có trong nhóm');
-                                return;
-                            }
-                            Modal.confirm({
-                                title: 'Thêm thành viên',
-                                content: (
-                                    <Select 
-                                        style={{ width: '100%' }} 
-                                        placeholder="Chọn nhân viên"
-                                        options={nonMembers.map(u => ({ label: u.name, value: u.id }))}
-                                        onChange={(val) => (Modal as any)._selectedMember = val}
-                                    />
-                                ),
-                                onOk: () => {
-                                    const val = (Modal as any)._selectedMember;
-                                    if (val) handleAddMember(val);
-                                }
-                            });
-                        },
-                    },
-                    {
-                        key: 'remove_member',
-                        label: 'Gỡ thành viên',
-                        icon: <UserDeleteOutlined />,
-                        onClick: () => {
-                            const members = mockUsers.filter(u => selectedGroup?.members.includes(u.id) && u.id !== user?.id);
-                            if (members.length === 0) {
-                                message.info('Không có thành viên nào khác để gỡ');
-                                return;
-                            }
-                            Modal.confirm({
-                                title: 'Gỡ thành viên',
-                                content: (
-                                    <Select 
-                                        style={{ width: '100%' }} 
-                                        placeholder="Chọn thành viên"
-                                        options={members.map(u => ({ label: u.name, value: u.id }))}
-                                        onChange={(val) => (Modal as any)._selectedMember = val}
-                                    />
-                                ),
-                                onOk: () => {
-                                    const val = (Modal as any)._selectedMember;
-                                    if (val) handleRemoveMember(val);
-                                }
-                            });
-                        },
-                    },
-                    { type: 'divider' },
-                    {
-                        key: 'delete',
-                        label: 'Xóa nhóm',
-                        icon: <DeleteOutlined />,
-                        danger: true,
-                        onClick: () => selectedGroupId && handleDeleteGroup(selectedGroupId),
-                    },
-                ],
-            }}
-            trigger={['click']}
-        >
-            <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
-    );
 
     return (
         <Layout style={{ height: 'calc(100vh - 150px)', background: '#fff', borderRadius: '8px', overflow: 'hidden' }}>
@@ -223,7 +143,11 @@ const ChatPage: React.FC = () => {
                                     {selectedGroup.members.length} thành viên
                                 </Typography.Text>
                             </div>
-                            {isAdmin && groupMenu}
+                            <Button 
+                                type="text" 
+                                icon={<MoreOutlined style={{ color: '#000', fontSize: '20px', fontWeight: 'bold' }} />} 
+                                onClick={() => setIsMembersModalOpen(true)}
+                            />
                         </div>
                         <ChatMessages messages={messages} />
                         <ChatInput onSendMessage={handleSendMessage} />
@@ -239,6 +163,17 @@ const ChatPage: React.FC = () => {
                 open={isCreateModalOpen}
                 onCancel={() => setIsCreateModalOpen(false)}
                 onCreate={handleCreateGroup}
+            />
+            <GroupMembersModal
+                open={isMembersModalOpen}
+                onCancel={() => setIsMembersModalOpen(false)}
+                group={selectedGroup}
+                allUsers={mockUsers}
+                currentUser={user}
+                isAdmin={isAdmin}
+                onAddMember={handleAddMember}
+                onRemoveMember={handleRemoveMember}
+                onDeleteGroup={handleDeleteGroup}
             />
         </Layout>
     );
