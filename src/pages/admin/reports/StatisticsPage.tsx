@@ -536,7 +536,7 @@ const StatisticsPage: React.FC = () => {
           fieldProps={{
             formatter: (value) =>
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-            parser: (value) => value!.replace(/\$\s?|,*/g, ""),
+            parser: (value) => Number(value!.replace(/\$\s?|,*/g, "")),
             addonAfter: "đ",
           }}
           rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}

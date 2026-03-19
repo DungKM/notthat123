@@ -17,7 +17,7 @@ const mockProducts: ProductItem[] = [
 ];
 
 const ProductManagementPage: React.FC = () => {
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType | undefined>(undefined);
   const [data, setData] = useState<ProductItem[]>(mockProducts);
   const [open, setOpen] = useState(false);
 

@@ -56,6 +56,7 @@ const roleLabels: Record<Role, string> = {
   [Role.ACCOUNTANT]: 'Kế toán',
   [Role.STAFF]: 'Nhân viên',
   [Role.SITE_MANAGER]: 'Quản lý công trình',
+  [Role.CUSTOMER]: 'Khách hàng',
 };
 
 type UserFormValues = {
@@ -70,7 +71,7 @@ type UserFormValues = {
 const UsersPage: React.FC = () => {
   const { user: currentUser } = useAuth();
   const actionRef = useRef<ActionType>(null);
-  const formRef = useRef<ProFormInstance<UserFormValues>>();
+  const formRef = useRef<ProFormInstance<UserFormValues>>(undefined);
   const [users, setUsers] = useState<UserItem[]>(initialUsers);
   const [open, setOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);

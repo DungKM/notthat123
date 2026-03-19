@@ -15,7 +15,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, FileTextOutlined } from '@a
 import { useRef } from 'react';
 
 const ShowcaseProjectManagementPage: React.FC = () => {
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType | undefined>(undefined);
   const [projects, setProjects] = useState<ShowcaseProject[]>(MOCK_SHOWCASE_PROJECTS);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentProject, setCurrentProject] = useState<ShowcaseProject | null>(null);
@@ -42,15 +42,15 @@ const ShowcaseProjectManagementPage: React.FC = () => {
 
     if (currentProject) {
       // Update
-      const updated = projects.map(p => 
-        p.id === currentProject.id 
-          ? { 
-              ...p, 
-              ...values, 
-              slug: generateSlug(values.title),
-              content: typeof values.content === 'string' ? values.content.split('\n') : values.content,
-              gallery: typeof values.gallery === 'string' ? values.gallery.split('\n') : values.gallery
-            } 
+      const updated = projects.map(p =>
+        p.id === currentProject.id
+          ? {
+            ...p,
+            ...values,
+            slug: generateSlug(values.title),
+            content: typeof values.content === 'string' ? values.content.split('\n') : values.content,
+            gallery: typeof values.gallery === 'string' ? values.gallery.split('\n') : values.gallery
+          }
           : p
       );
       setProjects(updated);

@@ -30,25 +30,24 @@ const LoginPage = lazy(() => import('@/src/pages/auth/LoginPage'));
 // Pages - Admin
 const DashboardPage = lazy(() => import('@/src/pages/admin/dashboard/DashboardPage'));
 const ProjectListPage = lazy(() => import('@/src/pages/admin/projects/ProjectListPage'));
-const EmployeeManagementPage = lazy(() => import('@/src/pages/admin/accounting/EmployeeManagementPage'));
-const AdvanceApprovalPage = lazy(() => import('@/src/pages/admin/accounting/AdvanceApprovalPage'));
-const AttendanceSummaryPage = lazy(() => import('@/src/pages/admin/accounting/AttendanceSummaryPage'));
-const SalaryManagementPage = lazy(() => import('@/src/pages/admin/accounting/SalaryManagementPage'));
-
-const AttendancePage = lazy(() => import('@/src/pages/admin/staff/AttendancePage'));
-const PersonalAdvancePage = lazy(() => import('@/src/pages/admin/staff/PersonalAdvancePage'));
-const StatisticsPage = lazy(() => import('@/src/pages/admin/staff/StatisticsPage'));
+const EmployeeManagementPage = lazy(() => import('@/src/pages/admin/hr/EmployeeManagementPage'));
+const AdvanceApprovalPage = lazy(() => import('@/src/pages/admin/hr/AdvanceApprovalPage'));
+const AttendanceSummaryPage = lazy(() => import('@/src/pages/admin/hr/AttendanceSummaryPage'));
+const SalaryManagementPage = lazy(() => import('@/src/pages/admin/hr/SalaryManagementPage'));
+const AttendancePage = lazy(() => import('@/src/pages/admin/hr/AttendancePage'));
+const PersonalAdvancePage = lazy(() => import('@/src/pages/admin/hr/PersonalAdvancePage'));
+const RecruitmentManagementPage = lazy(() => import('@/src/pages/admin/hr/RecruitmentManagementPage'));
+const StatisticsPage = lazy(() => import('@/src/pages/admin/reports/StatisticsPage'));
 const ProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/ProjectManagementPage'));
 const ProjectDetailPage = lazy(() => import('@/src/pages/admin/projects/ProjectDetailPage'));
-const UsersPage = lazy(() => import('@/src/pages/admin/dashboard/UsersPage'));
-const OrderManagementPage = lazy(() => import('@/src/pages/admin/dashboard/OrderManagementPage'));
-const ProductManagementPage = lazy(() => import('@/src/pages/admin/dashboard/ProductManagementPage'));
-const CategoryManagementPage = lazy(() => import('@/src/pages/admin/dashboard/CategoryManagementPage'));
-const ContactManagementPage = lazy(() => import('@/src/pages/admin/dashboard/ContactManagementPage'));
-const RecruitmentManagementPage = lazy(() => import('@/src/pages/admin/dashboard/RecruitmentManagementPage'));
+const UsersPage = lazy(() => import('@/src/pages/admin/crm/UsersPage'));
+const OrderManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/OrderManagementPage'));
+const ProductManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ProductManagementPage'));
+const CategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/CategoryManagementPage'));
+const ContactManagementPage = lazy(() => import('@/src/pages/admin/crm/ContactManagementPage'));
 const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage'));
 const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/ShowcaseProjectManagementPage'));
-const PartnerManagementPage = lazy(() => import('@/src/pages/admin/partner/PartnerManagementPage'));
+const PartnerManagementPage = lazy(() => import('@/src/pages/admin/crm/PartnerManagementPage'));
 
 const Unauthorized = () => (
   <div style={{ padding: 50, textAlign: 'center' }}>

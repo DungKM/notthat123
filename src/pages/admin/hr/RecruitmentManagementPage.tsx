@@ -17,7 +17,7 @@ const mockRecruitments: RecruitmentItem[] = [
 ];
 
 const RecruitmentManagementPage: React.FC = () => {
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType | undefined>(undefined);
   const [data, setData] = useState<RecruitmentItem[]>(mockRecruitments);
   const [open, setOpen] = useState(false);
 

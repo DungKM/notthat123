@@ -18,7 +18,7 @@ const mockCategories: CategoryItem[] = [
 
 const CategoryManagementPage: React.FC = () => {
   const { user } = useAuth();
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType | undefined>(undefined);
   const [data, setData] = useState<CategoryItem[]>(mockCategories);
   const [open, setOpen] = useState(false);
 
