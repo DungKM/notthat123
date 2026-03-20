@@ -49,6 +49,7 @@ const ContactManagementPage = lazy(() => import('@/src/pages/admin/crm/ContactMa
 const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage'));
 const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ShowcaseProjectManagementPage'));
 const PartnerManagementPage = lazy(() => import('@/src/pages/admin/crm/PartnerManagementPage'));
+const VideoManagementPage = lazy(() => import('@/src/pages/admin/marketing/VideoManagementPage'));
 
 const Unauthorized = () => (
   <div style={{ padding: 50, textAlign: 'center' }}>
@@ -230,6 +231,14 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
                 <PartnerManagementPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_VIDEO}
+            element={
+              <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
+                <VideoManagementPage />
               </ProtectedAdminRoute>
             }
           />

@@ -1,46 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Container from '@/src/features/showcase/components/ui/Container';
-import { PlayCircleFilled } from '@ant-design/icons';
+import { PlayCircleFilled, CloseOutlined } from '@ant-design/icons';
+import { Modal } from 'antd';
 import SEO from '@/src/components/common/SEO';
+import { useVideoService } from '@/src/api/services';
+
+const getYoutubeId = (url: string) => {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
+
+const getYoutubeThumb = (url: string) => {
+  const id = getYoutubeId(url);
+  if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+  return 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=800';
+};
 
 const VideoPage: React.FC = () => {
-  const videos = [
-    {
-      title: 'Biệt thự Gamuda Gardens',
-      desc: 'Thi công hoàn thiện nội thất Gỗ Óc Chó',
-      image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      title: 'Căn hộ Penthouse Skylake',
-      desc: 'Thiết kế sang trọng phong cách hiện đại',
-      image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      title: 'Biệt thự Vinhomes Riverside',
-      desc: 'Nội thất tân cổ điển đẳng cấp',
-      image: 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      title: 'Thi công Showroom 102 Hà Nội',
-      desc: 'Không gian trưng bày đẳng cấp',
-      image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      title: 'Nội thất phòng khách gỗ óc chó',
-      desc: 'Sự tinh tế trong từng đường nét',
-      image: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      title: 'Phòng ngủ Master ấm cúng',
-      desc: 'Kiến tạo không gian nghỉ ngơi lý tưởng',
-      image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=800'
-    },
-  ];
+  const { list: videos, getAll, loading } = useVideoService();
+  const [selectedVideoUrl, setSelectedVideoUrl] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    getAll({ limit: 100 });
+  }, [getAll]);
 
   return (
     <div className="bg-white">
-      <SEO 
-        title="Video" 
+      <SEO
+        title="Video"
         description="Tổng hợp các video thực tế thi công nội thất gỗ óc chó tại các công trình tiêu biểu của Hochi."
       />
 
@@ -64,17 +53,37 @@ const VideoPage: React.FC = () => {
       <section className="py-20 bg-gray-50">
         <Container>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {videos.map((v, i) => (
-              <div key={i} className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500">
+            {loading ? (
+              <div className="col-span-full text-center py-10">Đang tải video...</div>
+            ) : videos.map((v, i) => (
+              <div
+                key={v.id || i}
+                onClick={() => setSelectedVideoUrl(v.url)}
+                className="group cursor-pointer bg-white rounded-2xl overflow-hidden  transition-all duration-500"
+              >
                 <div className="relative aspect-video overflow-hidden">
-                  <img src={v.image} alt={v.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                  <img src={getYoutubeThumb(v.url)} alt={v.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-all">
-                    <PlayCircleFilled className="text-5xl text-white/90 drop-shadow-lg" />
+                    <svg
+                      width="64"
+                      height="64"
+                      viewBox="0 0 64 64"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="drop-shadow-lg transition-transform duration-300 group-hover:scale-110"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M32 64C49.673 64 64 49.673 64 32C64 14.327 49.673 0 32 0C14.327 0 0 14.327 0 32C0 49.673 14.327 64 32 64ZM26 20V44L44 32L26 20Z"
+                        fill="rgba(255, 255, 255, 0.95)"
+                      />
+                    </svg>
                   </div>
                 </div>
                 <div className="p-6 space-y-2">
-                  <h3 className="font-bold text-gray-900 group-hover:text-teal-900 transition-colors uppercase text-sm tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>{v.title}</h3>
-                  <p className="text-gray-500 text-xs font-light leading-relaxed">{v.desc}</p>
+                  <h2 className="font-bold text-amber-700 group-hover:text-amber-800 transition-colors uppercase text-sm tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>{v.title}</h2>
+                  <p className="text-gray-500 text-xs font-light leading-relaxed">Video công trình</p>
                 </div>
               </div>
             ))}
@@ -86,6 +95,34 @@ const VideoPage: React.FC = () => {
           </div>
         </Container>
       </section>
+
+      {/* Video Modal */}
+      <Modal
+        open={!!selectedVideoUrl}
+        onCancel={() => setSelectedVideoUrl(null)}
+        footer={null}
+        width={1000}
+        centered
+        destroyOnClose
+        closeIcon={<CloseOutlined style={{ color: '#fff', fontSize: '24px', position: 'absolute', right: '-40px', top: '0px' }} />}
+        styles={{
+          body: { padding: 0, backgroundColor: '#000' },
+          content: { padding: 0, overflow: 'visible', backgroundColor: 'transparent', boxShadow: 'none' }
+        }}
+      >
+        {selectedVideoUrl && (
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}> {/* 16:9 Aspect Ratio */}
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${getYoutubeId(selectedVideoUrl)}?autoplay=1&rel=0`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

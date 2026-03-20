@@ -80,3 +80,6 @@ export const useConstructionService = () => useApi<any>('/constructions');
 export const useConstructionCategoryService = () => useApi<any>('/constructions/categories');
 
 export const useApplicationService = () => useApi<any>('/applications');
+
+
+export const useVideoService = () => useApi<any>('/videos');

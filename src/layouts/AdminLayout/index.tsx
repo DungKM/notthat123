@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Dropdown, Space, Tag, Badge } from 'antd';
-import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined } from '@ant-design/icons';
+import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import { Role } from '@/src/auth/types';
 import { ROUTES } from '@/src/routes/index';
 import logo from '@/src/statics/logo_hochi.jpg';
@@ -51,6 +51,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         { path: ROUTES.ADMIN_QUAN_LY_DOI_TAC, name: 'Quản lý đối tác', icon: <ProjectOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_LIEN_HE, name: 'Quản lý liên hệ', icon: <MessageOutlined /> },
+        { path: ROUTES.ADMIN_VIDEO, name: 'Quản lý Video', icon: <VideoCameraOutlined /> },
       ],
     };
 
