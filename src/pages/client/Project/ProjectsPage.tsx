@@ -17,6 +17,8 @@ const ProjectsPage: React.FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [projects, setProjects] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
 
   // -- Load Categories --
   useEffect(() => {
@@ -29,18 +31,21 @@ const ProjectsPage: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const query: any = { page: 1, limit: 100 };
+        const query: any = { page: currentPage, limit: 12 };
 
         if (selectedCategoryId) {
           query.categoryId = selectedCategoryId;
         }
 
         if (searchQuery) {
-          query.name = searchQuery; // API support search by name
+          query.search = searchQuery; // API support search by name
         }
 
         const res = await constructionRequest('GET', '', null, query);
         setProjects(res.data || []);
+        if (res.meta) {
+          setMeta(res.meta);
+        }
       } catch (e) {
         console.error('Failed to fetch projects', e);
       }
@@ -50,10 +55,11 @@ const ProjectsPage: React.FC = () => {
       fetchProjects();
     }, 400); // Debounce search
     return () => clearTimeout(timeoutId);
-  }, [selectedCategoryId, searchQuery, constructionRequest]);
+  }, [selectedCategoryId, searchQuery, currentPage, constructionRequest]);
 
   const handleCategorySelect = (catId: string) => {
     setSelectedCategoryId(catId);
+    setCurrentPage(1);
   };
 
   return (
@@ -193,6 +199,21 @@ const ProjectsPage: React.FC = () => {
                       />
                     );
                   })}
+                </div>
+              )}
+
+              {/* Pagination Placeholder */}
+              {meta.totalPages > 1 && (
+                <div className="mt-24 flex justify-center gap-2">
+                  {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
+                    <button 
+                      key={p} 
+                      onClick={() => setCurrentPage(p)}
+                      className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage ? 'bg-teal-900 text-white border-teal-900' : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'}`}
+                    >
+                      {p}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

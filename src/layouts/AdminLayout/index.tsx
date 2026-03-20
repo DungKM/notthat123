@@ -52,6 +52,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_LIEN_HE, name: 'Quản lý liên hệ', icon: <MessageOutlined /> },
         { path: ROUTES.ADMIN_VIDEO, name: 'Quản lý Video', icon: <VideoCameraOutlined /> },
+        { path: ROUTES.ADMIN_DANH_GIA, name: 'Quản lý đánh giá', icon: <MessageOutlined /> },
       ],
     };
 

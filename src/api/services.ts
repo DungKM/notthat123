@@ -81,5 +81,7 @@ export const useConstructionCategoryService = () => useApi<any>('/constructions/
 
 export const useApplicationService = () => useApi<any>('/applications');
 
-
 export const useVideoService = () => useApi<any>('/videos');
+
+// ─── Reviews ───
+export const useReviewService = () => useApi<any>('/reviews');

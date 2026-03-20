@@ -8,39 +8,53 @@ import { Search, X, Filter } from 'lucide-react';
 
 const ProductsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [debouncedSearch, setDebouncedSearch] = React.useState('');
   const [selectedCategoryId, setSelectedCategoryId] = React.useState('');
+  const [currentPage, setCurrentPage] = React.useState(1);
 
   const { list: apiCategories, getAll: getCategories } = useCategoryService();
-  const { list: apiProducts, loading, getAll: getProducts } = useProductService();
+  const { request: productRequest, loading } = useProductService();
+
+  const [apiProducts, setApiProducts] = React.useState<any[]>([]);
+  const [meta, setMeta] = React.useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
 
   // Load danh mục 1 lần khi vào trang
   React.useEffect(() => {
-    getCategories();
-  }, []);
+    getCategories({ limit: 50 });
+  }, [getCategories]);
 
-  // Load Products khi select categoryId thay đổi
+  // Debounce search
   React.useEffect(() => {
-    if (selectedCategoryId) {
-      getProducts({ categoryId: selectedCategoryId });
-    } else {
-      getProducts(); // Load tất cả
-    }
-  }, [selectedCategoryId]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  // Client-side search & filter (nếu muốn search text ngay lập tức)
-  const filteredProducts = React.useMemo(() => {
-    let result = apiProducts || [];
-    if (searchQuery) {
-      result = result.filter((prod: any) =>
-        prod.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    return result;
-  }, [searchQuery, apiProducts]);
+  // Load Products
+  React.useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const query: any = { page: currentPage, limit: 12 };
+        if (selectedCategoryId) query.categoryId = selectedCategoryId;
+        if (debouncedSearch) query.search = debouncedSearch;
+
+        const res = await productRequest('GET', '', null, query);
+        setApiProducts(res.data || []);
+        if (res.meta) {
+          setMeta(res.meta);
+        }
+      } catch (error) {
+        console.error('Failed to fetch products', error);
+      }
+    };
+    fetchProducts();
+  }, [currentPage, selectedCategoryId, debouncedSearch, productRequest]);
 
   const handleCategorySelect = (catId: string) => {
-    // Chỉ lưu state, không đồng bộ lên URL nữa để giấu query string
     setSelectedCategoryId(catId);
+    setCurrentPage(1);
   };
 
   return (
@@ -153,20 +167,20 @@ const ProductsPage: React.FC = () => {
             {/* Right Content */}
             <div>
               <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
-                Hiển thị {filteredProducts.length} sản phẩm {searchQuery && `cho "${searchQuery}"`}
+                Hiển thị {meta.total || apiProducts.length} sản phẩm {searchQuery && `cho "${searchQuery}"`}
               </div>
 
               {loading ? (
                 <div className="py-20 text-center text-gray-400">
                   <p className="text-lg animate-pulse">Đang tải sản phẩm...</p>
                 </div>
-              ) : filteredProducts.length === 0 ? (
+              ) : apiProducts.length === 0 ? (
                 <div className="py-20 text-center text-gray-400">
                   <p className="text-lg">Không tìm thấy sản phẩm nào phù hợp.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredProducts.map((product: any, i: number) => (
+                  {apiProducts.map((product: any, i: number) => (
                     <ProductCard
                       key={product.id || i}
                       basePath="/san-pham"
@@ -181,10 +195,14 @@ const ProductsPage: React.FC = () => {
               )}
 
               {/* Pagination Placeholder */}
-              {filteredProducts.length > 0 && (
+              {meta.totalPages > 1 && (
                 <div className="mt-24 flex justify-center gap-2">
-                  {[1, 2, 3, '...'].map((p, i) => (
-                    <button key={i} className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === 1 ? 'bg-teal-900 text-white border-teal-900' : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'}`}>
+                  {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setCurrentPage(p)}
+                      className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage ? 'bg-teal-900 text-white border-teal-900' : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'}`}
+                    >
                       {p}
                     </button>
                   ))}

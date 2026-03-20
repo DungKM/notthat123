@@ -155,11 +155,11 @@ const PartnerManagementPage: React.FC = () => {
           Sửa
         </Button>,
         <Popconfirm
-          key="delete"
-          title="Xóa đối tác này?"
-          onConfirm={() => handleDelete(record.id || record._id)}
+          title="Xoá đối tác này?"
+          description="Hành động này không thể hoàn tác."
           okText="Xóa"
           cancelText="Hủy"
+          okButtonProps={{ danger: true }} onConfirm={() => handleDelete(record.id || record._id)}
         >
           <Button type="link" size="large" danger icon={<DeleteOutlined />} />
         </Popconfirm>,

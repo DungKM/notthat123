@@ -171,7 +171,11 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         >
           Sửa
         </Button>,
-        <Popconfirm key="delete" title="Xóa bài viết này?" onConfirm={() => handleDelete(record.id)}>
+        <Popconfirm title="Xoá bài viết này?"
+          description="Hành động này không thể hoàn tác."
+          okText="Xóa"
+          cancelText="Hủy"
+          okButtonProps={{ danger: true }} onConfirm={() => handleDelete(record.id)}>
           <Button type="link" size="large" danger icon={<DeleteOutlined />} />
         </Popconfirm>,
       ],

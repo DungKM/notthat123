@@ -3,6 +3,7 @@ import Container from '../ui/Container';
 import { StarFilled, UserOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useReviewService } from '@/src/api/services';
 
 // Dữ liệu mẫu đánh giá của khách hàng
 const initialFeedbacks = [
@@ -35,6 +36,7 @@ const initialFeedbacks = [
 const Feedback: React.FC = () => {
   const { t } = useTranslation();
   const [feedbacks, setFeedbacks] = useState(initialFeedbacks);
+  const { create } = useReviewService();
 
   // State cho form đánh giá
   const [formData, setFormData] = useState({
@@ -78,31 +80,41 @@ const Feedback: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      // Giả lập lưu feedback mới (Trong thực tế sẽ gọi API)
-      const newFeedback = {
-        id: Date.now(),
-        name: formData.name,
-        // Dùng avatar mặc định nếu không có upload
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`,
-        rating: formData.rating,
-        content: formData.content,
-        // Lấy ngày hiện tại
-        date: new Date().toLocaleDateString('vi-VN'),
-      };
+      try {
+        const payload = {
+          fullName: formData.name,
+          phone: formData.phone,
+          description: formData.content,
+          rating: formData.rating,
+        };
 
-      setFeedbacks([newFeedback, ...feedbacks]);
-      message.success(t('feedback.success'));
+        await create(payload);
 
-      // Reset form
-      setFormData({
-        name: '',
-        phone: '',
-        rating: 5,
-        content: '',
-      });
+        // Giả lập đưa feedback mới lên UI (nếu có API list sẽ fetch lại)
+        const newFeedback = {
+          id: Date.now(),
+          name: formData.name,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`,
+          rating: formData.rating,
+          content: formData.content,
+          date: new Date().toLocaleDateString('vi-VN'),
+        };
+
+        setFeedbacks([newFeedback, ...feedbacks]);
+
+        // Reset form
+        setFormData({
+          name: '',
+          phone: '',
+          rating: 5,
+          content: '',
+        });
+      } catch (error) {
+        // error msg handled by hook
+      }
     } else {
       message.error(t('feedback.error_fill'));
     }

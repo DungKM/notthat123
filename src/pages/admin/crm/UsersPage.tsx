@@ -3,54 +3,24 @@ import { Button, Tag, message, Popconfirm, Space } from 'antd';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import {
   ModalForm,
-  ProFormDigit,
   ProFormSelect,
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
 import { Role } from '@/src/auth/types';
 import { useAuth } from '@/src/auth/hooks/useAuth';
-import { EditOutlined, LockOutlined } from '@ant-design/icons';
+import { EditOutlined, LockOutlined, UnlockOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useUserService } from '@/src/api/services';
 
 interface UserItem {
   id: string;
-  fullName: string;
-  username: string;
-  baseSalary: number;
-  phone: string;
+  name: string;
+  account: string;
   role: Role;
   status: 'ACTIVE' | 'INACTIVE';
+  createdAt?: string;
+  updatedAt?: string;
 }
-
-const initialUsers: UserItem[] = [
-  {
-    id: '1',
-    fullName: 'Nguyễn Giám Đốc',
-    username: 'giamdoc',
-    baseSalary: 500000,
-    phone: '0900000001',
-    role: Role.DIRECTOR,
-    status: 'ACTIVE',
-  },
-  {
-    id: '2',
-    fullName: 'Trần Kế Toán',
-    username: 'ketoan',
-    baseSalary: 600000,
-    phone: '0900000002',
-    role: Role.ACCOUNTANT,
-    status: 'ACTIVE',
-  },
-  {
-    id: '4',
-    fullName: 'Phạm Nhân Viên',
-    username: 'nhanvien',
-    baseSalary: 500000,
-    phone: '0900000004',
-    role: Role.STAFF,
-    status: 'ACTIVE',
-  },
-];
 
 const roleLabels: Record<Role, string> = {
   [Role.DIRECTOR]: 'Giám đốc',
@@ -61,21 +31,20 @@ const roleLabels: Record<Role, string> = {
 };
 
 type UserFormValues = {
-  fullName: string;
-  username: string;
-  baseSalary: number;
-  phone: string;
+  name: string;
+  account: string;
   password?: string;
   role: Role;
+  status?: 'ACTIVE' | 'INACTIVE';
 };
 
 const UsersPage: React.FC = () => {
   const { user: currentUser } = useAuth();
   const actionRef = useRef<ActionType>(null);
   const formRef = useRef<ProFormInstance<UserFormValues>>(undefined);
-  const [users, setUsers] = useState<UserItem[]>(initialUsers);
   const [open, setOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
+  const { request, patch, remove, create } = useUserService();
 
   const resetModal = () => {
     setOpen(false);
@@ -85,6 +54,7 @@ const UsersPage: React.FC = () => {
 
   const handleOpenCreate = () => {
     setEditingUser(null);
+    formRef.current?.resetFields();
     setOpen(true);
   };
 
@@ -93,47 +63,43 @@ const UsersPage: React.FC = () => {
     setOpen(true);
   };
 
-  const handleToggleStatus = (id: string) => {
-    if (id === currentUser?.id) {
+  const handleToggleStatus = async (user: UserItem) => {
+    if (user.id === currentUser?.id) {
       message.error('Bạn không thể tự khóa tài khoản của chính mình!');
       return;
     }
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: u.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' }
-          : u
-      )
-    );
-    message.success('Cập nhật trạng thái thành công');
+    
+    try {
+      const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      await patch(user.id, { status: newStatus });
+      actionRef.current?.reload();
+    } catch (error) {
+       // handled by hook
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (id === currentUser?.id) {
+      message.error('Bạn không thể tự xóa tài khoản của chính mình!');
+      return;
+    }
+    try {
+      await remove(id);
+      actionRef.current?.reload();
+    } catch (error) {
+       // handled by hook
+    }
   };
 
   const columns: ProColumns<UserItem>[] = [
     {
       title: 'Họ tên',
-      dataIndex: 'fullName',
+      dataIndex: 'name',
     },
     {
       title: 'Tên đăng nhập',
-      dataIndex: 'username',
+      dataIndex: 'account',
       width: 180,
-    },
-    {
-      title: 'Lương cơ bản',
-      dataIndex: 'baseSalary',
-      render: (_, record) => {
-        const salary = Number(record.baseSalary ?? 0);
-        return `${salary.toLocaleString('vi-VN')} VNĐ`;
-      },
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-    },
-    {
-      title: 'Số điện thoại',
-      dataIndex: 'phone',
-      width: 140,
     },
     {
       title: 'Vai trò',
@@ -152,9 +118,16 @@ const UsersPage: React.FC = () => {
         ),
     },
     {
+      title: 'Ngày tạo',
+      dataIndex: 'createdAt',
+      width: 120,
+      search: false,
+      render: (_, record) => record.createdAt ? new Date(record.createdAt).toLocaleDateString('vi-VN') : '—',
+    },
+    {
       title: 'Thao tác',
       valueType: 'option',
-
+      width: 250,
       render: (_, record) => {
         const isSelf = record.id === currentUser?.id;
 
@@ -173,15 +146,33 @@ const UsersPage: React.FC = () => {
             )}
 
             {!disabled && (
-              <Button
-                type="link"
-                size="large"
-                danger={record.status === 'ACTIVE'}
-                onClick={() => handleToggleStatus(record.id)}
-                icon={<LockOutlined />}
-                title={record.status === 'ACTIVE' ? 'Đóng băng tài khoản' : 'Mở khóa'}
-              >
-              </Button>
+              <>
+                <Popconfirm
+                  title={`Bạn có chắc muốn ${record.status === 'ACTIVE' ? 'khóa' : 'mở khóa'} tài khoản này?`}
+                  onConfirm={async () => await handleToggleStatus(record)}
+                  okText="Đồng ý"
+                  cancelText="Hủy"
+                >
+                  <Button
+                    type="link"
+                    size="large"
+                    danger={record.status === 'ACTIVE'}
+                    icon={record.status === 'ACTIVE' ? <LockOutlined /> : <UnlockOutlined />}
+                    title={record.status === 'ACTIVE' ? 'Khóa/mở khóa' : 'Mở khóa'}
+                  >
+                  </Button>
+                </Popconfirm>
+                <Popconfirm
+                  title="Xóa người dùng này?"
+                  description="Hành động này không thể hoàn tác."
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  okButtonProps={{ danger: true }}
+                  onConfirm={() => handleDelete(record.id)}
+                >
+                  <Button type="link" size="large" danger icon={<DeleteOutlined />} title="Xóa" />
+                </Popconfirm>
+              </>
             )}
           </Space>
         );
@@ -198,8 +189,30 @@ const UsersPage: React.FC = () => {
         rowKey="id"
         headerTitle="Danh sách người dùng"
         scroll={{ x: 1000 }}
-        search={{ labelWidth: 100 }}
-        dataSource={users}
+        search={{ labelWidth: 'auto' }}
+        request={async (params) => {
+          try {
+            const queryParams: any = {
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+            };
+            
+            if (params.name) queryParams.name = params.name;
+            if (params.account) queryParams.account = params.account;
+            if (params.role) queryParams.role = params.role;
+            if (params.status) queryParams.status = params.status;
+
+            const res = await request('GET', '', null, queryParams);
+            return {
+              data: res.data || [],
+              success: true,
+              total: res.meta?.total || 0,
+            };
+          } catch (e) {
+            return { data: [], success: false, total: 0 };
+          }
+        }}
+        pagination={{ pageSize: 10, showSizeChanger: true }}
         toolBarRender={() => [
           <Button key="create" type="primary" onClick={handleOpenCreate}>
             Tạo tài khoản
@@ -208,115 +221,65 @@ const UsersPage: React.FC = () => {
       />
 
       <ModalForm<UserFormValues>
-        key={editingUser?.id || 'create'}
         formRef={formRef}
         title={editingUser ? 'Sửa thông tin người dùng' : 'Tạo tài khoản người dùng'}
         open={open}
-        initialValues={
-          editingUser
-            ? {
-              fullName: editingUser.fullName,
-              username: editingUser.username,
-              baseSalary: editingUser.baseSalary,
-              phone: editingUser.phone,
-              role: editingUser.role,
-              password: '',
-            }
-            : {
-              fullName: '',
-              username: '',
-              baseSalary: 0,
-              phone: '',
-              password: '',
-              role: undefined,
-            }
-        }
+        initialValues={editingUser || {}}
+        onOpenChange={(visible) => {
+          if (!visible) resetModal();
+        }}
         modalProps={{
           destroyOnClose: true,
           onCancel: resetModal,
         }}
         onFinish={async (values) => {
-          if (editingUser) {
-            setUsers((prev) =>
-              prev.map((u) =>
-                u.id === editingUser.id
-                  ? {
-                    ...u,
-                    fullName: values.fullName,
-                    username: values.username,
-                    baseSalary: Number(values.baseSalary || 0),
-                    phone: values.phone,
-                    role: values.role,
-                  }
-                  : u
-              )
-            );
-
-            message.success('Cập nhật tài khoản thành công');
-          } else {
-            const newUser: UserItem = {
-              id: Date.now().toString(),
-              fullName: values.fullName,
-              username: values.username,
-              baseSalary: Number(values.baseSalary || 0),
-              phone: values.phone,
+          try {
+            const payload: any = {
+              name: values.name,
+              account: values.account,
               role: values.role,
-              status: 'ACTIVE',
+              ...(values.status && { status: values.status }),
             };
+            if (values.password) {
+              payload.password = values.password;
+            }
 
-            setUsers((prev) => [newUser, ...prev]);
-            message.success('Tạo tài khoản thành công');
+            if (editingUser) {
+              await patch(editingUser.id, payload);
+            } else {
+              await create(payload);
+            }
+
+            resetModal();
+            actionRef.current?.reload();
+            return true;
+          } catch (error) {
+            return false;
           }
-
-          resetModal();
-          return true;
         }}
       >
         <ProFormText
-          name="fullName"
+          name="name"
           label="Họ tên"
           placeholder="Nhập họ tên"
           rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
         />
 
         <ProFormText
-          name="username"
+          name="account"
           label="Tên đăng nhập"
           placeholder="Nhập tên đăng nhập"
           rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]}
         />
 
-        <ProFormDigit
-          name="baseSalary"
-          label="Lương cơ bản"
-          placeholder="Nhập lương cơ bản"
-          min={0}
-          fieldProps={{
-            style: { width: '100%' },
-            formatter: (value) =>
-              value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '',
-            parser: (value) => (value ? Number(value.replace(/\./g, '')) : 0),
-          }}
-          rules={[{ required: true, message: 'Vui lòng nhập lương cơ bản' }]}
-        />
-
-        <ProFormText
-          name="phone"
-          label="Số điện thoại"
-          placeholder="Nhập số điện thoại"
-          rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
-        />
-
-        <ProFormText.Password
-          name="password"
-          label="Mật khẩu"
-          placeholder={editingUser ? 'Để trống nếu không đổi mật khẩu' : 'Nhập mật khẩu'}
-          rules={
-            editingUser
-              ? []
-              : [{ required: true, message: 'Vui lòng nhập mật khẩu' }]
-          }
-        />
+        {!editingUser && (
+          <ProFormText.Password
+            name="password"
+            label="Mật khẩu"
+            placeholder="Nhập mật khẩu"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+          />
+        )}
 
         <ProFormSelect
           name="role"
@@ -327,9 +290,23 @@ const UsersPage: React.FC = () => {
             { label: 'Kế toán', value: Role.ACCOUNTANT },
             { label: 'Nhân viên', value: Role.STAFF },
             { label: 'Quản lý công trình', value: Role.SITE_MANAGER },
+            { label: 'Khách hàng', value: Role.CUSTOMER }
           ]}
           rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
         />
+
+        {editingUser && (
+          <ProFormSelect
+            name="status"
+            label="Trạng thái"
+            placeholder="Chọn trạng thái"
+            options={[
+              { label: 'Hoạt động', value: 'ACTIVE' },
+              { label: 'Ngưng hoạt động', value: 'INACTIVE' },
+            ]}
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+          />
+        )}
       </ModalForm>
     </>
   );

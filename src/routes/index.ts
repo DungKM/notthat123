@@ -49,4 +49,5 @@ export const ROUTES = {
   ADMIN_THONG_KE_LUONG: '/quan-tri/thong-ke-luong',
   ADMIN_QUAN_LY_DOI_TAC: '/quan-tri/quan-ly-doi-tac',
   ADMIN_VIDEO: '/quan-tri/video',
+  ADMIN_DANH_GIA: '/quan-tri/danh-gia',
 };

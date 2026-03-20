@@ -124,12 +124,13 @@ const ContactManagementPage: React.FC = () => {
             </Button>
           </Dropdown>
           <Popconfirm
-            title="Bạn chắc chắn muốn xóa liên hệ này?"
-            onConfirm={() => handleDelete(record.id)}
+            title="Xoá liên hệ này?"
+            description="Hành động này không thể hoàn tác."
             okText="Xóa"
             cancelText="Hủy"
+            okButtonProps={{ danger: true }} onConfirm={() => handleDelete(record.id)}
           >
-            <Button type="link" size="large" danger icon={<DeleteOutlined />} title="Xóa" />
+            <Button type="link" size="large" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
