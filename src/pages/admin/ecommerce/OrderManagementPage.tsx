@@ -14,7 +14,7 @@ interface OrderItemProduct {
 }
 
 interface OrderItem {
-  _id: string;
+  id: string;
   items: OrderItemProduct[];
   totalAmount: number;
   fullName: string;
@@ -42,7 +42,7 @@ const deliveryTimeMap: Record<string, string> = {
 };
 
 const OrderManagementPage: React.FC = () => {
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType>(null);
   const { request } = useOrderService();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<OrderItem | null>(null);
@@ -52,7 +52,7 @@ const OrderManagementPage: React.FC = () => {
   const handleView = async (record: OrderItem) => {
     const hide = message.loading('Đang tải chi tiết đơn hàng...', 0);
     try {
-      const res = await request('GET', `/${record._id}`);
+      const res = await request('GET', `/${record.id}`);
       const data = res.data;
       hide();
 
@@ -123,7 +123,7 @@ const OrderManagementPage: React.FC = () => {
   const handleEdit = async (record: OrderItem) => {
     const hide = message.loading('Đang tải dữ liệu đơn hàng...', 0);
     try {
-      const res = await request('GET', `/${record._id}`);
+      const res = await request('GET', `/${record.id}`);
       setCurrentRecord(res.data);
       setEditModalOpen(true);
     } catch (err) {
@@ -212,20 +212,24 @@ const OrderManagementPage: React.FC = () => {
             icon={<EyeOutlined />}
             onClick={() => handleView(record)}
             title="Xem chi tiết"
+            size='large'
           />
           <Button
             type="link"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
             title="Sửa"
-          />
+            size='large'
+          >
+            Sửa
+          </Button>
           <Popconfirm
             title="Bạn chắc chắn muốn xóa đơn hàng này?"
-            onConfirm={() => handleDelete(record._id)}
+            onConfirm={() => handleDelete(record.id)}
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button type="link" danger icon={<DeleteOutlined />} title="Xóa" />
+            <Button type="link" danger icon={<DeleteOutlined />} title="Xóa" size="large" />
           </Popconfirm>
         </Space>
       ),
@@ -236,10 +240,11 @@ const OrderManagementPage: React.FC = () => {
       <ProTable<OrderItem>
         columns={columns}
         actionRef={actionRef}
-        rowKey="_id"
+        rowKey="id"
         headerTitle="Quản lý đơn hàng"
         search={{ labelWidth: 'auto' }}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: 'max-content' }}
         request={async (params) => {
           try {
             const res = await request('GET', '/list', null, {
@@ -270,7 +275,7 @@ const OrderManagementPage: React.FC = () => {
           try {
             if (!currentRecord) return false;
             // Gọi api PATCH /orders/{id}
-            await request('PATCH', `/${currentRecord._id}`, values);
+            await request('PATCH', `/${currentRecord.id}`, values);
             message.success('Cập nhật đơn hàng thành công');
             setEditModalOpen(false);
             actionRef.current?.reload();

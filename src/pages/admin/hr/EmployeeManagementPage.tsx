@@ -17,7 +17,7 @@ import { Employee, User, AttendanceRecord } from '@/src/types';
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from '@/src/mockData';
 import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col, Image } from 'antd';
 import dayjs from 'dayjs';
-import { HistoryOutlined, CreditCardOutlined, PlusOutlined } from '@ant-design/icons';
+import { HistoryOutlined, CreditCardOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -212,36 +212,37 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         <Button
           key="detail"
           type="link"
+          size="large"
+          title='Xem chi tiết'
+          icon={<EyeOutlined />}
           onClick={() => {
             setSelectedEmployee(record);
             setDetailVisible(true);
           }}
-        >
-          Chi tiết
-        </Button>,
+        />,
         <Button
           key="history"
           type="link"
+          size="large"
+          title='Xem lịch sử'
           icon={<HistoryOutlined />}
           onClick={() => {
             setSelectedEmployee(record);
             setHistoryVisible(true);
           }}
-        >
-          Lịch sử
-        </Button>,
+        />,
         <Button
           key="payment"
           type="link"
+          size="large"
+          title='Thanh toán'
           icon={<CreditCardOutlined />}
           style={{ color: '#faad14' }}
           onClick={() => {
             setSelectedEmployee(record);
             setPaymentVisible(true);
           }}
-        >
-          Thanh toán
-        </Button>,
+        />,
       ],
     },
   ];

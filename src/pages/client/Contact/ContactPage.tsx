@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Container from '@/src/features/showcase/components/ui/Container';
 import {
   PhoneOutlined,
@@ -9,9 +9,45 @@ import {
 import Button from '@/src/features/showcase/components/ui/Button';
 import SEO from '@/src/components/common/SEO';
 import { useTranslation } from 'react-i18next';
+import { message } from 'antd';
+import { useContactService } from '@/src/api/services';
+import toast from 'react-hot-toast';
 
 const ContactPage: React.FC = () => {
   const { t } = useTranslation();
+  const { create, loading } = useContactService();
+  
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+    email: '',
+    address: '',
+    message: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.fullName || !formData.phone) {
+      message.warning('Vui lòng nhập họ tên và số điện thoại!');
+      return;
+    }
+
+    try {
+      await create({
+        ...formData,
+        content: formData.message // Mapping to content if backend expects it
+      });
+      setFormData({ fullName: '', phone: '', email: '', address: '', message: '' });
+      toast.success('Gửi liên hệ thành công. Chúng tôi sẽ sớm liên lạc với bạn!');
+    } catch (error) {
+      console.error('Submit contact error:', error);
+    }
+  };
 
   return (
     <div className="bg-white">
@@ -98,13 +134,56 @@ const ContactPage: React.FC = () => {
                 <p className="text-gray-500 text-sm leading-relaxed">{t('contact.form_desc')}</p>
               </div>
 
-              <form className="space-y-6">
-                <input type="text" placeholder={t('contact.name')} className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors" />
-                <input type="tel" placeholder={t('contact.phone')} className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors" />
-                <input type="email" placeholder={t('contact.email')} className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors" />
-                <input type="text" placeholder={t('contact.address')} className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors" />
-                <textarea rows={4} placeholder={t('contact.message')} className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors resize-none"></textarea>
-                <Button className="bg-teal-900 border-none px-12 py-4 uppercase font-bold tracking-widest hover:bg-black transition-all">{t('contact.submit')}</Button>
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder={t('contact.name')}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
+                  required
+                />
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder={t('contact.phone')}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
+                  required
+                />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder={t('contact.email')}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
+                />
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder={t('contact.address')}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
+                />
+                <textarea
+                  rows={4}
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder={t('contact.message')}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors resize-none"
+                ></textarea>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-teal-900 border-none px-12 py-4 uppercase font-bold tracking-widest hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Đang gửi...' : t('contact.submit')}
+                </Button>
               </form>
             </div>
           </div>

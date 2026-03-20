@@ -2,11 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
-import { usePartners } from "@/src/hooks/usePartners";
-
+import { useEffect } from "react";
+import { usePartnerService } from "@/src/api/services";
 const PartnerPage: React.FC = () => {
-  const { partners } = usePartners();
-  
+  const { list: partners, getAll } = usePartnerService();
+
+  useEffect(() => {
+    getAll({ limit: 100 });
+  }, [getAll]);
+
   return (
     <div className="bg-white">
       <SEO
@@ -75,18 +79,18 @@ const PartnerPage: React.FC = () => {
                 {/* Image Section - Now fills the background */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden">
                   <img
-                    src={partner.image}
+                    src={partner.images?.[0]?.url || "https://images.unsplash.com/photo-1600880292203-757bb62b4baf"}
                     alt={partner.title}
                     className="w-full h-full object-cover transition-transform duration-1000 "
                   />
                 </div>
 
                 {/* Content Area - Slides up from bottom */}
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 bg-white p-8 transition-transform duration-500 ease-out translate-y-[calc(100%-140px)] group-hover:translate-y-0 flex flex-col min-h-[140px]"
                 >
                   <span className="text-orange-500 font-extrabold text-xl mb-3 block">
-                    {partner.year}
+                    {partner.cooperationYear}
                   </span>
 
                   <h3 className="text-2xl font-bold text-slate-700 leading-tight mb-2">

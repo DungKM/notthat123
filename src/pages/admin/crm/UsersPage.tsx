@@ -10,6 +10,7 @@ import {
 } from '@ant-design/pro-components';
 import { Role } from '@/src/auth/types';
 import { useAuth } from '@/src/auth/hooks/useAuth';
+import { EditOutlined, LockOutlined } from '@ant-design/icons';
 
 interface UserItem {
   id: string;
@@ -111,21 +112,23 @@ const UsersPage: React.FC = () => {
     {
       title: 'Họ tên',
       dataIndex: 'fullName',
-      width: 180,
     },
     {
       title: 'Tên đăng nhập',
       dataIndex: 'username',
-      width: 140,
+      width: 180,
     },
     {
       title: 'Lương cơ bản',
       dataIndex: 'baseSalary',
-      width: 180,
       render: (_, record) => {
         const salary = Number(record.baseSalary ?? 0);
         return `${salary.toLocaleString('vi-VN')} VNĐ`;
       },
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
     },
     {
       title: 'Số điện thoại',
@@ -135,7 +138,6 @@ const UsersPage: React.FC = () => {
     {
       title: 'Vai trò',
       dataIndex: 'role',
-      width: 160,
       render: (_, record) => <Tag>{roleLabels[record.role]}</Tag>,
     },
     {
@@ -152,47 +154,38 @@ const UsersPage: React.FC = () => {
     {
       title: 'Thao tác',
       valueType: 'option',
-      width: 260,
-    
+
       render: (_, record) => {
-  const isSelf = record.id === currentUser?.id;
+        const isSelf = record.id === currentUser?.id;
 
-  // kế toán không được thao tác với giám đốc
-  const isAccountantEditDirector =
-    currentUser?.role === Role.ACCOUNTANT && record.role === Role.DIRECTOR;
+        // kế toán không được thao tác với giám đốc
+        const isAccountantEditDirector =
+          currentUser?.role === Role.ACCOUNTANT && record.role === Role.DIRECTOR;
 
-  const disabled = isSelf || isAccountantEditDirector;
+        const disabled = isSelf || isAccountantEditDirector;
 
-  return (
-    <Space>
-      {!isAccountantEditDirector && (
-        <a onClick={() => handleOpenEdit(record)}>Sửa</a>
-      )}
+        return (
+          <Space>
+            {!isAccountantEditDirector && (
+              <Button type="link" icon={<EditOutlined />} size="large" onClick={() => handleOpenEdit(record)} title='Sửa'>
+                Sửa
+              </Button>
+            )}
 
-      {!disabled && (
-        <a
-          onClick={() => handleToggleStatus(record.id)}
-          style={{ cursor: 'pointer' }}
-        >
-          {record.status === 'ACTIVE'
-            ? 'Đóng băng tài khoản'
-            : 'Mở khóa'}
-        </a>
-      )}
-         {/* {!isSelf && (
-              <Popconfirm
-                title="Bạn có chắc chắn muốn xóa tài khoản này không?"
-                onConfirm={() => handleDelete(record.id)}
-                okText="Xóa"
-                cancelText="Hủy"
-                okButtonProps={{ danger: true }}
+            {!disabled && (
+              <Button
+                type="link"
+                size="large"
+                danger={record.status === 'ACTIVE'}
+                onClick={() => handleToggleStatus(record.id)}
+                icon={<LockOutlined />}
+                title={record.status === 'ACTIVE' ? 'Đóng băng tài khoản' : 'Mở khóa'}
               >
-                <a style={{ color: '#ff4d4f' }}>Xóa</a>
-              </Popconfirm>
-            )} */}
-    </Space>
-  );
-}
+              </Button>
+            )}
+          </Space>
+        );
+      }
     },
   ];
 

@@ -75,3 +75,8 @@ export const useContactService = () => useApi<any>('/contacts');
 
 //Cart
 export const useCartService = () => useApi<any>('/cart');
+
+export const useConstructionService = () => useApi<any>('/constructions');
+export const useConstructionCategoryService = () => useApi<any>('/constructions/categories');
+
+export const useApplicationService = () => useApi<any>('/applications');

@@ -3,16 +3,22 @@ import { useParams, Navigate, Link } from "react-router-dom";
 import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { usePartners } from "@/src/hooks/usePartners";
-
+import { useEffect, useState } from "react";
+import { usePartnerService } from "@/src/api/services";
 const PartnerDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { partners, isLoaded } = usePartners();
-  const partner = partners.find((p) => p.slug === slug);
+  const { data: partner, getById, loading } = usePartnerService();
+  const [hasFetched, setHasFetched] = useState(false);
 
-  if (!isLoaded) return <div style={{ padding: 24, textAlign: 'center' }}>Đang tải dữ liệu...</div>;
+  useEffect(() => {
+    if (slug) {
+      getById(slug).finally(() => setHasFetched(true));
+    }
+  }, [slug, getById]);
 
-  if (!partner) {
+  if (loading || !hasFetched) return <div style={{ padding: 24, textAlign: 'center' }}>Đang tải dữ liệu...</div>;
+
+  if (!partner && hasFetched) {
     return <Navigate to="/doi-tac" replace />;
   }
 
@@ -39,7 +45,7 @@ const PartnerDetailPage: React.FC = () => {
             {/* Hero Banner for Detail */}
             <div className="w-full h-[400px] md:h-[500px] relative">
               <img
-                src={partner.image}
+                src={partner.images?.[0]?.url || "https://images.unsplash.com/photo-1600880292203-757bb62b4baf"}
                 alt={partner.title}
                 className="w-full h-full object-cover"
               />
@@ -47,7 +53,7 @@ const PartnerDetailPage: React.FC = () => {
               
               <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
                 <span className="inline-block px-4 py-1.5 bg-orange-500 text-white rounded-full font-bold text-sm tracking-wider mb-4">
-                  ĐỐI TÁC CHIẾN LƯỢC {partner.year}
+                  ĐỐI TÁC CHIẾN LƯỢC {partner.cooperationYear}
                 </span>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 shadow-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {partner.title}
@@ -79,7 +85,7 @@ const PartnerDetailPage: React.FC = () => {
                 </div>
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                   <h3 className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">Năm hợp tác</h3>
-                  <p className="text-xl font-semibold text-orange-500">{partner.year}</p>
+                  <p className="text-xl font-semibold text-orange-500">{partner.cooperationYear}</p>
                 </div>
               </div>
             </div>

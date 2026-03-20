@@ -27,7 +27,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const { request } = useCartService();
+  const { request, patch } = useCartService();
 
   // Lưu timer debounce theo từng productId
   const debounceTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
@@ -127,16 +127,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Hàm gọi API thật (chỉ được gọi sau khi debounce kết thúc)
   const syncQuantityToServer = useCallback(async (id: string, quantity: number) => {
     try {
-      const res = await request('PUT', '/update', {
+      const data = await patch('update', {
         items: [{ productId: id, quantity }]
       });
-      if (res?.data) updateCartStateFromAPI(res.data);
+      if (data) updateCartStateFromAPI(data);
       else fetchCart();
     } catch (err) {
       console.error('Lỗi khi cập nhật số lượng giỏ hàng', err);
       fetchCart();
     }
-  }, [request, updateCartStateFromAPI, fetchCart]);
+  }, [patch, updateCartStateFromAPI, fetchCart]);
 
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {

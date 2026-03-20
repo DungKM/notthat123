@@ -6,8 +6,8 @@ import {
 } from '@ant-design/pro-components';
 import { Employee, Role } from '@/src/types';
 import { MOCK_EMPLOYEES } from '@/src/mockData';
-import { Card, Tag, message, Popconfirm } from 'antd';
-import { DollarOutlined } from '@ant-design/icons';
+import { Card, Tag, message, Popconfirm, Button } from 'antd';
+import { DollarOutlined, EditOutlined } from '@ant-design/icons';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 
 const SalaryManagementPage: React.FC = () => {
@@ -54,16 +54,16 @@ const SalaryManagementPage: React.FC = () => {
       dataIndex: 'bonus',
       valueType: 'digit',
       render: (_, record) => (
-         <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(record.bonus)}</span>
+        <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(record.bonus)}</span>
       )
     },
     {
-       title: 'Phạt',
-       dataIndex: 'penalty',
-       valueType: 'digit',
-       render: (_, record) => (
-          <span style={{ color: 'red' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(record.penalty)}</span>
-       )
+      title: 'Phạt',
+      dataIndex: 'penalty',
+      valueType: 'digit',
+      render: (_, record) => (
+        <span style={{ color: 'red' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(record.penalty)}</span>
+      )
     },
     {
       title: 'Hành động',
@@ -72,14 +72,17 @@ const SalaryManagementPage: React.FC = () => {
       render: (text, record, _, action) => {
         const isSelf = String(record.id) === String(user.id);
         return [
-          <a
+          <Button
+            type="link"
+            size="large"
             key="editable"
+            icon={<EditOutlined />}
             onClick={() => {
               action?.startEditable?.(record.id);
             }}
           >
-            Chỉnh sửa
-          </a>,
+            Sửa
+          </Button>,
           <Popconfirm
             key="delete"
             title="Bạn có chắc chắn muốn xóa tài khoản này không?"
@@ -89,9 +92,9 @@ const SalaryManagementPage: React.FC = () => {
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <a style={{ color: isSelf ? '#ccc' : '#ff4d4f', cursor: isSelf ? 'not-allowed' : 'pointer' }}>
+            <Button type="link" size="large" danger disabled={isSelf}>
               Xóa
-            </a>
+            </Button>
           </Popconfirm>
         ];
       },
@@ -104,7 +107,7 @@ const SalaryManagementPage: React.FC = () => {
         headerTitle="Quản lý Lương Cơ Bản Nhân Viên"
         rowKey="id"
         scroll={{
-          x: 960,
+          x: 'max-content',
         }}
         recordCreatorProps={false}
         loading={false}

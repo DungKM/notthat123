@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ProTable,
   ActionType,
@@ -6,130 +6,191 @@ import {
   ModalForm,
   ProFormText,
   ProFormTextArea,
+  ProFormDigit,
+  ProFormUploadButton,
 } from '@ant-design/pro-components';
-import { Partner } from '@/src/types';
-import { usePartners } from '@/src/hooks/usePartners';
 import { Button, Space, message, Popconfirm, Image } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useRef } from 'react';
+import { usePartnerService } from '@/src/api/services';
+
+interface PartnerItem {
+  id: string;
+  _id: string;
+  title: string;
+  brandName: string;
+  cooperationYear: number;
+  description: string;
+  images: any[];
+  createdAt: string;
+}
 
 const PartnerManagementPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
-  const { partners, setPartners, isLoaded } = usePartners();
+  const { request, remove } = usePartnerService();
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentPartner, setCurrentPartner] = useState<Partner | null>(null);
+  const [currentPartner, setCurrentPartner] = useState<any>(null);
 
-  const handleDelete = (slug: string) => {
-    setPartners(partners.filter((p) => p.slug !== slug));
-    message.success('Đã xóa đối tác');
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(id);
+      // message.success('Đã xóa đối tác');
+      actionRef.current?.reload();
+    } catch (err) {
+      // Error handled by useApi
+    }
   };
 
   const handleFinish = async (values: any) => {
-    const generateSlug = (text: string) => {
-      return text
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[đĐ]/g, 'd')
-        .replace(/([^0-9a-z-\s])/g, '')
-        .replace(/(\s+)/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '');
-    };
+    try {
+      const formData = new FormData();
+      formData.append('title', values.title);
+      formData.append('brandName', values.brandName);
+      if (values.cooperationYear) formData.append('cooperationYear', values.cooperationYear.toString());
+      if (values.description) formData.append('description', values.description);
 
-    if (currentPartner) {
-      // Update
-      const updated = partners.map((p) =>
-        p.slug === currentPartner.slug
-          ? {
-              ...p,
-              ...values,
-              // If title changed, update slug
-              slug: p.title !== values.title ? generateSlug(values.title) : p.slug,
+      // Xử lý ảnh upload
+      if (values.images && values.images.length > 0) {
+        values.images.forEach((fileItem: any) => {
+          if (fileItem.originFileObj) {
+            // Ảnh mới upload
+            formData.append('images', fileItem.originFileObj);
+          } else if (currentPartner) {
+            // Ảnh cũ giữ lại (khi sửa)
+            const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
+            if (imageId) {
+              formData.append('keepImageIds', imageId);
             }
-          : p
-      );
-      setPartners(updated);
-      message.success('Cập nhật thành công');
-    } else {
-      // Create
-      const newPartner: Partner = {
-        ...values,
-        slug: generateSlug(values.title),
-      };
-      setPartners([newPartner, ...partners]);
-      message.success('Thêm đối tác thành công');
+          }
+        });
+      }
+
+      if (currentPartner) {
+        await request('PATCH', `/${currentPartner.id || currentPartner._id}`, formData);
+        message.success('Cập nhật đối tác thành công');
+      } else {
+        await request('POST', '', formData);
+        message.success('Thêm đối tác thành công');
+      }
+
+      setModalVisible(false);
+      actionRef.current?.reload();
+      return true;
+    } catch (err) {
+      return false;
     }
-    setModalVisible(false);
-    return true;
   };
 
-  const columns: ProColumns<Partner>[] = [
+  const columns: ProColumns<PartnerItem>[] = [
     {
-      title: 'Hình ảnh',
-      dataIndex: 'image',
+      title: 'Ảnh',
+      dataIndex: 'images',
       hideInSearch: true,
-      render: (img) => (
-        <Image
-          src={img as string}
-          fallback="https://via.placeholder.com/80x50"
-          width={80}
-          height={50}
-          style={{ objectFit: 'cover', borderRadius: 4 }}
-        />
-      ),
+      width: 100,
+      render: (_, record) => {
+        const imgUrl = record.images && record.images.length > 0 ? record.images[0].url || record.images[0] : null;
+        return imgUrl ? (
+          <Image
+            src={imgUrl}
+            fallback="https://via.placeholder.com/80x50"
+            width={80}
+            height={50}
+            style={{ objectFit: 'contain', borderRadius: 4 }}
+          />
+        ) : 'Không có ảnh';
+      },
     },
     {
-      title: 'Thương hiệu',
+      title: 'Tiêu đề',
       dataIndex: 'title',
       copyable: true,
       ellipsis: true,
     },
     {
-      title: 'Năm',
-      dataIndex: 'year',
-      width: 100,
+      title: 'Thương hiệu',
+      dataIndex: 'brandName',
+      ellipsis: true,
     },
     {
-      title: 'Mô tả ngắn',
+      title: 'Năm hợp tác',
+      dataIndex: 'cooperationYear',
+      width: 120,
+      search: false,
+    },
+    {
+      title: 'Mô tả',
       dataIndex: 'description',
       ellipsis: true,
+      search: false,
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'createdAt',
+      search: false,
+      width: 120,
+      render: (_, record) => record.createdAt ? new Date(record.createdAt).toLocaleDateString('vi-VN') : '—',
     },
     {
       title: 'Thao tác',
       valueType: 'option',
       width: 120,
       render: (_, record) => [
-        <a
+        <Button
+          type="link"
+          size="large"
           key="edit"
-          onClick={() => {
-            setCurrentPartner(record);
-            setModalVisible(true);
+          onClick={async () => {
+            const hide = message.loading('Đang tải dữ liệu đối tác...', 0);
+            try {
+              const res = await request('GET', `/${record.id || record._id}`);
+              setCurrentPartner(res.data || res);
+              setModalVisible(true);
+            } catch (err) {
+              message.error('Không thể tải chi tiết đối tác');
+            } finally {
+              hide();
+            }
           }}
+          icon={<EditOutlined />}
         >
-          <EditOutlined /> Sửa
-        </a>,
+          Sửa
+        </Button>,
         <Popconfirm
           key="delete"
           title="Xóa đối tác này?"
-          onConfirm={() => handleDelete(record.slug)}
+          onConfirm={() => handleDelete(record.id || record._id)}
+          okText="Xóa"
+          cancelText="Hủy"
         >
-          <a style={{ color: 'red' }}>
-            <DeleteOutlined />
-          </a>
+          <Button type="link" size="large" danger icon={<DeleteOutlined />} />
         </Popconfirm>,
       ],
     },
   ];
 
-  if (!isLoaded) return <div style={{ padding: 24 }}>Đang tải dữ liệu...</div>;
+  const getInitialValues = () => {
+    if (!currentPartner) return {};
+    return {
+      ...currentPartner,
+      images: currentPartner.images?.map((img: any, i: number) => {
+        const urlStr = typeof img === 'string' ? img : img.url;
+        return {
+          uid: img._id || img.id || `-img-${i}`,
+          name: urlStr?.split('/').pop() || `image-${i}`,
+          status: 'done',
+          url: urlStr,
+          thumbUrl: urlStr,
+          type: 'image/png',
+        };
+      }) || [],
+    };
+  };
 
   return (
     <>
-      <ProTable<Partner>
+      <ProTable<PartnerItem>
         headerTitle="Quản lý đối tác"
         actionRef={actionRef}
-        rowKey="slug"
+        rowKey={(record) => record.id || record._id}
         search={{ labelWidth: 'auto' }}
         toolBarRender={() => [
           <Button
@@ -144,8 +205,28 @@ const PartnerManagementPage: React.FC = () => {
             Thêm đối tác
           </Button>,
         ]}
-        dataSource={partners}
+        request={async (params) => {
+          try {
+            const queryParams: any = {
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+            };
+            if (params.title) queryParams.search = params.title;
+
+            const res = await request('GET', '', null, queryParams);
+            return {
+              data: res.data || [],
+              success: true,
+              total: res.meta?.total || 0,
+            };
+          } catch (e) {
+            return { data: [], success: false, total: 0 };
+          }
+        }}
+        pagination={{ pageSize: 10, showSizeChanger: true }}
         columns={columns}
+        scroll={{ x: 'max-content' }}
+
       />
 
       <ModalForm
@@ -153,7 +234,7 @@ const PartnerManagementPage: React.FC = () => {
         open={modalVisible}
         onOpenChange={setModalVisible}
         onFinish={handleFinish}
-        initialValues={currentPartner || {}}
+        initialValues={getInitialValues()}
         modalProps={{
           destroyOnClose: true,
         }}
@@ -163,39 +244,46 @@ const PartnerManagementPage: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <ProFormText
               name="title"
-              label="Tên thương hiệu"
-              placeholder="VD: Apple, Huawei"
-              rules={[{ required: true, message: 'Vui lòng nhập tên thương hiệu' }]}
+              label="Tiêu đề"
+              placeholder="VD: Đối tác Hafele"
+              rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}
             />
             <ProFormText
-              name="year"
-              label="Năm hợp tác"
-              placeholder="VD: 2025"
-              rules={[{ required: true, message: 'Vui lòng nhập năm' }]}
+              name="brandName"
+              label="Tên thương hiệu"
+              placeholder="VD: Hafele, Samsung"
+              rules={[{ required: true, message: 'Vui lòng nhập tên thương hiệu' }]}
             />
           </div>
 
-          <ProFormText
-            name="image"
-            label="Link hình ảnh Đại diện"
-            placeholder="Nhập URL hình ảnh"
-            rules={[{ required: true, message: 'Vui lòng nhập link ảnh' }]}
+          <ProFormDigit
+            name="cooperationYear"
+            label="Năm hợp tác"
+            placeholder="VD: 2023"
+            fieldProps={{ controls: false }}
+            rules={[{ required: true, message: 'Vui lòng nhập năm hợp tác' }]}
           />
 
           <ProFormTextArea
             name="description"
-            label="Mô tả ngắn"
-            placeholder="Hiển thị ở trang danh sách..."
-            rules={[{ required: true, message: 'Vui lòng nhập mô tả ngắn' }]}
-            fieldProps={{ rows: 2 }}
+            label="Mô tả"
+            placeholder="Mô tả ngắn gọn về đối tác..."
+            fieldProps={{ rows: 3 }}
           />
 
-          <ProFormTextArea
-            name="content"
-            label="Nội dung chi tiết"
-            placeholder="Hiển thị ở trang chi tiết đối tác..."
-            rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]}
-            fieldProps={{ rows: 6 }}
+          {/* @ts-ignore */}
+          <ProFormUploadButton
+            name="images"
+            label="Hình ảnh (Tối đa 4 ảnh)"
+            title="Thêm ảnh"
+            max={4}
+            fieldProps={{
+              multiple: true,
+              accept: 'image/*',
+              listType: 'picture-card',
+              beforeUpload: () => false,
+            }}
+            extra="Upload hình ảnh đối tác"
           />
         </Space>
       </ModalForm>

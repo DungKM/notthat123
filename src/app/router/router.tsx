@@ -15,7 +15,7 @@ import { useAuth } from '@/src/auth/hooks/useAuth';
 const PublicHome = lazy(() => import('@/src/pages/client/About/PublicHome'));
 const ProductsPage = lazy(() => import('@/src/pages/client/Product/ProductsPage'));
 const ProductDetailPage = lazy(() => import('@/src/pages/client/Product/ProductDetailPage'));
-const ProjectsPage = lazy(() => import('@/src/pages/client/ProjectsPage'));
+const ProjectsPage = lazy(() => import('@/src/pages/client/Project/ProjectsPage'));
 const ProjectDetailClientPage = lazy(() => import('@/src/pages/client/Project/ProjectDetailPage'));
 const AboutPage = lazy(() => import('@/src/pages/client/About/AboutPage'));
 const WhyChooseUsPage = lazy(() => import('@/src/pages/client/About/WhyChooseUsPage'));
@@ -44,9 +44,10 @@ const UsersPage = lazy(() => import('@/src/pages/admin/crm/UsersPage'));
 const OrderManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/OrderManagementPage'));
 const ProductManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ProductManagementPage'));
 const CategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/CategoryManagementPage'));
+const CategoryProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/CategoryProjectManagementPage'));
 const ContactManagementPage = lazy(() => import('@/src/pages/admin/crm/ContactManagementPage'));
 const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage'));
-const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/ShowcaseProjectManagementPage'));
+const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ShowcaseProjectManagementPage'));
 const PartnerManagementPage = lazy(() => import('@/src/pages/admin/crm/PartnerManagementPage'));
 
 const Unauthorized = () => (
@@ -176,6 +177,14 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedAdminRoute roles={[Role.ACCOUNTANT, Role.DIRECTOR]}>
                 <CategoryManagementPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_DANH_MUC_CONG_TRINH}
+            element={
+              <ProtectedAdminRoute roles={[Role.ACCOUNTANT, Role.DIRECTOR]}>
+                <CategoryProjectManagementPage />
               </ProtectedAdminRoute>
             }
           />

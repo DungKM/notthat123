@@ -92,24 +92,23 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
             <Button
               key="approve"
               type="primary"
-              size="small"
+              size="large"
               icon={<CheckCircleOutlined />}
               onClick={() => {
                 setSelectedRequest(record);
                 setApproveModalVisible(true);
               }}
-            >
-              Duyệt
-            </Button>,
+              title='Duyệt'
+            />
+            ,
             <Button
               key="reject"
               danger
-              size="small"
+              size="large"
               icon={<CloseCircleOutlined />}
               onClick={() => handleReject(record.id)}
-            >
-              Từ chối
-            </Button>,
+              title='Từ chối'
+            />,
           ];
         }
         return [

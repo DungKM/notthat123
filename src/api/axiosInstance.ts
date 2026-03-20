@@ -22,6 +22,13 @@ api.interceptors.request.use(
 
     const sessionId = getOrCreateSessionId();
     config.headers['x-session-id'] = sessionId;
+
+    // Nếu payload là FormData (upload file), xóa Content-Type
+    // để trình duyệt tự set multipart/form-data kèm boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

@@ -45,7 +45,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
       children: [
         { path: ROUTES.ADMIN_DON_HANG, name: 'Quản lý đơn hàng', icon: <ShoppingCartOutlined /> },
         { path: ROUTES.ADMIN_SAN_PHAM, name: 'Quản lý sản phẩm', icon: <AppstoreOutlined /> },
-        { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục', icon: <TagsOutlined /> },
+        { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục sản phẩm', icon: <TagsOutlined /> },
+        { path: ROUTES.ADMIN_DANH_MUC_CONG_TRINH, name: 'Quản lý danh mục công trình', icon: <TagsOutlined /> },
         { path: ROUTES.ADMIN_SHOWCASE_PROJECTS, name: 'Bài viết công trình', icon: <FileTextOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_DOI_TAC, name: 'Quản lý đối tác', icon: <ProjectOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },

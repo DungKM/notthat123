@@ -11,16 +11,20 @@ import {
   ThunderboltOutlined,
   CheckCircleFilled
 } from '@ant-design/icons';
+import { useApplicationService } from '@/src/api/services';
+import toast from 'react-hot-toast';
 
 const RecruitmentPage: React.FC = () => {
+  const { create: submitApplication, loading } = useApplicationService();
   const [formData, setFormData] = useState({
+    position: 'Kiến trúc sư', // default
     fullName: '',
     phone: '',
-    gender: 'male',
+    gender: 'Nam', // map directly for backend ENUM
     address: '',
     age: '',
     experience: '',
-    notes: ''
+    note: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -39,6 +43,7 @@ const RecruitmentPage: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
+    if (!formData.position.trim()) newErrors.position = 'Vui lòng nhập vị trí ứng tuyển';
     if (!formData.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên';
     if (!formData.phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại';
     else if (!/^\d{10,11}$/.test(formData.phone)) newErrors.phone = 'Số điện thoại không hợp lệ';
@@ -50,30 +55,40 @@ const RecruitmentPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      message.success('Cảm ơn bạn đã ứng tuyển! Chúng tôi sẽ liên hệ lại sớm nhất.');
-      setFormData({
-        fullName: '',
-        phone: '',
-        gender: 'male',
-        address: '',
-        age: '',
-        experience: '',
-        notes: ''
-      });
+      try {
+        await submitApplication({
+          ...formData,
+          age: Number(formData.age),
+          experience: Number(formData.experience)
+        });
+        toast.success('Cảm ơn bạn đã ứng tuyển! Chúng tôi sẽ liên hệ lại sớm nhất.');
+        setFormData({
+          position: '',
+          fullName: '',
+          phone: '',
+          gender: 'Nam',
+          address: '',
+          age: '',
+          experience: '',
+          note: ''
+        });
+      } catch (err) {
+        // error handled by useApi interceptor usually
+      }
     } else {
-      message.error('Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.');
+      toast.error('Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.');
     }
   };
- 
+
   return (
     <div className="bg-white">
       <SEO
         title="Tuyển dụng"
         description="Gia nhập đội ngũ Nội Thất Hochi để cùng chúng tôi kiến tạo những không gian sống đẳng cấp và nghệ thuật."
-      /> 
+      />
 
       {/* Premium Hero Section */}
       <section className="relative h-125 flex items-center pt-20">
@@ -166,6 +181,19 @@ const RecruitmentPage: React.FC = () => {
             <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 md:p-12 border-t-8 border-showcase-primary">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Vị trí ứng tuyển *</label>
+                  <input
+                    type="text"
+                    name="position"
+                    value={formData.position}
+                    onChange={handleChange}
+                    placeholder="VD: Kiến trúc sư..."
+                    className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.position ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
+                  />
+                  {errors.position && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.position}</p>}
+                </div>
+
+                <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Họ và tên *</label>
                   <input
                     type="text"
@@ -200,9 +228,9 @@ const RecruitmentPage: React.FC = () => {
                       onChange={handleChange}
                       className="w-full px-5 py-4 bg-gray-50 rounded-xl border border-transparent focus:border-showcase-primary outline-none transition-all bg-white font-medium"
                     >
-                      <option value="male">Nam</option>
-                      <option value="female">Nữ</option>
-                      <option value="other">Khác</option>
+                      <option value="Nam">Nam</option>
+                      <option value="Nữ">Nữ</option>
+                      <option value="Khác">Khác</option>
                     </select>
                   </div>
                 </div>
@@ -251,8 +279,8 @@ const RecruitmentPage: React.FC = () => {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Ghi chú thêm</label>
                   <textarea
-                    name="notes"
-                    value={formData.notes}
+                    name="note"
+                    value={formData.note}
                     onChange={handleChange}
                     rows={4}
                     placeholder="Thông tin thêm..."
@@ -263,9 +291,10 @@ const RecruitmentPage: React.FC = () => {
                 <div className="pt-4">
                   <Button
                     type="submit"
-                    className="w-full bg-teal-950 text-white py-5 rounded-xl font-bold uppercase tracking-[0.3em] hover:bg-showcase-primary transition-all shadow-xl hover:shadow-showcase-primary/20"
+                    disabled={loading}
+                    className="w-full bg-teal-950 text-white py-5 rounded-xl font-bold uppercase tracking-[0.3em] hover:bg-showcase-primary transition-all shadow-xl hover:shadow-showcase-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    GỬI HỒ SƠ ỨNG TUYỂN
+                    {loading ? 'ĐANG GỬI...' : 'GỬI HỒ SƠ ỨNG TUYỂN'}
                   </Button>
                 </div>
               </form>

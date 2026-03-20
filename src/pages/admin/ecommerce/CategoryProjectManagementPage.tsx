@@ -1,38 +1,39 @@
 import React, { useRef, useState } from 'react';
-import { Button, Popconfirm, Space, Tooltip } from 'antd';
+import { Button, message, Popconfirm, Space } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ModalForm, ProFormText, ProFormTextArea, ProTable } from '@ant-design/pro-components';
-import { useAuth } from '../../../auth/hooks/useAuth';
-import { useApi } from '../../../hooks/useApi';
+import { useAuth } from '@/src/auth/hooks/useAuth';
+import { useApi } from '@/src/hooks/useApi';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-interface CategoryItem {
+interface CategoryProjectItem {
   id: string;
   name: string;
-  description: string;
+  slug?: string;
+  description?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
-const CategoryManagementPage: React.FC = () => {
+const CategoryProjectManagementPage: React.FC = () => {
   const { user } = useAuth();
   const actionRef = useRef<ActionType | undefined>(undefined);
 
-  // Hook gọi API cho danh mục
-  const { getAll, create, patch, remove } = useApi<CategoryItem>('/categories');
+  // Hook gọi API cho danh mục công trình
+  const { getAll, create, patch, remove } = useApi<CategoryProjectItem>('/constructions/categories');
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [editRecord, setEditRecord] = useState<CategoryItem | null>(null);
+  const [editRecord, setEditRecord] = useState<CategoryProjectItem | null>(null);
 
   if (!user) return null;
 
   // ─── Columns ─────────────────────────────────────────────────────────────
-  const columns: ProColumns<CategoryItem>[] = [
+  const columns: ProColumns<CategoryProjectItem>[] = [
     {
-      title: 'Tên danh mục',
+      title: 'Tên danh mục công trình',
       dataIndex: 'name',
       ellipsis: true,
     },
@@ -71,17 +72,21 @@ const CategoryManagementPage: React.FC = () => {
             Sửa
           </Button>
           <Popconfirm
-            title="Xoá danh mục này?"
+            title="Xoá danh mục công trình này?"
             description="Hành động này không thể hoàn tác."
             okText="Xóa"
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
             onConfirm={async () => {
-              await remove(record.id);
-              actionRef.current?.reload();
+              if (record.id) {
+                await remove(record.id);
+                actionRef.current?.reload();
+                message.success('Xóa danh mục công trình thành công');
+
+              }
             }}
           >
-            <Button type="link" size='large' danger icon={<DeleteOutlined />} title="Xóa" />
+            <Button type="link" danger icon={<DeleteOutlined />} title="Xóa" />
           </Popconfirm>
         </Space>
       ),
@@ -106,11 +111,11 @@ const CategoryManagementPage: React.FC = () => {
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <>
-      <ProTable<CategoryItem>
+      <ProTable<CategoryProjectItem>
         columns={columns}
         actionRef={actionRef}
         rowKey="id"
-        headerTitle="Quản lý danh mục sản phẩm"
+        headerTitle="Quản lý danh mục công trình"
         request={async (params) => {
           const { current, pageSize, name, ...rest } = params;
           const list = await getAll({
@@ -138,8 +143,8 @@ const CategoryManagementPage: React.FC = () => {
       />
 
       {/* ─── Modal Thêm ─── */}
-      <ModalForm<Partial<CategoryItem>>
-        title="Thêm danh mục"
+      <ModalForm<Partial<CategoryProjectItem>>
+        title="Thêm danh mục công trình"
         open={createOpen}
         modalProps={{
           destroyOnClose: true,
@@ -156,7 +161,7 @@ const CategoryManagementPage: React.FC = () => {
       </ModalForm>
 
       {/* ─── Modal Sửa ─── */}
-      <ModalForm<Partial<CategoryItem>>
+      <ModalForm<Partial<CategoryProjectItem>>
         title={`Sửa: ${editRecord?.name ?? ''}`}
         open={editOpen}
         modalProps={{
@@ -171,8 +176,10 @@ const CategoryManagementPage: React.FC = () => {
           description: editRecord?.description,
         }}
         onFinish={async (values) => {
-          if (!editRecord) return false;
+          if (!editRecord || !editRecord.id) return false;
+
           await patch(editRecord.id, values);
+          message.success('Cập nhật danh mục công trình thành công');
           setEditOpen(false);
           setEditRecord(null);
           actionRef.current?.reload();
@@ -185,4 +192,4 @@ const CategoryManagementPage: React.FC = () => {
   );
 };
 
-export default CategoryManagementPage;
+export default CategoryProjectManagementPage;

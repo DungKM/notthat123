@@ -1,10 +1,12 @@
 // ─── Partner Types ───
 
 export interface Partner {
+  id: string;
   slug: string;
-  year: string;
+  cooperationYear: number;
   title: string;
-  description: string;
-  image: string;
-  content: string;
+  brandName?: string;
+  description?: string;
+  images?: Array<{ url: string; sortOrder?: number; id?: string }>;
+  content?: string;
 }

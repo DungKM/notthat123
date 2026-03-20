@@ -1,88 +1,201 @@
-import React, { useRef, useState } from 'react';
-import { Button, Tag, message } from 'antd';
+import React, { useRef } from 'react';
+import { Select, Tag, message, Typography, Space, Dropdown, Button, Popconfirm } from 'antd';
+import { DeleteOutlined, DownOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ModalForm, ProFormSelect, ProFormText, ProTable } from '@ant-design/pro-components';
+import { ProTable } from '@ant-design/pro-components';
+import { useApplicationService } from '@/src/api/services';
 
-interface RecruitmentItem {
+interface ApplicationItem {
+  _id: string;
   id: string;
   position: string;
-  department: string;
-  quantity: number;
-  status: 'OPENING' | 'CLOSED';
+  fullName: string;
+  phone: string;
+  gender: string;
+  address: string;
+  age: number;
+  experience: number;
+  note: string;
+  status: string;
+  createdAt: string;
 }
 
-const mockRecruitments: RecruitmentItem[] = [
-  { id: '1', position: 'Nhân viên kinh doanh', department: 'Kinh doanh', quantity: 3, status: 'OPENING' },
-  { id: '2', position: 'Kế toán tổng hợp', department: 'Kế toán', quantity: 1, status: 'CLOSED' },
+const STATUS_OPTIONS = [
+  { label: 'Chờ xử lý', value: 'Chờ xử lý', color: 'default' },
+  { label: 'Đã liên hệ', value: 'Đã liên hệ', color: 'processing' },
+  { label: 'Từ chối', value: 'Từ chối', color: 'error' },
 ];
 
 const RecruitmentManagementPage: React.FC = () => {
-  const actionRef = useRef<ActionType | undefined>(undefined);
-  const [data, setData] = useState<RecruitmentItem[]>(mockRecruitments);
-  const [open, setOpen] = useState(false);
+  const actionRef = useRef<ActionType>(null);
+  const { request, update, remove } = useApplicationService();
 
-  const columns: ProColumns<RecruitmentItem>[] = [
-    { title: 'Vị trí tuyển dụng', dataIndex: 'position' },
-    { title: 'Phòng ban', dataIndex: 'department' },
-    { title: 'Số lượng', dataIndex: 'quantity' },
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      await request('PATCH', `/${id}`, { status: newStatus });
+      message.success('Cập nhật trạng thái thành công');
+      actionRef.current?.reload();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(id);
+      message.success('Xóa hồ sơ thành công');
+      actionRef.current?.reload();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const columns: ProColumns<ApplicationItem>[] = [
+    {
+      title: 'Thời gian nộp',
+      dataIndex: 'createdAt',
+      valueType: 'dateTime',
+      sorter: true,
+      width: 150,
+    },
+    {
+      title: 'Vị trí ứng tuyển',
+      dataIndex: 'position',
+      width: 150,
+    },
+    {
+      title: 'Họ và tên',
+      dataIndex: 'fullName',
+      copyable: true,
+      width: 150,
+      render: (_, record) => (
+        <div>
+          <div className="font-semibold">{record.fullName}</div>
+          <div className="text-xs text-gray-500">{record.gender} • {record.age} tuổi</div>
+        </div>
+      ),
+    },
+    {
+      title: 'Số điện thoại',
+      dataIndex: 'phone',
+      copyable: true,
+      width: 120,
+    },
+    {
+      title: 'Kinh nghiệm',
+      dataIndex: 'experience',
+      width: 120,
+      renderText: (val) => `${val} năm`,
+    },
+    {
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      ellipsis: true,
+      width: 200,
+    },
+    {
+      title: 'Ghi chú',
+      dataIndex: 'note',
+      ellipsis: true,
+      width: 200,
+    },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
-      render: (_, record) =>
-        record.status === 'OPENING' ? <Tag color="green">Đang tuyển</Tag> : <Tag color="red">Đã đóng</Tag>,
+      width: 160,
+      filters: true,
+      onFilter: true,
+      valueEnum: STATUS_OPTIONS.reduce((acc, curr) => {
+        acc[curr.value] = { text: curr.label, status: curr.color };
+        return acc;
+      }, {} as any),
+      render: (_, record) => {
+        const option = STATUS_OPTIONS.find((opt) => opt.value === record.status);
+        if (!option) return <Tag color="default">{record.status}</Tag>;
+        return <Tag color={option.color}>{option.label}</Tag>;
+      },
+    },
+    {
+      title: 'Thao tác',
+      valueType: 'option',
+      width: 150,
+      render: (_, record) => (
+        <Space>
+          <Dropdown
+            menu={{
+              items: STATUS_OPTIONS.map((opt) => ({
+                key: opt.value,
+                label: opt.label,
+                disabled: record.status === opt.value,
+              })),
+              onClick: ({ key }) => handleStatusChange(record._id || record.id, key),
+            }}
+            trigger={['click']}
+          >
+            <Button type="link" size="small">
+              Trạng thái <DownOutlined />
+            </Button>
+          </Dropdown>
+          <Popconfirm
+            title="Bạn chắc chắn muốn xóa hồ sơ này?"
+            onConfirm={() => handleDelete(record._id || record.id)}
+            okText="Xóa"
+            cancelText="Hủy"
+          >
+            <Button type="link" size="large" danger icon={<DeleteOutlined />} title="Xóa" />
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
   return (
-    <>
-      <ProTable<RecruitmentItem>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="mb-6">
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          Quản lý Hồ sơ ứng tuyển
+        </Typography.Title>
+        <Typography.Text type="secondary">
+          Theo dõi và cập nhật trạng thái các ứng viên ứng tuyển từ Website
+        </Typography.Text>
+      </div>
+
+      <ProTable<ApplicationItem>
         columns={columns}
         actionRef={actionRef}
-        rowKey="id"
-        headerTitle="Quản lý tuyển dụng"
-        request={async () => ({ data, success: true })}
-        toolBarRender={() => [
-          <Button key="create" type="primary" onClick={() => setOpen(true)}>
-            Thêm tin tuyển dụng
-          </Button>,
-        ]}
-      />
-
-      <ModalForm
-        title="Thêm tuyển dụng"
-        open={open}
-        modalProps={{ destroyOnClose: true, onCancel: () => setOpen(false) }}
-        onFinish={async (values) => {
-          setData((prev) => [
-            {
-              id: Date.now().toString(),
-              position: values.position,
-              department: values.department,
-              quantity: Number(values.quantity),
-              status: values.status,
-            },
-            ...prev,
-          ]);
-          message.success('Tạo tin tuyển dụng thành công');
-          setOpen(false);
-          actionRef.current?.reload();
-          return true;
+        rowKey={(record) => record._id || record.id}
+        search={false} // API /applications doesn't support complex search by default unless implemented, turning off for simplicity
+        scroll={{ x: 'max-content' }}
+        request={async (params) => {
+          try {
+            const apiParams = {
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+            };
+            const response = await request('GET', '', null, apiParams);
+            
+            return {
+              data: response.data || [],
+              success: true,
+              total: response.meta?.total || 0,
+            };
+          } catch (error) {
+            console.error(error);
+            return {
+              data: [],
+              success: false,
+              total: 0,
+            };
+          }
         }}
-      >
-        <ProFormText name="position" label="Vị trí" rules={[{ required: true }]} />
-        <ProFormText name="department" label="Phòng ban" rules={[{ required: true }]} />
-        <ProFormText name="quantity" label="Số lượng tuyển" rules={[{ required: true }]} />
-        <ProFormSelect
-          name="status"
-          label="Trạng thái"
-          rules={[{ required: true }]}
-          options={[
-            { label: 'Đang tuyển', value: 'OPENING' },
-            { label: 'Đã đóng', value: 'CLOSED' },
-          ]}
-        />
-      </ModalForm>
-    </>
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+        }}
+        dateFormatter="string"
+        headerTitle="Danh sách ứng viên"
+      />
+    </div>
   );
 };
 

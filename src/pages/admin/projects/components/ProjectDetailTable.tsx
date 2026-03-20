@@ -121,19 +121,21 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       valueType: "option",
       width: 100,
       render: (text, record, _, action) => [
-        <a key="edit" onClick={() => action?.startEditable?.(record.id)}>
+        <Button type="link" size="large" key="edit" onClick={() => action?.startEditable?.(record.id)}>
           Sửa
-        </a>,
-        <a
+        </Button>,
+        <Button
+          type="link"
+          size="large"
+          danger
           key="delete"
-          style={{ color: "#ff4d4f" }}
           onClick={() => {
             onUpdate(details.filter((item) => item.id !== record.id));
             message.success("Đã xóa dòng");
           }}
         >
           Xóa
-        </a>,
+        </Button>,
       ],
     },
   ];

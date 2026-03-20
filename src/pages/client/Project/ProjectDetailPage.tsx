@@ -1,30 +1,76 @@
-import React from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import SEO from '@/src/components/common/SEO';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import { ArrowLeftOutlined, EnvironmentOutlined, CalendarOutlined, FullscreenOutlined } from '@ant-design/icons';
-import { MOCK_SHOWCASE_PROJECTS } from '@/src/mockData';
-
-const projectsData = MOCK_SHOWCASE_PROJECTS;
+import { useConstructionService } from '@/src/api/services';
 
 const ProjectDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { request, loading } = useConstructionService();
 
-  const project = projectsData.find((p) => p.slug === slug);
+  const [project, setProject] = useState<any>(null);
+  const [relatedProjects, setRelatedProjects] = useState<any[]>([]);
+  const [error, setError] = useState(false);
 
-  if (!project) {
-    return <Navigate to="/cong-trinh" replace />;
+  useEffect(() => {
+    if (!slug) return;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const fetchDetail = async () => {
+      try {
+        const res = await request('GET', `/${slug}`);
+        if (res?.data) {
+          setProject(res.data);
+          // Fetch related projects by category
+          if (res.data.categoryId?._id || res.data.categoryId?.id) {
+            const catId = res.data.categoryId._id || res.data.categoryId.id;
+            const relatedRes = await request('GET', '', null, { categoryId: catId, limit: 3 });
+            if (relatedRes?.data) {
+              setRelatedProjects(relatedRes.data.filter((p: any) => (p._id || p.id) !== (res.data._id || res.data.id)));
+            }
+          }
+        } else {
+          setError(true);
+        }
+      } catch (e) {
+        console.error('Failed to fetch project detail:', e);
+        setError(true);
+      }
+    };
+
+    fetchDetail();
+  }, [slug, request]);
+
+  if (loading && !project) {
+    return (
+      <div className="bg-white min-h-screen pt-40 pb-20 text-center">
+        <p className="text-gray-400 animate-pulse text-lg">Đang tải thông tin chi tiết...</p>
+      </div>
+    );
   }
 
-  const relatedProjects = projectsData.filter(
-    (p) => p.slug !== project.slug && (p.category === project.category || !project.category),
-  );
+  if (error || !project) {
+    return (
+      <div className="bg-white min-h-screen pt-40 pb-20 text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Không tìm thấy công trình</h2>
+        <Link to="/cong-trinh" className="text-showcase-primary hover:underline flex items-center justify-center gap-2">
+          <ArrowLeftOutlined /> Quay lại danh sách công trình
+        </Link>
+      </div>
+    );
+  }
+
+  const categoryName = project.categoryId?.name || 'Công trình';
+  const coverImage = project.images && project.images.length > 0 ? project.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
+  const gallery = project.images && project.images.length > 1 ? project.images.slice(1) : [];
 
   return (
     <div className="bg-white">
-      <SEO title={project.title} description={project.excerpt} />
+      <SEO title={project.name} description={project.description || 'Chi tiết công trình Thiết kế Nội thất Hochi'} />
 
       <main className="pt-28 pb-20">
         <Container>
@@ -39,7 +85,7 @@ const ProjectDetailPage: React.FC = () => {
                 Công trình
               </Link>
               <span className="text-gray-400">/</span>
-              <span className="text-gray-800 line-clamp-1">{project.title}</span>
+              <span className="text-gray-800 line-clamp-1">{project.name}</span>
             </div>
 
             <Link
@@ -59,15 +105,15 @@ const ProjectDetailPage: React.FC = () => {
                 {/* Cover image */}
                 <div className="relative h-[260px] sm:h-[340px] md:h-[420px]">
                   <img
-                    src={project.coverImage}
-                    alt={project.title}
+                    src={coverImage}
+                    alt={project.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white">
                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <Badge variant="gold">{project.category}</Badge>
+                      <Badge variant="gold">{categoryName}</Badge>
                       {project.year && (
                         <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
                           <CalendarOutlined className="mr-1 text-[10px]" />
@@ -77,7 +123,7 @@ const ProjectDetailPage: React.FC = () => {
                       {project.area && (
                         <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
                           <FullscreenOutlined className="mr-1 text-[10px]" />
-                          {project.area}
+                          {project.area} m²
                         </span>
                       )}
                     </div>
@@ -85,7 +131,7 @@ const ProjectDetailPage: React.FC = () => {
                       className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
-                      {project.title}
+                      {project.name}
                     </h1>
                     {project.location && (
                       <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-100">
@@ -99,44 +145,15 @@ const ProjectDetailPage: React.FC = () => {
                 {/* Body */}
                 <div className="p-6 sm:p-10 space-y-10">
                   {/* Excerpt */}
-                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed border-l-4 border-showcase-primary pl-4 sm:pl-6">
-                    {project.excerpt}
-                  </p>
-
-                  {/* Info grid
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100">
-                  {project.location && (
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-semibold mb-1">Địa điểm</p>
-                      <p className="text-sm font-semibold text-gray-900">{project.location}</p>
-                    </div>
+                  {project.description && (
+                    <p className="text-base sm:text-lg text-gray-700 leading-relaxed border-l-4 border-showcase-primary pl-4 sm:pl-6 whitespace-pre-line">
+                      {project.description}
+                    </p>
                   )}
-                  {project.year && (
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-semibold mb-1">Năm thực hiện</p>
-                      <p className="text-sm font-semibold text-gray-900">{project.year}</p>
-                    </div>
-                  )}
-                  {project.area && (
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-semibold mb-1">Diện tích</p>
-                      <p className="text-sm font-semibold text-gray-900">{project.area}</p>
-                    </div>
-                  )}
-                </div> */}
-
-                  {/* Content paragraphs */}
-                  <div className="space-y-6">
-                    {project.content.map((paragraph, index) => (
-                      <p key={index} className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
 
                   {/* Gallery */}
-                  {project.gallery && project.gallery.length > 0 && (
-                    <section className="space-y-4">
+                  {gallery && gallery.length > 0 && (
+                    <section className="space-y-4 pt-6">
                       <div className="flex items-center justify-between">
                         <h2
                           className="text-lg sm:text-xl font-bold uppercase tracking-[0.25em] text-teal-950"
@@ -145,18 +162,18 @@ const ProjectDetailPage: React.FC = () => {
                           GALLERY CÔNG TRÌNH
                         </h2>
                         <span className="text-xs text-gray-400 font-medium">
-                          {project.gallery.length} hình ảnh thực tế
+                          {gallery.length + 1} hình ảnh
                         </span>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {project.gallery.map((image, index) => (
+                        {gallery.map((image: any, index: number) => (
                           <div
-                            key={index}
+                            key={image._id || image.id || index}
                             className="relative aspect-4/3 rounded-2xl overflow-hidden group border border-gray-100 bg-gray-100"
                           >
                             <img
-                              src={image}
-                              alt={`${project.title} ${index + 1}`}
+                              src={image.url}
+                              alt={`${project.name} ${index + 2}`}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               loading="lazy"
                             />
@@ -185,17 +202,21 @@ const ProjectDetailPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {relatedProjects.map((p) => (
-                    <ProductCard
-                      key={p.slug}
-                      basePath="/cong-trinh"
-                      slug={p.slug}
-                      title={p.title}
-                      category={p.category}
-                      image={p.coverImage}
-                      tag={p.category === 'Nhà ở' ? 'NHÀ Ở' : p.category === 'Thương mại' ? 'THƯƠNG MẠI' : 'CÔNG NGHIỆP'}
-                    />
-                  ))}
+                  {relatedProjects.map((p) => {
+                    const pCatName = p.categoryId?.name || 'Công trình';
+                    const pCover = p.images && p.images.length > 0 ? p.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
+                    return (
+                      <ProductCard
+                        key={p._id || p.id}
+                        basePath="/cong-trinh"
+                        slug={p.slug || String(p._id || p.id)}
+                        title={p.name}
+                        category={pCatName}
+                        image={pCover}
+                        tag={pCatName.toUpperCase()}
+                      />
+                    );
+                  })}
                 </div>
               </section>
             )}
@@ -207,4 +228,3 @@ const ProjectDetailPage: React.FC = () => {
 };
 
 export default ProjectDetailPage;
-

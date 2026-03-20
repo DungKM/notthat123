@@ -57,7 +57,7 @@ const AttendanceSummaryPage: React.FC<AttendanceSummaryProps> = ({ currentUser }
       title: 'Thao tác',
       valueType: 'option',
       render: (_, record) => [
-        <Button key="detail" type="link" onClick={() => viewAttendanceDetail(record)}>
+        <Button key="detail" type="link" size="large" onClick={() => viewAttendanceDetail(record)}>
           Xem chi tiết
         </Button>,
       ],

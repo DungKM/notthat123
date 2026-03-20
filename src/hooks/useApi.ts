@@ -30,6 +30,7 @@ export interface UseApiReturn<T> {
   getBySlug: (slug: string) => Promise<T>;
   create: (payload: Partial<T>) => Promise<T>;
   update: (id: string, payload: Partial<T>) => Promise<T>;
+  patch: (id: string, payload: Partial<T>) => Promise<T>;
   remove: (id: string) => Promise<void>;
 
   // Custom request
@@ -121,12 +122,28 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
     }
   }, [basePath, handleError]);
 
-  // ─── UPDATE ───
+  // ─── UPDATE (PUT) ───
   const update = useCallback(async (id: string, payload: Partial<T>): Promise<T> => {
     setLoading(true);
     setError(null);
     try {
       const res: ApiResponse<T> = await api.put(`${basePath}/${id}`, payload);
+      message.success(res.message || 'Cập nhật thành công!');
+      return res.data;
+    } catch (err: any) {
+      handleError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [basePath, handleError]);
+
+  // ─── PATCH ───
+  const patch = useCallback(async (id: string, payload: Partial<T>): Promise<T> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res: ApiResponse<T> = await api.patch(`${basePath}/${id}`, payload);
       message.success(res.message || 'Cập nhật thành công!');
       return res.data;
     } catch (err: any) {
@@ -168,6 +185,6 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
 
   return {
     data, list, loading, error, meta,
-    getAll, getById, getBySlug, create, update, remove, request,
+    getAll, getById, getBySlug, create, update, patch, remove, request,
   };
 }

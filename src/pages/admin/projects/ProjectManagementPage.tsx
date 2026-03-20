@@ -13,7 +13,7 @@ import { Project, Role } from '@/src/types';
 import { MOCK_PROJECTS } from '@/src/mockData';
 import { mockUsers } from '@/src/auth/mockUsers';
 import { Tag, Button, Space, message, Row, Col, Statistic, Popconfirm } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, ToolOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, ToolOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -124,20 +124,19 @@ const ProjectManagementPage: React.FC = () => {
         const actions = [];
 
         actions.push(
-          <Button key="view" type="link" size="small" onClick={() => navigate(`/quan-tri/cong-trinh/${record.id}`)}>Chi tiết</Button>
+          <Button key="view" type="link" size="small" icon={<EyeOutlined />} onClick={() => navigate(`/quan-tri/cong-trinh/${record.id}`)} />
         );
 
         const canEdit = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT || isSiteManager;
 
         if (canEdit && !isSiteManager) {
           actions.push(
-            <a key="edit" onClick={() => {
+            <Button type="link" size="large" key="edit" icon={<EditOutlined />} onClick={() => {
               setSelectedProject(record);
               setEditModalVisible(true);
-            }}
-            >
-              <EditOutlined />
-            </a>,
+            }}>
+              Sửa
+            </Button>,
             <Popconfirm
               key="delete"
               title="Xác nhận xóa?"

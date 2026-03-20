@@ -26,7 +26,7 @@ const ProjectListPage: React.FC = () => {
   if (!user) return null;
 
   const isDirectorOrAccountant = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT;
-  const isSiteManager = user.role === Role.SITE_MANAGER || user.role === Role.STAFF ;
+  const isSiteManager = user.role === Role.SITE_MANAGER || user.role === Role.STAFF;
 
   // Danh sách dự án chờ duyệt (cho admin/kế toán)
   const pendingProjects = projects.filter(p => p.status === 'Chờ duyệt');
@@ -162,25 +162,23 @@ const ProjectListPage: React.FC = () => {
 
         return [
           canViewDetail ? (
-            <a key="view" onClick={() => navigate(`/quan-tri/du-an/${record.id}`)}>
-              <EyeOutlined /> Chi tiết
-            </a>
+            <Button type="link" size="large" key="view" icon={<EyeOutlined />} onClick={() => navigate(`/quan-tri/du-an/${record.id}`)} />
           ) : (
-            <span key="view-disabled" style={{ color: '#ccc', cursor: 'not-allowed' }} title="Vui lòng duyệt dự án trước khi xem chi tiết">
-              <EyeOutlined /> Chi tiết
+            <span key="view-disabled" style={{ color: '#ccc', cursor: 'not-allowed', padding: '4px 15px' }} title="Vui lòng duyệt dự án trước khi xem chi tiết">
+              <EyeOutlined />
             </span>
           ),
           isDirectorOrAccountant && (
-            <a key="edit" onClick={() => {
+            <Button type="link" size="large" key="edit" icon={<EditOutlined />} onClick={() => {
               setSelectedProject(record);
               setModalVisible(true);
             }}>
-              <EditOutlined />
-            </a>
+              Sửa
+            </Button>
           ),
           isDirectorOrAccountant && (
             <Popconfirm key="delete" title="Xóa dự án này?" onConfirm={() => handleDelete(record.id)}>
-              <a style={{ color: 'red' }}><DeleteOutlined /></a>
+              <Button type="link" size="large" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           ),
         ];

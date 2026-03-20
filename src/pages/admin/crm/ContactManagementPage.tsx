@@ -1,28 +1,30 @@
 import React, { useRef } from 'react';
-import { Button, Tag, Popconfirm, message, Space } from 'antd';
-import { DeleteOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Button, Tag, Popconfirm, message, Space, Dropdown } from 'antd';
+import { DeleteOutlined, DownOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { useContactService } from '@/src/api/services';
 
 interface ContactItem {
-  _id: string;
+  id: string;
   fullName: string;
   phone: string;
   email: string;
-  content: string;
+  address: string;
+  message: string;
   status: string;
   createdAt: string;
 }
 
 const statusMap: Record<string, { text: string; color: string }> = {
-  pending: { text: 'Chưa xử lý', color: 'orange' },
-  processed: { text: 'Đã xử lý', color: 'green' },
+  'Chờ xử lý': { text: 'Chờ xử lý', color: 'orange' },
+  'Đã liên hệ': { text: 'Đã liên hệ', color: 'green' },
+  'Đã hủy': { text: 'Đã hủy', color: 'red' },
 };
 
 const ContactManagementPage: React.FC = () => {
-  const actionRef = useRef<ActionType>();
-  const { request } = useContactService();
+  const actionRef = useRef<ActionType>(null);
+  const { request, remove } = useContactService();
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
@@ -36,7 +38,7 @@ const ContactManagementPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await request('DELETE', `/${id}`);
+      await remove(id);
       message.success('Xóa liên hệ thành công');
       actionRef.current?.reload();
     } catch (err) {
@@ -65,8 +67,15 @@ const ContactManagementPage: React.FC = () => {
       width: 150,
     },
     {
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      ellipsis: true,
+      width: 150,
+      search: false,
+    },
+    {
       title: 'Nội dung',
-      dataIndex: 'content',
+      dataIndex: 'message',
       ellipsis: true,
       width: 200,
       search: false,
@@ -77,11 +86,12 @@ const ContactManagementPage: React.FC = () => {
       width: 120,
       filters: true,
       valueEnum: {
-        pending: { text: 'Chưa xử lý', status: 'Warning' },
-        processed: { text: 'Đã xử lý', status: 'Success' },
+        'Chờ xử lý': { text: 'Chờ xử lý', status: 'Warning' },
+        'Đã liên hệ': { text: 'Đã liên hệ', status: 'Success' },
+        'Đã hủy': { text: 'Đã hủy', status: 'Error' },
       },
       render: (_, record) => {
-        const st = statusMap[record.status] || statusMap['pending'];
+        const st = statusMap[record.status] || statusMap['Chờ xử lý'];
         return <Tag color={st.color}>{st.text}</Tag>;
       },
     },
@@ -98,23 +108,28 @@ const ContactManagementPage: React.FC = () => {
       width: 150,
       render: (_, record) => (
         <Space>
-          {record.status !== 'processed' && (
-            <Popconfirm
-              title="Đánh dấu đã tư vấn / xử lý liên hệ này?"
-              onConfirm={() => handleUpdateStatus(record._id, 'processed')}
-              okText="Xác nhận"
-              cancelText="Hủy"
-            >
-              <Button type="link" icon={<CheckCircleOutlined />} title="Đánh dấu đã xử lý" />
-            </Popconfirm>
-          )}
+          <Dropdown
+            menu={{
+              items: [
+                { key: 'Chờ xử lý', label: 'Chờ xử lý', disabled: record.status === 'Chờ xử lý' },
+                { key: 'Đã liên hệ', label: 'Đã liên hệ', disabled: record.status === 'Đã liên hệ' },
+                { key: 'Đã hủy', label: 'Đã hủy', disabled: record.status === 'Đã hủy' },
+              ],
+              onClick: ({ key }) => handleUpdateStatus(record.id, key),
+            }}
+            trigger={['click']}
+          >
+            <Button type="link" size="small">
+              Trạng thái <DownOutlined />
+            </Button>
+          </Dropdown>
           <Popconfirm
             title="Bạn chắc chắn muốn xóa liên hệ này?"
-            onConfirm={() => handleDelete(record._id)}
+            onConfirm={() => handleDelete(record.id)}
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button type="link" danger icon={<DeleteOutlined />} title="Xóa" />
+            <Button type="link" size="large" danger icon={<DeleteOutlined />} title="Xóa" />
           </Popconfirm>
         </Space>
       ),
@@ -125,13 +140,13 @@ const ContactManagementPage: React.FC = () => {
     <ProTable<ContactItem>
       columns={columns}
       actionRef={actionRef}
-      rowKey="_id"
+      rowKey="id"
       headerTitle="Quản lý khách hàng liên hệ"
       search={{ labelWidth: 'auto' }}
       pagination={{ pageSize: 10 }}
       request={async (params) => {
         try {
-          const res = await request('GET', '/list', null, {
+          const res = await request('GET', '', null, {
             page: params.current || 1,
             limit: params.pageSize || 10,
           });
