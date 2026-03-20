@@ -18,6 +18,7 @@ interface UserItem {
   account: string;
   role: Role;
   status: 'ACTIVE' | 'INACTIVE';
+  phone?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -34,6 +35,7 @@ type UserFormValues = {
   name: string;
   account: string;
   password?: string;
+  phone?: string;
   role: Role;
   status?: 'ACTIVE' | 'INACTIVE';
 };
@@ -68,13 +70,13 @@ const UsersPage: React.FC = () => {
       message.error('Bạn không thể tự khóa tài khoản của chính mình!');
       return;
     }
-    
+
     try {
       const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       await patch(user.id, { status: newStatus });
       actionRef.current?.reload();
     } catch (error) {
-       // handled by hook
+      // handled by hook
     }
   };
 
@@ -87,7 +89,7 @@ const UsersPage: React.FC = () => {
       await remove(id);
       actionRef.current?.reload();
     } catch (error) {
-       // handled by hook
+      // handled by hook
     }
   };
 
@@ -95,6 +97,12 @@ const UsersPage: React.FC = () => {
     {
       title: 'Họ tên',
       dataIndex: 'name',
+      width: 200,
+    },
+    {
+      title: 'Số điện thoại',
+      dataIndex: 'phone',
+      width: 150,
     },
     {
       title: 'Tên đăng nhập',
@@ -196,8 +204,9 @@ const UsersPage: React.FC = () => {
               page: params.current || 1,
               limit: params.pageSize || 10,
             };
-            
+
             if (params.name) queryParams.name = params.name;
+            if (params.phone) queryParams.phone = params.phone;
             if (params.account) queryParams.account = params.account;
             if (params.role) queryParams.role = params.role;
             if (params.status) queryParams.status = params.status;
@@ -238,6 +247,7 @@ const UsersPage: React.FC = () => {
               name: values.name,
               account: values.account,
               role: values.role,
+              ...(values.phone && { phone: values.phone }),
               ...(values.status && { status: values.status }),
             };
             if (values.password) {
@@ -270,6 +280,13 @@ const UsersPage: React.FC = () => {
           label="Tên đăng nhập"
           placeholder="Nhập tên đăng nhập"
           rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]}
+        />
+
+        <ProFormText
+          name="phone"
+          label="Số điện thoại"
+          placeholder="Nhập số điện thoại"
+          rules={[{ required: false, message: 'Vui lòng nhập số điện thoại' }, { pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ' }]}
         />
 
         {!editingUser && (

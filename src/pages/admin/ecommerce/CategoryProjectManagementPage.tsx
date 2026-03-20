@@ -81,7 +81,6 @@ const CategoryProjectManagementPage: React.FC = () => {
               if (record.id) {
                 await remove(record.id);
                 actionRef.current?.reload();
-                message.success('Xóa danh mục công trình thành công');
 
               }
             }}

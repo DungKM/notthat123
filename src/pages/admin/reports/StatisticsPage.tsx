@@ -42,6 +42,9 @@ import {
   toSafeNumber,
 } from "@/src/utils/format";
 import { useAuth } from "@/src/auth/hooks/useAuth";
+import { useAdvanceRequestService } from "@/src/api/services";
+import { useRef } from "react";
+import type { ActionType } from "@ant-design/pro-components";
 
 interface ProjectOption {
   label: string;
@@ -110,6 +113,8 @@ const MOCK_ATTENDANCE_WORK: AttendanceWorkRecord[] = [
 
 const StatisticsPage: React.FC = () => {
   const { user } = useAuth();
+  const advanceActionRef = useRef<ActionType>(null);
+  const { request, create } = useAdvanceRequestService();
   const [attendanceOpen, setAttendanceOpen] = useState(false);
   const [advanceOpen, setAdvanceOpen] = useState(false);
   const [records, setRecords] = useState<AttendanceWorkRecord[]>(
@@ -148,10 +153,19 @@ const StatisticsPage: React.FC = () => {
   const penalty = toSafeNumber(employeeInfo.penalty);
   const advance = toSafeNumber(employeeInfo.advance);
   const estimatedSalary = baseSalary + bonus - penalty - advance;
+
   const handleCreateRequest = async (values: any) => {
-    // Giả lập thêm yêu cầu ứng tiền vào danh sách (có thể thay bằng API)
-    message.success("Yêu cầu ứng tiền đã được gửi");
-    return true;
+    try {
+      await create({
+        amount: Number(values.amount),
+        reason: values.reason,
+      });
+      message.success("Yêu cầu ứng tiền đã được gửi thành công");
+      advanceActionRef.current?.reload();
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleSubmitAttendance = async (values: any) => {
@@ -255,10 +269,10 @@ const StatisticsPage: React.FC = () => {
     },
     {
       title: "Ngày yêu cầu",
-      dataIndex: "requestDate",
+      dataIndex: "createdAt",
       valueType: "dateTime",
       hideInSearch: true,
-      render: (_, record) => formatDateTime(record.requestDate),
+      render: (_, record) => formatDateTime((record as any).createdAt || record.requestDate),
     },
     {
       title: "Số tiền",
@@ -410,20 +424,30 @@ const StatisticsPage: React.FC = () => {
       >
 
         <ProTable<AdvanceRequest>
+          actionRef={advanceActionRef}
           columns={advanceColumns}
-          rowKey="id"
+          rowKey={(record) => record.id || (record as any)._id}
           search={{ labelWidth: "auto", defaultCollapsed: false }}
           request={async (params) => {
-            let data = myAdvanceRequests;
-            if (params.requestDateFilter) {
-              data = data.filter((item) =>
-                dayjs(item.requestDate).isSame(params.requestDateFilter, "day"),
-              );
+            try {
+              const res = await request('GET', '', null, {
+                page: params.current || 1,
+                limit: params.pageSize || 10,
+              });
+              let data = res.data || [];
+              if (params.requestDateFilter) {
+                data = data.filter((item: AdvanceRequest) =>
+                  dayjs((item as any).createdAt || item.requestDate).isSame(params.requestDateFilter, "day"),
+                );
+              }
+              return {
+                data,
+                success: true,
+                total: res.meta?.total || 0,
+              };
+            } catch {
+              return { data: [], success: false, total: 0 };
             }
-            return {
-              data,
-              success: true,
-            };
           }}
           pagination={{ pageSize: 5 }}
           options={false}
@@ -536,7 +560,7 @@ const StatisticsPage: React.FC = () => {
           fieldProps={{
             formatter: (value) =>
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-            parser: (value) => Number(value!.replace(/\$\s?|,*/g, "")),
+            parser: (value) => value ? Number(value.replace(/\$\s?|,*/g, "")) : 0,
             addonAfter: "đ",
           }}
           rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}

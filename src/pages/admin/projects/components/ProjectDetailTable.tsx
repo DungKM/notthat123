@@ -19,7 +19,7 @@ const { Text } = Typography;
 interface ProjectDetailTableProps {
   projectId: string;
   details: ProjectDetail[];
-  onUpdate: (details: ProjectDetail[]) => void;
+  onUpdate: (details: ProjectDetail[], saveToServer?: boolean, singleRowData?: ProjectDetail, action?: 'save' | 'delete') => void;
   role: Role;
   nameColumnTitle?: string;
 }
@@ -130,7 +130,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           danger
           key="delete"
           onClick={() => {
-            onUpdate(details.filter((item) => item.id !== record.id));
+            onUpdate(details.filter((item) => item.id !== record.id), true, record, 'delete');
             message.success("Đã xóa dòng");
           }}
         >
@@ -178,9 +178,10 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       price: 0,
       amount: 0,
       costPrice: 0,
+      isCompanyProduct: true,
       note: "",
     };
-    onUpdate([newRow, ...details]);
+    onUpdate([newRow, ...details], false); // Chỉ cập nhật UI, không gọi API patch toàn bộ
     setEditableRowKeys([newId]);
   };
 
@@ -285,7 +286,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         recordCreatorProps={false}
         columns={columns}
         value={details}
-        onChange={onUpdate}
+        onChange={(newDetails) => onUpdate(newDetails as ProjectDetail[], false)}
         rowSelection={{
           selectedRowKeys,
           onChange: setSelectedRowKeys,
@@ -300,7 +301,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             const updatedDetails = details.map((item) =>
               item.id === rowKey ? newData : item,
             );
-            onUpdate(updatedDetails);
+            onUpdate(updatedDetails, true, newData, 'save');
+          },
+          onDelete: async (rowKey, row) => {
+            const updatedDetails = details.filter((item) => item.id !== rowKey);
+            const deletedRow = details.find((item) => item.id === rowKey) || (row as ProjectDetail);
+            onUpdate(updatedDetails, true, deletedRow, 'delete');
           },
           actionRender: (row, config, defaultDoms) => {
             return [defaultDoms.save, defaultDoms.delete, defaultDoms.cancel];

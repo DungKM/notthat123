@@ -3,6 +3,8 @@ import {
   ModalForm,
   ProFormText,
   ProFormSelect,
+  ProFormDatePicker,
+  ProFormGroup,
 } from '@ant-design/pro-components';
 import { Role } from '@/src/auth/types';
 import { mockUsers } from '@/src/auth/mockUsers';
@@ -59,11 +61,20 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         label="Số điện thoại"
         rules={[{ required: true }]}
       />
-      <ProFormText
-        name="estimatedTime"
-        label="Ước lượng thời gian hoàn thành"
-        rules={[{ required: true }]}
-      />
+      <ProFormGroup>
+        <ProFormDatePicker
+          name="startDate"
+          label="Ngày bắt đầu"
+          rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu' }]}
+          transform={(value) => ({ startDate: value ? new Date(value).toISOString() : value })}
+        />
+        <ProFormDatePicker
+          name="endDate"
+          label="Ngày kết thúc"
+          rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc' }]}
+          transform={(value) => ({ endDate: value ? new Date(value).toISOString() : value })}
+        />
+      </ProFormGroup>
 
       {/* Ẩn các trường chỉnh sửa cao cấp với Công trình */}
       {!isSiteManager && (

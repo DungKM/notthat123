@@ -4,8 +4,8 @@ import { ProCard, PageContainer } from '@ant-design/pro-components';
 import { Button, Tag, Row, Col, message, Spin, Typography } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 import { Project, Role } from '@/src/types';
-import { MOCK_PROJECTS } from '@/src/mockData';
 import { useAuth } from '@/src/auth/hooks/useAuth';
+import { useProjectService } from '@/src/api/services';
 import { useNotifications } from '@/src/hooks/useNotifications';
 
 import ProjectDetailTable from './components/ProjectDetailTable';
@@ -22,18 +22,29 @@ const ProjectDetailPage: React.FC = () => {
   const [progressModalVisible, setProgressModalVisible] = useState(false);
 
   const [loading, setLoading] = useState(true);
+  const { request, patch } = useProjectService();
   const { addNotification } = useNotifications(user?.id);
 
   useEffect(() => {
-    // Giả lập load dữ liệu từ mock data
-    const found = MOCK_PROJECTS.find(p => p.id === id);
-    if (found) {
-      setProject(found);
-    } else {
-      message.error('Không tìm thấy dự án');
-      navigate('/quan-tri/cong-trinh');
-    }
-    setLoading(false);
+    if (!id) return;
+    const fetchProject = async () => {
+      try {
+        setLoading(true);
+        const res = await request('GET', `/${id}`);
+        if (res.data) {
+          setProject(res.data);
+        } else {
+          message.error('Không tìm thấy dự án');
+          navigate('/quan-tri/cong-trinh');
+        }
+      } catch (err) {
+        message.error('Không tìm thấy dự án');
+        navigate('/quan-tri/cong-trinh');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProject();
   }, [id, navigate]);
 
   if (loading || !project || !user) {
@@ -46,21 +57,59 @@ const ProjectDetailPage: React.FC = () => {
 
 
   const handleUpdateProject = async (values: any) => {
-    const updated = { ...project, ...values };
-    setProject(updated);
-    message.success('Cập nhật thông tin dự án thành công');
-    setEditModalVisible(false);
-    return true;
+    if (!project) return false;
+    try {
+      await patch(project.id || (project as any)._id, values);
+      const updated = { ...project, ...values };
+      setProject(updated);
+      setEditModalVisible(false);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
-  const handleUpdateDetails = (newDetails: any[]) => {
+  const handleUpdateDetails = async (newDetails: any[], saveToServer = true, singleRowData?: any, action?: 'save' | 'delete') => {
     if (!project) return;
     setProject({ ...project, details: newDetails });
+
+    if (saveToServer) {
+      try {
+        if (singleRowData) {
+          const projectId = project.id || (project as any)._id;
+          const detailId = singleRowData.id || singleRowData._id;
+          const isNew = String(detailId).length !== 24;
+
+          if (action === 'delete') {
+            if (!isNew) {
+              await request('DELETE', `/${projectId}/details/${detailId}`);
+            }
+          } else {
+            if (isNew) {
+              await request('POST', `/${projectId}/details`, singleRowData);
+              const res = await request('GET', `/${projectId}`);
+              if (res.data) setProject(res.data);
+            } else {
+              await request('PATCH', `/${projectId}/details/${detailId}`, singleRowData);
+            }
+          }
+        } else {
+          await patch(project.id || (project as any)._id, { details: newDetails });
+        }
+      } catch (e) {
+        message.error('Lỗi khi cập nhật chi tiết');
+      }
+    }
   };
 
-  const handleUpdateProgress = (newProgress: any[]) => {
+  const handleUpdateProgress = async (newProgress: any[]) => {
     if (!project) return;
-    setProject({ ...project, progress: newProgress });
+    try {
+      await patch(project.id || (project as any)._id, { progress: newProgress });
+      setProject({ ...project, progress: newProgress });
+    } catch (e) {
+      // lỗi api
+    }
   };
 
   return (
@@ -105,7 +154,7 @@ const ProjectDetailPage: React.FC = () => {
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <Typography.Text type="secondary" style={{ display: 'block', marginBottom: '4px' }}>Người tạo dự án</Typography.Text>
-                  <Typography.Text strong style={{ fontSize: '16px', color: '#1890ff' }}>{project.createdBy || 'N/A'}</Typography.Text>
+                  <Typography.Text strong style={{ fontSize: '16px', color: '#1890ff' }}>{project.createdById?.name || (typeof project.createdById === 'string' ? project.createdById : 'N/A')}</Typography.Text>
                 </div>
               </Col>
               <Col xs={24} md={12}>
@@ -132,12 +181,12 @@ const ProjectDetailPage: React.FC = () => {
                       }
                       setProgressModalVisible(true);
                     }}
-                    style={{ 
-                      padding: 0, 
-                      fontSize: '16px', 
-                      fontWeight: 500, 
-                      height: 'auto', 
-                      textDecoration: project.status === 'Chờ duyệt' ? 'none' : 'underline', 
+                    style={{
+                      padding: 0,
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      height: 'auto',
+                      textDecoration: project.status === 'Chờ duyệt' ? 'none' : 'underline',
                       color: project.status === 'Chờ duyệt' ? '#ccc' : 'red',
                       cursor: project.status === 'Chờ duyệt' ? 'not-allowed' : 'pointer'
                     }}

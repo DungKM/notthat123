@@ -85,3 +85,5 @@ export const useVideoService = () => useApi<any>('/videos');
 
 // ─── Reviews ───
 export const useReviewService = () => useApi<any>('/reviews');
+
+export const useAdvanceRequestService = () => useApi<any>('/advance-requests');

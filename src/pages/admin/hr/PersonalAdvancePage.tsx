@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  ProTable, 
-  ProColumns, 
-  ModalForm, 
-  ProFormDigit, 
-  ProFormTextArea, 
-  ProFormUploadButton as RawProFormUploadButton 
+import {
+  ProTable,
+  ProColumns,
+  ModalForm,
+  ProFormDigit,
+  ProFormTextArea,
+  ProFormUploadButton as RawProFormUploadButton
 } from '@ant-design/pro-components';
 
 // Workaround: ProFormUploadButton bị export sai type

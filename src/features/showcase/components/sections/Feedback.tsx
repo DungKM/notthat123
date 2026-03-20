@@ -5,38 +5,42 @@ import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useReviewService } from '@/src/api/services';
 
-// Dữ liệu mẫu đánh giá của khách hàng
-const initialFeedbacks = [
-  {
-    id: 1,
-    name: 'Nguyễn Văn A',
-    avatar: 'https://i.pravatar.cc/150?img=11',
-    rating: 5,
-    content: 'Đội ngũ thi công rất chuyên nghiệp, thiết kế tinh tế. Tôi hoàn toàn hài lòng với không gian sống mới của gia đình.',
-    date: '10/03/2026',
-  },
-  {
-    id: 2,
-    name: 'Trần Thị B',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-    rating: 5,
-    content: 'Chất lượng gỗ óc chó thực sự khác biệt, mịn màng và sang trọng. Tiến độ hoàn thành đúng như cam kết ban đầu.',
-    date: '05/03/2026',
-  },
-  {
-    id: 3,
-    name: 'Phạm Minh C',
-    avatar: 'https://i.pravatar.cc/150?img=8',
-    rating: 4,
-    content: 'Thiết kế đẹp, tư vấn nhiệt tình. Khâu bảo hành cũng rất nhanh gọn. Tuy nhiên, giá có cao hơn mặt bằng chung một chút nhưng đáng tiền.',
-    date: '28/02/2026',
-  },
-];
+interface FeedbackItem {
+  id: string | number;
+  name: string;
+  avatar: string;
+  rating: number;
+  content: string;
+  date: string;
+}
 
 const Feedback: React.FC = () => {
   const { t } = useTranslation();
-  const [feedbacks, setFeedbacks] = useState(initialFeedbacks);
-  const { create } = useReviewService();
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const { create, request } = useReviewService();
+
+  React.useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const res = await request('GET', '', null, { page: 1, limit: 10 });
+        if (res.data) {
+          const formatted = res.data.map((r: any) => ({
+            id: r.id || r._id,
+            name: r.fullName,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(r.fullName)}&background=random`,
+            rating: r.rating || 5,
+            content: r.description,
+            date: new Date(r.createdAt || Date.now()).toLocaleDateString('vi-VN'),
+          }));
+          setFeedbacks(formatted);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách đánh giá', error);
+      }
+    };
+    fetchFeedbacks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // State cho form đánh giá
   const [formData, setFormData] = useState({
@@ -93,8 +97,8 @@ const Feedback: React.FC = () => {
 
         await create(payload);
 
-        // Giả lập đưa feedback mới lên UI (nếu có API list sẽ fetch lại)
-        const newFeedback = {
+        // Hiển thị ngay feedback mới lên UI
+        const newFeedback: FeedbackItem = {
           id: Date.now(),
           name: formData.name,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`,

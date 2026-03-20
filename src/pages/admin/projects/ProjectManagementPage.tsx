@@ -8,75 +8,74 @@ import {
   ProFormText,
   ProFormTextArea,
   ProFormSelect,
+  ProFormDatePicker,
+  ProFormGroup,
 } from '@ant-design/pro-components';
 import { Project, Role } from '@/src/types';
-import { MOCK_PROJECTS } from '@/src/mockData';
 import { mockUsers } from '@/src/auth/mockUsers';
 import { Tag, Button, Space, message, Row, Col, Statistic, Popconfirm } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, ToolOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useProjectService } from '@/src/api/services';
 
 const ProjectManagementPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const actionRef = useRef<ActionType>(null);
-  const [projects, setProjects] = useState<Project[]>(MOCK_PROJECTS);
+  const { request, create, patch, remove } = useProjectService();
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
 
   if (!user) return null;
 
   const isSiteManager = user.role === Role.SITE_MANAGER;
 
-  const displayProjects = isSiteManager
-    ? projects.filter(p => p.managerId === user.id)
-    : projects;
-
-  const activeProjects = displayProjects.filter(p => p.status === 'Duyệt');
-
   const managerOptions = mockUsers
     .filter(u => u.role === Role.SITE_MANAGER || u.role === Role.STAFF)
     .map(u => ({ label: u.name, value: u.id }));
 
   const handleCreate = async (values: any) => {
-    const newProject: Project = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: values.name,
-      address: values.address,
-      ownerName: values.ownerName,
-      ownerPhone: values.ownerPhone,
-      managerId: values.managerId,
-      status: values.status,
-      createdAt: dayjs().toISOString(),
-      details: [],
-    };
-
-    setProjects([newProject, ...projects]);
-    message.success('Tạo dự án thành công!');
-    setCreateModalVisible(false);
-    return true;
+    try {
+      const payload = {
+        ...values,
+        managerId: isSiteManager ? user.id : values.managerId,
+        status: isSiteManager ? 'Chờ duyệt' : (values.status || 'Duyệt'),
+      };
+      await create(payload);
+      actionRef.current?.reload();
+      message.success('Tạo dự án thành công!');
+      setCreateModalVisible(false);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleUpdate = async (values: any) => {
     if (!selectedProject) return false;
+    try {
+      await patch(selectedProject.id || selectedProject._id, values);
+      actionRef.current?.reload();
+      message.success('Cập nhật dự án thành công!');
+      setEditModalVisible(false);
+      setSelectedProject(null);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
-    const updatedProjects = projects.map(p =>
-      p.id === selectedProject.id
-        ? {
-          ...p,
-          ...values
-        }
-        : p
-    );
-
-    setProjects(updatedProjects);
-    message.success('Cập nhật dự án thành công!');
-    setEditModalVisible(false);
-    setSelectedProject(null);
-    return true;
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(id);
+      actionRef.current?.reload();
+      message.success('Đã xóa dự án');
+    } catch {
+      // handled
+    }
   };
 
   const columns: ProColumns<Project>[] = [
@@ -139,13 +138,10 @@ const ProjectManagementPage: React.FC = () => {
             </Button>,
             <Popconfirm
               key="delete"
-              title="Xác nhận xóa?"
-              onConfirm={() => {
-                setProjects(projects.filter(p => p.id !== record.id));
-                message.success('Đã xóa');
-              }}
+              title="Xóa dự án này?"
+              onConfirm={() => handleDelete(record.id || (record as any)._id)}
             >
-              <a style={{ color: '#ff4d4f' }}><DeleteOutlined /></a>
+              <Button type="link" size="large" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           );
         }
@@ -170,15 +166,32 @@ const ProjectManagementPage: React.FC = () => {
         </Col>
       </Row> */}
 
-      <ProTable<Project>
+      <ProTable<any>
         headerTitle="Danh sách công trình / dự án"
-        columns={columns}
+        columns={columns as ProColumns<any>[]}
         search={false}
         actionRef={actionRef}
-        dataSource={displayProjects}
-        rowKey="id"
-        // search={{ labelWidth: 'auto' }}
-        pagination={{ pageSize: 10 }}
+        rowKey={(record) => record.id || record._id}
+        request={async (params) => {
+          try {
+            const queryParams: any = {
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+            };
+            if (isSiteManager) {
+              queryParams.managerId = user.id;
+            }
+            const res = await request('GET', '', null, queryParams);
+            return {
+              data: res.data || [],
+              success: true,
+              total: res.meta?.total || 0,
+            };
+          } catch (e) {
+            return { data: [], success: false, total: 0 };
+          }
+        }}
+        pagination={{ pageSize: 10, showSizeChanger: true }}
         scroll={{ x: 1000 }}
         toolBarRender={() => {
           const canCreate = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT || isSiteManager;
@@ -201,6 +214,20 @@ const ProjectManagementPage: React.FC = () => {
         <ProFormText name="address" label="Địa chỉ" rules={[{ required: true }]} />
         <ProFormText name="ownerName" label="Chủ nhà" rules={[{ required: true }]} />
         <ProFormText name="ownerPhone" label="Số điện thoại" rules={[{ required: true }]} />
+        <ProFormGroup>
+          <ProFormDatePicker
+            name="startDate"
+            label="Ngày bắt đầu"
+            rules={[{ required: true }]}
+            transform={(value) => ({ startDate: value ? new Date(value).toISOString() : value })}
+          />
+          <ProFormDatePicker
+            name="endDate"
+            label="Ngày kết thúc"
+            rules={[{ required: true }]}
+            transform={(value) => ({ endDate: value ? new Date(value).toISOString() : value })}
+          />
+        </ProFormGroup>
         <ProFormSelect
           name="managerId"
           label="Người đảm nhiệm"
@@ -210,8 +237,8 @@ const ProjectManagementPage: React.FC = () => {
         <ProFormSelect
           name="status"
           label="Trạng thái"
-          options={['Chưa duyệt', 'Duyệt']}
-          initialValue="Chưa duyệt"
+          options={['Chờ duyệt', 'Duyệt']}
+          initialValue="Chờ duyệt"
         />
       </ModalForm>
 
@@ -228,6 +255,20 @@ const ProjectManagementPage: React.FC = () => {
         <ProFormText name="address" label="Địa chỉ" rules={[{ required: true }]} />
         <ProFormText name="ownerName" label="Chủ nhà" rules={[{ required: true }]} />
         <ProFormText name="ownerPhone" label="Số điện thoại" rules={[{ required: true }]} />
+        <ProFormGroup>
+          <ProFormDatePicker
+            name="startDate"
+            label="Ngày bắt đầu"
+            rules={[{ required: true }]}
+            transform={(value) => ({ startDate: value ? new Date(value).toISOString() : value })}
+          />
+          <ProFormDatePicker
+            name="endDate"
+            label="Ngày kết thúc"
+            rules={[{ required: true }]}
+            transform={(value) => ({ endDate: value ? new Date(value).toISOString() : value })}
+          />
+        </ProFormGroup>
         <ProFormSelect
           name="managerId"
           label="Người đảm nhiệm"
@@ -237,7 +278,7 @@ const ProjectManagementPage: React.FC = () => {
         <ProFormSelect
           name="status"
           label="Trạng thái"
-          options={['Chưa duyệt', 'Duyệt']}
+          options={['Chờ duyệt', 'Duyệt']}
         />
       </ModalForm>
     </div>
