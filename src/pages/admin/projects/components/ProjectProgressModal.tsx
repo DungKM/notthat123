@@ -6,14 +6,9 @@ import {
   HistoryOutlined,
 } from "@ant-design/icons";
 import { ProjectProgress, ProjectStatus } from "@/src/types";
-import { mockUsers } from "@/src/auth/mockUsers";
 import { Role } from "@/src/auth/types";
 import dayjs from "dayjs";
-
-// Lấy danh sách nhân viên có thể giao việc (Staff + Site Manager)
-const assignableEmployees = mockUsers.filter(
-  (u) => u.role === Role.STAFF || u.role === Role.SITE_MANAGER
-);
+import { useUserService } from "@/src/api/services";
 const statusOptions: ProjectStatus[] = [
   'Tư vấn + gặp khách + khảo sát',
   'Lập dự toán ngân sách',
@@ -44,6 +39,34 @@ const ProjectProgressModal: React.FC<Props> = ({
     null
   );
   const [historyOpen, setHistoryOpen] = useState(false);
+  const { list: users, getAll } = useUserService();
+
+  React.useEffect(() => {
+    if (open) {
+      // Fetch user list when modal opens with limit to ensure we get a sufficient list of assignable employees
+      getAll({ page: 1, limit: 1000 }).catch(console.error);
+    } else {
+      // Reset khi đóng phòng trường hợp mở lại dự án khác
+      setCurrentStatus(null);
+    }
+  }, [open, getAll]);
+
+  // Luôn lấy trạng thái mới nhất từ server/props đưa vào UI để tiếp tục (nếu chưa có hoặc nếu vừa lưu xong)
+  React.useEffect(() => {
+    if (open && progress && progress.length > 0) {
+      const lastProgress = progress[progress.length - 1];
+      // Chỉ tự động điền nếu đang không làm việc nháp trên trạng thái khác
+      // Hoặc nếu nó là kết quả vừa nạp mới từ việc Save (project.progress thay đổi)
+      if (!currentStatus || currentStatus.id === lastProgress.id) {
+        setCurrentStatus(lastProgress);
+      }
+    }
+  }, [open, progress]);
+
+  // Lấy danh sách nhân viên có thể giao việc (Staff + Site Manager)
+  const assignableEmployees = (users || []).filter(
+    (u: any) => u.role === Role.STAFF || u.role === Role.SITE_MANAGER
+  );
 
   const archiveCurrentStatus = () => {
     if (!currentStatus) return;
@@ -123,6 +146,26 @@ const ProjectProgressModal: React.FC<Props> = ({
           ),
         };
         setCurrentStatus(updated);
+        message.success("Lưu tiến độ dự án thành công!");
+        
+        // Gửi notification
+        if (onTaskAssigned) {
+          unsavedTasks.forEach(task => {
+            if (task.employee) {
+              const matchedUser = users?.find(u => u.id === task.employee);
+              if (matchedUser) {
+                onTaskAssigned({
+                  employeeId: matchedUser.id,
+                  employeeName: matchedUser.name,
+                  work: task.work
+                });
+              }
+            }
+          });
+        }
+
+      } else {
+        message.error("Có lỗi xảy ra khi lưu tiến độ!");
       }
     } else {
       // Fallback local update
@@ -131,10 +174,13 @@ const ProjectProgressModal: React.FC<Props> = ({
         tasks: currentStatus.tasks.map((t) => ({
           ...t,
           updatedAt: dayjs().toISOString(),
+          isSaved: true
         })),
       };
-      setCurrentStatus(updated);
-      message.success("Đã lưu thông tin trạng thái hiện tại");
+      
+      onUpdate([...progress, updated]);
+      setCurrentStatus(null);
+      message.success("Đã lưu tiến độ vào lịch sử");
     }
   };
 
@@ -267,14 +313,6 @@ const ProjectProgressModal: React.FC<Props> = ({
                         }
                       />
                     ),
-                  },
-                  {
-                    title: "Trạng thái",
-                    width: 100,
-                    dataIndex: "isSaved",
-                    render: (_, record: any) => record.isSaved ? 
-                      <span style={{color: 'green'}}>Đã lưu</span> : 
-                      <span style={{color: 'orange'}}>Chưa lưu</span>
                   },
                   {
                     title: "Cập nhật",

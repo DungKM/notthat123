@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { ProTable, ProColumns, ModalForm, ProFormTextArea, ProFormUploadButton as RawProFormUploadButton } from '@ant-design/pro-components';
+import React, { useState, useRef } from 'react';
+import { ProTable, ProColumns, ModalForm, ProFormTextArea, ProFormUploadButton as RawProFormUploadButton, ActionType } from '@ant-design/pro-components';
 
 // Workaround: ProFormUploadButton bị export sai type
 const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { User, AdvanceRequest } from '@/src/types';
-import { MOCK_ADVANCE_REQUESTS } from '@/src/mockData';
 import { Tag, Button, Space, Typography, Badge, message, Descriptions } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, FileImageOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { formatCurrency, formatDateTime } from '@/src/utils/format';
+import { useAdvanceRequestService } from '@/src/api/services';
 
 const { Text } = Typography;
 
@@ -17,15 +17,20 @@ interface AdvanceApprovalProps {
 }
 
 const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) => {
-  const [advanceRequests, setAdvanceRequests] = useState<AdvanceRequest[]>(MOCK_ADVANCE_REQUESTS as AdvanceRequest[]);
   const [approveModalVisible, setApproveModalVisible] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<AdvanceRequest | null>(null);
+  
+  const actionRef = useRef<ActionType>(null);
+  const { request, patch } = useAdvanceRequestService();
+  // State pendingCount dùng để đếm số lượng chờ duyệt trên màn hình
+  const [pendingCount, setPendingCount] = useState(0);
 
   const advanceColumns: ProColumns<AdvanceRequest>[] = [
     {
       title: 'Nhân viên',
       dataIndex: 'employeeName',
       width: 150,
+      render: (_, record: any) => record.employeeId?.name || record.employeeName || 'Unknown',
     },
     {
       title: 'Số tiền',
@@ -49,10 +54,10 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
     },
     {
       title: 'Ngày yêu cầu',
-      dataIndex: 'requestDate',
+      dataIndex: 'createdAt',
       valueType: 'dateTime',
       hideInSearch: true,
-      render: (val) => formatDateTime(String(val)),
+      render: (_, record: any) => formatDateTime(String(record.createdAt || record.requestDate)),
       width: 200,
 
     },
@@ -123,47 +128,43 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
   const handleApprove = async (values: any) => {
     if (!selectedRequest) return false;
 
-    const updatedRequests = advanceRequests.map((req) =>
-      req.id === selectedRequest.id
-        ? {
-          ...req,
-          status: 'Đã duyệt' as const,
-          approvedBy: currentUser.name,
-          approvedDate: dayjs().toISOString(),
-          transferProof: values.transferProof?.[0]?.url || values.transferProof?.[0]?.response?.url,
-          note: values.note,
-        }
-        : req
-    );
+    try {
+      await patch(selectedRequest.id, {
+        status: 'Đã duyệt',
+        approvedBy: currentUser.name,
+        approvedDate: dayjs().toISOString(),
+        transferProof: values.transferProof?.[0]?.url || values.transferProof?.[0]?.response?.url,
+        note: values.note,
+      });
 
-    setAdvanceRequests(updatedRequests);
-    message.success('Đã duyệt yêu cầu ứng tiền!');
-    setApproveModalVisible(false);
-    setSelectedRequest(null);
-    return true;
+      message.success('Đã duyệt yêu cầu ứng tiền!');
+      setApproveModalVisible(false);
+      setSelectedRequest(null);
+      actionRef.current?.reload();
+      return true;
+    } catch (e) {
+      return false;
+    }
   };
 
-  const handleReject = (id: string) => {
-    const updatedRequests = advanceRequests.map((req) =>
-      req.id === id
-        ? {
-          ...req,
-          status: 'Từ chối' as const,
-          approvedBy: currentUser.name,
-          approvedDate: dayjs().toISOString(),
-          note: 'Yêu cầu không được chấp nhận',
-        }
-        : req
-    );
-    setAdvanceRequests(updatedRequests);
-    message.info('Đã từ chối yêu cầu');
+  const handleReject = async (id: string) => {
+    try {
+      await patch(id, {
+        status: 'Từ chối',
+        approvedBy: currentUser.name,
+        approvedDate: dayjs().toISOString(),
+        note: 'Yêu cầu không được chấp nhận',
+      });
+      message.info('Đã từ chối yêu cầu');
+      actionRef.current?.reload();
+    } catch (e) {
+      // error handled by api hook
+    }
   };
 
-  const viewRequestDetail = (record: AdvanceRequest) => {
-    message.info(`Chi tiết yêu cầu: ${record.employeeName} - ${formatCurrency(record.amount)}`);
+  const viewRequestDetail = (record: any) => {
+    message.info(`Chi tiết yêu cầu: ${record.employeeId?.name || record.employeeName} - ${formatCurrency(record.amount)}`);
   };
-
-  const pendingCount = advanceRequests.filter(r => r.status === 'Chờ duyệt').length;
 
   return (
     <div>
@@ -177,7 +178,32 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
           </Space>
         }
         columns={advanceColumns}
-        dataSource={advanceRequests}
+        actionRef={actionRef}
+        request={async (params) => {
+          try {
+            const queryParams: any = {
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+            };
+            
+            if (params.employeeName) queryParams.employeeName = params.employeeName;
+            if (params.reason) queryParams.reason = params.reason;
+            if (params.status) queryParams.status = params.status;
+
+            const res = await request('GET', '', null, queryParams);
+            
+            // Xóa pendingCount vì api không trả về tổng số lượng record chờ duyệt mà chỉ trả về page hiện tại
+            // Hoặc lấy từ meta data
+            
+            return {
+              data: res.data || [],
+              success: true,
+              total: res.meta?.total || 0,
+            };
+          } catch (e) {
+            return { data: [], success: false, total: 0 };
+          }
+        }}
         rowKey="id"
         search={{
           labelWidth: 'auto',
@@ -195,7 +221,7 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
       >
         {selectedRequest && (
           <Descriptions column={1} bordered style={{ marginBottom: 16 }}>
-            <Descriptions.Item label="Nhân viên">{selectedRequest.employeeName}</Descriptions.Item>
+            <Descriptions.Item label="Nhân viên">{(selectedRequest as any).employeeId?.name || selectedRequest.employeeName}</Descriptions.Item>
             <Descriptions.Item label="Số tiền">
               <Text strong style={{ fontSize: 16, color: '#1890ff' }}>
                 {formatCurrency(selectedRequest.amount)}
@@ -203,7 +229,7 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
             </Descriptions.Item>
             <Descriptions.Item label="Lý do">{selectedRequest.reason}</Descriptions.Item>
             <Descriptions.Item label="Ngày yêu cầu">
-              {formatDateTime(selectedRequest.requestDate)}
+              {formatDateTime((selectedRequest as any).createdAt || selectedRequest.requestDate)}
             </Descriptions.Item>
           </Descriptions>
         )}

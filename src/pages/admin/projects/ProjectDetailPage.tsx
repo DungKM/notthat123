@@ -134,27 +134,13 @@ const ProjectDetailPage: React.FC = () => {
           userId: task.employee
         });
 
-        // Add notification safely
-        if (task.employee) {
-          const matchedUser = require('@/src/auth/mockUsers').mockUsers.find((u: any) => u.id === task.employee || u.name === task.employee);
-          if (matchedUser) {
-            addNotification({
-              projectId: projectId,
-              projectName: project.name,
-              assigneeId: matchedUser.id,
-              assigneeName: matchedUser.name,
-              assignedById: user.id,
-              assignedByName: user.name,
-              taskDescription: task.work,
-            });
-          }
-        }
+        // Add notification safely đã được chuyển ra ngoài gọi qua onTaskAssigned để nhận diện đúng user từ API
       }
 
       // Refresh project to get the newly updated progress from server
       const res = await request('GET', `/${projectId}`);
       if (res.data) setProject(res.data);
-      
+
       return true;
     } catch (e) {
       return false;
@@ -288,7 +274,7 @@ const ProjectDetailPage: React.FC = () => {
           id: p.id || Math.random().toString(),
           status: (p.status || p.stage) as any,
           tasks: (p.tasks || p.updates || []).map((t: any) => ({
-             ...t,
+            ...t,
             id: t.id || Math.random().toString(),
             work: t.work || t.name,
             employee: t.employee || t.user,
