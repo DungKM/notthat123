@@ -105,10 +105,59 @@ const ProjectDetailPage: React.FC = () => {
   const handleUpdateProgress = async (newProgress: any[]) => {
     if (!project) return;
     try {
-      await patch(project.id || (project as any)._id, { progress: newProgress });
-      setProject({ ...project, progress: newProgress });
+      const backendProgress = newProgress.map(p => ({
+        stage: p.status || p.stage,
+        updates: (p.tasks || p.updates || []).map((t: any) => ({
+          name: t.work || t.name,
+          user: t.employee || t.user,
+          updatedAt: t.updatedAt
+        }))
+      }));
+
+      const currentProgStr = backendProgress.length > 0 ? backendProgress[backendProgress.length - 1].stage : project.currentProgress;
+
+      await patch(project.id || (project as any)._id, { progress: backendProgress, currentProgress: currentProgStr });
+      setProject({ ...project, progress: backendProgress, currentProgress: currentProgStr });
     } catch (e) {
       // lỗi api
+    }
+  };
+
+  const handleSaveProgressTasks = async (stage: string, tasks: any[]) => {
+    if (!project) return false;
+    const projectId = project.id || (project as any)._id;
+    try {
+      for (const task of tasks) {
+        await request('POST', `/${projectId}/progress`, {
+          stage: stage,
+          name: task.work,
+          userId: task.employee
+        });
+
+        // Add notification safely
+        if (task.employee) {
+          const matchedUser = require('@/src/auth/mockUsers').mockUsers.find((u: any) => u.id === task.employee || u.name === task.employee);
+          if (matchedUser) {
+            addNotification({
+              projectId: projectId,
+              projectName: project.name,
+              assigneeId: matchedUser.id,
+              assigneeName: matchedUser.name,
+              assignedById: user.id,
+              assignedByName: user.name,
+              taskDescription: task.work,
+            });
+          }
+        }
+      }
+
+      // Refresh project to get the newly updated progress from server
+      const res = await request('GET', `/${projectId}`);
+      if (res.data) setProject(res.data);
+      
+      return true;
+    } catch (e) {
+      return false;
     }
   };
 
@@ -193,8 +242,8 @@ const ProjectDetailPage: React.FC = () => {
                   >
                     {project.status === 'Chờ duyệt' ? 'Chưa thể xem tiến độ' : (
                       project.progress && project.progress.length > 0
-                        ? project.progress[project.progress.length - 1].status
-                        : 'Chưa có tiến độ'
+                        ? (project.progress[project.progress.length - 1].status || project.progress[project.progress.length - 1].stage)
+                        : (project.currentProgress || 'Chưa có tiến độ')
                     )}
                   </Button>
                 </div>
@@ -235,8 +284,20 @@ const ProjectDetailPage: React.FC = () => {
       <ProjectProgressModal
         open={progressModalVisible}
         onOpenChange={setProgressModalVisible}
-        progress={project.progress || []}
+        progress={(project.progress || []).map(p => ({
+          id: p.id || Math.random().toString(),
+          status: (p.status || p.stage) as any,
+          tasks: (p.tasks || p.updates || []).map((t: any) => ({
+             ...t,
+            id: t.id || Math.random().toString(),
+            work: t.work || t.name,
+            employee: t.employee || t.user,
+            updatedAt: t.updatedAt,
+            isSaved: true
+          }))
+        }))}
         onUpdate={handleUpdateProgress}
+        onSaveTasks={handleSaveProgressTasks}
         onTaskAssigned={(task) => {
           addNotification({
             projectId: project.id,

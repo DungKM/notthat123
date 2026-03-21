@@ -2,9 +2,12 @@ import React from 'react';
 import Container from '../ui/Container';
 import Button from '../ui/Button';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/src/routes/index';
 
 const Hero: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <section className="relative min-h-[600px] md:h-screen md:min-h-[700px] flex items-center pt-20 overflow-hidden">
@@ -31,10 +34,25 @@ const Hero: React.FC = () => {
             {t('hero.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-black">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-white text-white hover:bg-white hover:text-black"
+              onClick={() => navigate(ROUTES.CONG_TRINH)}
+            >
               {t('hero.btn_explore')}
             </Button>
-            <Button variant="primary" size="lg" className="bg-showcase-primary border-none hover:bg-showcase-hover">
+            <Button 
+              variant="primary" 
+              size="lg" 
+              className="bg-showcase-primary border-none hover:bg-showcase-hover"
+              onClick={() => {
+                const formElement = document.getElementById('tu-van-ngay-form');
+                if (formElement) {
+                  formElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
               {t('hero.btn_consult')}
             </Button>
           </div>

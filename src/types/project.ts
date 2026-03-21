@@ -1,9 +1,11 @@
 // ─── Project Types ───
 
 export interface ProjectProgressTask {
-  id: string;
-  work: string;
-  employee: string;
+  id?: string;
+  work?: string;
+  employee?: string;
+  name?: string; // Backend API format
+  user?: string; // Backend API format
   updatedAt: string;
 }
 
@@ -16,9 +18,11 @@ export type ProjectStatus =
   | 'Phát sinh hợp đồng';
 
 export interface ProjectProgress {
-  id: string;
-  status: ProjectStatus;
-  tasks: ProjectProgressTask[];
+  id?: string;
+  status?: ProjectStatus;
+  stage?: ProjectStatus; // Backend API format
+  tasks?: ProjectProgressTask[];
+  updates?: ProjectProgressTask[]; // Backend API format
 }
 
 export interface ProjectDetail {
@@ -55,4 +59,5 @@ export interface Project {
   createdAt: string;  // Thời gian tạo
   updatedAt: string;  // Thời gian cập nhật cuối
   progress?: ProjectProgress[]; // Dành cho luồng tiến độ bên ngoài
+  currentProgress?: string; // Trạng thái tiến độ hiện tại từ API
 }

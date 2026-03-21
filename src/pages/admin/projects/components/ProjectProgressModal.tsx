@@ -28,6 +28,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   progress: ProjectProgress[];
   onUpdate: (data: ProjectProgress[]) => void;
+  onSaveTasks?: (stage: string, tasks: any[]) => Promise<boolean>;
   onTaskAssigned?: (task: { employeeId: string; employeeName: string; work: string }) => void;
 }
 
@@ -36,6 +37,7 @@ const ProjectProgressModal: React.FC<Props> = ({
   onOpenChange,
   progress,
   onUpdate,
+  onSaveTasks,
   onTaskAssigned,
 }) => {
   const [currentStatus, setCurrentStatus] = useState<ProjectProgress | null>(
@@ -43,27 +45,13 @@ const ProjectProgressModal: React.FC<Props> = ({
   );
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // Lưu trạng thái hiện tại vào lịch sử (internal)
   const archiveCurrentStatus = () => {
     if (!currentStatus) return;
 
-    onUpdate([...progress, currentStatus]);
-
-    // Tạo thông báo cho từng task được giao
-    if (onTaskAssigned) {
-      currentStatus.tasks.forEach((task) => {
-        if (task.employee) {
-          const matchedUser = assignableEmployees.find((u) => u.id === task.employee || u.name === task.employee);
-          if (matchedUser) {
-            onTaskAssigned({
-              employeeId: matchedUser.id,
-              employeeName: matchedUser.name,
-              work: task.work,
-            });
-          }
-        }
-      });
-    }
+    // We no longer rely on patching the full array here if onSaveTasks is provided
+    // Data is saved to backend progressively via saveStatus.
+    // So we just visually reset currentStatus locally or rely on the parent to update the project
+    setCurrentStatus(null);
   };
 
   // Thêm trạng thái mới — nếu đang có trạng thái thì cảnh báo trước
@@ -109,23 +97,45 @@ const ProjectProgressModal: React.FC<Props> = ({
   };
 
   // Lưu — chỉ cập nhật thông tin đang nhập (không đẩy vào lịch sử)
-  const saveStatus = () => {
+  const saveStatus = async () => {
     if (!currentStatus) {
       message.warning("Không có trạng thái để lưu");
       return;
     }
 
-    // Cập nhật updatedAt cho tất cả task
-    const updated: ProjectProgress = {
-      ...currentStatus,
-      tasks: currentStatus.tasks.map((t) => ({
-        ...t,
-        updatedAt: dayjs().toISOString(),
-      })),
-    };
+    const unsavedTasks = currentStatus.tasks.filter(t => !(t as any).isSaved && t.work && t.employee);
+    
+    if (unsavedTasks.length === 0) {
+      // Just update updatedAt if needed locally
+      message.success("Đã ghi nhận ở giao diện. Vui lòng thêm công việc mới nếu muốn lưu lên hệ thống.");
+      return;
+    }
 
-    setCurrentStatus(updated);
-    message.success("Đã lưu thông tin trạng thái hiện tại");
+    if (onSaveTasks) {
+      const success = await onSaveTasks(currentStatus.status as string, unsavedTasks);
+      if (success) {
+        const updated: ProjectProgress = {
+          ...currentStatus,
+          tasks: currentStatus.tasks.map((t) => 
+            unsavedTasks.some(ut => ut.id === t.id) 
+              ? { ...t, isSaved: true, updatedAt: dayjs().toISOString() } as any
+              : t
+          ),
+        };
+        setCurrentStatus(updated);
+      }
+    } else {
+      // Fallback local update
+      const updated: ProjectProgress = {
+        ...currentStatus,
+        tasks: currentStatus.tasks.map((t) => ({
+          ...t,
+          updatedAt: dayjs().toISOString(),
+        })),
+      };
+      setCurrentStatus(updated);
+      message.success("Đã lưu thông tin trạng thái hiện tại");
+    }
   };
 
   const addTask = () => {
@@ -259,11 +269,19 @@ const ProjectProgressModal: React.FC<Props> = ({
                     ),
                   },
                   {
+                    title: "Trạng thái",
+                    width: 100,
+                    dataIndex: "isSaved",
+                    render: (_, record: any) => record.isSaved ? 
+                      <span style={{color: 'green'}}>Đã lưu</span> : 
+                      <span style={{color: 'orange'}}>Chưa lưu</span>
+                  },
+                  {
                     title: "Cập nhật",
                     dataIndex: "updatedAt",
-                    width: 180,
+                    width: 150,
                     render: (_, record) =>
-                      dayjs(record.updatedAt).format("HH:mm DD/MM/YYYY"),
+                      dayjs(record.updatedAt).format("HH:mm DD/MM"),
                   },
                 ]}
               />
