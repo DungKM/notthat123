@@ -14,6 +14,50 @@ import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import toast from 'react-hot-toast';
 import { useProductService } from '@/src/api/services';
 
+// ─── Mini card giống UI Sản phẩm bán chạy ───
+const StarRating: React.FC<{ rating?: number }> = ({ rating = 0 }) => (
+  <div className="flex gap-0.5 mt-1">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <svg key={star} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+        fill={star <= rating ? '#f59e0b' : 'none'}
+        stroke={star <= rating ? '#f59e0b' : '#d1d5db'}
+        strokeWidth={1.5} className="w-3.5 h-3.5">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      </svg>
+    ))}
+  </div>
+);
+
+const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
+  const image = product.images && product.images.length > 0
+    ? product.images[0].url
+    : 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800';
+  const priceText = product.price && product.price > 0
+    ? `${product.price.toLocaleString()}đ`
+    : 'Liên hệ';
+  return (
+    <Link to={`/san-pham/${product.slug || product.id}`}
+      className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+      <div className="overflow-hidden bg-gray-50">
+        <img src={image} alt={product.name}
+          className="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy" />
+      </div>
+      <div className="flex flex-col flex-1 p-3 gap-1">
+        <h3 className="text-sm text-gray-800 font-medium leading-snug line-clamp-2 min-h-[2.5rem]">
+          {product.name}
+        </h3>
+        <StarRating rating={0} />
+        <p className="text-[#a0522d] font-bold text-base mt-1">{priceText}</p>
+      </div>
+      <div className="px-3 pb-3">
+        <img src={deliveryLogo} alt="Giao lắp tại nhà" className="w-full h-auto object-contain rounded-lg" />
+      </div>
+    </Link>
+  );
+};
+
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>(); // Lấy slug thật từ URL
   const navigate = useNavigate();
@@ -234,31 +278,18 @@ const ProductDetailPage: React.FC = () => {
               </div>
 
               {/* Related Products */}
-              <div className="mt-32 border-t border-gray-100 pt-20">
-                <div className="text-center mb-12 space-y-4">
-                  <Badge variant="gold">GỢI Ý</Badge>
-
-                  <h2
-                    className="text-3xl font-bold text-teal-950 uppercase"
-                    style={{ fontFamily: "'Inter', sans-serif" }}
-                  >
-                    SẢN PHẨM KHÁC
+              <div className="mt-24 border-t border-gray-100 pt-16">
+                <div className="text-center mb-10 space-y-3">
+                  <Badge variant="gold">GỢI Ý CHO BẠN</Badge>
+                  <h2 className="text-2xl font-bold text-teal-950 uppercase"
+                    style={{ fontFamily: "'Inter', sans-serif" }}>
+                    SẢN PHẨM TƯƠNG TỰ
                   </h2>
-
-                  <div className="w-20 h-1 bg-showcase-primary mx-auto"></div>
+                  <div className="w-16 h-1 bg-[#a0522d] mx-auto" />
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {(relatedProducts || []).slice(0, 4).map((rp: any, i: number) => (
-                    <ProductCard
-                      key={rp.id || i}
-                      basePath="/san-pham"
-                      slug={rp.slug || rp.id}
-                      title={rp.name}
-                      category={rp.categoryId?.name}
-                      price={rp.price && rp.price > 0 ? `${rp.price.toLocaleString()} VNĐ` : 'Liên hệ'}
-                      image={rp.images && rp.images.length > 0 ? rp.images[0].url : 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800'}
-                    />
+                    <RelatedProductCard key={rp.id || i} product={rp} />
                   ))}
                 </div>
               </div>

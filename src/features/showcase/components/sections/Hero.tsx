@@ -28,23 +28,59 @@ const Hero: React.FC = () => {
             <span className="text-sm font-bold uppercase tracking-[0.3em] text-showcase-primary">{t('hero.badge')}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-            {t('hero.title_line1')} <br /> {t('hero.title_line2')}
+            <span className="block">
+              {t('hero.title_line1').split('').map((char, i) => (
+                <span
+                  key={i}
+                  style={{
+                    display: 'inline-block',
+                    opacity: 0,
+                    animation: `charDrop 0.45s cubic-bezier(0.22,1,0.36,1) ${0.3 + i * 0.07}s forwards`,
+                  }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </span>
+            <span className="block">
+              {t('hero.title_line2').split('').map((char, i) => {
+                const offset = t('hero.title_line1').length;
+                return (
+                  <span
+                    key={i}
+                    style={{
+                      display: 'inline-block',
+                      opacity: 0,
+                      animation: `charDrop 0.45s cubic-bezier(0.22,1,0.36,1) ${0.3 + (offset + i) * 0.07}s forwards`,
+                    }}
+                  >
+                    {char === ' ' ? '\u00A0' : char}
+                  </span>
+                );
+              })}
+            </span>
           </h1>
+          <style>{`
+            @keyframes charDrop {
+              from { opacity: 0; transform: translateY(28px); }
+              to   { opacity: 1; transform: translateY(0); }
+            }
+          `}</style>
           <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
             {t('hero.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Button 
-              variant="outline" 
-              size="lg" 
+            <Button
+              variant="outline"
+              size="lg"
               className="border-white text-white hover:bg-white hover:text-black"
               onClick={() => navigate(ROUTES.CONG_TRINH)}
             >
               {t('hero.btn_explore')}
             </Button>
-            <Button 
-              variant="primary" 
-              size="lg" 
+            <Button
+              variant="primary"
+              size="lg"
               className="bg-showcase-primary border-none hover:bg-showcase-hover"
               onClick={() => {
                 const formElement = document.getElementById('tu-van-ngay-form');

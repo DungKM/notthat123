@@ -190,18 +190,6 @@ const ContactPage: React.FC = () => {
         </Container>
       </section>
 
-      {/* Map Section */}
-      <div className="h-[350px] md:h-[500px] w-full bg-gray-100 grayscale hover:grayscale-0 transition-all duration-700">
-        <iframe
-          title="Google Map"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3725.326265744883!2d105.8037340760463!3d20.979555689471587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ace4443722a5%3A0xe5a3c26cb7f06bad!2zMzEgTmd1eeG7hW4gWGnhu4NuLCBUaGFuaCBYdcOibiBOYW0sIFRoYW5oIFh1w6JuLCBIw6AgTuG7mWksIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1710000000000!5m2!1svi!2s"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen={true}
-          loading="lazy"
-        ></iframe>
-      </div>
     </div>
   );
 };

@@ -10,10 +10,12 @@ import {
   DownOutlined,
   DeleteOutlined,
   ArrowRightOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import Container from '../ui/Container';
 import { useCart } from '../../context/CartContext';
 import { useTranslation } from 'react-i18next';
+import { useConstructionCategoryService } from '@/src/api/services';
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -26,6 +28,16 @@ const Header: React.FC = () => {
   const cartButtonRef = useRef<HTMLDivElement | null>(null);
   const cartDrawerRef = useRef<HTMLDivElement | null>(null);
   const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart } = useCart();
+
+  // ─── Danh mục công trình ───
+  const { getAll: getCongTrinhCategories } = useConstructionCategoryService();
+  const [congTrinhCategories, setCongTrinhCategories] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    getCongTrinhCategories({ limit: 20 })
+      .then((res) => setCongTrinhCategories(res || []))
+      .catch(() => {});
+  }, []);
 
   const currentLang = i18n.language?.toUpperCase().substring(0, 2) || 'VI';
 
@@ -118,17 +130,20 @@ const Header: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-x-8">
+          <nav className="hidden lg:flex items-center gap-x-4">
             {navLinks.map((link) => (
               <div key={link.title} className="relative group">
                 <Link
                   to={link.href}
                   target={link.target}
-                  className={`text-[13px] font-bold uppercase tracking-widest transition-all duration-300 hover:text-showcase-primary flex items-center gap-1 ${isDarkHeader ? '!text-gray-800' : '!text-white'
+                  className={`text-[13px] font-bold uppercase tracking-wide whitespace-nowrap transition-all duration-300 hover:text-showcase-primary flex items-center gap-1 ${isDarkHeader ? '!text-gray-800' : '!text-white'
                     }`}
                 >
                   {link.title}
-                  {link.submenu && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
+                  {(link.submenu || link.href === ROUTES.CONG_TRINH) && congTrinhCategories.length > 0 && link.href === ROUTES.CONG_TRINH
+                    ? <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />
+                    : link.submenu && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />
+                  }
                 </Link>
 
                 {link.submenu && (
@@ -147,14 +162,52 @@ const Header: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Submenu Công Trình - nền đen */}
+                {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
+                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
+                    <div className="bg-gray-950 shadow-2xl rounded-xl py-3 min-w-[260px] overflow-hidden">
+                      <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Danh mục</p>
+                      {congTrinhCategories.map((cat) => (
+                        <Link
+                          key={cat._id || cat.id}
+                          to={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
+                          className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-200 hover:!text-white hover:bg-white/10 transition-colors group/item"
+                        >
+                          <span>{cat.name}</span>
+                          <ArrowRightOutlined className="text-[10px] text-gray-500 group-hover/item:text-white group-hover/item:translate-x-1 transition-all duration-200" />
+                        </Link>
+                      ))}
+                      <div className="border-t border-white/10 mt-2 pt-2">
+                        <Link
+                          to={ROUTES.CONG_TRINH}
+                          className="flex items-center justify-between px-5 py-2.5 text-[12px] font-bold !text-showcase-primary hover:!text-white hover:bg-white/10 transition-colors uppercase tracking-wide"
+                        >
+                          Xem tất cả
+                          <ArrowRightOutlined className="text-[10px]" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 ml-6 lg:ml-8">
+            {/* Search Bar - Desktop */}
+            <div className={`hidden md:flex items-center bg-white rounded-full px-4 py-2 border transition-all shadow-sm ${isDarkHeader ? 'border-gray-200' : 'border-white/20'}`}>
+              <input
+                type="text"
+                placeholder="Tìm kiếm..."
+                className="bg-transparent outline-none text-[13px] w-[150px] lg:w-[220px] text-gray-800 placeholder-gray-400"
+              />
+              <SearchOutlined className="text-gray-400 text-lg ml-2 hover:text-showcase-primary cursor-pointer transition-colors" />
+            </div>
+
             {/* Language Switcher - Desktop */}
-            <div className="hidden md:block relative group">
+            <div className="hidden lg:block relative group">
               <button
                 className={`flex items-center gap-1.5 text-[12px] font-black tracking-tighter uppercase px-3 py-1.5 rounded-full border transition-all ${isDarkHeader
                   ? 'text-gray-700 border-gray-200 hover:bg-gray-50'
@@ -192,24 +245,27 @@ const Header: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCartOpen(!isCartOpen)}
-                className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isDarkHeader
-                  ? 'text-gray-800 hover:bg-gray-100'
-                  : 'text-white hover:bg-white/10'
+                className={`group flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300 ${isDarkHeader
+                  ? 'text-gray-800 border-gray-200 hover:bg-gray-50'
+                  : 'text-white border-white/30 hover:bg-white/10'
                   }`}
               >
-                <ShoppingCartOutlined className="text-xl" />
-                <AnimatePresence>
-                  {cartCount > 0 && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      className="absolute -top-0.5 -right-0.5 bg-showcase-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
-                    >
-                      {cartCount}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                <div className="relative flex items-center">
+                  <ShoppingCartOutlined className="text-xl group-hover:scale-110 transition-transform" />
+                  <AnimatePresence>
+                    {cartCount > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="absolute -top-2.5 -right-3.5 bg-showcase-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
+                      >
+                        {cartCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <span className="font-bold uppercase text-[12px] tracking-wider hidden sm:block">Giỏ hàng</span>
               </button>
             </div>
 
@@ -396,6 +452,22 @@ const Header: React.FC = () => {
                             onClick={() => setIsMenuOpen(false)}
                           >
                             {sub.title}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {/* Danh mục Công Trình trên mobile */}
+                    {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
+                      <div className="pb-4 pl-4 space-y-1">
+                        {congTrinhCategories.map((cat) => (
+                          <Link
+                            key={cat._id || cat.id}
+                            to={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
+                            className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-950 text-gray-200 hover:text-white hover:bg-black text-sm font-medium transition-colors mb-1"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <span>{cat.name}</span>
+                            <ArrowRightOutlined className="text-[10px] text-gray-500" />
                           </Link>
                         ))}
                       </div>
