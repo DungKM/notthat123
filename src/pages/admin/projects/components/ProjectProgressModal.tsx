@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, Select, Input, Space, Table, message } from "antd";
+import { Modal, Button, Select, Input, Space, Table, message, Typography } from "antd";
 import {
   PlusOutlined,
   SaveOutlined,
@@ -17,11 +17,14 @@ const statusOptions: ProjectStatus[] = [
   'Bàn giao thanh lý hợp đồng',
   'Phát sinh hợp đồng',
 ];
+const { Title } = Typography;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   progress: ProjectProgress[];
+  historyProgress?: ProjectProgress[];
+  onLoadHistory?: () => void;
   onUpdate: (data: ProjectProgress[]) => void;
   onSaveTasks?: (stage: string, tasks: any[]) => Promise<boolean>;
   onTaskAssigned?: (task: { employeeId: string; employeeName: string; work: string }) => void;
@@ -31,6 +34,8 @@ const ProjectProgressModal: React.FC<Props> = ({
   open,
   onOpenChange,
   progress,
+  historyProgress,
+  onLoadHistory,
   onUpdate,
   onSaveTasks,
   onTaskAssigned,
@@ -127,7 +132,7 @@ const ProjectProgressModal: React.FC<Props> = ({
     }
 
     const unsavedTasks = currentStatus.tasks.filter(t => !(t as any).isSaved && t.work && t.employee);
-    
+
     if (unsavedTasks.length === 0) {
       // Just update updatedAt if needed locally
       message.success("Đã ghi nhận ở giao diện. Vui lòng thêm công việc mới nếu muốn lưu lên hệ thống.");
@@ -139,15 +144,15 @@ const ProjectProgressModal: React.FC<Props> = ({
       if (success) {
         const updated: ProjectProgress = {
           ...currentStatus,
-          tasks: currentStatus.tasks.map((t) => 
-            unsavedTasks.some(ut => ut.id === t.id) 
+          tasks: currentStatus.tasks.map((t) =>
+            unsavedTasks.some(ut => ut.id === t.id)
               ? { ...t, isSaved: true, updatedAt: dayjs().toISOString() } as any
               : t
           ),
         };
         setCurrentStatus(updated);
         message.success("Lưu tiến độ dự án thành công!");
-        
+
         // Gửi notification
         if (onTaskAssigned) {
           unsavedTasks.forEach(task => {
@@ -177,7 +182,7 @@ const ProjectProgressModal: React.FC<Props> = ({
           isSaved: true
         })),
       };
-      
+
       onUpdate([...progress, updated]);
       setCurrentStatus(null);
       message.success("Đã lưu tiến độ vào lịch sử");
@@ -241,7 +246,10 @@ const ProjectProgressModal: React.FC<Props> = ({
 
             <Button
               icon={<HistoryOutlined />}
-              onClick={() => setHistoryOpen(true)}
+              onClick={() => {
+                if (onLoadHistory) onLoadHistory();
+                setHistoryOpen(true);
+              }}
             >
               Lịch sử tiến độ
             </Button>
@@ -336,7 +344,7 @@ const ProjectProgressModal: React.FC<Props> = ({
         footer={null}
         onCancel={() => setHistoryOpen(false)}
       >
-        {progress.map((p) => (
+        {(historyProgress || progress).map((p) => (
           <div
             key={p.id}
             style={{
@@ -346,7 +354,11 @@ const ProjectProgressModal: React.FC<Props> = ({
               marginBottom: 16,
             }}
           >
-            <h4>{p.status}</h4>
+            {/* <h4 className="text-lg font-semibold italic text">{p.status}</h4>
+             */}
+
+            <Title level={4} style={{ color: "red" }}>{p.status}</Title>
+
 
             <Table
               dataSource={p.tasks}

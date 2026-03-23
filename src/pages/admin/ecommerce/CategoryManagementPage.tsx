@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Button, Popconfirm, Space, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ModalForm, ProFormText, ProFormTextArea, ProTable } from '@ant-design/pro-components';
+import { ModalForm, ProFormText, ProFormTextArea, ProTable, ProFormSelect } from '@ant-design/pro-components';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { useApi } from '../../../hooks/useApi';
 
@@ -10,9 +10,12 @@ import { useApi } from '../../../hooks/useApi';
 interface CategoryItem {
   id: string;
   name: string;
+  slug: string;
+  parentSlug?: string | null;
   description: string;
   createdAt?: string;
   updatedAt?: string;
+  children?: CategoryItem[];
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -96,6 +99,31 @@ const CategoryManagementPage: React.FC = () => {
         label="Tên danh mục"
         rules={[{ required: true, message: 'Nhập tên danh mục' }]}
       />
+      <ProFormSelect
+        name="parentSlug"
+        label="Danh mục cha"
+        tooltip="Chỉ chọn nếu muốn tạo danh mục con"
+        request={async () => {
+          try {
+            const list = await getAll({ limit: 100 });
+            const options: { label: string; value: string }[] = [];
+            const flatten = (items: CategoryItem[], prefix = '') => {
+              items.forEach(item => {
+                options.push({ label: `${prefix}${item.name}`, value: item.slug });
+                if (item.children && item.children.length > 0) {
+                  flatten(item.children, `${prefix}${item.name} > `);
+                }
+              });
+            };
+            if (Array.isArray(list)) flatten(list);
+            return options;
+          } catch (error) {
+            return [];
+          }
+        }}
+        placeholder="Không chọn (Tạo danh mục gốc)"
+        showSearch
+      />
       <ProFormTextArea
         name="description"
         label="Mô tả danh mục"
@@ -134,7 +162,7 @@ const CategoryManagementPage: React.FC = () => {
         pagination={{ pageSize: 15, showSizeChanger: true }}
         search={{ labelWidth: 'auto' }}
         scroll={{ x: 'max-content' }}
-
+        expandable={{ defaultExpandAllRows: true }}
       />
 
       {/* ─── Modal Thêm ─── */}
@@ -168,6 +196,7 @@ const CategoryManagementPage: React.FC = () => {
         }}
         initialValues={{
           name: editRecord?.name,
+          parentSlug: editRecord?.parentSlug,
           description: editRecord?.description,
         }}
         onFinish={async (values) => {

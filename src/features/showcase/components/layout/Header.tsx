@@ -15,7 +15,7 @@ import {
 import Container from '../ui/Container';
 import { useCart } from '../../context/CartContext';
 import { useTranslation } from 'react-i18next';
-import { useConstructionCategoryService } from '@/src/api/services';
+import { useConstructionCategoryService, useCategoryService } from '@/src/api/services';
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -33,11 +33,21 @@ const Header: React.FC = () => {
   const { getAll: getCongTrinhCategories } = useConstructionCategoryService();
   const [congTrinhCategories, setCongTrinhCategories] = React.useState<any[]>([]);
 
+  // ─── Danh mục sản phẩm ───
+  const { list: apiCategories, getAll: getProductCategories } = useCategoryService();
+  const [productCategories, setProductCategories] = React.useState<any[]>([]);
+
   React.useEffect(() => {
     getCongTrinhCategories({ limit: 20 })
       .then((res) => setCongTrinhCategories(res || []))
       .catch(() => {});
+      
+    getProductCategories({ limit: 50 }).catch(() => {});
   }, []);
+
+  React.useEffect(() => {
+    if (apiCategories) setProductCategories(apiCategories);
+  }, [apiCategories]);
 
   const currentLang = i18n.language?.toUpperCase().substring(0, 2) || 'VI';
 
@@ -140,15 +150,14 @@ const Header: React.FC = () => {
                     }`}
                 >
                   {link.title}
-                  {(link.submenu || link.href === ROUTES.CONG_TRINH) && congTrinhCategories.length > 0 && link.href === ROUTES.CONG_TRINH
-                    ? <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />
-                    : link.submenu && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />
-                  }
+                  {link.submenu && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
+                  {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
+                  {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
                 </Link>
 
                 {link.submenu && (
                   <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                    <div className="bg-white shadow-2xl rounded-xl py-4 min-w-[240px] border border-gray-100 overflow-hidden">
+                    <div className="bg-white py-4 min-w-[240px] border border-gray-100 overflow-hidden">
                       {link.submenu.map((sub) => (
                         <Link
                           key={sub.title}
@@ -163,10 +172,57 @@ const Header: React.FC = () => {
                   </div>
                 )}
 
+                {/* Submenu Sản Phẩm */}
+                {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
+                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
+                    <div className="bg-white py-3 min-w-[260px] border border-gray-100 overflow-visible relative">
+                      <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Danh mục sản phẩm</p>
+                      {productCategories.map((cat: any) => (
+                        <div key={cat.id || cat._id} className="relative group/parent">
+                          <Link
+                            to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${cat.slug}`}
+                            className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-700 hover:text-showcase-primary hover:bg-gray-50 transition-colors group/item"
+                          >
+                            <span>{cat.name}</span>
+                            <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover/item:text-showcase-primary group-hover/item:translate-x-1 transition-all duration-200" />
+                          </Link>
+                          
+                          {/* Child categories flyout */}
+                          {cat.children && cat.children.length > 0 && (
+                            <div className="absolute top-0 left-full pl-0 opacity-0 invisible group-hover/parent:opacity-100 group-hover/parent:visible transition-all duration-300 -translate-x-2 group-hover/parent:translate-x-0 z-[60]">
+                              <div className="bg-white py-3 min-w-[260px] border border-gray-100 overflow-hidden ml-1">
+                                {cat.children.map((child: any) => (
+                                  <Link
+                                    key={child.id || child._id}
+                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${child.slug}`}
+                                    className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-700 hover:text-showcase-primary hover:bg-gray-50 transition-colors group/subitem"
+                                  >
+                                    <span>{child.name}</span>
+                                    <ArrowRightOutlined className="text-[10px] text-gray-200 opacity-0 group-hover/subitem:opacity-100 group-hover/subitem:text-showcase-primary group-hover/subitem:translate-x-1 transition-all duration-200 -translate-x-2" />
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <div className="border-t border-gray-100 mt-2 pt-2">
+                        <Link
+                          to={ROUTES.SAN_PHAM}
+                          className="flex items-center justify-between px-5 py-2.5 text-[12px] font-bold !text-showcase-primary hover:!text-gray-900 hover:bg-gray-50 transition-colors uppercase tracking-wide group/all"
+                        >
+                          Xem tất cả
+                          <ArrowRightOutlined className="text-[10px] transition-transform group-hover/all:translate-x-1 duration-200" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Submenu Công Trình - nền đen */}
                 {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
                   <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
-                    <div className="bg-gray-950 shadow-2xl rounded-xl py-3 min-w-[260px] overflow-hidden">
+                    <div className="bg-gray-950 py-3 min-w-[260px] overflow-hidden">
                       <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Danh mục</p>
                       {congTrinhCategories.map((cat) => (
                         <Link
@@ -220,7 +276,7 @@ const Header: React.FC = () => {
               </button>
 
               <div className="absolute right-0 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                <div className="bg-white shadow-2xl rounded-xl py-2 min-w-[180px] border border-gray-100 overflow-hidden">
+                <div className="bg-white py-2 min-w-[180px] border border-gray-100 overflow-hidden">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
@@ -456,6 +512,37 @@ const Header: React.FC = () => {
                         ))}
                       </div>
                     )}
+                    {/* Danh mục Sản Phẩm trên mobile */}
+                    {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
+                      <div className="pb-4 pl-4 space-y-1">
+                        {productCategories.map((cat: any) => (
+                          <div key={cat.id || cat._id} className="mb-1">
+                            <Link
+                              to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${cat.slug}`}
+                              className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 text-gray-700 hover:text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <span>{cat.name}</span>
+                            </Link>
+                            {cat.children && cat.children.length > 0 && (
+                              <div className="pl-4 mt-1 space-y-1">
+                                {cat.children.map((child: any) => (
+                                  <Link
+                                    key={child.id || child._id}
+                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${child.slug}`}
+                                    className="flex items-center py-2 px-3 rounded-lg text-gray-500 hover:text-showcase-primary text-[12px] transition-colors"
+                                    onClick={() => setIsMenuOpen(false)}
+                                  >
+                                    - {child.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Danh mục Công Trình trên mobile */}
                     {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
                       <div className="pb-4 pl-4 space-y-1">

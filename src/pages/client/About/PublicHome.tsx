@@ -27,7 +27,7 @@ const PublicHome: React.FC = () => {
       `}</style>
       
       <Hero />
-      <ProductShopSection />
+      {/* <ProductShopSection /> */}
       <Showcase />
       <Features />
       <Feedback />

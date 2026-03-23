@@ -20,6 +20,7 @@ const ProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [progressModalVisible, setProgressModalVisible] = useState(false);
+  const [historyProgress, setHistoryProgress] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(true);
   const { request, patch } = useProjectService();
@@ -54,7 +55,15 @@ const ProjectDetailPage: React.FC = () => {
   const isDirector = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT;
   const isSiteManager = user.role === Role.SITE_MANAGER;
 
-
+  const loadHistoryProgress = async () => {
+    if (!project) return;
+    try {
+      const res = await request('GET', `/${project.id || (project as any)._id}/progress`);
+      if (res.data) setHistoryProgress(res.data);
+    } catch {
+      message.error('Lỗi lấy lịch sử tiến độ');
+    }
+  };
 
   const handleUpdateProject = async (values: any) => {
     if (!project) return false;
@@ -277,11 +286,24 @@ const ProjectDetailPage: React.FC = () => {
             ...t,
             id: t.id || Math.random().toString(),
             work: t.work || t.name,
-            employee: t.employee || t.user,
+            employee: t.employee || t.userId || t.user, // Add userId to support fallback Name
             updatedAt: t.updatedAt,
             isSaved: true
           }))
         }))}
+        historyProgress={(historyProgress || []).map(p => ({
+          id: p.id || Math.random().toString(),
+          status: (p.status || p.stage) as any,
+          tasks: (p.tasks || p.updates || []).map((t: any) => ({
+            ...t,
+            id: t.id || Math.random().toString(),
+            work: t.work || t.name,
+            employee: t.user || t.employee,
+            updatedAt: t.updatedAt,
+            isSaved: true
+          }))
+        }))}
+        onLoadHistory={loadHistoryProgress}
         onUpdate={handleUpdateProgress}
         onSaveTasks={handleSaveProgressTasks}
         onTaskAssigned={(task) => {

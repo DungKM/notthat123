@@ -13,6 +13,7 @@ import { useAuth } from '@/src/auth/hooks/useAuth';
 
 // Pages - Client
 const PublicHome = lazy(() => import('@/src/pages/client/About/PublicHome'));
+const CategoryExplorerPage = lazy(() => import('@/src/pages/client/Product/CategoryExplorerPage'));
 const ProductsPage = lazy(() => import('@/src/pages/client/Product/ProductsPage'));
 const ProductDetailPage = lazy(() => import('@/src/pages/client/Product/ProductDetailPage'));
 const ProjectsPage = lazy(() => import('@/src/pages/client/Project/ProjectsPage'));
@@ -69,7 +70,8 @@ const AppRouter: React.FC = () => {
           {/* Public Showcase Routes (wrapped in ClientLayout) */}
           <Route element={<ClientLayout />}>
             <Route path={ROUTES.TRANG_CHU} element={<PublicHome />} />
-            <Route path={ROUTES.SAN_PHAM} element={<ProductsPage />} />
+            <Route path={ROUTES.SAN_PHAM} element={<CategoryExplorerPage />} />
+            <Route path={ROUTES.DANH_SACH_SAN_PHAM} element={<ProductsPage />} />
             <Route path={ROUTES.CHI_TIET_SAN_PHAM} element={<ProductDetailPage />} />
             <Route path={ROUTES.CONG_TRINH} element={<ProjectsPage />} />
             <Route path={ROUTES.CHI_TIET_CONG_TRINH} element={<ProjectDetailClientPage />} />

@@ -74,7 +74,7 @@ const ProjectListPage: React.FC = () => {
 
   const handleApprove = async (id: string) => {
     try {
-      await request('PATCH', `/${id}/approve`);
+      await request('PATCH', `/${id}/review`, { status: 'Duyệt' });
       actionRef.current?.reload();
       message.success('Đã duyệt dự án');
     } catch { }
@@ -82,7 +82,7 @@ const ProjectListPage: React.FC = () => {
 
   const handleReject = async (id: string, reason: string) => {
     try {
-      await request('PATCH', `/${id}/reject`, { reason });
+      await request('PATCH', `/${id}/review`, { status: 'Từ chối', reason });
       actionRef.current?.reload();
       message.success('Đã từ chối dự án');
     } catch { }

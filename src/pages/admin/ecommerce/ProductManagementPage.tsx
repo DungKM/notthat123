@@ -41,6 +41,7 @@ interface ProductItem {
 interface CategoryItem {
   id: string;
   name: string;
+  children?: CategoryItem[];
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -204,12 +205,22 @@ const ProductManagementPage: React.FC = () => {
         label="Danh mục"
         rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
         request={async () => {
-          const res = await getCategories({ limit: 1000 });
-          // Format lại danh sách cho select options
-          return res.map((cat) => ({
-            label: cat.name,
-            value: cat.id,
-          }));
+          try {
+            const list = await getCategories({ limit: 1000 });
+            const options: { label: string; value: string }[] = [];
+            const flatten = (items: CategoryItem[], prefix = '') => {
+              items.forEach(item => {
+                options.push({ label: `${prefix}${item.name}`, value: item.id });
+                if (item.children && item.children.length > 0) {
+                  flatten(item.children, `${prefix}${item.name} > `);
+                }
+              });
+            };
+            if (Array.isArray(list)) flatten(list);
+            return options;
+          } catch (error) {
+            return [];
+          }
         }}
         showSearch
       />

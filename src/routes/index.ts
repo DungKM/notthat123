@@ -12,6 +12,7 @@ export const ROUTES = {
   // Công khai (Public)
   TRANG_CHU: '/',
   SAN_PHAM: '/san-pham',
+  DANH_SACH_SAN_PHAM: '/san-pham/danh-sach',
   CHI_TIET_SAN_PHAM: '/san-pham/:slug',
   CONG_TRINH: '/cong-trinh',
   CHI_TIET_CONG_TRINH: '/cong-trinh/:slug',
