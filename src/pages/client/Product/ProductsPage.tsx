@@ -61,10 +61,10 @@ const ProductsPage: React.FC = () => {
     getCategories({ limit: 50 });
   }, [getCategories]);
 
-  // Đồng bộ URL slug -> selectedCategories khi URL thay đổi
+  // Đồng bộ URL search -> selectedCategories khi URL thay đổi
   useEffect(() => {
-    const slug = searchParams.get('slug') || searchParams.get('category');
-    setSelectedCategories(slug ? [slug] : []);
+    const searchParam = searchParams.get('search') || searchParams.get('category');
+    setSelectedCategories(searchParam ? [searchParam] : []);
     setCurrentPage(1);
   }, [searchParams]);
 

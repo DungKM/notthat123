@@ -296,7 +296,7 @@ const Header: React.FC = () => {
                                 {currentCat.children.map((child: any) => (
                                   <Link
                                     key={child.id || child._id}
-                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${child.slug}`}
+                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
                                     className="flex items-center gap-3 px-2 border border-gray-300 hover:border-showcase-primary transition-all group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(false); }}
                                   >
@@ -761,7 +761,7 @@ const Header: React.FC = () => {
                         {productCategories.map((cat: any) => (
                           <div key={cat.id || cat._id} className="mb-1">
                             <Link
-                              to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${cat.slug}`}
+                              to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${cat.slug}`}
                               className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors"
                               onClick={() => setIsMenuOpen(false)}
                             >
@@ -772,7 +772,7 @@ const Header: React.FC = () => {
                                 {cat.children.map((child: any) => (
                                   <Link
                                     key={child.id || child._id}
-                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${child.slug}`}
+                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
                                     className="flex items-center py-2 px-3 rounded-lg !text-gray-800 hover:!text-showcase-primary text-[12px] transition-colors"
                                     onClick={() => setIsMenuOpen(false)}
                                   >
