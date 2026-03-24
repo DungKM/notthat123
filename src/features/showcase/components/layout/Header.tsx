@@ -40,9 +40,9 @@ const Header: React.FC = () => {
   React.useEffect(() => {
     getCongTrinhCategories({ limit: 20 })
       .then((res) => setCongTrinhCategories(res || []))
-      .catch(() => {});
-      
-    getProductCategories({ limit: 50 }).catch(() => {});
+      .catch(() => { });
+
+    getProductCategories({ limit: 50 }).catch(() => { });
   }, []);
 
   React.useEffect(() => {
@@ -186,7 +186,7 @@ const Header: React.FC = () => {
                             <span>{cat.name}</span>
                             <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover/item:text-showcase-primary group-hover/item:translate-x-1 transition-all duration-200" />
                           </Link>
-                          
+
                           {/* Child categories flyout */}
                           {cat.children && cat.children.length > 0 && (
                             <div className="absolute top-0 left-full pl-0 opacity-0 invisible group-hover/parent:opacity-100 group-hover/parent:visible transition-all duration-300 -translate-x-2 group-hover/parent:translate-x-0 z-[60]">
@@ -519,7 +519,7 @@ const Header: React.FC = () => {
                           <div key={cat.id || cat._id} className="mb-1">
                             <Link
                               to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${cat.slug}`}
-                              className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 text-gray-700 hover:text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors"
+                              className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors"
                               onClick={() => setIsMenuOpen(false)}
                             >
                               <span>{cat.name}</span>
@@ -530,7 +530,7 @@ const Header: React.FC = () => {
                                   <Link
                                     key={child.id || child._id}
                                     to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${child.slug}`}
-                                    className="flex items-center py-2 px-3 rounded-lg text-gray-500 hover:text-showcase-primary text-[12px] transition-colors"
+                                    className="flex items-center py-2 px-3 rounded-lg !text-gray-800 hover:!text-showcase-primary text-[12px] transition-colors"
                                     onClick={() => setIsMenuOpen(false)}
                                   >
                                     - {child.name}
@@ -550,7 +550,7 @@ const Header: React.FC = () => {
                           <Link
                             key={cat._id || cat.id}
                             to={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
-                            className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-950 text-gray-200 hover:text-white hover:bg-black text-sm font-medium transition-colors mb-1"
+                            className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-sm font-medium transition-colors mb-1"
                             onClick={() => setIsMenuOpen(false)}
                           >
                             <span>{cat.name}</span>
