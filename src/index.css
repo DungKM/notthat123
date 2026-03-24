@@ -21,5 +21,30 @@
     .hidden-mobile {
       display: none !important;
     }
+
+    /* Admin responsive overrides */
+    .ant-pro-table-search {
+      padding: 12px !important;
+    }
+    .ant-pro-table-search .ant-form-item {
+      margin-bottom: 8px !important;
+    }
+    .ant-pro-page-container .ant-page-header {
+      padding: 12px !important;
+    }
+    .ant-modal {
+      max-width: calc(100vw - 16px) !important;
+      margin: 8px auto !important;
+    }
+    .ant-modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .md-hidden {
+      display: none !important;
+    }
   }
 }

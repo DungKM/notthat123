@@ -16,6 +16,14 @@ const { Content, Sider } = Layout;
 
 const ChatPage: React.FC = () => {
     const { user } = useAuth();
+    const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+    
+    useEffect(() => {
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
     const [groups, setGroups] = useState<ChatGroup[]>([]);
     const [selectedGroupId, setSelectedGroupId] = useState<string>();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -125,7 +133,18 @@ const ChatPage: React.FC = () => {
 
     return (
         <Layout style={{ height: 'calc(100vh - 150px)', background: '#fff', borderRadius: '8px', overflow: 'hidden' }}>
-            <Sider width={300} theme="light">
+            {/* Desktop: show sidebar always. Mobile: show sidebar only when no group selected */}
+            <Sider
+              width={300}
+              theme="light"
+              breakpoint="md"
+              collapsedWidth={0}
+              trigger={null}
+              collapsed={!!selectedGroupId && isMobile}
+              style={{
+                display: selectedGroupId && isMobile ? 'none' : 'block',
+              }}
+            >
                 <ChatSidebar 
                     groups={groups} 
                     selectedGroupId={selectedGroupId}
@@ -133,15 +152,26 @@ const ChatPage: React.FC = () => {
                     onCreateGroup={() => setIsCreateModalOpen(true)}
                 />
             </Sider>
-            <Layout>
+            <Layout style={{ display: !selectedGroupId && isMobile ? 'none' : 'flex' }}>
                 {selectedGroup ? (
                     <>
                         <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <Typography.Title level={5} style={{ margin: 0 }}>{selectedGroup.name}</Typography.Title>
-                                <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                                    {selectedGroup.members.length} thành viên
-                                </Typography.Text>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Button
+                                  type="text"
+                                  size="small"
+                                  className="md-hidden"
+                                  onClick={() => setSelectedGroupId(undefined)}
+                                  style={{ padding: '0 4px' }}
+                                >
+                                  ← 
+                                </Button>
+                                <div>
+                                  <Typography.Title level={5} style={{ margin: 0 }}>{selectedGroup.name}</Typography.Title>
+                                  <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                                      {selectedGroup.members.length} thành viên
+                                  </Typography.Text>
+                                </div>
                             </div>
                             <Button 
                                 type="text" 

@@ -34,7 +34,7 @@ const PartnerDetailPage: React.FC = () => {
           <div className="mb-8">
             <Link
               to="/doi-tac"
-              className="inline-flex items-center text-gray-500 hover:text-orange-500 transition-colors font-medium"
+              className="inline-flex items-center !text-gray-500 hover:text-orange-500 transition-colors font-medium"
             >
               <ArrowLeftOutlined className="mr-2" />
               Quay lại danh sách đối tác
@@ -50,7 +50,7 @@ const PartnerDetailPage: React.FC = () => {
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-              
+
               <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
                 <span className="inline-block px-4 py-1.5 bg-orange-500 text-white rounded-full font-bold text-sm tracking-wider mb-4">
                   ĐỐI TÁC CHIẾN LƯỢC {partner.cooperationYear}
@@ -68,9 +68,9 @@ const PartnerDetailPage: React.FC = () => {
                   {partner.description}
                 </p>
               )}
-              
+
               <div className="w-20 h-1 bg-orange-500 mb-8"></div>
-              
+
               <div className="prose prose-lg max-w-none text-gray-600 leading-loose">
                 <p>{partner.content}</p>
                 <p className="mt-6">

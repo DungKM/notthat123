@@ -6,11 +6,9 @@ import Badge from '@/src/features/showcase/components/ui/Badge';
 import {
   ArrowLeftOutlined,
   CheckCircleFilled,
-  HeartOutlined,
   ShoppingCartOutlined,
   PhoneFilled,
   CheckOutlined,
-  HeartFilled,
 } from '@ant-design/icons';
 import SEO from '@/src/components/common/SEO';
 import { useCart } from '@/src/features/showcase/context/CartContext';
@@ -92,6 +90,7 @@ const ProductDetailPage: React.FC = () => {
     category: apiProduct.categoryId?.name || 'Sản phẩm',
     price: apiProduct.price || 0,
     priceText: apiProduct.price ? `${apiProduct.price.toLocaleString()} VND` : 'Liên hệ',
+    productCode: apiProduct.productCode || 'Đang cập nhật',
     description: apiProduct.description || 'Chi tiết sản phẩm nội thất cao cấp với thiết kế hiện đại, chất liệu bền bỉ và đẹp mắt. Tôn vinh Không gian sống đẳng cấp.',
     images: apiProduct.images && apiProduct.images.length > 0
       ? apiProduct.images.map((img: any) => img.url).filter(Boolean)
@@ -107,6 +106,9 @@ const ProductDetailPage: React.FC = () => {
       { label: 'Tồn kho', value: apiProduct.stockQuantity ? `${apiProduct.stockQuantity} sản phẩm` : 'Đặt hàng' },
       { label: 'Bảo hành', value: apiProduct.warranty || 'Đang cập nhật' },
     ],
+    imageDetails: apiProduct.images && apiProduct.images.length > 0
+      ? apiProduct.images.map((img: any) => ({ url: img.url, description: img.description || '' }))
+      : [],
   } : null;
 
   const handleAddToCart = () => {
@@ -158,10 +160,7 @@ const ProductDetailPage: React.FC = () => {
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 text-sm font-medium text-gray-700">
-                      <HeartFilled className="text-red-400" />
-                      <span>31</span>
-                    </div>
+
                   </div>
                   <div className="grid grid-cols-4 gap-2 sm:gap-4">
                     {product.images.slice(0, 4).map((img: string, i: number) => (
@@ -196,8 +195,8 @@ const ProductDetailPage: React.FC = () => {
                       {product.title}
                     </h1>
                     <div className="text-[15px] text-gray-700 space-y-1.5">
-                      <p>Mã sản phẩm: <span className="text-gray-900">{product.slug}</span>.</p>
-                      <p><strong>Xem thêm:</strong> <Link to="/san-pham" className="text-gray-700 hover:text-gray-900">{product.category}</Link></p>
+                      <p>Mã sản phẩm: <span className="text-gray-900">{product.productCode}</span>.</p>
+                      <p><strong>Xem thêm:</strong> <Link to="/san-pham" className="!text-gray-700 hover:text-showcase-primary">{product.category}</Link></p>
                     </div>
                   </div>
 
@@ -206,7 +205,6 @@ const ProductDetailPage: React.FC = () => {
                     <div className="text-[28px] font-bold text-[#c49a0e]">
                       {product.priceText}
                     </div>
-                    <HeartOutlined className="text-[22px] text-red-500 cursor-pointer" />
                   </div>
 
                   {/* Stock Status */}
@@ -219,7 +217,7 @@ const ProductDetailPage: React.FC = () => {
                   {/* Action Buttons */}
                   <div className="flex flex-wrap items-stretch gap-3 mb-8">
                     {/* Quantity Selector */}
-                    <div className="flex border border-gray-300 rounded overflow-hidden h-10 w-[72px] bg-white">
+                    {/* <div className="flex border border-gray-300 rounded overflow-hidden h-10 w-[72px] bg-white">
                       <div className="flex-1 flex items-center justify-center font-bold text-gray-800 text-[15px]">
                         {quantity}
                       </div>
@@ -231,7 +229,7 @@ const ProductDetailPage: React.FC = () => {
                           <span className="leading-none mb-1">-</span>
                         </button>
                       </div>
-                    </div>
+                    </div> */}
 
                     <button
                       onClick={handleAddToCart}
@@ -249,8 +247,8 @@ const ProductDetailPage: React.FC = () => {
                     </button>
 
                     <a
-                      href="tel:1900xxxx"
-                      className="h-10 px-5 bg-[#333] hover:bg-black text-white font-bold rounded flex items-center gap-2 transition-colors text-sm"
+                      href="tel:0911972789"
+                      className="h-10 px-5 !bg-[#222] hover:bg-black !text-white font-bold rounded flex items-center gap-2 transition-colors text-sm"
                     >
                       <PhoneFilled className="text-lg" />
                       Gọi tư vấn
@@ -313,21 +311,47 @@ const ProductDetailPage: React.FC = () => {
                 {/* Content Box */}
                 <div className="border border-t-0 border-gray-200 bg-white p-6 sm:p-10 mb-10">
                   <div className="prose max-w-none text-gray-900 text-[15px] leading-relaxed">
-                    <p className="font-bold mb-8 text-black">
-                      Mẫu bàn ăn thông minh gấp gọn mặt giả vân đá dưới đây không chỉ đáp ứng được sự tiện lợi, gọn gàng và tiết kiệm diện tích. Sản phẩm còn đem đến sự hiện đại, tính thẩm mỹ cao cho không gian ngôi nhà nhỏ.
-                    </p>
+                    {/* Mô tả sản phẩm */}
+                    {product.description && (
+                      <p className="font-bold mb-8 text-black">
+                        {product.description}
+                      </p>
+                    )}
 
-                    <div className="flex flex-col items-center">
-                      <img 
-                        src={product.images[0] || "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&q=80&w=1000"} 
-                        alt="Bàn ăn thông minh" 
-                        className="w-full max-w-4xl mx-auto block"
-                        loading="lazy"
-                      />
-                      <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
-                        Có thể sử dụng được bàn ăn thông minh gấp gọn mặt giả vân đá ở 3 kiểu dáng
-                      </div>
+                    {/* Thông số kỹ thuật */}
+                    <div className="mb-8 border border-gray-200 rounded-lg overflow-hidden">
+                      <table className="w-full text-[14px]">
+                        <tbody>
+                          {product.specs.map((spec: any, i: number) => (
+                            <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                              <td className="px-4 py-3 font-semibold text-gray-700 w-[140px] border-r border-gray-200">{spec.label}</td>
+                              <td className="px-4 py-3 text-gray-800">{spec.value}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
+
+                    {/* Ảnh sản phẩm kèm mô tả */}
+                    {product.imageDetails && product.imageDetails.length > 0 && (
+                      <div className="space-y-6">
+                        {product.imageDetails.map((img: any, i: number) => (
+                          <div key={i} className="flex flex-col items-center">
+                            <img
+                              src={img.url}
+                              alt={img.description || product.title}
+                              className="w-full max-w-4xl mx-auto block rounded"
+                              loading="lazy"
+                            />
+                            {img.description && (
+                              <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
+                                {img.description}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Button, Popconfirm, Space, Tag, Image, Tooltip, message } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Popconfirm, Space, Tag, Image, Tooltip, message, Upload, Input } from 'antd';
+import { EditOutlined, DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
   ModalForm,
@@ -23,6 +23,7 @@ interface ProductImage {
 interface ProductItem {
   id: string;
   name: string;
+  productCode?: string;
   slug?: string;
   price: number;
   stockQuantity?: number;
@@ -54,6 +55,8 @@ const ProductManagementPage: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editRecord, setEditRecord] = useState<ProductItem | null>(null);
+  const [imageFiles, setImageFiles] = useState<any[]>([]);
+  const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
 
   // ─── Columns ─────────────────────────────────────────────────────────────
   const columns: ProColumns<ProductItem>[] = [
@@ -93,6 +96,12 @@ const ProductManagementPage: React.FC = () => {
         );
       },
     },
+    // {
+    //   title: 'Mã SP',
+    //   dataIndex: 'productCode',
+    //   width: 120,
+    //   render: (val) => val ? <Tag color="blue" style={{ fontFamily: 'monospace' }}>{val as string}</Tag> : '—',
+    // },
     {
       title: 'Tên sản phẩm',
       dataIndex: 'name',
@@ -165,8 +174,22 @@ const ProductManagementPage: React.FC = () => {
             onClick={async () => {
               const hide = message.loading('Đang tải dữ liệu sản phẩm...', 0);
               try {
-                const data = await getById(record.id);
+              const data = await getById(record.id);
                 setEditRecord(data);
+                // Pre-load images and descriptions
+                const existingImages = (data.images || []).map((img: any, i: number) => {
+                  const urlStr = typeof img === 'string' ? img : img.url;
+                  return {
+                    uid: img._id || img.id || `-img-${i}`,
+                    name: urlStr.split('/').pop() || `image-${i}`,
+                    status: 'done',
+                    url: urlStr,
+                    thumbUrl: urlStr,
+                    type: 'image/png',
+                  };
+                });
+                setImageFiles(existingImages);
+                setImageDescriptions((data.images || []).map((img: any) => img.description || ''));
                 setEditOpen(true);
               } catch (err) {
                 // Lỗi đã được xử lý trong hook
@@ -229,6 +252,11 @@ const ProductManagementPage: React.FC = () => {
         label="Tên sản phẩm"
         rules={[{ required: true, message: 'Nhập tên sản phẩm' }]}
       />
+      <ProFormText
+        name="productCode"
+        label="Mã sản phẩm"
+        placeholder="VD: SP001, NT-2024"
+      />
       <ProFormDigit
         name="price"
         label="Giá (VNĐ)"
@@ -241,20 +269,65 @@ const ProductManagementPage: React.FC = () => {
         label="Số lượng tồn kho"
         min={0}
       />
-      {/* @ts-ignore */}
-      <ProFormUploadButton
-        name="images"
-        label="Hình ảnh (Tối đa 4 ảnh)"
-        title="Thêm ảnh"
-        max={4}
-        fieldProps={{
-          multiple: true,
-          accept: 'image/*',
-          listType: 'picture-card',
-          beforeUpload: () => false,
-        }}
-        extra="Hỗ trợ tải lên nhiều ảnh. Ảnh đầu tiên được chọn sẽ làm ảnh bìa."
-      />
+      <div style={{ marginBottom: 24 }}>
+        <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Hình ảnh (Tối đa 4 ảnh)</label>
+        <Upload
+          listType="picture-card"
+          fileList={imageFiles}
+          beforeUpload={() => false}
+          accept="image/*"
+          multiple
+          onChange={({ fileList }) => {
+            const limited = fileList.slice(0, 4);
+            setImageFiles(limited);
+            // Ensure descriptions array matches
+            setImageDescriptions(prev => {
+              const next = [...prev];
+              while (next.length < limited.length) next.push('');
+              return next.slice(0, limited.length);
+            });
+          }}
+          onRemove={(file) => {
+            const idx = imageFiles.findIndex(f => f.uid === file.uid);
+            if (idx >= 0) {
+              setImageDescriptions(prev => {
+                const next = [...prev];
+                next.splice(idx, 1);
+                return next;
+              });
+            }
+          }}
+          itemRender={(originNode, file, currFileList) => {
+            const idx = currFileList.findIndex(f => f.uid === file.uid);
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {originNode}
+                <Input
+                  size="small"
+                  placeholder={`Mô tả ảnh ${idx + 1}`}
+                  value={imageDescriptions[idx] || ''}
+                  onChange={(e) => {
+                    setImageDescriptions(prev => {
+                      const next = [...prev];
+                      next[idx] = e.target.value;
+                      return next;
+                    });
+                  }}
+                  style={{ width: 104 }}
+                />
+              </div>
+            );
+          }}
+        >
+          {imageFiles.length >= 4 ? null : (
+            <div>
+              <PlusOutlined />
+              <div style={{ marginTop: 4, fontSize: 12 }}>Thêm ảnh</div>
+            </div>
+          )}
+        </Upload>
+        <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>Hỗ trợ tải lên nhiều ảnh. Ảnh đầu tiên được chọn sẽ làm ảnh bìa.</div>
+      </div>
       <ProFormText
         name="warranty"
         label="Bảo hành"
@@ -289,7 +362,11 @@ const ProductManagementPage: React.FC = () => {
           <Button
             key="button"
             icon={<PlusOutlined />}
-            onClick={() => setCreateOpen(true)}
+            onClick={() => {
+              setImageFiles([]);
+              setImageDescriptions([]);
+              setCreateOpen(true);
+            }}
             type="primary"
           >
             Thêm sản phẩm
@@ -323,6 +400,7 @@ const ProductManagementPage: React.FC = () => {
           const formData = new FormData();
           formData.append('name', values.name);
           formData.append('categoryId', values.categoryId);
+          if (values.productCode) formData.append('productCode', values.productCode);
           if (values.price) formData.append('price', values.price.toString());
           if (values.stockQuantity) formData.append('stockQuantity', values.stockQuantity.toString());
           if (values.warranty) formData.append('warranty', values.warranty);
@@ -330,16 +408,21 @@ const ProductManagementPage: React.FC = () => {
           if (values.material) formData.append('material', values.material);
           if (values.description) formData.append('description', values.description);
 
-          if (values.images && values.images.length > 0) {
-            values.images.slice(0, 4).forEach((fileItem: any) => {
+          if (imageFiles.length > 0) {
+            imageFiles.slice(0, 4).forEach((fileItem: any, idx: number) => {
               if (fileItem.originFileObj) {
                 formData.append('images', fileItem.originFileObj);
               }
+            });
+            imageDescriptions.slice(0, imageFiles.length).forEach((desc) => {
+              formData.append('imageDescriptions', desc || '');
             });
           }
 
           await request('POST', '', formData);
           setCreateOpen(false);
+          setImageFiles([]);
+          setImageDescriptions([]);
           actionRef.current?.reload();
           return true;
         }}
@@ -361,23 +444,13 @@ const ProductManagementPage: React.FC = () => {
         initialValues={{
           ...editRecord,
           categoryId: typeof editRecord?.categoryId === 'object' ? editRecord.categoryId?.id : editRecord?.categoryId,
-          images: editRecord?.images?.map((img: any, i: number) => {
-            const urlStr = typeof img === 'string' ? img : img.url;
-            return {
-              uid: img._id || img.id || `-img-${i}`,
-              name: urlStr.split('/').pop() || `image-${i}`,
-              status: 'done',
-              url: urlStr,
-              thumbUrl: urlStr,
-              type: 'image/png',
-            };
-          }) || [],
         }}
         onFinish={async (values) => {
           if (!editRecord) return false;
           const formData = new FormData();
           formData.append('name', values.name);
           formData.append('categoryId', values.categoryId);
+          if (values.productCode) formData.append('productCode', values.productCode);
           if (values.price) formData.append('price', values.price.toString());
           if (values.stockQuantity) formData.append('stockQuantity', values.stockQuantity.toString());
           if (values.warranty) formData.append('warranty', values.warranty);
@@ -385,8 +458,8 @@ const ProductManagementPage: React.FC = () => {
           if (values.material) formData.append('material', values.material);
           if (values.description) formData.append('description', values.description);
 
-          if (values.images && values.images.length > 0) {
-            values.images.slice(0, 4).forEach((fileItem: any) => {
+          if (imageFiles.length > 0) {
+            imageFiles.slice(0, 4).forEach((fileItem: any) => {
               if (fileItem.originFileObj) {
                 formData.append('images', fileItem.originFileObj);
               } else {
@@ -396,12 +469,17 @@ const ProductManagementPage: React.FC = () => {
                 }
               }
             });
+            imageDescriptions.slice(0, imageFiles.length).forEach((desc) => {
+              formData.append('imageDescriptions', desc || '');
+            });
           }
 
           await request('PATCH', `/${editRecord.id}`, formData);
           message.success('Cập nhật sản phẩm thành công');
           setEditOpen(false);
           setEditRecord(null);
+          setImageFiles([]);
+          setImageDescriptions([]);
           actionRef.current?.reload();
           return true;
         }}
