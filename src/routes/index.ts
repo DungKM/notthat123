@@ -26,6 +26,7 @@ export const ROUTES = {
   THANH_TOAN: '/checkout',
   DANG_NHAP: '/login',
   TRO_CHUYEN: '/quan-tri/tin-nhan',
+  TIM_KIEM: '/tim-kiem',
 
   // Quản trị (Admin)
   ADMIN_GOC: '/quan-tri',

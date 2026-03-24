@@ -74,27 +74,13 @@ const ProjectDetailPage: React.FC = () => {
 
       <main className="pt-28 pb-20">
         <Container>
-          {/* Breadcrumb + Back */}
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="text-xs md:text-sm text-gray-500 font-medium flex flex-wrap items-center gap-1">
-              <Link to="/" className="hover:text-showcase-primary transition-colors">
-                Trang chủ
-              </Link>
-              <span className="text-gray-400">/</span>
-              <Link to="/cong-trinh" className="hover:text-showcase-primary transition-colors">
-                Công trình
-              </Link>
-              <span className="text-gray-400">/</span>
-              <span className="text-gray-800 line-clamp-1">{project.name}</span>
-            </div>
-
-            <Link
-              to="/cong-trinh"
-              className="inline-flex items-center gap-2 text-xs md:text-sm text-gray-500 hover:text-showcase-primary transition-colors"
-            >
-              <ArrowLeftOutlined className="text-xs" />
-              Quay lại danh sách công trình
-            </Link>
+          {/* BREADCRUMB */}
+          <div className="text-[13px] !text-gray-500 mb-6 font-medium">
+            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Home</Link>
+            <span className="mx-2">/</span>
+            <Link to="/cong-trinh" className="hover:text-showcase-primary !text-gray-500">Công trình</Link>
+            <span className="mx-2">/</span>
+            <span className="text-gray-900">{project.name}</span>
           </div>
 
           <div className="max-w-6xl mx-auto">
@@ -214,6 +200,7 @@ const ProjectDetailPage: React.FC = () => {
                         category={pCatName}
                         image={pCover}
                         tag={pCatName.toUpperCase()}
+                        likes={p.likeCount || p.likes}
                       />
                     );
                   })}

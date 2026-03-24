@@ -25,27 +25,61 @@ const ContactPage: React.FC = () => {
     message: ''
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Vui lòng nhập họ tên!';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Vui lòng nhập số điện thoại!';
+    } else {
+      const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+      if (!phoneRegex.test(formData.phone.trim())) {
+        newErrors.phone = 'Số điện thoại không hợp lệ!';
+      }
+    }
+
+    if (formData.email.trim()) {
+      const emailRegex = /^\S+@\S+\.\S+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = 'Email không hợp lệ!';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone) {
-      message.warning('Vui lòng nhập họ tên và số điện thoại!');
-      return;
-    }
-
-    try {
-      await create({
-        ...formData,
-        content: formData.message // Mapping to content if backend expects it
-      });
-      setFormData({ fullName: '', phone: '', email: '', address: '', message: '' });
-      toast.success('Gửi liên hệ thành công. Chúng tôi sẽ sớm liên lạc với bạn!');
-    } catch (error) {
-      console.error('Submit contact error:', error);
+    if (validateForm()) {
+      try {
+        await create({
+          ...formData,
+          content: formData.message // Mapping to content if backend expects it
+        });
+        setFormData({ fullName: '', phone: '', email: '', address: '', message: '' });
+        toast.success('Gửi liên hệ thành công. Chúng tôi sẽ sớm liên lạc với bạn!');
+      } catch (error) {
+        console.error('Submit contact error:', error);
+      }
+    } else {
+      toast.error('Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.');
     }
   };
 
@@ -135,48 +169,59 @@ const ContactPage: React.FC = () => {
               </div>
 
               <form className="space-y-6" onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder={t('contact.name')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
-                  required
-                />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder={t('contact.phone')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
-                  required
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder={t('contact.email')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
-                />
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder={t('contact.address')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
-                />
-                <textarea
-                  rows={4}
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder={t('contact.message')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors resize-none"
-                ></textarea>
+                <div>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder={t('contact.name')}
+                    className={`w-full px-4 py-3 border rounded-md outline-none transition-colors ${errors.fullName ? 'border-red-500' : 'border-gray-200 focus:border-teal-700'}`}
+                  />
+                  {errors.fullName && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.fullName}</p>}
+                </div>
+                <div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder={t('contact.phone')}
+                    className={`w-full px-4 py-3 border rounded-md outline-none transition-colors ${errors.phone ? 'border-red-500' : 'border-gray-200 focus:border-teal-700'}`}
+                  />
+                  {errors.phone && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.phone}</p>}
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder={t('contact.email')}
+                    className={`w-full px-4 py-3 border rounded-md outline-none transition-colors ${errors.email ? 'border-red-500' : 'border-gray-200 focus:border-teal-700'}`}
+                  />
+                  {errors.email && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.email}</p>}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder={t('contact.address')}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    rows={4}
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder={t('contact.message')}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-md focus:border-teal-700 outline-none transition-colors resize-none"
+                  ></textarea>
+                </div>
                 <Button
                   type="submit"
                   disabled={loading}

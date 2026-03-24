@@ -31,14 +31,13 @@ const PartnerDetailPage: React.FC = () => {
 
       <main className="flex-grow pt-28 pb-20">
         <Container>
-          <div className="mb-8">
-            <Link
-              to="/doi-tac"
-              className="inline-flex items-center !text-gray-500 hover:text-orange-500 transition-colors font-medium"
-            >
-              <ArrowLeftOutlined className="mr-2" />
-              Quay lại danh sách đối tác
-            </Link>
+          {/* BREADCRUMB */}
+          <div className="text-[13px] !text-gray-500 mb-6 font-medium">
+            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Home</Link>
+            <span className="mx-2">/</span>
+            <Link to="/doi-tac" className="hover:text-showcase-primary !text-gray-500">Đối tác</Link>
+            <span className="mx-2">/</span>
+            <span className="text-gray-900">{partner.title}</span>
           </div>
 
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">

@@ -20,10 +20,10 @@ const Card: React.FC<CardProps> = ({
   hoverable = true
 }) => {
   return (
-    <div className={`bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${hoverable ? 'hover:shadow-xl hover:-translate-y-1' : ''} ${className}`}>
+    <div className={`bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100  ${hoverable ? 'cursor-pointer' : ''} ${className}`}>
       {image && (
         <div className="relative aspect-[4/3] overflow-hidden">
-          <img src={image} alt={title} className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" />
+          <img src={image} alt={title} className="w-full h-full object-cover " />
         </div>
       )}
       <div className="p-5">

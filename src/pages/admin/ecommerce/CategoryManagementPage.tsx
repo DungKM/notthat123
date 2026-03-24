@@ -107,15 +107,12 @@ const CategoryManagementPage: React.FC = () => {
           try {
             const list = await getAll({ limit: 100 });
             const options: { label: string; value: string }[] = [];
-            const flatten = (items: CategoryItem[], prefix = '') => {
-              items.forEach(item => {
-                options.push({ label: `${prefix}${item.name}`, value: item.slug });
-                if (item.children && item.children.length > 0) {
-                  flatten(item.children, `${prefix}${item.name} > `);
-                }
+            if (Array.isArray(list)) {
+              // Chỉ lấy danh mục gốc (root categories)
+              list.forEach(item => {
+                options.push({ label: item.name, value: item.slug });
               });
-            };
-            if (Array.isArray(list)) flatten(list);
+            }
             return options;
           } catch (error) {
             return [];

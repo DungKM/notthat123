@@ -27,6 +27,7 @@ const PartnerPage = lazy(() => import('@/src/pages/client/Partner/PartnerPage'))
 const PartnerDetailPage = lazy(() => import('@/src/pages/client/Partner/PartnerDetailPage'));
 const CheckoutPage = lazy(() => import('@/src/pages/client/CheckoutPage'));
 const LoginPage = lazy(() => import('@/src/pages/auth/LoginPage'));
+const SearchResultsPage = lazy(() => import('@/src/pages/client/Search/SearchResultsPage'));
 
 // Pages - Admin
 const DashboardPage = lazy(() => import('@/src/pages/admin/dashboard/DashboardPage'));
@@ -83,6 +84,7 @@ const AppRouter: React.FC = () => {
             <Route path={ROUTES.DOI_TAC} element={<PartnerPage />} />
             <Route path={ROUTES.CHI_TIET_DOI_TAC} element={<PartnerDetailPage />} />
             <Route path={ROUTES.THANH_TOAN} element={<CheckoutPage />} />
+            <Route path={ROUTES.TIM_KIEM} element={<SearchResultsPage />} />
           </Route>
 
           {/* Special Routes (No Layout) */}

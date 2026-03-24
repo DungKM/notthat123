@@ -11,11 +11,13 @@ import {
   DeleteOutlined,
   ArrowRightOutlined,
   SearchOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons';
 import Container from '../ui/Container';
 import { useCart } from '../../context/CartContext';
 import { useTranslation } from 'react-i18next';
 import { useConstructionCategoryService, useCategoryService } from '@/src/api/services';
+import { useApi } from '@/src/hooks/useApi';
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -24,10 +26,23 @@ const Header: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [showTopBar, setShowTopBar] = useState(true);
+  const [activeMegaCategory, setActiveMegaCategory] = useState<any>(null);
+  const [megaMenuForceHide, setMegaMenuForceHide] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const megaMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cartRef = useRef<HTMLDivElement | null>(null);
   const cartButtonRef = useRef<HTMLDivElement | null>(null);
   const cartDrawerRef = useRef<HTMLDivElement | null>(null);
   const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart } = useCart();
+
+  // ─── Search ───
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ products: any[]; constructions: any[] }>({ products: [], constructions: [] });
+  const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement | null>(null);
+  const { request: searchRequest } = useApi<any>('/search');
 
   // ─── Danh mục công trình ───
   const { getAll: getCongTrinhCategories } = useConstructionCategoryService();
@@ -50,6 +65,45 @@ const Header: React.FC = () => {
   }, [apiCategories]);
 
   const currentLang = i18n.language?.toUpperCase().substring(0, 2) || 'VI';
+
+  // ─── Debounced Search ───
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults({ products: [], constructions: [] });
+      setShowResults(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await searchRequest('GET', '', null, { keyword: searchQuery.trim(), limit: 8 });
+        const data = res?.data || {};
+        setSearchResults({
+          products: Array.isArray(data.products) ? data.products : [],
+          constructions: Array.isArray(data.constructions) ? data.constructions : [],
+        });
+        setShowResults(true);
+      } catch {
+        setSearchResults({ products: [], constructions: [] });
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Close search dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const totalSearchResults = searchResults.products.length + searchResults.constructions.length;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -127,9 +181,9 @@ const Header: React.FC = () => {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isDarkHeader ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-6'
           }`}
       >
-        <Container className="flex items-center justify-between">
+        <Container className="flex items-center justify-between xl:!max-w-[1400px]">
           {/* Logo */}
-          <Link to="/" className="relative z-50 transition-transform hover:scale-105">
+          <Link to="/" className="relative z-50 transition-transform hover:scale-105 mr-4 lg:mr-6 xl:mr-4 2xl:mr-8">
             <div className="w-[100px] sm:w-[120px]">
               <img
                 src="/assets/images/image-logo.png"
@@ -140,13 +194,30 @@ const Header: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-x-4">
+          <nav className="hidden xl:flex items-center xl:gap-x-3 2xl:gap-x-5">
             {navLinks.map((link) => (
-              <div key={link.title} className="relative group">
+              <div
+                key={link.title}
+                className={`${link.href === ROUTES.SAN_PHAM ? 'static' : 'relative'} group`}
+                onMouseEnter={() => {
+                  if (link.href === ROUTES.SAN_PHAM) {
+                    // Clear any pending close
+                    if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
+                    if (!megaMenuForceHide) setMegaMenuOpen(true);
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  setMegaMenuForceHide(false);
+                  if (link.href === ROUTES.SAN_PHAM) {
+                    // Delay close so cursor can move from nav item to panel
+                    megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(false), 80);
+                  }
+                }}
+              >
                 <Link
                   to={link.href}
                   target={link.target}
-                  className={`text-[13px] font-bold uppercase tracking-wide whitespace-nowrap transition-all duration-300 hover:text-showcase-primary flex items-center gap-1 ${isDarkHeader ? '!text-gray-800' : '!text-white'
+                  className={`text-[12px] 2xl:text-[13px] font-bold uppercase tracking-wide whitespace-nowrap transition-all duration-300 hover:text-showcase-primary flex items-center gap-1 ${isDarkHeader ? '!text-gray-800' : '!text-white'
                     }`}
                 >
                   {link.title}
@@ -172,48 +243,79 @@ const Header: React.FC = () => {
                   </div>
                 )}
 
-                {/* Submenu Sản Phẩm */}
+                {/* Submenu Sản Phẩm - MEGA MENU */}
                 {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
-                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
-                    <div className="bg-white py-3 min-w-[260px] border border-gray-100 overflow-visible relative">
-                      <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Danh mục sản phẩm</p>
-                      {productCategories.map((cat: any) => (
-                        <div key={cat.id || cat._id} className="relative group/parent">
-                          <Link
-                            to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${cat.slug}`}
-                            className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-700 hover:text-showcase-primary hover:bg-gray-50 transition-colors group/item"
-                          >
-                            <span>{cat.name}</span>
-                            <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover/item:text-showcase-primary group-hover/item:translate-x-1 transition-all duration-200" />
-                          </Link>
+                  <div
+                    className={`absolute top-full left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
+                  >
+                    <div
+                      className="mx-auto w-full max-w-[1240px] px-4 xl:px-4 pointer-events-auto"
+                      onMouseEnter={() => {
+                        if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
+                      }}
+                      onMouseLeave={() => {
+                        megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(false), 80);
+                      }}
+                    >
+                      <div
+                        className="bg-white rounded-b-xl overflow-hidden flex min-h-[450px] border border-gray-100 relative"
+                        onMouseLeave={() => setActiveMegaCategory(null)}
+                      >
+                        {/* Left Sidebar - Parent Categories */}
+                        <div className="w-[200px] bg-[#f4f7f9] flex flex-col py-4 shrink-0 border-r border-[#e5e9f0]">
+                          {productCategories.map((cat: any, index: number) => {
+                            const isActive = activeMegaCategory ? activeMegaCategory.id === cat.id : index === 0;
+                            return (
+                              <div
+                                key={cat.id || cat._id}
+                                onMouseEnter={() => setActiveMegaCategory(cat)}
+                                className={`flex items-center px-6 py-3.5 cursor-pointer transition-colors relative ${isActive ? 'bg-[#5fa9f7] text-white' : 'text-gray-700 border-b border-[#e5e9f0] hover:bg-[#ebf0f5]'
+                                  }`}
+                              >
+                                <span className={`font-bold text-[14px] flex-1 line-clamp-1 text-left ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                                  {cat.name}
+                                </span>
+                                {/* Right Arrow Triangle */}
+                                {isActive && (
+                                  <div className="absolute top-1/2 -right-0 -translate-y-1/2 w-0 h-0 border-y-[10px] border-y-transparent border-l-[12px] border-l-[#5fa9f7] translate-x-[11px] z-10" />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
 
-                          {/* Child categories flyout */}
-                          {cat.children && cat.children.length > 0 && (
-                            <div className="absolute top-0 left-full pl-0 opacity-0 invisible group-hover/parent:opacity-100 group-hover/parent:visible transition-all duration-300 -translate-x-2 group-hover/parent:translate-x-0 z-[60]">
-                              <div className="bg-white py-3 min-w-[260px] border border-gray-100 overflow-hidden ml-1">
-                                {cat.children.map((child: any) => (
+                        {/* Right Area - Child Categories */}
+                        <div className="flex-1 bg-[#fbfcfd] p-8 overflow-y-auto">
+                          {(() => {
+                            const currentCat = activeMegaCategory || productCategories[0];
+                            if (!currentCat || !currentCat.children || currentCat.children.length === 0) {
+                              return <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>;
+                            }
+                            return (
+                              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+                                {currentCat.children.map((child: any) => (
                                   <Link
                                     key={child.id || child._id}
                                     to={`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${child.slug}`}
-                                    className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-700 hover:text-showcase-primary hover:bg-gray-50 transition-colors group/subitem"
+                                    className="flex items-center gap-3 px-2 border border-gray-300 hover:border-showcase-primary transition-all group/sub bg-white"
+                                    onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(false); }}
                                   >
-                                    <span>{child.name}</span>
-                                    <ArrowRightOutlined className="text-[10px] text-gray-200 opacity-0 group-hover/subitem:opacity-100 group-hover/subitem:text-showcase-primary group-hover/subitem:translate-x-1 transition-all duration-200 -translate-x-2" />
+                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0">
+                                      {child.name}
+                                    </span>
+                                    <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                                      {child.representativeImage ? (
+                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                      ) : (
+                                        <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain" alt="" />
+                                      )}
+                                    </div>
                                   </Link>
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                         </div>
-                      ))}
-                      <div className="border-t border-gray-100 mt-2 pt-2">
-                        <Link
-                          to={ROUTES.SAN_PHAM}
-                          className="flex items-center justify-between px-5 py-2.5 text-[12px] font-bold !text-showcase-primary hover:!text-gray-900 hover:bg-gray-50 transition-colors uppercase tracking-wide group/all"
-                        >
-                          Xem tất cả
-                          <ArrowRightOutlined className="text-[10px] transition-transform group-hover/all:translate-x-1 duration-200" />
-                        </Link>
                       </div>
                     </div>
                   </div>
@@ -251,15 +353,156 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 sm:gap-4 ml-6 lg:ml-8">
+          <div className="flex items-center gap-2 sm:gap-3 2xl:gap-4 ml-4 lg:ml-6 xl:ml-4 2xl:ml-8">
             {/* Search Bar - Desktop */}
-            <div className={`hidden md:flex items-center bg-white rounded-full px-4 py-2 border transition-all shadow-sm ${isDarkHeader ? 'border-gray-200' : 'border-white/20'}`}>
-              <input
-                type="text"
-                placeholder="Tìm kiếm..."
-                className="bg-transparent outline-none text-[13px] w-[150px] lg:w-[220px] text-gray-800 placeholder-gray-400"
-              />
-              <SearchOutlined className="text-gray-400 text-lg ml-2 hover:text-showcase-primary cursor-pointer transition-colors" />
+            <div ref={searchRef} className="relative hidden md:flex">
+              <div className={`flex items-center bg-white rounded-full px-4 py-2 border transition-all  ${isDarkHeader ? 'border-gray-200' : 'border-white/20 border-gray-800'}`}>
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => { if (totalSearchResults > 0) setShowResults(true); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim()) {
+                      setShowResults(false);
+                      navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
+                    }
+                  }}
+                  className="bg-transparent outline-none text-[13px] w-[14vw] xl:w-[10vw] 2xl:w-[15vw] min-w-[100px] max-w-[250px] transition-all duration-300 focus:w-[20vw] text-gray-800 placeholder-gray-400"
+                />
+                <div className="ml-2 w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  {isSearching ? (
+                    <LoadingOutlined className="text-gray-400 text-base" />
+                  ) : (
+                    <SearchOutlined
+                      onClick={() => {
+                        if (searchQuery.trim()) {
+                          setShowResults(false);
+                          navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
+                        }
+                      }}
+                      className="text-gray-400 text-base hover:text-showcase-primary cursor-pointer transition-colors"
+                    />
+                  )}
+                </div>
+              </div>
+              {/* Dropdown: has results */}
+              {showResults && totalSearchResults > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden min-w-[360px]">
+                  <div className="max-h-[420px] overflow-y-auto">
+
+                    {/* Group: Sản phẩm */}
+                    {searchResults.products.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 px-4 pt-3 pb-1.5">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sản phẩm</span>
+                          <span className="text-[10px] font-bold text-showcase-primary bg-amber-50 px-1.5 py-0.5 rounded-full">{searchResults.products.length}</span>
+                        </div>
+                        {searchResults.products.map((item: any) => (
+                          <button
+                            key={item.id || item._id}
+                            type="button"
+                            onClick={() => {
+                              setShowResults(false);
+                              setSearchQuery('');
+                              navigate(`/san-pham/${item.slug}`);
+                            }}
+                            className="flex items-center gap-3 w-full px-4 py-2 hover:bg-amber-50 text-left transition-colors group/item"
+                          >
+                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50">
+                              {item.image
+                                ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                : <img src="/assets/images/image-logo.png" className="w-full h-full object-contain p-1" alt="" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] text-gray-800 font-semibold truncate group-hover/item:text-showcase-primary transition-colors">{item.name}</p>
+                            </div>
+                            <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover/item:text-showcase-primary group-hover/item:translate-x-0.5 transition-all flex-shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Divider nếu có cả 2 nhóm */}
+                    {searchResults.products.length > 0 && searchResults.constructions.length > 0 && (
+                      <div className="border-t border-gray-100 mx-4" />
+                    )}
+
+                    {/* Group: Công trình */}
+                    {searchResults.constructions.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 px-4 pt-3 pb-1.5">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Công trình</span>
+                          <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded-full">{searchResults.constructions.length}</span>
+                        </div>
+                        {searchResults.constructions.map((item: any) => (
+                          <button
+                            key={item.id || item._id}
+                            type="button"
+                            onClick={() => {
+                              setShowResults(false);
+                              setSearchQuery('');
+                              navigate(`/cong-trinh/${item.slug}`);
+                            }}
+                            className="flex items-center gap-3 w-full px-4 py-2 hover:bg-blue-50 text-left transition-colors group/item"
+                          >
+                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50">
+                              {item.image
+                                ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                : <img src="/assets/images/image-logo.png" className="w-full h-full object-contain p-1" alt="" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] text-gray-800 font-semibold truncate group-hover/item:text-blue-600 transition-colors">{item.name}</p>
+                            </div>
+                            <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover/item:text-blue-500 group-hover/item:translate-x-0.5 transition-all flex-shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Footer: Xem tất cả */}
+                  <div className="border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowResults(false);
+                        navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 text-[12px] font-bold text-showcase-primary py-3 hover:bg-amber-50 transition-colors"
+                    >
+                      Xem tất cả {totalSearchResults} kết quả
+                      <ArrowRightOutlined className="text-[10px]" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Dropdown: empty state - searched but no results */}
+              {showResults && !isSearching && searchQuery.trim() && totalSearchResults === 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden min-w-[320px]">
+                  <div className="px-5 py-6 text-center">
+                    <SearchOutlined className="text-2xl text-gray-300 mb-2" />
+                    <p className="text-[13px] font-semibold text-gray-600">Không tìm thấy kết quả</p>
+                    <p className="text-[11px] text-gray-400 mt-1">Thử từ khóa khác hoặc xem toàn bộ</p>
+                  </div>
+                  <div className="border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowResults(false);
+                        navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 text-[12px] font-bold text-gray-500 py-3 hover:bg-gray-50 transition-colors"
+                    >
+                      Trang kết quả tìm kiếm
+                      <ArrowRightOutlined className="text-[10px]" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Language Switcher - Desktop */}
@@ -314,20 +557,20 @@ const Header: React.FC = () => {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         exit={{ scale: 0 }}
-                        className="absolute -top-2.5 -right-3.5 bg-showcase-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
+                        className="absolute -top-2.5 -right-3.5 bg-showcase-primary text-white text-[12px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
                       >
                         {cartCount}
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </div>
-                <span className="font-bold uppercase text-[12px] tracking-wider hidden sm:block">Giỏ hàng</span>
+                <span className="font-bold uppercase text-[12px] tracking-wider hidden xl:block whitespace-nowrap">Giỏ hàng</span>
               </button>
             </div>
 
             {/* Mobile Menu Toggle */}
             <button
-              className={`lg:hidden flex items-center justify-center w-10 h-10 rounded-full transition-all ${isDarkHeader ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+              className={`xl:hidden flex items-center justify-center w-10 h-10 rounded-full transition-all ${isDarkHeader ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'
                 }`}
               onClick={() => setIsMenuOpen(true)}
             >
@@ -470,7 +713,7 @@ const Header: React.FC = () => {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[100] flex flex-col lg:hidden"
+            className="fixed inset-0 bg-white z-[100] flex flex-col xl:hidden"
           >
             <div className="flex items-center justify-between p-6 border-b">
               <div className="w-[100px]">

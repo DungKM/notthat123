@@ -13,7 +13,7 @@ const Testimonials: React.FC = () => {
   useEffect(() => {
     constructionRequest('GET', '', null, { limit: 3 })
       .then((res) => setProjects(res.data || []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const brands = [
@@ -31,12 +31,12 @@ const Testimonials: React.FC = () => {
         {/* Media Mentions / Partners */}
         <div className="text-center mb-16">
           <h4 className="text-xl font-bold text-gray-400 uppercase tracking-[0.3em] mb-8">{t('testimonials.media_title')}</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center opacity-70 grayscale hover:grayscale-0 transition-all">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center opacity-70 ">
             {brands.map((brand, i) => (
               <img key={i} src={brand.logo} alt={brand.name} className="mx-auto object-contain" />
             ))}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center opacity-70 grayscale hover:grayscale-0 transition-all">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center opacity-70 ">
             {brands.map((brand, i) => (
               <img key={i} src={brand.logo} alt={brand.name} className="mx-auto object-contain" />
             ))}

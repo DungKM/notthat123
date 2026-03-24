@@ -34,7 +34,7 @@ export interface UseApiReturn<T> {
   remove: (id: string) => Promise<void>;
 
   // Custom request
-  request: <R = any>(method: string, url: string, payload?: any, params?: Record<string, any>) => Promise<R>;
+  request: <R = any>(method: string, url: string, payload?: any, params?: Record<string, any>, headers?: Record<string, string>) => Promise<R>;
 }
 
 // ─── Generic CRUD Hook ───
@@ -95,7 +95,7 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
     setLoading(true);
     setError(null);
     try {
-      const res: ApiResponse<T> = await api.get(`${basePath}/slug/${slug}`);
+      const res: ApiResponse<T> = await api.get(`${basePath}/${slug}`);
       setData(res.data);
       return res.data;
     } catch (err: any) {
@@ -169,11 +169,11 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
   }, [basePath, handleError]);
 
   // ─── CUSTOM REQUEST (cho API đặc biệt) ───
-  const request = useCallback(async <R = any>(method: string, url: string, payload?: any, params?: Record<string, any>): Promise<R> => {
+  const request = useCallback(async <R = any>(method: string, url: string, payload?: any, params?: Record<string, any>, headers?: Record<string, string>): Promise<R> => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api({ method, url: `${basePath}${url}`, data: payload, params });
+      const res = await api({ method, url: `${basePath}${url}`, data: payload, params, headers });
       return res as R;
     } catch (err: any) {
       handleError(err);

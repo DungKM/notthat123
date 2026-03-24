@@ -233,9 +233,14 @@ const ProductManagementPage: React.FC = () => {
             const options: { label: string; value: string }[] = [];
             const flatten = (items: CategoryItem[], prefix = '') => {
               items.forEach(item => {
-                options.push({ label: `${prefix}${item.name}`, value: item.id });
                 if (item.children && item.children.length > 0) {
+                  // Nếu là danh mục cha (có con), tiếp tục đệ quy nhưng KHÔNG thêm nó vào danh sách chọn
                   flatten(item.children, `${prefix}${item.name} > `);
+                } else {
+                  // Chỉ các danh mục con (leaf node có cha - tức là prefix khác rỗng) mới được chọn
+                  if (prefix !== '') {
+                    options.push({ label: `${prefix}${item.name}`, value: item.id });
+                  }
                 }
               });
             };

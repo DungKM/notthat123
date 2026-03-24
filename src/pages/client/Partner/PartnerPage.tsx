@@ -5,11 +5,12 @@ import SEO from "@/src/components/common/SEO";
 import { useEffect } from "react";
 import { usePartnerService } from "@/src/api/services";
 const PartnerPage: React.FC = () => {
-  const { list: partners, getAll } = usePartnerService();
+  const { list: partners, getAll, meta } = usePartnerService();
+  const [limit, setLimit] = React.useState(6);
 
   useEffect(() => {
-    getAll({ limit: 100 });
-  }, [getAll]);
+    getAll({ limit });
+  }, [getAll, limit]);
 
   return (
     <div className="bg-white">
@@ -110,11 +111,16 @@ const PartnerPage: React.FC = () => {
           </div>
 
           {/* Pagination / Load More Button Space if needed */}
-          <div className="mt-16 flex justify-center">
-            <button className="px-8 py-3 border border-orange-500 text-orange-500 font-bold rounded-full hover:bg-orange-500 hover:text-white transition-colors duration-300 flex items-center gap-2">
-              Xem thêm <span className="ml-2">↓</span>
-            </button>
-          </div>
+          {(!meta || partners.length < meta.total) && (
+            <div className="mt-16 flex justify-center">
+              <button 
+                onClick={() => setLimit(prev => prev + 6)}
+                className="px-8 py-3 border border-orange-500 text-orange-500 font-bold rounded-full hover:bg-orange-500 hover:text-white transition-colors duration-300 flex items-center gap-2"
+              >
+                Xem thêm <span className="ml-2">↓</span>
+              </button>
+            </div>
+          )}
         </Container>
       </section>
     </div>

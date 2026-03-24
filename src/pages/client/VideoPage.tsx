@@ -21,10 +21,17 @@ const getYoutubeThumb = (url: string) => {
 const VideoPage: React.FC = () => {
   const { list: videos, getAll, loading } = useVideoService();
   const [selectedVideoUrl, setSelectedVideoUrl] = React.useState<string | null>(null);
+  const [limit, setLimit] = React.useState(9);
 
   useEffect(() => {
-    getAll({ limit: 100 });
-  }, [getAll]);
+    getAll({ limit });
+  }, [getAll, limit]);
+
+  const handleLoadMore = () => {
+    setLimit(prev => prev + 9);
+  };
+
+  const hasMore = videos.length >= limit;
 
   return (
     <div className="bg-white">
@@ -90,9 +97,17 @@ const VideoPage: React.FC = () => {
           </div>
 
           {/* Load More Button */}
-          <div className="mt-16 text-center">
-            <button className="px-12 py-4 border-2 border-teal-900 text-teal-900 font-bold text-xs uppercase tracking-[0.3em] hover:bg-teal-900 hover:text-white transition-all">TẢI THÊM VIDEO</button>
-          </div>
+          {hasMore && (
+            <div className="mt-16 text-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loading}
+                className="px-12 py-4 border-2 border-teal-900 text-teal-900 font-bold text-xs uppercase tracking-[0.3em] hover:bg-teal-900 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Đang tải...' : 'TẢI THÊM VIDEO'}
+              </button>
+            </div>
+          )}
         </Container>
       </section>
 

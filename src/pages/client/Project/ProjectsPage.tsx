@@ -5,6 +5,7 @@ import Badge from '@/src/features/showcase/components/ui/Badge';
 import SEO from '@/src/components/common/SEO';
 import { Search, X, Filter } from 'lucide-react';
 import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
+import { useApi } from '@/src/hooks/useApi';
 
 // ====================== Project Card ======================
 
@@ -45,8 +46,10 @@ const SkeletonCard: React.FC = () => (
 const ProjectsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { request: constructionRequest, loading } = useConstructionService();
+  const { request: constructionRequest, loading: constructionLoading } = useConstructionService();
   const { getAll: getCategories } = useConstructionCategoryService();
+  const { request: searchRequest, loading: searchLoading } = useApi<any>('/search');
+  const loading = searchQuery.trim() ? searchLoading : constructionLoading;
 
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
@@ -63,19 +66,33 @@ const ProjectsPage: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const query: any = { page: currentPage, limit: 12 };
-        if (selectedCategoryId) query.categoryId = selectedCategoryId;
-        if (searchQuery) query.search = searchQuery;
-        const res = await constructionRequest('GET', '', null, query);
-        setProjects(res.data || []);
-        if (res.meta) setMeta(res.meta);
+        if (searchQuery.trim()) {
+          // Dùng /search API khi có keyword (giống header)
+          const res = await searchRequest('GET', '', null, { keyword: searchQuery.trim(), limit: 50 });
+          let constructions: any[] = res?.data?.constructions || [];
+          // Lọc thêm theo category nếu đang chọn
+          if (selectedCategoryId) {
+            constructions = constructions.filter(
+              (c: any) => (c.categoryId === selectedCategoryId || c.category?._id === selectedCategoryId || c.category?.id === selectedCategoryId)
+            );
+          }
+          setProjects(constructions);
+          setMeta({ page: 1, limit: constructions.length, total: constructions.length, totalPages: 1 });
+        } else {
+          // Không có keyword: gọi API công trình gốc
+          const query: any = { page: currentPage, limit: 12 };
+          if (selectedCategoryId) query.categoryId = selectedCategoryId;
+          const res = await constructionRequest('GET', '', null, query);
+          setProjects(res.data || []);
+          if (res.meta) setMeta(res.meta);
+        }
       } catch (e) {
         console.error('Failed to fetch projects', e);
       }
     };
     const timeoutId = setTimeout(fetchProjects, 400);
     return () => clearTimeout(timeoutId);
-  }, [selectedCategoryId, searchQuery, currentPage, constructionRequest]);
+  }, [selectedCategoryId, searchQuery, currentPage, constructionRequest, searchRequest]);
 
   const handleCategorySelect = (catId: string) => {
     setSelectedCategoryId(catId);
@@ -161,11 +178,10 @@ const ProjectsPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCategorySelect('')}
-                        className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
-                          !selectedCategoryId
+                        className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
                             ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                             : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         Tất cả
                       </button>
@@ -175,11 +191,10 @@ const ProjectsPage: React.FC = () => {
                           key={cat._id || cat.id}
                           type="button"
                           onClick={() => handleCategorySelect(cat._id || cat.id)}
-                          className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
-                            selectedCategoryId === (cat._id || cat.id)
+                          className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${selectedCategoryId === (cat._id || cat.id)
                               ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                               : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
-                          }`}
+                            }`}
                         >
                           {cat.name}
                         </button>
@@ -230,11 +245,10 @@ const ProjectsPage: React.FC = () => {
                     <button
                       key={p}
                       onClick={() => setCurrentPage(p)}
-                      className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${
-                        p === currentPage
-                          ? 'bg-teal-900 text-white border-teal-900'
+                      className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
+                          ? 'bg-showcase-primary text-white border-showcase-primary'
                           : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
-                      }`}
+                        }`}
                     >
                       {p}
                     </button>
