@@ -269,16 +269,14 @@ const Header: React.FC = () => {
                               <div
                                 key={cat.id || cat._id}
                                 onMouseEnter={() => setActiveMegaCategory(cat)}
-                                className={`flex items-center px-6 py-3.5 cursor-pointer transition-colors relative ${isActive ? 'bg-[#5fa9f7] text-white' : 'text-gray-700 border-b border-[#e5e9f0] hover:bg-[#ebf0f5]'
+                                className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-[#5fa9f7] text-white border-[#5fa9f7]' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
                                   }`}
                               >
-                                <span className={`font-bold text-[14px] flex-1 line-clamp-1 text-left ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                                <span className={`font-bold text-[14px] flex-1 line-clamp-1 text-left transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-800'}`}>
                                   {cat.name}
                                 </span>
                                 {/* Right Arrow Triangle */}
-                                {isActive && (
-                                  <div className="absolute top-1/2 -right-0 -translate-y-1/2 w-0 h-0 border-y-[10px] border-y-transparent border-l-[12px] border-l-[#5fa9f7] translate-x-[11px] z-10" />
-                                )}
+                                <div className={`absolute top-1/2 -right-0 -translate-y-1/2 w-0 h-0 border-y-[10px] border-y-transparent border-l-[12px] border-l-[#5fa9f7] translate-x-[11px] z-10 pointer-events-none transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
                               </div>
                             );
                           })}
@@ -297,17 +295,17 @@ const Header: React.FC = () => {
                                   <Link
                                     key={child.id || child._id}
                                     to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
-                                    className="flex items-center gap-3 px-2 border border-gray-300 hover:border-showcase-primary transition-all group/sub bg-white"
+                                    className="flex items-center gap-3 px-2 border border-gray-200 rounded-lg hover:border-showcase-primary hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(false); }}
                                   >
-                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0">
+                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0 transition-colors duration-300">
                                       {child.name}
                                     </span>
-                                    <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                                    <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden">
                                       {child.representativeImage ? (
-                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-contain mix-blend-multiply group-hover/sub:scale-110 transition-transform duration-300" />
                                       ) : (
-                                        <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain" alt="" />
+                                        <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain group-hover/sub:scale-110 transition-transform duration-300" alt="" />
                                       )}
                                     </div>
                                   </Link>
