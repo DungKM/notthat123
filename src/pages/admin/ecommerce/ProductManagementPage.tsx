@@ -464,19 +464,26 @@ const ProductManagementPage: React.FC = () => {
           if (values.description) formData.append('description', values.description);
 
           if (imageFiles.length > 0) {
-            imageFiles.slice(0, 4).forEach((fileItem: any) => {
+            const existingMap: Record<string, string> = {};
+
+            imageFiles.slice(0, 4).forEach((fileItem: any, idx: number) => {
+              const desc = imageDescriptions[idx] || '';
+
               if (fileItem.originFileObj) {
                 formData.append('images', fileItem.originFileObj);
+                formData.append('imageDescriptions', desc);
               } else {
                 const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
                 if (imageId) {
                   formData.append('keepImageIds', imageId);
+                  existingMap[imageId] = desc;
                 }
               }
             });
-            imageDescriptions.slice(0, imageFiles.length).forEach((desc) => {
-              formData.append('imageDescriptions', desc || '');
-            });
+
+            if (Object.keys(existingMap).length > 0) {
+              formData.append('existingImageDescriptions', JSON.stringify(existingMap));
+            }
           }
 
           await request('PATCH', `/${editRecord.id}`, formData);
