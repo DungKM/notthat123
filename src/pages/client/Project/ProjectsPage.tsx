@@ -259,19 +259,36 @@ const ProjectsPage: React.FC = () => {
 
               {/* Pagination */}
               {meta.totalPages > 1 && (
-                <div className="mt-24 flex justify-center gap-2">
-                  {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setCurrentPage(p)}
-                      className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
-                        ? 'bg-showcase-primary text-white border-showcase-primary'
-                        : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
-                        }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
+                <div className="mt-24 flex flex-wrap justify-center items-center gap-2">
+                  {(() => {
+                    const { totalPages } = meta;
+                    let pages: (number | string)[] = [];
+                    if (totalPages <= 7) {
+                      pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+                    } else if (currentPage <= 3) {
+                      pages = [1, 2, 3, 4, '...', totalPages - 1, totalPages];
+                    } else if (currentPage >= totalPages - 2) {
+                      pages = [1, 2, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                    } else {
+                      pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+                    }
+                    
+                    return pages.map((p, index) => (
+                      <button
+                        key={`${p}-${index}`}
+                        onClick={() => typeof p === 'number' && setCurrentPage(p)}
+                        disabled={typeof p === 'string'}
+                        className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
+                          ? 'bg-showcase-primary text-white border-showcase-primary'
+                          : typeof p === 'string'
+                            ? 'bg-transparent border-transparent text-gray-500 cursor-default'
+                            : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
+                          }`}
+                      >
+                        {p}
+                      </button>
+                    ));
+                  })()}
                 </div>
               )}
             </div>

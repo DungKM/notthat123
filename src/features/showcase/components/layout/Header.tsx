@@ -246,7 +246,7 @@ const Header: React.FC = () => {
                 {/* Submenu Sản Phẩm - MEGA MENU */}
                 {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
                   <div
-                    className={`absolute top-full left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
+                    className={`absolute top-18 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
                   >
                     <div
                       className="mx-auto w-full max-w-[1240px] px-4 xl:px-4 pointer-events-auto"
