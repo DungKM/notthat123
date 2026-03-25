@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import SEO from '@/src/components/common/SEO';
@@ -44,6 +44,9 @@ const SkeletonCard: React.FC = () => (
 // ====================== Projects Page ======================
 
 const ProjectsPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category') || '';
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const { request: constructionRequest, loading: constructionLoading } = useConstructionService();
@@ -52,10 +55,18 @@ const ProjectsPage: React.FC = () => {
   const loading = searchQuery.trim() ? searchLoading : constructionLoading;
 
   const [categories, setCategories] = useState<any[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(categoryParam);
   const [projects, setProjects] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
+
+  // Đồng bộ selectedCategoryId khi url thay đổi (từ menu)
+  useEffect(() => {
+    if (categoryParam !== selectedCategoryId) {
+      setSelectedCategoryId(categoryParam);
+      setCurrentPage(1);
+    }
+  }, [categoryParam]);
 
   useEffect(() => {
     getCategories({ limit: 50 }).then(res => {
@@ -73,7 +84,7 @@ const ProjectsPage: React.FC = () => {
           // Lọc thêm theo category nếu đang chọn
           if (selectedCategoryId) {
             constructions = constructions.filter(
-              (c: any) => (c.categoryId === selectedCategoryId || c.category?._id === selectedCategoryId || c.category?.id === selectedCategoryId)
+              (c: any) => (c.categoryId === selectedCategoryId || c.category?._id === selectedCategoryId || c.category?.id === selectedCategoryId || c.category?.slug === selectedCategoryId)
             );
           }
           setProjects(constructions);
@@ -94,9 +105,14 @@ const ProjectsPage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [selectedCategoryId, searchQuery, currentPage, constructionRequest, searchRequest]);
 
-  const handleCategorySelect = (catId: string) => {
-    setSelectedCategoryId(catId);
+  const handleCategorySelect = (catValue: string) => {
+    setSelectedCategoryId(catValue);
     setCurrentPage(1);
+    if (catValue) {
+      setSearchParams({ category: catValue });
+    } else {
+      setSearchParams({});
+    }
   };
 
   return (
@@ -179,26 +195,29 @@ const ProjectsPage: React.FC = () => {
                         type="button"
                         onClick={() => handleCategorySelect('')}
                         className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
-                            ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
+                          ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                           }`}
                       >
                         Tất cả
                       </button>
 
-                      {categories.map((cat) => (
-                        <button
-                          key={cat._id || cat.id}
-                          type="button"
-                          onClick={() => handleCategorySelect(cat._id || cat.id)}
-                          className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${selectedCategoryId === (cat._id || cat.id)
+                      {categories.map((cat) => {
+                        const catValue = cat.slug || cat._id || cat.id;
+                        return (
+                          <button
+                            key={cat._id || cat.id}
+                            type="button"
+                            onClick={() => handleCategorySelect(catValue)}
+                            className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${selectedCategoryId === catValue
                               ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                               : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
-                            }`}
-                        >
-                          {cat.name}
-                        </button>
-                      ))}
+                              }`}
+                          >
+                            {cat.name}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -246,8 +265,8 @@ const ProjectsPage: React.FC = () => {
                       key={p}
                       onClick={() => setCurrentPage(p)}
                       className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
-                          ? 'bg-showcase-primary text-white border-showcase-primary'
-                          : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
+                        ? 'bg-showcase-primary text-white border-showcase-primary'
+                        : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
                         }`}
                     >
                       {p}

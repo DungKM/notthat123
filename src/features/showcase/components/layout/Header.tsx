@@ -295,17 +295,17 @@ const Header: React.FC = () => {
                                   <Link
                                     key={child.id || child._id}
                                     to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
-                                    className="flex items-center gap-3 px-2 border border-gray-200 rounded-lg hover:border-showcase-primary hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 group/sub bg-white"
+                                    className="flex items-center gap-3 px-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(false); }}
                                   >
-                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0 transition-colors duration-300">
+                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0 ">
                                       {child.name}
                                     </span>
                                     <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden">
                                       {child.representativeImage ? (
-                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-contain mix-blend-multiply group-hover/sub:scale-110 transition-transform duration-300" />
+                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-contain mix-blend-multiply" />
                                       ) : (
-                                        <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain group-hover/sub:scale-110 transition-transform duration-300" alt="" />
+                                        <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain" alt="" />
                                       )}
                                     </div>
                                   </Link>
@@ -327,7 +327,7 @@ const Header: React.FC = () => {
                       {congTrinhCategories.map((cat) => (
                         <Link
                           key={cat._id || cat.id}
-                          to={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
+                          to={`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id}`}
                           className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-200 hover:!text-white hover:bg-white/10 transition-colors group/item"
                         >
                           <span>{cat.name}</span>
