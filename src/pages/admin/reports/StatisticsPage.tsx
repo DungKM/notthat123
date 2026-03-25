@@ -160,7 +160,6 @@ const StatisticsPage: React.FC = () => {
         amount: Number(values.amount),
         reason: values.reason,
       });
-      message.success("Yêu cầu ứng tiền đã được gửi thành công");
       advanceActionRef.current?.reload();
       return true;
     } catch {
@@ -301,14 +300,45 @@ const StatisticsPage: React.FC = () => {
     },
     {
       title: "File thanh toán",
-      dataIndex: "transferProof",
+      dataIndex: "images",
       hideInSearch: true,
-      render: (_, record) =>
-        record.transferProof ? (
-          <Image src={record.transferProof} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QardG0sPDwMBx0YEhT18TA4PUeBXtIHBYlD0wGMzlJuU1A9IMDBQCsIiC4IOCfRKDbyAUG3hYWboKAfYDYi6IA8gViA7H8thwBjglIHbCkLtRJgGYJ3oGBISERBZBiKfyLMlAzGRgYIhh4GBgZUBi0UGA8MlQIol+RKjIIEO0GBgS0iwMDMwgBV0QWBfhmEQSKRKDgYGt4YGBpYoBhC7AcY3R0YGBrYJxklEOViYGBIBov+/8//UYaBAuJQYMDwL/p+BgYWBvjNAABBelRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/Pgo8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIj4KICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIvPgogIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4L+5JfAAAAn0lEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOBtwYEAAUFsJp0AAAAASUVORK5CYII=" width={50} height={50} style={{ objectFit: 'cover', borderRadius: 4 }} />
-        ) : (
-          <span style={{ color: '#aaa' }}>Không có ảnh</span>
-        )
+      render: (_, record: any) => {
+        const images = record.images || [];
+        const firstImg = images.length > 0 ? images[0].url : (record.transferProof || null);
+        
+        if (!firstImg) {
+          return <span style={{ color: '#aaa' }}>Không có ảnh</span>;
+        }
+
+        return (
+          <Image.PreviewGroup>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <Image 
+                src={firstImg} 
+                width={50} 
+                height={50} 
+                style={{ borderRadius: 4, objectFit: 'cover' }} 
+              />
+              {images.length > 1 && (
+                <div style={{
+                  position: 'absolute', top: -5, right: -5,
+                  background: '#1890ff', color: 'white', borderRadius: '50%',
+                  width: 20, height: 20, display: 'flex', alignItems: 'center', 
+                  justifyContent: 'center', fontSize: 10, fontWeight: 'bold'
+                }}>
+                  +{images.length - 1}
+                </div>
+              )}
+              {/* Vẫn render các ảnh còn lại nhưng giấu đi để PreviewGroup có thể next được */}
+              <div style={{ display: 'none' }}>
+                {images.slice(1).map((img: any, idx: number) => (
+                  <Image key={img.id || img._id || idx} src={img.url} />
+                ))}
+              </div>
+            </div>
+          </Image.PreviewGroup>
+        );
+      }
     },
   ];
 

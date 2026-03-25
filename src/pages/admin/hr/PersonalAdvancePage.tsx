@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ProTable,
   ProColumns,
   ModalForm,
   ProFormDigit,
   ProFormTextArea,
-  ProFormUploadButton as RawProFormUploadButton
+  ProFormUploadButton as RawProFormUploadButton,
+  ActionType
 } from '@ant-design/pro-components';
 
 // Workaround: ProFormUploadButton bị export sai type
 const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { AdvanceRequest, User } from '@/src/types';
 import { MOCK_ADVANCE_REQUESTS } from '@/src/mockData';
-import { Button, Tag, Space, Typography, message, Image } from 'antd';
+import { Badge, Button, Tag, Space, Typography, Image } from 'antd';
 import { PlusOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, FileImageOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { formatCurrency, formatDateTime } from '@/src/utils/format';
+import { useAdvanceRequestService } from '@/src/api/services';
 
 const { Text } = Typography;
 
@@ -24,9 +26,8 @@ interface PersonalAdvancePageProps {
 }
 
 const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }) => {
-  const [requests, setRequests] = useState<AdvanceRequest[]>(
-    MOCK_ADVANCE_REQUESTS.filter(r => r.employeeId === currentUser.id) as AdvanceRequest[]
-  );
+  const { request: apiRequest } = useAdvanceRequestService();
+  const actionRef = useRef<ActionType>(null);
 
   const columns: ProColumns<AdvanceRequest>[] = [
     {
@@ -34,15 +35,15 @@ const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }
       dataIndex: 'requestDate',
       valueType: 'dateTime',
       hideInSearch: true,
-      render: (val) => formatDateTime(String(val)),
+      render: (val, record: any) => formatDateTime(String(record.createdAt || val)),
       width: 180,
     },
     {
       title: 'Số tiền',
       dataIndex: 'amount',
-      render: (val) => (
+      render: (_, record: any) => (
         <Text strong style={{ color: '#1890ff' }}>
-          {formatCurrency(Number(val))}
+          {formatCurrency(Number(record.amount))}
         </Text>
       ),
       width: 150,
@@ -54,11 +55,35 @@ const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }
     },
     {
       title: 'Minh chứng',
-      dataIndex: 'transferProof',
+      dataIndex: 'images',
       hideInSearch: true,
-      render: (val) => val ? (
-        <Image src={String(val)} width={40} height={40} style={{ borderRadius: 4, objectFit: 'cover' }} />
-      ) : '-',
+      render: (_, record: any) => {
+        const images = record.images || [];
+        const firstImg = images.length > 0 ? images[0].url : (record.transferProof || null);
+        
+        if (!firstImg) return '-';
+
+        return (
+          <Image.PreviewGroup>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <Image 
+                src={firstImg} 
+                width={40} 
+                height={40} 
+                style={{ borderRadius: 4, objectFit: 'cover' }} 
+              />
+              {images.length > 1 && (
+                <Badge count={images.length} size="small" style={{ position: 'absolute', top: -8, right: -8 }} />
+              )}
+              <div style={{ display: 'none' }}>
+                {images.slice(1).map((img: any, idx: number) => (
+                  <Image key={img.id || img._id || idx} src={img.url} />
+                ))}
+              </div>
+            </div>
+          </Image.PreviewGroup>
+        );
+      },
       width: 100,
     },
     {
@@ -92,21 +117,25 @@ const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }
   ];
 
   const handleCreateRequest = async (values: any) => {
-    const newRequest: AdvanceRequest = {
-      id: Math.random().toString(36).substr(2, 9),
-      employeeId: currentUser.id,
-      employeeName: currentUser.name,
-      amount: Number(values.amount),
-      reason: values.reason,
-      requestDate: dayjs().toISOString(),
-      status: 'Chờ duyệt' as const,
-      // Giả lập preview ảnh
-      transferProof: values.image?.[0]?.thumbUrl || values.image?.[0]?.url,
-    };
+    try {
+      const formData = new FormData();
+      formData.append('amount', String(values.amount));
+      formData.append('reason', values.reason);
 
-    setRequests([newRequest, ...requests]);
-    message.success('Gửi yêu cầu ứng tiền thành công!');
-    return true;
+      if (values.image && values.image.length > 0) {
+        values.image.forEach((file: any) => {
+          if (file.originFileObj) {
+            formData.append('images', file.originFileObj);
+          }
+        });
+      }
+
+      await apiRequest('POST', '', formData);
+      actionRef.current?.reload();
+      return true;
+    } catch (e) {
+      return false;
+    }
   };
 
   return (
@@ -114,7 +143,24 @@ const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }
       <ProTable<AdvanceRequest>
         headerTitle="Lịch sử ứng tiền cá nhân"
         columns={columns}
-        dataSource={requests}
+        actionRef={actionRef}
+        request={async (params) => {
+          try {
+            const queryParams: any = {
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+              employeeId: currentUser.id, // Lọc theo nhân viên hiện tại
+            };
+            const res = await apiRequest('GET', '', null, queryParams);
+            return {
+              data: res.data || [],
+              success: true,
+              total: res.meta?.total || 0,
+            };
+          } catch (e) {
+            return { data: [], success: false, total: 0 };
+          }
+        }}
         rowKey="id"
         search={false}
         pagination={{ pageSize: 10 }}
