@@ -72,7 +72,7 @@ const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>(); // Lấy slug thật từ URL
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
   const [quantity, setQuantity] = React.useState(1);
 
   const { data: apiProduct, loading, getBySlug, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
@@ -186,6 +186,8 @@ const ProductDetailPage: React.FC = () => {
       quantity: quantity,
       subtotal: product.price * quantity,
     });
+    // Trigger cart drawer open
+    setIsCartOpen(true);
   };
 
   const handleBuyNow = () => {

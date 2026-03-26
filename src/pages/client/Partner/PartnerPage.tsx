@@ -4,8 +4,18 @@ import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
 import { useEffect } from "react";
 import { usePartnerService } from "@/src/api/services";
+
+const PartnerCardSkeleton = () => (
+  <div className="relative h-[520px] bg-gray-100 rounded-2xl overflow-hidden border border-gray-100 border-b-[6px] border-b-gray-200 animate-pulse block">
+    <div className="absolute bottom-0 left-0 right-0 bg-white p-8 flex flex-col min-h-[140px]">
+      <div className="w-16 h-5 bg-gray-200 rounded mb-3"></div>
+      <div className="w-3/4 h-6 bg-gray-200 rounded mb-2"></div>
+    </div>
+  </div>
+);
+
 const PartnerPage: React.FC = () => {
-  const { list: partners, getAll, meta } = usePartnerService();
+  const { list: partners, getAll, meta, loading } = usePartnerService();
   const [limit, setLimit] = React.useState(6);
 
   useEffect(() => {
@@ -71,7 +81,9 @@ const PartnerPage: React.FC = () => {
 
           {/* Grid of Partner Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {partners.map((partner, index) => (
+            {loading ? (
+              Array.from({ length: 6 }).map((_, idx) => <PartnerCardSkeleton key={idx} />)
+            ) : partners.map((partner, index) => (
               <Link
                 to={`/doi-tac/${partner.slug}`}
                 key={index}

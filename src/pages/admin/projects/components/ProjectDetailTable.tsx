@@ -395,9 +395,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           </ProTable.Summary>
         )}
       />
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
+      <style>{`
         .project-detail-table .ant-pro-table-list-toolbar {
           display: none;
         }
@@ -424,9 +422,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           border-bottom: 1px solid #1677ff !important; /* Viền xanh đậm hơn khi focus */
           background-color: #f0f5ff; /* Đổi màu nền nhẹ cho dễ nhìn */
         }
-      `,
-        }}
-      />
+      `}</style>
     </div>
   );
 };

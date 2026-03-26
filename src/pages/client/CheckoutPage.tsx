@@ -16,6 +16,7 @@ import {
   MinusOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
@@ -35,12 +36,12 @@ const CheckoutPage: React.FC = () => {
 
   const handleOrder = async () => {
     if (!customer.fullName || !customer.phone || !customer.address) {
-      alert('Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ!');
+      toast.error('Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ!');
       return;
     }
 
     if (cartItems.length === 0) {
-      alert('Giỏ hàng đang trống');
+      toast.error('Giỏ hàng đang trống');
       return;
     }
 
@@ -53,13 +54,13 @@ const CheckoutPage: React.FC = () => {
         deliveryTime: customer.deliveryTime
       });
 
-      alert('Tạo đơn hàng thành công! Cảm ơn bạn đã tin tưởng Nội Thất Hochi.');
+      toast.success('Tạo đơn hàng thành công! Cảm ơn bạn đã tin tưởng Nội Thất Hochi.');
       clearCart();
       navigate('/');
     } catch (err: any) {
       console.error('Lỗi khi thiết lập đơn hàng:', err);
       const msg = err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!';
-      alert(msg);
+      toast.error(msg);
     }
   };
 
@@ -251,9 +252,12 @@ const CheckoutPage: React.FC = () => {
 
                 <div className="p-6">
                   {cartItems.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 opacity-30">
-                      <ShoppingOutlined className="text-6xl mb-4" />
-                      <p className="text-sm font-medium">{t('checkout.cart_empty')}</p>
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <ShoppingOutlined className="text-6xl mb-4 text-gray-300" />
+                      <p className="text-sm font-medium text-gray-500 mb-6">{t('checkout.cart_empty') || 'Giỏ hàng của bạn đang trống'}</p>
+                      <Link to="/san-pham" className="px-6 py-2.5 bg-showcase-primary text-white font-bold rounded-lg hover:bg-[#bea748] transition-colors shadow-sm tracking-wide">
+                        Tiếp tục mua sắm
+                      </Link>
                     </div>
                   ) : (
                     <div className="space-y-6">

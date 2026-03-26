@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 const ContactPage: React.FC = () => {
   const { t } = useTranslation();
   const { create, loading } = useContactService();
-  
+
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -118,7 +118,7 @@ const ContactPage: React.FC = () => {
 
               <div className="space-y-8">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 ">
                     <EnvironmentOutlined className="text-xl" />
                   </div>
                   <div>
@@ -127,7 +127,7 @@ const ContactPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 ">
                     <EnvironmentOutlined className="text-xl" />
                   </div>
                   <div>
@@ -136,7 +136,7 @@ const ContactPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 ">
                     <EnvironmentOutlined className="text-xl" />
                   </div>
                   <div>
@@ -162,7 +162,7 @@ const ContactPage: React.FC = () => {
             </div>
 
             {/* Form Column */}
-            <div className="bg-white p-8 rounded-2xl shadow-2xl border border-gray-50 space-y-8">
+            <div className="bg-white p-8 rounded-2xl border border-gray-50 space-y-8">
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>{t('contact.form_title')}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{t('contact.form_desc')}</p>

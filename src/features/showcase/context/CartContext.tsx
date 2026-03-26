@@ -20,6 +20,8 @@ interface CartContextType {
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  isCartOpen: boolean;
+  setIsCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,6 +29,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const { request, patch } = useCartService();
 
   // Lưu timer debounce theo từng productId
@@ -190,6 +193,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeFromCart,
         updateQuantity,
         clearCart,
+        isCartOpen,
+        setIsCartOpen,
       }}
     >
       {children}

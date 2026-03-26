@@ -18,6 +18,16 @@ const getYoutubeThumb = (url: string) => {
   return 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=800';
 };
 
+const VideoCardSkeleton = () => (
+  <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
+    <div className="relative aspect-video overflow-hidden bg-gray-200" />
+    <div className="p-6 space-y-4">
+      <div className="h-4 w-3/4 bg-gray-200 rounded" />
+      <div className="h-3 w-1/3 bg-gray-200 rounded" />
+    </div>
+  </div>
+);
+
 const VideoPage: React.FC = () => {
   const { list: videos, getAll, loading } = useVideoService();
   const [selectedVideoUrl, setSelectedVideoUrl] = React.useState<string | null>(null);
@@ -61,7 +71,7 @@ const VideoPage: React.FC = () => {
         <Container>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {loading ? (
-              <div className="col-span-full text-center py-10">Đang tải video...</div>
+              Array.from({ length: 6 }).map((_, i) => <VideoCardSkeleton key={i} />)
             ) : videos.map((v, i) => (
               <div
                 key={v.id || i}

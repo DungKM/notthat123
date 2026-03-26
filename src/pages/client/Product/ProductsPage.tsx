@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
+import ProductCardSkeleton from '@/src/features/showcase/components/ui/ProductCardSkeleton';
 import SEO from '@/src/components/common/SEO';
 import { useCategoryService, useProductService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
@@ -389,8 +390,10 @@ const ProductsPage: React.FC = () => {
               </div>
 
               {loading ? (
-                <div className="py-20 text-center text-gray-400">
-                  <p className="text-lg animate-pulse">Đang tải sản phẩm...</p>
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-6">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <ProductCardSkeleton key={i} />
+                  ))}
                 </div>
               ) : apiProducts.length === 0 ? (
                 <div className="py-20 text-center text-gray-400">

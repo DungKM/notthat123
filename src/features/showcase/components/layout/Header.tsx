@@ -23,7 +23,6 @@ const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [showTopBar, setShowTopBar] = useState(true);
@@ -34,7 +33,7 @@ const Header: React.FC = () => {
   const cartRef = useRef<HTMLDivElement | null>(null);
   const cartButtonRef = useRef<HTMLDivElement | null>(null);
   const cartDrawerRef = useRef<HTMLDivElement | null>(null);
-  const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart, isCartOpen, setIsCartOpen } = useCart();
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,23 +45,39 @@ const Header: React.FC = () => {
 
   // ─── Danh mục công trình ───
   const { getAll: getCongTrinhCategories } = useConstructionCategoryService();
-  const [congTrinhCategories, setCongTrinhCategories] = React.useState<any[]>([]);
+  const [congTrinhCategories, setCongTrinhCategories] = React.useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('HOCHI_CONG_TRINH_CATS');
+      return cached ? JSON.parse(cached) : [];
+    } catch { return []; }
+  });
 
   // ─── Danh mục sản phẩm ───
-  const { list: apiCategories, getAll: getProductCategories } = useCategoryService();
-  const [productCategories, setProductCategories] = React.useState<any[]>([]);
+  const { getAll: getProductCategories } = useCategoryService();
+  const [productCategories, setProductCategories] = React.useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('HOCHI_PRODUCT_CATS');
+      return cached ? JSON.parse(cached) : [];
+    } catch { return []; }
+  });
 
   React.useEffect(() => {
     getCongTrinhCategories({ limit: 20 })
-      .then((res) => setCongTrinhCategories(res || []))
+      .then((res) => {
+        const data = res || [];
+        setCongTrinhCategories(data);
+        localStorage.setItem('HOCHI_CONG_TRINH_CATS', JSON.stringify(data));
+      })
       .catch(() => { });
 
-    getProductCategories({ limit: 50 }).catch(() => { });
+    getProductCategories({ limit: 50 })
+      .then((res) => {
+        const data = res || [];
+        setProductCategories(data);
+        localStorage.setItem('HOCHI_PRODUCT_CATS', JSON.stringify(data));
+      })
+      .catch(() => { });
   }, []);
-
-  React.useEffect(() => {
-    if (apiCategories) setProductCategories(apiCategories);
-  }, [apiCategories]);
 
   const currentLang = i18n.language?.toUpperCase().substring(0, 2) || 'VI';
 
@@ -555,7 +570,7 @@ const Header: React.FC = () => {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         exit={{ scale: 0 }}
-                        className="absolute -top-2.5 -right-3.5 bg-showcase-primary text-white text-[12px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
+                        className="absolute -top-2.5 -right-3.5 bg-yellow-700 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
                       >
                         {cartCount}
                       </motion.span>

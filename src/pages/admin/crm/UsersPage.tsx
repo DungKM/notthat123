@@ -5,6 +5,7 @@ import {
   ModalForm,
   ProFormSelect,
   ProFormText,
+  ProFormDigit,
   ProTable,
 } from '@ant-design/pro-components';
 import { Role } from '@/src/auth/types';
@@ -19,6 +20,7 @@ interface UserItem {
   role: Role;
   status: 'ACTIVE' | 'INACTIVE';
   phone?: string;
+  baseSalary?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -36,6 +38,7 @@ type UserFormValues = {
   account: string;
   password?: string;
   phone?: string;
+  baseSalary?: number;
   role: Role;
   status?: 'ACTIVE' | 'INACTIVE';
 };
@@ -103,6 +106,13 @@ const UsersPage: React.FC = () => {
       title: 'Số điện thoại',
       dataIndex: 'phone',
       width: 150,
+    },
+    {
+      title: 'Lương cơ bản',
+      dataIndex: 'baseSalary',
+      width: 150,
+      search: false,
+      render: (_, record) => record.baseSalary ? `${record.baseSalary.toLocaleString('vi-VN')} đ` : '—',
     },
     {
       title: 'Tên đăng nhập',
@@ -249,6 +259,7 @@ const UsersPage: React.FC = () => {
               role: values.role,
               ...(values.phone && { phone: values.phone }),
               ...(values.status && { status: values.status }),
+              ...(values.baseSalary !== undefined && { baseSalary: values.baseSalary }),
             };
             if (values.password) {
               payload.password = values.password;
@@ -287,6 +298,17 @@ const UsersPage: React.FC = () => {
           label="Số điện thoại"
           placeholder="Nhập số điện thoại"
           rules={[{ required: false, message: 'Vui lòng nhập số điện thoại' }, { pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ' }]}
+        />
+
+        <ProFormDigit
+          name="baseSalary"
+          label="Lương cơ bản"
+          placeholder="Nhập lương cơ bản"
+          fieldProps={{
+            formatter: (value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+            parser: (value) => value ? (value.replace(/\$\s?|(,*)/g, '') as unknown as number) : ('' as unknown as number),
+            addonAfter: 'VND'
+          }}
         />
 
         {!editingUser && (
