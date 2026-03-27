@@ -439,9 +439,12 @@ const StatisticsPage: React.FC = () => {
         </Descriptions>
       </ProCard>
 
-      <Card
+      <ProCard
         title="Lịch sử ứng tiền"
         bordered
+        headerBordered
+        collapsible
+        defaultCollapsed
         extra={
           <Button
             type="primary"
@@ -483,11 +486,14 @@ const StatisticsPage: React.FC = () => {
           options={false}
           scroll={{ x: 500 }}
         />
-      </Card>
+      </ProCard>
 
-      <Card
+      <ProCard
         title="Chi tiết công"
         bordered
+        headerBordered
+        collapsible
+        defaultCollapsed
         extra={
           <Button
             type="primary"
@@ -519,11 +525,14 @@ const StatisticsPage: React.FC = () => {
           pagination={{ pageSize: 5 }}
           options={false}
         />
-      </Card>
+      </ProCard>
 
-      <Card
+      <ProCard
         title="Lịch sử thanh toán lương"
         bordered
+        headerBordered
+        collapsible
+        defaultCollapsed
       >
         <ProTable
           rowKey="id"
@@ -569,7 +578,7 @@ const StatisticsPage: React.FC = () => {
             }
           ]}
         />
-      </Card>
+      </ProCard>
       {/* ModalForm tạo yêu cầu ứng tiền */}
       <ModalForm
         key="add"

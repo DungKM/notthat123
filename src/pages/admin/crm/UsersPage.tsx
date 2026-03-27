@@ -20,7 +20,7 @@ interface UserItem {
   role: Role;
   status: 'ACTIVE' | 'INACTIVE';
   phone?: string;
-  baseSalary?: number;
+  baseSalary: number;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -6,6 +6,14 @@ import { User } from '@/src/auth/types';
 
 const { Text } = Typography;
 
+const roleLabels: Record<string, string> = {
+  DIRECTOR: 'Giám đốc',
+  ACCOUNTANT: 'Kế toán',
+  STAFF: 'Nhân viên',
+  SITE_MANAGER: 'Quản lý công trình',
+  CUSTOMER: 'Khách hàng',
+};
+
 interface GroupMembersModalProps {
     open: boolean;
     group: ChatGroup | undefined;
@@ -13,7 +21,7 @@ interface GroupMembersModalProps {
     currentUser: User | null;
     isAdmin: boolean;
     onCancel: () => void;
-    onAddMember: (memberId: string) => void;
+    onAddMembers: (memberIds: string[]) => void;
     onRemoveMember: (memberId: string) => void;
     onDeleteGroup: (groupId: string) => void;
 }
@@ -25,7 +33,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({
     currentUser,
     isAdmin,
     onCancel,
-    onAddMember,
+    onAddMembers,
     onRemoveMember,
     onDeleteGroup
 }) => {
@@ -38,7 +46,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({
 
     const handleAdd = () => {
         if (selectedNewMembers.length > 0) {
-            selectedNewMembers.forEach(id => onAddMember(id));
+            onAddMembers(selectedNewMembers);
             setSelectedNewMembers([]);
         }
     };
@@ -61,7 +69,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({
                             placeholder="Chọn nhân viên"
                             value={selectedNewMembers}
                             onChange={setSelectedNewMembers}
-                            options={nonMembers.map(u => ({ label: u.name, value: u.id }))}
+                            options={nonMembers.map(u => ({ label: `${u.name} (${roleLabels[u.role] || u.role})`, value: u.id }))}
                             showSearch
                             filterOption={(input, option) =>
                                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
@@ -106,7 +114,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({
                         <List.Item.Meta
                             avatar={<Avatar src={member.avatar} icon={<UserOutlined />} />}
                             title={<Text>{member.name} {member.id === currentUser?.id && <Text type="secondary">(Bạn)</Text>}</Text>}
-                            description={<Text type="secondary" style={{ fontSize: 12 }}>{member.role}</Text>}
+                            description={<Text type="secondary" style={{ fontSize: 12 }}>{roleLabels[member.role] || member.role}</Text>}
                         />
                     </List.Item>
                 )}

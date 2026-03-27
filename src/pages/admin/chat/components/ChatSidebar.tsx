@@ -46,7 +46,9 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                         >
                             <List.Item.Meta
                                 avatar={
-                                    <Avatar src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.name}`} />
+                                    <Badge count={item.unreadCount || 0} size="small" offset={[-2, 6]}>
+                                        <Avatar src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.name}`} />
+                                    </Badge>
                                 }
                                 title={<Text strong>{item.name}</Text>}
                                 description={

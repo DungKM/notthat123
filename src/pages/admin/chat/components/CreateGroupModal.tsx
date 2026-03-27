@@ -1,15 +1,24 @@
 import React from 'react';
 import { Modal, Form, Input, Select } from 'antd';
-import { mockUsers } from '@/src/auth/mockUsers';
+import { User } from '@/src/auth/types';
 import { useAuth } from '@/src/auth/hooks/useAuth';
+
+const roleLabels: Record<string, string> = {
+  DIRECTOR: 'Giám đốc',
+  ACCOUNTANT: 'Kế toán',
+  STAFF: 'Nhân viên',
+  SITE_MANAGER: 'Quản lý công trình',
+  CUSTOMER: 'Khách hàng',
+};
 
 interface CreateGroupModalProps {
     open: boolean;
     onCancel: () => void;
     onCreate: (name: string, members: string[]) => void;
+    allUsers: User[];
 }
 
-const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ open, onCancel, onCreate }) => {
+const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ open, onCancel, onCreate, allUsers }) => {
     const [form] = Form.useForm();
     const { user } = useAuth();
 
@@ -21,10 +30,10 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ open, onCancel, onC
     };
 
     // Filter out current user from member selection
-    const memberOptions = mockUsers
+    const memberOptions = allUsers
         .filter(u => u.id !== user?.id)
         .map(u => ({
-            label: `${u.name} (${u.role})`,
+            label: `${u.name} (${roleLabels[u.role] || u.role})`,
             value: u.id
         }));
 

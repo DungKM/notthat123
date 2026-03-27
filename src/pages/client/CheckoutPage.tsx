@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import { useCart } from '@/src/features/showcase/context/CartContext';
 import { useOrderService } from '@/src/api/services';
+import api from '@/src/api/axiosInstance';
 import SEO from '@/src/components/common/SEO';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import {
@@ -21,7 +22,6 @@ import toast from 'react-hot-toast';
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
   const { cartItems, totalAmount, updateQuantity, removeFromCart, clearCart } = useCart();
-  const { request: requestOrder } = useOrderService();
   const navigate = useNavigate();
 
   const [customer, setCustomer] = useState({
@@ -34,9 +34,40 @@ const CheckoutPage: React.FC = () => {
     paymentMethod: 'cash',
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setCustomer(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!customer.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên';
+    if (!customer.phone.trim()) {
+      newErrors.phone = 'Vui lòng nhập số điện thoại';
+    } else if (!/^\d{10,11}$/.test(customer.phone)) {
+      newErrors.phone = 'Số điện thoại không hợp lệ';
+    }
+    if (customer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+    if (!customer.address.trim()) newErrors.address = 'Vui lòng nhập địa chỉ';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleOrder = async () => {
-    if (!customer.fullName || !customer.phone || !customer.address) {
-      toast.error('Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ!');
+    if (!validate()) {
+      toast.error('Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.');
       return;
     }
 
@@ -46,7 +77,7 @@ const CheckoutPage: React.FC = () => {
     }
 
     try {
-      await requestOrder('POST', '/checkout', {
+      await api.post('/orders/checkout', {
         fullName: customer.fullName,
         phone: customer.phone,
         email: customer.email || 'guest@hochi.vn',
@@ -59,8 +90,7 @@ const CheckoutPage: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       console.error('Lỗi khi thiết lập đơn hàng:', err);
-      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!';
-      toast.error(msg);
+      toast.error('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!');
     }
   };
 
@@ -101,55 +131,64 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.full_name')}</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.full_name')} *</label>
                     <input
                       type="text"
+                      name="fullName"
                       placeholder={t('checkout.full_name_placeholder')}
                       value={customer.fullName}
-                      onChange={(e) => setCustomer({ ...customer, fullName: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-3.5 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 bg-gray-50/30"
+                      onChange={handleChange}
+                      className={`w-full rounded-xl border ${errors.fullName ? 'border-red-500' : 'border-gray-200 focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20'} px-4 py-3.5 outline-none transition-all bg-gray-50/30`}
                     />
+                    {errors.fullName && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.fullName}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.phone')}</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.phone')} *</label>
                     <input
                       type="text"
+                      name="phone"
                       placeholder={t('checkout.phone_placeholder')}
                       value={customer.phone}
-                      onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-3.5 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 bg-gray-50/30"
+                      onChange={handleChange}
+                      className={`w-full rounded-xl border ${errors.phone ? 'border-red-500' : 'border-gray-200 focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20'} px-4 py-3.5 outline-none transition-all bg-gray-50/30`}
                     />
+                    {errors.phone && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.phone}</p>}
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.email')}</label>
                     <input
                       type="email"
+                      name="email"
                       placeholder={t('checkout.email_placeholder')}
                       value={customer.email}
-                      onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-3.5 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 bg-gray-50/30"
+                      onChange={handleChange}
+                      className={`w-full rounded-xl border ${errors.email ? 'border-red-500' : 'border-gray-200 focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20'} px-4 py-3.5 outline-none transition-all bg-gray-50/30`}
                     />
+                    {errors.email && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.email}</p>}
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.address_label')}</label>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.address_label')} *</label>
                     <input
                       type="text"
+                      name="address"
                       placeholder={t('checkout.address_placeholder')}
                       value={customer.address}
-                      onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-3.5 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 bg-gray-50/30"
+                      onChange={handleChange}
+                      className={`w-full rounded-xl border ${errors.address ? 'border-red-500' : 'border-gray-200 focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20'} px-4 py-3.5 outline-none transition-all bg-gray-50/30`}
                     />
+                    {errors.address && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.address}</p>}
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('checkout.note_label')}</label>
                     <textarea
+                      name="note"
                       placeholder={t('checkout.note_placeholder')}
                       value={customer.note}
-                      onChange={(e) => setCustomer({ ...customer, note: e.target.value })}
+                      onChange={handleChange}
                       className="min-h-[140px] w-full rounded-xl border border-gray-200 px-4 py-3.5 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 bg-gray-50/30 resize-none"
                     />
                   </div>

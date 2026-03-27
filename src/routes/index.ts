@@ -52,4 +52,5 @@ export const ROUTES = {
   ADMIN_QUAN_LY_DOI_TAC: '/quan-tri/quan-ly-doi-tac',
   ADMIN_VIDEO: '/quan-tri/video',
   ADMIN_DANH_GIA: '/quan-tri/danh-gia',
+  ADMIN_DANH_MUC_TIEN_DO: '/quan-tri/danh-muc-tien-do-du-an',
 };

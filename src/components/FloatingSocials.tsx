@@ -27,7 +27,7 @@ const FloatingSocials: React.FC = () => {
         href="tel:0911972789"
         className="fixed bottom-4 left-4 md:bottom-10 md:left-6 z-999
         flex items-center gap-2 !bg-showcase-primary !text-white 
-        px-4 py-3 rounded-full shadow-xl hover:scale-105 transition-all duration-300"
+        px-4 py-3 rounded-full shadow-xl hover:scale-105 transition-all duration-300 animate-ripple"
       >
         <PhoneOutlined className="text-xl" />
         <span className="font-semibold ">
@@ -41,7 +41,7 @@ const FloatingSocials: React.FC = () => {
           href="https://zalo.me/0911972789"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300 animate-ripple"
         >
           <img
             src="/assets/images/zalo-logo.png"
@@ -54,7 +54,7 @@ const FloatingSocials: React.FC = () => {
           href="https://www.facebook.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300 animate-ripple"
         >
           <img
             src="/assets/images/fb-logo.png"
@@ -66,7 +66,7 @@ const FloatingSocials: React.FC = () => {
         {showScrollTop && (
           <button
             onClick={handleScrollToTop}
-            className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary text-white shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300"
+            className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary text-white shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300 "
             aria-label="Lên đầu trang"
           >
             <UpOutlined className="text-base md:text-lg" />

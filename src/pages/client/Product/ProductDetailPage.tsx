@@ -217,42 +217,6 @@ const ProductDetailPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col xl:flex-row gap-6">
-                {/* LEFT SIDEBAR - TÌM KIẾM BỘ LỌC */}
-                <div className="w-full xl:w-[220px] shrink-0 hidden xl:block">
-                  <div className="border border-gray-100 rounded-2xl p-6 bg-white shadow-sm">
-                    <div className="flex items-start justify-between mb-8">
-                      <div>
-                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
-                          TÌM KIẾM
-                        </h3>
-                        <h2 className="text-[18px] font-black text-gray-900 uppercase leading-none tracking-tight">
-                          BỘ LỌC
-                        </h2>
-                      </div>
-                      <svg className="w-5 h-5 text-gray-300 stroke-[1.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                      </svg>
-                    </div>
-
-                    <div className="mb-6">
-                      <p className="text-[12px] text-gray-400 font-bold uppercase mb-2">Từ khóa</p>
-                      <div className="relative">
-                        <input type="text" placeholder="Tìm kiếm sản phẩm..." className="w-full h-10 bg-gray-50 rounded-lg border border-transparent focus:bg-white focus:border-[#c49a0e] outline-none pl-9 pr-3 text-[13px] text-gray-700 transition-colors" />
-                        <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-[12px] text-gray-400 font-bold uppercase mb-2">Danh mục</p>
-                      <button className="w-full h-8 bg-[#cca32e] text-white text-[13px] font-bold rounded-lg flex items-center justify-center hover:bg-[#bea748] transition-colors shadow-sm">
-                        Tất cả
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
                 {/* MIDDLE CONTENT */}
                 <div className="flex-1 min-w-0">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">

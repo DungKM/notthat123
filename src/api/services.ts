@@ -45,6 +45,7 @@ export const useAttendanceService = () => useApi<AttendanceRecord>('/attendance'
 
 // ─── Salary ───
 export const useSalaryService = () => useApi<Employee>('/salary/employees');
+export const useSalaryActionService = () => useApi<any>('/salary');
 
 // ─── Advance Requests ───
 export const useAdvanceService = () => useApi<AdvanceRequest>('/advance-requests');
@@ -66,6 +67,7 @@ export const usePartnerService = () => useApi<Partner>('/partners');
 
 // ─── Chat ───
 export const useChatGroupService = () => useApi<any>('/chat/groups');
+export const useChatMessageService = () => useApi<any>('/chat/messages');
 
 // ─── Upload ───
 export const useUploadService = () => useApi<any>('/upload');
@@ -87,3 +89,6 @@ export const useVideoService = () => useApi<any>('/videos');
 export const useReviewService = () => useApi<any>('/reviews');
 
 export const useAdvanceRequestService = () => useApi<any>('/advance-requests');
+
+// ─── Project Stages ───
+export const useProjectStageService = () => useApi<any>('/project-stages');

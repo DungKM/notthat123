@@ -8,15 +8,7 @@ import {
 import { ProjectProgress, ProjectStatus } from "@/src/types";
 import { Role } from "@/src/auth/types";
 import dayjs from "dayjs";
-import { useUserService } from "@/src/api/services";
-const statusOptions: ProjectStatus[] = [
-  'Tư vấn + gặp khách + khảo sát',
-  'Lập dự toán ngân sách',
-  'Duyệt hợp đồng',
-  'Thi công sản xuất',
-  'Bàn giao thanh lý hợp đồng',
-  'Phát sinh hợp đồng',
-];
+import { useUserService, useProjectStageService } from "@/src/api/services";
 const { Title } = Typography;
 
 interface Props {
@@ -44,17 +36,30 @@ const ProjectProgressModal: React.FC<Props> = ({
     null
   );
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [stageOptions, setStageOptions] = useState<string[]>([]);
   const { list: users, getAll } = useUserService();
+  const { request: stageRequest } = useProjectStageService();
 
   React.useEffect(() => {
     if (open) {
-      // Fetch user list when modal opens with limit to ensure we get a sufficient list of assignable employees
+      // Fetch user list
       getAll({ page: 1, limit: 1000 }).catch(console.error);
+      // Fetch stage options từ API
+      stageRequest('GET', '', null, { page: 1, limit: 100 })
+        .then((res) => {
+          const raw: any[] = res.data || [];
+          const names = raw.map((item: any) =>
+            typeof item === 'string' ? item : item.name
+          ).filter(Boolean);
+          setStageOptions(names);
+        })
+        .catch(() => {
+          // fallback: giữ nguyên options cũ nếu có
+        });
     } else {
-      // Reset khi đóng phòng trường hợp mở lại dự án khác
       setCurrentStatus(null);
     }
-  }, [open, getAll]);
+  }, [open, getAll, stageRequest]);
 
   // Luôn lấy trạng thái mới nhất từ server/props đưa vào UI để tiếp tục (nếu chưa có hoặc nếu vừa lưu xong)
   React.useEffect(() => {
@@ -68,7 +73,7 @@ const ProjectProgressModal: React.FC<Props> = ({
     }
   }, [open, progress]);
 
-  // Lấy danh sách nhân viên có thể giao việc (Staff + Site Manager)
+  // Lấy danh sách nhân viên có thể giao việc lấy hết (Staff + Site Manager)
   const assignableEmployees = (users || []).filter(
     (u: any) => u.role === Role.STAFF || u.role === Role.SITE_MANAGER
   );
@@ -105,7 +110,7 @@ const ProjectProgressModal: React.FC<Props> = ({
           // Tạo trạng thái mới
           const newStatus: ProjectProgress = {
             id: Math.random().toString(36).slice(2),
-            status: statusOptions[0],
+            status: stageOptions[0] || '' as any,
             tasks: [],
           };
           setCurrentStatus(newStatus);
@@ -118,7 +123,7 @@ const ProjectProgressModal: React.FC<Props> = ({
     // Chưa có trạng thái nào → tạo mới luôn
     const newStatus: ProjectProgress = {
       id: Math.random().toString(36).slice(2),
-      status: statusOptions[0],
+      status: stageOptions[0] || '' as any,
       tasks: [],
     };
     setCurrentStatus(newStatus);
@@ -131,11 +136,12 @@ const ProjectProgressModal: React.FC<Props> = ({
       return;
     }
 
-    const unsavedTasks = currentStatus.tasks.filter(t => !(t as any).isSaved && t.work && t.employee);
+    const unsavedTasks = currentStatus.tasks.filter(t => !(t as any).isSaved && t.work);
 
     if (unsavedTasks.length === 0) {
       // Just update updatedAt if needed locally
-      message.success("Đã ghi nhận ở giao diện. Vui lòng thêm công việc mới nếu muốn lưu lên hệ thống.");
+      message.success("Lưu thành công. Vui lòng thêm công việc mới nếu muốn lưu lên hệ thống.");
+      onOpenChange(false);
       return;
     }
 
@@ -152,6 +158,7 @@ const ProjectProgressModal: React.FC<Props> = ({
         };
         setCurrentStatus(updated);
         message.success("Lưu tiến độ dự án thành công!");
+        onOpenChange(false);
 
         // Gửi notification
         if (onTaskAssigned) {
@@ -186,6 +193,7 @@ const ProjectProgressModal: React.FC<Props> = ({
       onUpdate([...progress, updated]);
       setCurrentStatus(null);
       message.success("Đã lưu tiến độ vào lịch sử");
+      onOpenChange(false);
     }
   };
 
@@ -214,7 +222,7 @@ const ProjectProgressModal: React.FC<Props> = ({
     const updated = {
       ...currentStatus,
       tasks: currentStatus.tasks.map((t) =>
-        t.id === taskId ? { ...t, [field]: value } : t
+        t.id === taskId ? { ...t, [field]: value, isSaved: false } : t
       ),
     };
 
@@ -229,8 +237,8 @@ const ProjectProgressModal: React.FC<Props> = ({
         width={900}
         onCancel={() => onOpenChange(false)}
         footer={[
-          <Button key="close" onClick={() => onOpenChange(false)}>
-            Đóng
+          <Button key="save" type="primary" icon={<SaveOutlined />} onClick={saveStatus}>
+            Lưu
           </Button>,
         ]}
       >
@@ -238,10 +246,6 @@ const ProjectProgressModal: React.FC<Props> = ({
           <Space>
             <Button type="primary" icon={<PlusOutlined />} onClick={addStatus}>
               Thêm trạng thái
-            </Button>
-
-            <Button danger icon={<SaveOutlined />} onClick={saveStatus}>
-              Lưu
             </Button>
 
             <Button
@@ -267,13 +271,18 @@ const ProjectProgressModal: React.FC<Props> = ({
                 <Select
                   style={{ width: 300 }}
                   value={currentStatus.status}
-                  options={statusOptions.map((s) => ({
+                  options={(stageOptions.length > 0 ? stageOptions : []).map((s) => ({
                     label: s,
                     value: s,
                   }))}
-                  onChange={(value) =>
-                    setCurrentStatus({ ...currentStatus, status: value })
-                  }
+                  onChange={(value) => {
+                    // Đổi stage → đánh dấu toàn bộ task cần lưu lại
+                    setCurrentStatus({
+                      ...currentStatus,
+                      status: value,
+                      tasks: currentStatus.tasks.map((t) => ({ ...t, isSaved: false })),
+                    });
+                  }}
                 />
 
                 <Button
@@ -312,10 +321,13 @@ const ProjectProgressModal: React.FC<Props> = ({
                         value={record.employee}
                         style={{ width: "100%" }}
                         placeholder="Chọn nhân viên"
-                        options={assignableEmployees.map((e) => ({
-                          label: `${e.name} (${e.role})`,
-                          value: e.id,
-                        }))}
+                        options={assignableEmployees.map((e) => {
+                          const roleLabel = e.role === Role.STAFF ? 'Nhân viên' : e.role === Role.SITE_MANAGER ? 'Quản lý công trình' : e.role;
+                          return {
+                            label: `${e.name} (${roleLabel})`,
+                            value: e.id,
+                          };
+                        })}
                         onChange={(value) =>
                           updateTask(record.id, "employee", value)
                         }

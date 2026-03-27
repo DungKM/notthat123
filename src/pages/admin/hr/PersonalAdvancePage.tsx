@@ -60,17 +60,17 @@ const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }
       render: (_, record: any) => {
         const images = record.images || [];
         const firstImg = images.length > 0 ? images[0].url : (record.transferProof || null);
-        
+
         if (!firstImg) return '-';
 
         return (
           <Image.PreviewGroup>
             <div style={{ position: 'relative', display: 'inline-block' }}>
-              <Image 
-                src={firstImg} 
-                width={40} 
-                height={40} 
-                style={{ borderRadius: 4, objectFit: 'cover' }} 
+              <Image
+                src={firstImg}
+                width={40}
+                height={40}
+                style={{ borderRadius: 4, objectFit: 'cover' }}
               />
               {images.length > 1 && (
                 <Badge count={images.length} size="small" style={{ position: 'absolute', top: -8, right: -8 }} />

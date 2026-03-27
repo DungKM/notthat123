@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   ProTable,
   ProColumns,
@@ -14,10 +14,12 @@ import {
 // Workaround: ProFormUploadButton bị export sai type (ForwardRefRenderFunction thay vì JSX component)
 const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { Employee, User, AttendanceRecord } from '@/src/types';
-import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from '@/src/mockData';
+import { MOCK_ATTENDANCE } from '@/src/mockData';
 import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col, Image } from 'antd';
+import { useSalaryService, useSalaryActionService, useProjectService } from '@/src/api/services';
+import type { ActionType } from '@ant-design/pro-components';
 import dayjs from 'dayjs';
-import { HistoryOutlined, CreditCardOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
+import { HistoryOutlined, CreditCardOutlined, PlusOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -94,7 +96,27 @@ const MOCK_REWARD_PENALTY: RewardPenaltyRecord[] = [
 ];
 
 const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser }) => {
-  const [employees, setEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
+  const actionRef = useRef<ActionType>(null);
+  const [month, setMonth] = useState(dayjs().format('YYYY-MM'));
+  const { request: salaryRequest } = useSalaryService();
+  const { request: salaryActionRequest } = useSalaryActionService();
+  const { request: projectRequest } = useProjectService();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [projectOptions, setProjectOptions] = useState<{ label: string; value: string }[]>([]);
+
+  // Load danh sách dự án đã duyệt
+  React.useEffect(() => {
+    projectRequest('GET', '', null, { status: 'APPROVED', limit: 1000 })
+      .then((res) => {
+        const data: any[] = res.data || [];
+        setProjectOptions(data.map((p) => ({
+          label: p.name || p.title || p.code || 'Dự án',
+          value: p.id || p._id,
+        })));
+      })
+      .catch(() => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [rewardPenaltyRecords, setRewardPenaltyRecords] =
     useState<RewardPenaltyRecord[]>(MOCK_REWARD_PENALTY);
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryRecord[]>([]);
@@ -103,6 +125,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
   const [rewardPenaltyVisible, setRewardPenaltyVisible] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
   const [paymentVisible, setPaymentVisible] = useState(false);
+  const [editSalaryVisible, setEditSalaryVisible] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [historyRange, setHistoryRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>([
     dayjs().startOf('month'),
@@ -232,10 +255,22 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           }}
         />,
         <Button
+          key="edit-salary"
+          type="link"
+          size="large"
+          title="Cập nhật lương cơ bản"
+          icon={<EditOutlined />}
+          style={{ color: '#1890ff' }}
+          onClick={() => {
+            setSelectedEmployee(record);
+            setEditSalaryVisible(true);
+          }}
+        />,
+        <Button
           key="payment"
           type="link"
           size="large"
-          title='Thanh toán'
+          title="Thanh toán"
           icon={<CreditCardOutlined />}
           style={{ color: '#faad14' }}
           onClick={() => {
@@ -366,113 +401,136 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
     return { list, totalWorkDays, totalOTDays };
   }, [selectedEmployee, historyRange]);
 
-  const handleSubmitRewardPenalty = async (values: any) => {
-    const employee = employees.find((item) => String(item.id) === String(values.employeeId));
-    const project = MOCK_PROJECT_OPTIONS.find((item) => item.value === values.projectId);
-
-    if (!employee || !project) {
-      message.error('Không tìm thấy nhân viên hoặc dự án');
+  const handleUpdateBaseSalary = async (values: any) => {
+    if (!selectedEmployee) return false;
+    try {
+      // PATCH /salary/base-salary - Cập nhật lương cơ bản
+      await salaryActionRequest('PATCH', '/base-salary', {
+        userId: selectedEmployee.id,
+        baseSalary: Number(values.baseSalary || 0),
+      });
+      message.success(`Đã cập nhật lương cơ bản cho ${selectedEmployee.name}`);
+      setEditSalaryVisible(false);
+      actionRef.current?.reload();
+      return true;
+    } catch {
       return false;
     }
+  };
 
-    const amount = Number(values.amount || 0);
-    const type = values.type as 'Thưởng' | 'Phạt';
-
-    const newRecord: RewardPenaltyRecord = {
-      id: Math.random().toString(36).slice(2, 11),
-      employeeId: String(employee.id),
-      employeeName: employee.name,
-      position: getPosition(employee),
-      type,
-      amount,
-      projectId: project.value,
-      projectName: project.label,
-      content: values.content,
-      createdAt: new Date().toLocaleString('vi-VN'),
-    };
-
-    setRewardPenaltyRecords((prev) => [newRecord, ...prev]);
-
-    setEmployees((prev) =>
-      prev.map((item) => {
-        if (String(item.id) !== String(employee.id)) return item;
-
-        if (type === 'Thưởng') {
-          return {
-            ...item,
-            bonus: Number(item.bonus ?? 0) + amount,
-          };
-        }
-
-        return {
-          ...item,
-          penalty: Number(item.penalty ?? 0) + amount,
-        };
-      })
-    );
-
-    message.success(`${type} thành công`);
-    return true;
+  const handleSubmitRewardPenalty = async (values: any) => {
+    const employee = employees.find((item) => String(item.id) === String(values.employeeId));
+    if (!employee) {
+      message.error('Không tìm thấy nhân viên');
+      return false;
+    }
+    try {
+      // POST /salary - Thêm thưởng/phạt/tạm ứng vào lịch sử
+      await salaryActionRequest('POST', '', {
+        userId: employee.id,
+        month,
+        type: values.type,
+        amount: Number(values.amount || 0),
+        content: values.content,
+        projectId: values.projectId,
+      });
+      message.success(`${values.type} thành công`);
+      actionRef.current?.reload();
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleFinishPayment = async (values: any) => {
     if (!selectedEmployee) return false;
 
-    const amountPaid = Number(values.amountPaid || 0);
-    const paymentDate: string = values.paymentDate
-      ? (values.paymentDate as dayjs.Dayjs).toISOString()
-      : new Date().toISOString();
-    const note: string | undefined = values.note;
-    const proof: string | undefined =
-      values.proof?.[0]?.url ||
-      values.proof?.[0]?.thumbUrl ||
-      values.proof?.[0]?.response?.url;
+    try {
+      const amount = Number(values.amount || 0);
+      const fileList = values.billImage || [];
+      const billFile = fileList[0]?.originFileObj || fileList[0];
 
-    const newPayment: PaymentHistoryRecord = {
-      id: Math.random().toString(36).slice(2, 11),
-      employeeId: String(selectedEmployee.id),
-      employeeName: selectedEmployee.name,
-      amountPaid,
-      paymentDate,
-      note,
-      proof,
-    };
+      if (billFile instanceof File) {
+        const formData = new FormData();
+        formData.append('userId', String(selectedEmployee.id));
+        formData.append('month', month);
 
-    setPaymentHistory((prev) => [newPayment, ...prev]);
+        // Gửi amount ở dạng nguyên thuỷ để Axios serialize với paramsSerializer hoặc BE middleware tự bóc
+        formData.append('amount', amount as any);
 
-    // Cập nhật state nhân viên: reset về 0
-    setEmployees((prev) =>
-      prev.map((item) => {
-        if (item.id === selectedEmployee.id) {
-          return {
-            ...item,
-            bonus: 0,
-            penalty: 0,
-            advance: 0,
-          };
+        if (values.date) {
+          formData.append('date', dayjs(values.date).format('YYYY-MM-DD'));
         }
-        return item;
-      })
-    );
+        if (values.note) {
+          formData.append('note', values.note);
+        }
+        formData.append('billImage', billFile);
 
-    message.success(`Đã thanh toán lương cho ${selectedEmployee.name}`);
-    setPaymentVisible(false);
-    return true;
+        // Bỏ set headers cứng, để axios wrapper tự fill boundary của form-data
+        await salaryActionRequest('POST', '/pay', formData);
+      } else {
+        await salaryActionRequest('POST', '/pay', {
+          userId: selectedEmployee.id,
+          month,
+          amount,
+          date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : undefined,
+          note: values.note,
+        });
+      }
+
+      message.success(`Đã thanh toán lương cho ${selectedEmployee.name}`);
+      setPaymentVisible(false);
+      actionRef.current?.reload();
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   return (
     <div>
       <ProTable<Employee>
+        actionRef={actionRef}
         headerTitle="Bảng lương & Thưởng phạt"
         columns={employeeColumns}
-        dataSource={employees}
         rowKey="id"
-        search={{
-          labelWidth: 'auto',
-        }}
+        search={false}
         pagination={{ pageSize: 10 }}
         scroll={{ x: 1200 }}
+        request={async () => {
+          try {
+            const res = await salaryRequest('GET', '', null, { month });
+            const raw: any[] = res.data || [];
+            const mapped: Employee[] = raw.map((r: any) => ({
+              id: r.userId?.id || r.userId,
+              name: r.userId?.name || '',
+              role: r.userId?.role || '',
+              baseSalary: r.userId?.baseSalary || 0,
+              bonus: r.bonus || 0,
+              penalty: r.penalty || 0,
+              advance: r.advance || 0,
+              totalSalary: r.netSalary || 0,
+            }));
+            setEmployees(mapped);
+            return { data: mapped, success: true, total: mapped.length };
+          } catch {
+            return { data: [], success: false, total: 0 };
+          }
+        }}
         toolBarRender={() => [
+          <DatePicker
+            key="month"
+            picker="month"
+            value={dayjs(month, 'YYYY-MM')}
+            format="MM/YYYY"
+            allowClear={false}
+            onChange={(d) => {
+              if (d) {
+                setMonth(d.format('YYYY-MM'));
+                setTimeout(() => actionRef.current?.reload(), 100);
+              }
+            }}
+          />,
           <Button key="reward-penalty" type="primary" onClick={() => setRewardPenaltyVisible(true)}>
             Thêm thưởng / phạt
           </Button>,
@@ -542,14 +600,21 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           name="amount"
           label="Số tiền"
           min={0}
-          fieldProps={{ precision: 0 }}
+          fieldProps={{
+            precision: 0,
+            addonAfter: 'VNĐ',
+            formatter: (val) => val ? String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '',
+            parser: (val) => val ? Number(val.replace(/\./g, '')) : 0,
+          }}
           rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}
         />
 
         <ProFormSelect
           name="projectId"
           label="Dự án"
-          options={MOCK_PROJECT_OPTIONS}
+          options={projectOptions}
+          placeholder="Chọn dự án đã duyệt"
+          showSearch
           rules={[{ required: true, message: 'Vui lòng chọn dự án' }]}
         />
 
@@ -557,6 +622,32 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           name="content"
           label="Nội dung thưởng / phạt"
           rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]}
+        />
+      </ModalForm>
+
+      {/* Modal Cập nhật lương cơ bản */}
+      <ModalForm
+        title={`Cập nhật lương cơ bản - ${selectedEmployee?.name ?? ''}`}
+        open={editSalaryVisible}
+        modalProps={{
+          destroyOnClose: true,
+          onCancel: () => setEditSalaryVisible(false),
+        }}
+        initialValues={{ baseSalary: selectedEmployee?.baseSalary }}
+        onOpenChange={setEditSalaryVisible}
+        onFinish={handleUpdateBaseSalary}
+      >
+        <ProFormDigit
+          name="baseSalary"
+          label="Lương cơ bản (VNĐ)"
+          min={0}
+          fieldProps={{
+            precision: 0,
+            addonAfter: 'VNĐ',
+            formatter: (val) => val ? String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '',
+            parser: (val) => val ? Number(val.replace(/\./g, '')) : 0,
+          }}
+          rules={[{ required: true, message: 'Vui lòng nhập lương cơ bản' }]}
         />
       </ModalForm>
 
@@ -635,10 +726,15 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           </Col>
           <Col span={12}>
             <ProFormDigit
-              name="amountPaid"
+              name="amount"
               label="Số tiền thanh toán"
               rules={[{ required: true }]}
-              fieldProps={{ precision: 0 }}
+              fieldProps={{
+                precision: 0,
+                addonAfter: 'VNĐ',
+                formatter: (val: any) => val ? String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '',
+                parser: (val: any) => val ? Number(val.replace(/\./g, '')) : 0,
+              }}
               initialValue={
                 (selectedEmployee?.baseSalary ?? 0) +
                 (selectedEmployee?.bonus ?? 0) -
@@ -649,18 +745,20 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           </Col>
         </Row>
         <ProFormDatePicker
-          name="paymentDate"
+          name="date"
           label="Ngày thanh toán"
           rules={[{ required: true }]}
           initialValue={dayjs()}
         />
         <ProFormTextArea name="note" label="Ghi chú" placeholder="Ví dụ: Chuyển khoản lương tháng 3" />
         <SafeUploadButton
-          name="proof"
+          name="billImage"
           label="Ảnh chứng từ / bill chuyển khoản"
           title="Tải ảnh lên"
           max={1}
-          action="/api/upload" // Giả lập
+          fieldProps={{
+            beforeUpload: () => false,
+          }}
         />
         <Text type="secondary" style={{ fontStyle: 'italic' }}>
           * Lưu ý: Khi xác nhận thanh toán, các khoản Thưởng, Phạt và Tiền ứng sẽ được đưa về 0.

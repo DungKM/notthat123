@@ -284,14 +284,14 @@ const Header: React.FC = () => {
                               <div
                                 key={cat.id || cat._id}
                                 onMouseEnter={() => setActiveMegaCategory(cat)}
-                                className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-[#5fa9f7] text-white border-[#5fa9f7]' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
+                                className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
                                   }`}
                               >
                                 <span className={`font-bold text-[14px] flex-1 line-clamp-1 text-left transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-800'}`}>
                                   {cat.name}
                                 </span>
                                 {/* Right Arrow Triangle */}
-                                <div className={`absolute top-1/2 -right-0 -translate-y-1/2 w-0 h-0 border-y-[10px] border-y-transparent border-l-[12px] border-l-[#5fa9f7] translate-x-[11px] z-10 pointer-events-none transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
+                                <div className={`absolute top-1/2 -right-0 -translate-y-1/2 w-0 h-0 border-y-[10px] border-y-transparent border-l-[12px] border-l-showcase-primary translate-x-[11px] z-10 pointer-events-none transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
                               </div>
                             );
                           })}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { List, Avatar, Typography, Empty, Image } from 'antd';
+import { List, Typography, Empty, Image, Dropdown, MenuProps, Modal, Input } from 'antd';
+import { MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ChatMessage } from '@/src/features/chat/types';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import dayjs from 'dayjs';
@@ -8,11 +9,16 @@ const { Text } = Typography;
 
 interface ChatMessagesProps {
     messages: ChatMessage[];
+    onDeleteMessage?: (msgId: string) => void;
+    onEditMessage?: (msgId: string, newContent: string) => void;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, onDeleteMessage, onEditMessage }) => {
     const { user } = useAuth();
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
+    const [editContent, setEditContent] = useState('');
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -34,9 +40,38 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
                 <List
                     dataSource={messages}
                     renderItem={(item) => {
-                        const isMe = item.senderId === user?.id;
+                        const isMe = item.senderId === user?.id || item.senderId === (user as any)?._id;
                         const hasAttachments = item.attachments && item.attachments.length > 0;
-                        const imageAttachments = item.attachments?.filter(a => a.type.startsWith('image/')) || [];
+
+                        const menuItems: MenuProps['items'] = [
+                            {
+                                key: 'edit',
+                                icon: <EditOutlined />,
+                                label: 'Sửa',
+                                onClick: () => {
+                                    setEditingMessage(item);
+                                    setEditContent(item.content);
+                                }
+                            },
+                            {
+                                key: 'delete',
+                                icon: <DeleteOutlined />,
+                                label: 'Xóa',
+                                danger: true,
+                                onClick: () => {
+                                    Modal.confirm({
+                                        title: 'Xác nhận xóa',
+                                        content: 'Bạn có chắc muốn xóa tin nhắn này?',
+                                        okText: 'Xóa',
+                                        okButtonProps: { danger: true },
+                                        cancelText: 'Hủy',
+                                        onOk: () => {
+                                            if (onDeleteMessage) onDeleteMessage(item.id || (item as any)._id);
+                                        }
+                                    });
+                                }
+                            }
+                        ];
 
                         return (
                             <div style={{
@@ -50,7 +85,17 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
                                     maxWidth: '70%',
                                     gap: '8px'
                                 }}>
-                                    <Avatar src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.senderName}`} />
+                                    {isMe && (
+                                        <div style={{ alignSelf: 'center', marginRight: '4px' }}>
+                                            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+                                                <div style={{ cursor: 'pointer', opacity: 0.5 }}>
+                                                    <MoreOutlined />
+                                                </div>
+                                            </Dropdown>
+                                        </div>
+                                    )}
+
+
                                     <div style={{
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -63,7 +108,42 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
                                             </Text>
                                         </div>
 
-                                        {/* Text content */}
+                                        {/* Image attachments - ảnh hiển thị TRƯỚC */}
+                                        {item.attachments && item.attachments.length > 0 && (() => {
+                                            // Chuẩn hóa: server trả về string[], local là ChatAttachment[]
+                                            const imageUrls: string[] = (item.attachments as any[]).map((a) =>
+                                                typeof a === 'string' ? a : a.url
+                                            ).filter(Boolean);
+                                            return imageUrls.length > 0 ? (
+                                                <div style={{
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
+                                                    gap: 6,
+                                                    maxWidth: 320,
+                                                    marginBottom: item.content ? 6 : 0,
+                                                }}>
+                                                    {imageUrls.map((url, idx) => (
+                                                        <Image
+                                                            key={idx}
+                                                            src={url}
+                                                            width={imageUrls.length === 1 ? 200 : 120}
+                                                            style={{
+                                                                borderRadius: 8,
+                                                                objectFit: 'cover',
+                                                                cursor: 'pointer',
+                                                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                            }}
+                                                            placeholder
+                                                            preview={{
+                                                                mask: <span style={{ fontSize: 12 }}>Xem ảnh</span>,
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            ) : null;
+                                        })()}
+
+                                        {/* Text content - hiển thị SAU ảnh */}
                                         {item.content && (
                                             <div style={{
                                                 padding: '8px 12px',
@@ -72,38 +152,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
                                                 color: isMe ? '#fff' : 'rgba(0, 0, 0, 0.85)',
                                                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
                                                 wordBreak: 'break-word',
-                                                marginBottom: hasAttachments ? '6px' : 0,
                                             }}>
                                                 {item.content}
-                                            </div>
-                                        )}
-
-                                        {/* Image attachments */}
-                                        {imageAttachments.length > 0 && (
-                                            <div style={{
-                                                display: 'flex',
-                                                flexWrap: 'wrap',
-                                                gap: 6,
-                                                maxWidth: 320,
-                                            }}>
-                                                {imageAttachments.map((att) => (
-                                                    <Image
-                                                        key={att.id}
-                                                        src={att.url}
-                                                        alt={att.name}
-                                                        width={imageAttachments.length === 1 ? 200 : 120}
-                                                        style={{
-                                                            borderRadius: 8,
-                                                            objectFit: 'cover',
-                                                            cursor: 'pointer',
-                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                                        }}
-                                                        placeholder
-                                                        preview={{
-                                                            mask: <span style={{ fontSize: 12 }}>Xem ảnh</span>,
-                                                        }}
-                                                    />
-                                                ))}
                                             </div>
                                         )}
                                     </div>
@@ -113,6 +163,27 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
                     }}
                 />
             </Image.PreviewGroup>
+
+            <Modal
+                title="Sửa tin nhắn"
+                open={!!editingMessage}
+                onCancel={() => setEditingMessage(null)}
+                onOk={() => {
+                    if (editingMessage && editContent.trim()) {
+                        if (onEditMessage) onEditMessage(editingMessage.id || (editingMessage as any)._id, editContent.trim());
+                        setEditingMessage(null);
+                        setEditContent('');
+                    }
+                }}
+                okText="Lưu"
+                cancelText="Hủy"
+            >
+                <Input.TextArea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    autoSize={{ minRows: 2, maxRows: 6 }}
+                />
+            </Modal>
         </div>
     );
 };

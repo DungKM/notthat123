@@ -22,7 +22,7 @@ export interface ChatMessage {
   senderName: string;
   content: string;
   timestamp: string;
-  attachments?: ChatAttachment[];
+  attachments?: string[] | ChatAttachment[];
 }
 
 export interface ChatGroup {
@@ -32,4 +32,6 @@ export interface ChatGroup {
   lastMessage?: ChatMessage;
   createdAt: string;
   createdBy: string;
+  createdByName?: string;
+  unreadCount?: number;
 }

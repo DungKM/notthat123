@@ -1,11 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { Input, Button, Upload } from 'antd';
-import { SendOutlined, PictureOutlined, PaperClipOutlined, CloseCircleFilled } from '@ant-design/icons';
+import { SendOutlined, PictureOutlined, CloseCircleFilled } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { ChatAttachment } from '@/src/features/chat/types';
 
 interface ChatInputProps {
-  onSendMessage: (content: string, attachments?: ChatAttachment[]) => void;
+  onSendMessage: (content: string, files?: File[]) => void;
   disabled?: boolean;
 }
 
@@ -23,28 +22,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
     });
   };
 
-  const handleSend = async () => {
+  const handleSend = () => {
     const trimmed = message.trim();
     if (!trimmed && imageFiles.length === 0) return;
-
-    let attachments: ChatAttachment[] | undefined;
-
-    if (imageFiles.length > 0) {
-      attachments = await Promise.all(
-        imageFiles.map(async (item) => {
-          const base64Url = await fileToBase64(item.file);
-          return {
-            id: Math.random().toString(36).substr(2, 9),
-            name: item.file.name,
-            type: item.file.type,
-            url: base64Url,
-            size: item.file.size,
-          };
-        })
-      );
-    }
-
-    onSendMessage(trimmed, attachments);
+    const files = imageFiles.map((item) => item.file);
+    onSendMessage(trimmed, files.length > 0 ? files : undefined);
     setMessage('');
     setImageFiles([]);
     inputRef.current?.focus?.();

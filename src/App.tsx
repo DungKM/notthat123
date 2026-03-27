@@ -22,9 +22,9 @@ export default function App() {
               toastOptions={{
                 duration: 3000,
                 style: {
-                  fontSize: '20px',
-                  padding: '16px 16px',
-                  minWidth: '320px',
+                  fontSize: '12px',
+                  padding: '8px',
+                  minWidth: '18px',
                   fontWeight: '700'
                 }
               }}

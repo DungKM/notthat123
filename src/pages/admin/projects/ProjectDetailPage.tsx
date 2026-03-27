@@ -137,13 +137,30 @@ const ProjectDetailPage: React.FC = () => {
     const projectId = project.id || (project as any)._id;
     try {
       for (const task of tasks) {
-        await request('POST', `/${projectId}/progress`, {
-          stage: stage,
-          name: task.work,
-          userId: task.employee
-        });
+        const taskId = task.id || task._id;
+        // Trích xuất string ID từ task.employee (có thể là string hoặc object từ server)
+        const userId = task.employee
+          ? (typeof task.employee === 'object'
+              ? task.employee.id || task.employee._id
+              : task.employee)
+          : undefined;
+        // Task có MongoDB ObjectId (24 ký tự) là task đã có trên server → PATCH để cập nhật
+        const isExisting = taskId && String(taskId).length === 24;
 
-        // Add notification safely đã được chuyển ra ngoài gọi qua onTaskAssigned để nhận diện đúng user từ API
+        if (isExisting) {
+          // PATCH /projects/{id}/progress/{progressId} - chỉ cập nhật name và userId
+          await request('PATCH', `/${projectId}/progress/${taskId}`, {
+            name: task.work,
+            userId,
+          });
+        } else {
+          // Task mới tạo ở frontend → POST để tạo mới
+          await request('POST', `/${projectId}/progress`, {
+            stage: stage,
+            name: task.work,
+            userId,
+          });
+        }
       }
 
       // Refresh project to get the newly updated progress from server

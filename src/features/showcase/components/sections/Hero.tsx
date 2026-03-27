@@ -24,73 +24,111 @@ const Hero: React.FC = () => {
 
       <Container className="relative z-10 text-white text-center">
         <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn">
-          <div className="inline-block border-y border-showcase-primary py-2 px-8 mb-6">
-            <span className="text-sm font-bold uppercase tracking-[0.3em] text-showcase-primary">{t('hero.badge')}</span>
+          <div 
+            className="inline-block border-y border-showcase-primary py-2 px-8 mb-6"
+            style={{ 
+              opacity: 0, 
+              animation: 'tracking-in-expand-fwd-badge 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both' 
+            }}
+          >
+            <span className="text-sm font-bold uppercase text-showcase-primary">{t('hero.badge')}</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-            <span className="block">
-              {t('hero.title_line1').split('').map((char, i) => (
-                <span
-                  key={i}
-                  style={{
-                    display: 'inline-block',
-                    opacity: 0,
-                    animation: `charDrop 0.45s cubic-bezier(0.22,1,0.36,1) ${0.3 + i * 0.07}s forwards`,
-                  }}
-                >
-                  {char === ' ' ? '\u00A0' : char}
-                </span>
-              ))}
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight" style={{ fontFamily: "'Inter', sans-serif", perspective: '1000px' }}>
+            <span 
+              className="block"
+              style={{
+                opacity: 0,
+                animation: 'tracking-in-expand-fwd 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) 0.3s both'
+              }}
+            >
+              {t('hero.title_line1')}
             </span>
-            <span className="block">
-              {t('hero.title_line2').split('').map((char, i) => {
-                const offset = t('hero.title_line1').length;
-                return (
-                  <span
-                    key={i}
-                    style={{
-                      display: 'inline-block',
-                      opacity: 0,
-                      animation: `charDrop 0.45s cubic-bezier(0.22,1,0.36,1) ${0.3 + (offset + i) * 0.07}s forwards`,
-                    }}
-                  >
-                    {char === ' ' ? '\u00A0' : char}
-                  </span>
-                );
-              })}
+            <span 
+              className="block"
+              style={{
+                opacity: 0,
+                animation: 'tracking-in-expand-fwd 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) 0.6s both'
+              }}
+            >
+              {t('hero.title_line2')}
             </span>
           </h1>
           <style>{`
-            @keyframes charDrop {
-              from { opacity: 0; transform: translateY(28px); }
-              to   { opacity: 1; transform: translateY(0); }
+            @keyframes tracking-in-expand-fwd {
+              0% {
+                letter-spacing: -0.5em;
+                transform: translateZ(-700px);
+                opacity: 0;
+              }
+              40% {
+                opacity: 0.6;
+              }
+              100% {
+                transform: translateZ(0);
+                opacity: 1;
+              }
+            }
+            @keyframes tracking-in-expand-fwd-badge {
+              0% {
+                letter-spacing: -0.5em;
+                transform: translateZ(-700px);
+                opacity: 0;
+              }
+              40% {
+                opacity: 0.6;
+              }
+              100% {
+                letter-spacing: 0.3em;
+                transform: translateZ(0);
+                opacity: 1;
+              }
+            }
+            @keyframes softFadeUp {
+              from { opacity: 0; transform: translateY(30px); }
+              to { opacity: 1; transform: translateY(0); }
             }
           `}</style>
-          <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+          <p 
+            className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed"
+            style={{ 
+              opacity: 0, 
+              animation: 'softFadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards' 
+            }}
+          >
             {t('hero.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white text-white hover:bg-white hover:text-black"
-              onClick={() => navigate(ROUTES.CONG_TRINH)}
+            <div 
+              className="w-full sm:w-auto"
+              style={{ opacity: 0, animation: 'softFadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.1s forwards' }}
             >
-              {t('hero.btn_explore')}
-            </Button>
-            <Button
-              variant="primary"
-              size="lg"
-              className="bg-showcase-primary border-none hover:bg-showcase-hover"
-              onClick={() => {
-                const formElement = document.getElementById('tu-van-ngay-form');
-                if (formElement) {
-                  formElement.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border-white text-white hover:bg-white hover:text-black transition-all duration-700 hover:-translate-y-1 hover:shadow-lg"
+                onClick={() => navigate(ROUTES.CONG_TRINH)}
+              >
+                {t('hero.btn_explore')}
+              </Button>
+            </div>
+            <div 
+              className="w-full sm:w-auto"
+              style={{ opacity: 0, animation: 'softFadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.3s forwards' }}
             >
-              {t('hero.btn_consult')}
-            </Button>
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full bg-showcase-primary border-none hover:bg-showcase-hover transition-all duration-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-showcase-primary/30"
+                onClick={() => {
+                  const formElement = document.getElementById('tu-van-ngay-form');
+                  if (formElement) {
+                    formElement.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                {t('hero.btn_consult')}
+              </Button>
+            </div>
           </div>
         </div>
       </Container>
