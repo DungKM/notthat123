@@ -281,7 +281,7 @@ const ChatPage: React.FC = () => {
         <Layout style={{ height: 'calc(100vh - 150px)', background: '#fff', borderRadius: '8px', overflow: 'hidden' }}>
             {/* Desktop: show sidebar always. Mobile: show sidebar only when no group selected */}
             <Sider
-                width={300}
+                width={isMobile ? '100%' : 300}
                 theme="light"
                 breakpoint="md"
                 collapsedWidth={0}
@@ -289,6 +289,9 @@ const ChatPage: React.FC = () => {
                 collapsed={!!selectedGroupId && isMobile}
                 style={{
                     display: selectedGroupId && isMobile ? 'none' : 'block',
+                    width: isMobile ? '100%' : 300,
+                    maxWidth: isMobile ? '100%' : 300,
+                    minWidth: isMobile ? '100%' : 300,
                 }}
             >
                 <ChatSidebar
