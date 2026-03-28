@@ -23,6 +23,7 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   attachments?: string[] | ChatAttachment[];
+  status?: 'sending' | 'sent' | 'error';
 }
 
 export interface ChatGroup {

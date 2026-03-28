@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io Test Client</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        input,
+        button,
+        textarea {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            padding: 5px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .log-entry.notification {
+            background: #fff3cd;
+        }
+
+        .log-entry.chat {
+            background: #d1ecf1;
+        }
+
+        .messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            background: #fafafa;
+        }
+
+        .message {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .message.own {
+            background: #007bff;
+            color: white;
+            text-align: right;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .message-status {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        .status-sending {
+            color: #ffc107;
+        }
+
+        .status-sent {
+            color: #28a745;
+        }
+
+        .status-error {
+            color: #dc3545;
+        }
+
+        .message.own[data-status="sending"] {
+            opacity: 0.7;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔌 Socket.io Test Client</h1>
+
+    <!-- Connection Section -->
+    <div class="container">
+        <h2>1. Kết nối</h2>
+        <div>
+            <input type="text" id="token" placeholder="Nhập JWT Token" style="width: 400px;">
+            <button id="connectBtn" onclick="connect()">Kết nối</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Ngắt kết nối</button>
+        </div>
+        <div id="connectionStatus" class="status disconnected">
+            ❌ Chưa kết nối
+        </div>
+        <div>
+            <small>Lấy token từ API login: POST /api/auth/login</small>
+        </div>
+    </div>
+
+    <!-- Notification Section -->
+    <div class="container">
+        <h2>2. Thông báo (Notifications)</h2>
+        <div class="log" id="notificationLog">
+            <div class="log-entry">Chờ thông báo...</div>
+        </div>
+        <div>
+            <button onclick="clearNotifications()">Xóa log</button>
+        </div>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="container">
+        <h2>3. Chat nhóm</h2>
+        <div>
+            <input type="text" id="roomId" placeholder="Room ID (vd: project-123)" style="width: 300px;">
+            <button id="joinBtn" onclick="joinRoom()" disabled>Tham gia phòng</button>
+            <button id="leaveBtn" onclick="leaveRoom()" disabled>Rời phòng</button>
+        </div>
+        <div id="currentRoom" style="margin: 10px 0; font-weight: bold;"></div>
+
+        <div class="messages" id="chatMessages">
+            <div style="text-align: center; color: #999;">Tham gia phòng để bắt đầu chat</div>
+        </div>
+
+        <div id="typingIndicator" class="typing"></div>
+
+        <div>
+            <textarea id="messageInput" placeholder="Nhập tin nhắn..." style="width: 70%; height: 60px;"
+                disabled></textarea>
+            <button id="sendBtn" onclick="sendMessage()" disabled>Gửi</button>
+        </div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="container">
+        <h2>4. Event Log</h2>
+        <div class="log" id="eventLog">
+            <div class="log-entry">Chờ events...</div>
+        </div>
+        <div>
+            <button onclick="clearEventLog()">Xóa log</button>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        let currentRoomId = null;
+        let currentUserId = null;
+        let typingTimeout = null;
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+        }
+
+        function addNotificationLog(notification) {
+            const log = document.getElementById('notificationLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry notification';
+            entry.innerHTML = `
+        <strong>[${new Date(notification.createdAt).toLocaleTimeString()}]</strong><br>
+        📋 ${notification.taskDescription}<br>
+        👤 Từ: ${notification.assignedByName}<br>
+        📁 Dự án: ${notification.projectName}
+      `;
+            log.insertBefore(entry, log.firstChild);
+        }
+
+        function addChatMessage(message, isOwn = false) {
+            const container = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isOwn ? 'own' : ''}`;
+            msgDiv.id = `msg-${message.messageId}`;
+
+            let statusIndicator = '';
+            if (isOwn) {
+                if (message.status === 'sending') {
+                    statusIndicator = '<span class="status-sending">⏳ Đang gửi...</span>';
+                } else if (message.status === 'sent') {
+                    statusIndicator = '<span class="status-sent">✓ Đã gửi</span>';
+                } else if (message.status === 'error') {
+                    statusIndicator = '<span class="status-error">❌ Lỗi</span>';
+                }
+            }
+
+            msgDiv.innerHTML = `
+        <strong>${message.userName}</strong> 
+        <small>(${new Date(message.timestamp).toLocaleTimeString()})</small><br>
+        ${message.message}
+        ${statusIndicator ? `<div class="message-status">${statusIndicator}</div>` : ''}
+      `;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateMessageStatus(messageId, status) {
+            const msgDiv = document.getElementById(`msg-${messageId}`);
+            if (!msgDiv) return;
+
+            const statusDiv = msgDiv.querySelector('.message-status');
+            if (!statusDiv) return;
+
+            if (status === 'sent') {
+                statusDiv.innerHTML = '<span class="status-sent">✓ Đã gửi</span>';
+            } else if (status === 'error') {
+                statusDiv.innerHTML = '<span class="status-error">❌ Lỗi</span>';
+            }
+        }
+
+        function updateConnectionStatus(connected, data = null) {
+            const status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.className = 'status connected';
+                status.innerHTML = `✅ Đã kết nối<br><small>User: ${data.userName} (${data.userId})</small>`;
+                currentUserId = data.userId;
+            } else {
+                status.className = 'status disconnected';
+                status.textContent = '❌ Chưa kết nối';
+                currentUserId = null;
+            }
+        }
+
+        function connect() {
+            const token = document.getElementById('token').value.trim();
+            if (!token) {
+                alert('Vui lòng nhập JWT token');
+                return;
+            }
+
+            socket = io('https://noithathochi.duckdns.org', {
+                auth: { token }
+            });
+
+            socket.on('connected', (data) => {
+                addLog(`Connected: ${data.userName} (${data.userId})`, 'info');
+                updateConnectionStatus(true, data);
+
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+                document.getElementById('joinBtn').disabled = false;
+            });
+
+            socket.on('connect_error', (error) => {
+                addLog(`Connection error: ${error.message}`, 'error');
+                alert('Lỗi kết nối: ' + error.message);
+            });
+
+            socket.on('disconnect', () => {
+                addLog('Disconnected', 'info');
+                updateConnectionStatus(false);
+
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+                document.getElementById('joinBtn').disabled = true;
+                document.getElementById('leaveBtn').disabled = true;
+                document.getElementById('sendBtn').disabled = true;
+                document.getElementById('messageInput').disabled = true;
+            });
+
+            // Notification events
+            socket.on('notification:new', (notification) => {
+                addLog(`New notification: ${notification.taskDescription}`, 'notification');
+                addNotificationLog(notification);
+
+                // Show browser notification if permitted
+                if (Notification.permission === 'granted') {
+                    new Notification('Thông báo mới', {
+                        body: notification.taskDescription,
+                        icon: '/favicon.ico'
+                    });
+                }
+            });
+
+            // Chat events
+            socket.on('chat:joined', (data) => {
+                addLog(`Joined room: ${data.roomId}`, 'chat');
+                document.getElementById('currentRoom').textContent = `📍 Phòng hiện tại: ${data.roomId}`;
+            });
+
+            socket.on('chat:user-joined', (data) => {
+                addLog(`${data.userName} joined room ${data.roomId}`, 'chat');
+                const container = document.getElementById('chatMessages');
+                const notice = document.createElement('div');
+                notice.style.textAlign = 'center';
+                notice.style.color = '#666';
+                notice.style.fontSize = '12px';
+                notice.style.margin = '10px 0';
+                notice.textContent = `${data.userName} đã tham gia phòng`;
+                container.appendChild(notice);
+            });
+
+            socket.on('chat:user-left', (data) => {
+                addLog(`${data.userName} left room ${data.roomId}`, 'chat');
+                const container = document.getElementById('chatMessages');
+                const notice = document.createElement('div');
+                notice.style.textAlign = 'center';
+                notice.style.color = '#666';
+                notice.style.fontSize = '12px';
+                notice.style.margin = '10px 0';
+                notice.textContent = `${data.userName} đã rời phòng`;
+                container.appendChild(notice);
+            });
+
+            socket.on('chat:message', (message) => {
+                addLog(`Message in ${message.roomId}: ${message.message}`, 'chat');
+
+                // Check if this is an update to our optimistic message
+                const existingMsg = document.getElementById(`msg-${message.messageId}`);
+                if (existingMsg) {
+                    // Update status from 'sending' to 'sent'
+                    updateMessageStatus(message.messageId, 'sent');
+                } else {
+                    // New message from another user
+                    const isOwn = message.userId === currentUserId;
+                    addChatMessage(message, isOwn);
+                }
+            });
+
+            socket.on('chat:message-error', (error) => {
+                addLog(`Message error: ${error.messageId}`, 'error');
+                updateMessageStatus(error.messageId, 'error');
+            });
+
+            socket.on('chat:typing', (data) => {
+                const indicator = document.getElementById('typingIndicator');
+                if (data.isTyping) {
+                    indicator.textContent = `${data.userName} đang gõ...`;
+                } else {
+                    indicator.textContent = '';
+                }
+            });
+
+            // Request notification permission
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+        }
+
+        function joinRoom() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                alert('Vui lòng nhập Room ID');
+                return;
+            }
+
+            if (currentRoomId) {
+                leaveRoom();
+            }
+
+            socket.emit('chat:join', { roomId });
+            currentRoomId = roomId;
+
+            document.getElementById('leaveBtn').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('messageInput').disabled = false;
+
+            // Clear messages
+            document.getElementById('chatMessages').innerHTML = '';
+        }
+
+        function leaveRoom() {
+            if (currentRoomId) {
+                socket.emit('chat:leave', { roomId: currentRoomId });
+                currentRoomId = null;
+
+                document.getElementById('currentRoom').textContent = '';
+                document.getElementById('leaveBtn').disabled = true;
+                document.getElementById('sendBtn').disabled = true;
+                document.getElementById('messageInput').disabled = true;
+                document.getElementById('chatMessages').innerHTML = '<div style="text-align: center; color: #999;">Tham gia phòng để bắt đầu chat</div>';
+            }
+        }
+
+        // Send message with OPTIMISTIC UI
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value.trim();
+            if (!message || !currentRoomId) return;
+
+            // STEP 1: Generate temporary messageId
+            const tempMessageId = `temp-${Date.now()}-${Math.random()}`;
+            const timestamp = new Date();
+
+            // STEP 2: Add to UI IMMEDIATELY (Optimistic Update)
+            addChatMessage({
+                messageId: tempMessageId,
+                roomId: currentRoomId,
+                userId: currentUserId,
+                userName: 'You',
+                message: message,
+                timestamp: timestamp,
+                status: 'sending' // Optimistic status
+            }, true);
+
+            // STEP 3: Send to server
+            socket.emit('chat:message', {
+                roomId: currentRoomId,
+                message: message,
+                messageId: tempMessageId
+            });
+
+            document.getElementById('messageInput').value = '';
+
+            // Stop typing indicator
+            socket.emit('chat:typing', { roomId: currentRoomId, isTyping: false });
+        }
+
+        function clearNotifications() {
+            document.getElementById('notificationLog').innerHTML = '<div class="log-entry">Chờ thông báo...</div>';
+        }
+
+        function clearEventLog() {
+            document.getElementById('eventLog').innerHTML = '<div class="log-entry">Chờ events...</div>';
+        }
+
+        // Typing indicator
+        document.getElementById('messageInput').addEventListener('input', function () {
+            if (!currentRoomId) return;
+
+            socket.emit('chat:typing', { roomId: currentRoomId, isTyping: true });
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('chat:typing', { roomId: currentRoomId, isTyping: false });
+            }, 1000);
+        });
+
+        // Send message on Enter
+        document.getElementById('messageInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+
+</html>

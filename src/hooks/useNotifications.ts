@@ -3,6 +3,8 @@ import { message } from 'antd';
 import { useNotificationService } from '@/src/api/services';
 import { TaskNotification } from '@/src/types';
 
+import { socket } from '@/src/api/socket';
+
 export const useNotifications = (userId?: string) => {
   const { list: notifications, request, getAll } = useNotificationService();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -26,7 +28,18 @@ export const useNotifications = (userId?: string) => {
     const interval = setInterval(() => {
       loadNotifications();
     }, 30000);
-    return () => clearInterval(interval);
+
+    const handleNewNotification = () => {
+      loadNotifications();
+      message.info('Bạn có thông báo mới!');
+    };
+
+    socket.on('notification:new', handleNewNotification);
+
+    return () => {
+      clearInterval(interval);
+      socket.off('notification:new', handleNewNotification);
+    };
   }, [loadNotifications]);
 
   const addNotification = useCallback((notification: any) => {

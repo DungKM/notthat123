@@ -3,7 +3,7 @@ import { Layout, message, Modal, Dropdown, Button, Space, Typography, Select } f
 import { MoreOutlined, UserAddOutlined, UserDeleteOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Role } from '@/src/auth/types';
-import { chatService } from '@/src/features/chat/services/chatService';
+import { socket } from '@/src/api/socket';
 import { useChatGroupService, useUserService, useChatMessageService } from '@/src/api/services';
 import { ChatAttachment, ChatGroup, ChatMessage } from '@/src/features/chat/types';
 import ChatSidebar from './components/ChatSidebar';
@@ -38,13 +38,14 @@ const ChatPage: React.FC = () => {
     const { patch: patchMessage, remove: removeMessage } = useChatMessageService();
 
     const loadUsers = useCallback(async () => {
+        if (!isAdmin) return;
         try {
             const res = await requestUsers('GET', '', null, { limit: 1000 });
             if (res.data) setAllUsers(res.data);
         } catch (e) {
             console.error("Failed to load users", e);
         }
-    }, [requestUsers]);
+    }, [requestUsers, isAdmin]);
 
     const loadGroups = useCallback(async () => {
         if (user) {
@@ -70,9 +71,27 @@ const ChatPage: React.FC = () => {
         loadUsers();
         loadGroups();
 
-        const handleNewMessage = (msg: ChatMessage) => {
-            if (msg.groupId === selectedGroupId) {
-                setMessages(prev => [...prev, msg]);
+        const handleNewMessage = (msg: any) => {
+            if (msg.roomId === selectedGroupId || msg.groupId === selectedGroupId) {
+                const mappedMsg: ChatMessage = {
+                    id: (msg.messageId || msg._id || Math.random().toString()) as string,
+                    groupId: (msg.roomId || msg.groupId) as string,
+                    senderId: (msg.userId || msg.senderId) as string,
+                    senderName: (msg.userName || msg.senderName) as string,
+                    content: (msg.message || msg.content) as string,
+                    timestamp: (msg.timestamp || new Date().toISOString()) as string,
+                };
+                
+                setMessages(prev => {
+                    // Update optimistic message if exists
+                    const existingMsgIndex = prev.findIndex(m => m.id === msg.messageId);
+                    if (existingMsgIndex >= 0) {
+                        const newMsgs = [...prev];
+                        newMsgs[existingMsgIndex] = { ...newMsgs[existingMsgIndex], status: 'sent' as any };
+                        return newMsgs;
+                    }
+                    return [...prev, mappedMsg];
+                });
             }
             loadGroups(); // Update last message in sidebar
         };
@@ -81,26 +100,17 @@ const ChatPage: React.FC = () => {
             loadGroups();
         };
 
-        const handleMemberRemoved = ({ groupId, memberId }: { groupId: string, memberId: string }) => {
-            if (memberId === user?.id) {
-                if (selectedGroupId === groupId) {
-                    setSelectedGroupId(undefined);
-                    setMessages([]);
-                }
-                loadGroups();
-                message.warning('Bạn đã bị xóa khỏi nhóm chat');
-            } else {
-                if (selectedGroupId === groupId) {
-                    loadGroups(); // Refresh member count etc
-                }
-            }
+        const handleMessageError = (error: any) => {
+            setMessages(prev => prev.map(m => m.id === error.messageId ? { ...m, status: 'error' as any } : m));
+            message.error('Gửi tin nhắn thất bại');
         };
 
-        chatService.on('new_message', handleNewMessage);
-        chatService.on('group_created', handleGroupUpdate);
-        chatService.on('member_added', handleGroupUpdate);
-        chatService.on('member_removed', handleMemberRemoved);
-        chatService.on('group_deleted', (deletedId) => {
+        socket.on('chat:message', handleNewMessage);
+        socket.on('chat:message-error', handleMessageError);
+        
+        socket.on('group_created', handleGroupUpdate);
+        socket.on('member_added', handleGroupUpdate);
+        socket.on('group_deleted', (deletedId) => {
             if (selectedGroupId === deletedId) {
                 setSelectedGroupId(undefined);
                 setMessages([]);
@@ -110,10 +120,11 @@ const ChatPage: React.FC = () => {
         });
 
         return () => {
-            chatService.off('new_message', handleNewMessage);
-            chatService.off('group_created', handleGroupUpdate);
-            chatService.off('member_added', handleGroupUpdate);
-            chatService.off('member_removed', handleMemberRemoved);
+            socket.off('chat:message', handleNewMessage);
+            socket.off('chat:message-error', handleMessageError);
+            socket.off('group_created', handleGroupUpdate);
+            socket.off('member_added', handleGroupUpdate);
+            socket.off('group_deleted');
         };
     }, [user, selectedGroupId, loadGroups]);
 
@@ -130,24 +141,53 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (selectedGroupId) {
+            socket.emit('chat:join', { roomId: selectedGroupId });
             loadMessages(selectedGroupId);
+
+            return () => {
+                socket.emit('chat:leave', { roomId: selectedGroupId });
+            };
         }
     }, [selectedGroupId, loadMessages]);
 
     const handleSendMessage = async (content: string, files?: File[]) => {
         if (selectedGroupId && user) {
-            try {
-                const formData = new FormData();
-                formData.append('content', content);
-                if (files && files.length > 0) {
+            const hasFiles = files && files.length > 0;
+            const tempMessageId = `temp-${Date.now()}-${Math.random()}`;
+            
+            const optimisticMsg: ChatMessage = {
+                id: tempMessageId,
+                groupId: selectedGroupId,
+                senderId: user.id || (user as any)._id,
+                senderName: user.name,
+                content: content,
+                timestamp: new Date().toISOString(),
+                status: 'sending'
+            };
+
+            if (!hasFiles) {
+                setMessages(prev => [...prev, optimisticMsg]);
+                socket.emit('chat:message', {
+                    roomId: selectedGroupId,
+                    message: content,
+                    messageId: tempMessageId
+                });
+            } else {
+                try {
+                    setMessages(prev => [...prev, optimisticMsg]);
+                    const formData = new FormData();
+                    formData.append('content', content);
                     files.forEach((file) => {
                         formData.append('attachments', file);
                     });
+                    const res = await request('POST', `/${selectedGroupId}/messages`, formData);
+                    if (res && (res.id || (res as any)._id)) {
+                       setMessages(prev => prev.map(m => m.id === tempMessageId ? { ...m, id: res.id || (res as any)._id, status: 'sent' } : m));
+                    }
+                } catch (e) {
+                    message.error('Lỗi khi gửi tin nhắn đính kèm');
+                    setMessages(prev => prev.map(m => m.id === tempMessageId ? { ...m, status: 'error' } : m));
                 }
-                await request('POST', `/${selectedGroupId}/messages`, formData);
-                loadMessages(selectedGroupId);
-            } catch (e) {
-                message.error('Lỗi khi gửi tin nhắn');
             }
         }
     };

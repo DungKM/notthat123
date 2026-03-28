@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
@@ -10,6 +10,8 @@ import logo from '@/src/statics/logo_hochi.jpg';
 import { useNotifications } from '@/src/hooks/useNotifications';
 import NotificationDrawer from '@/src/components/NotificationDrawer';
 
+import { connectSocket, disconnectSocket } from '@/src/api/socket';
+
 interface AdminLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -20,6 +22,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications(user?.id);
+
+  useEffect(() => {
+    if (user?.id) {
+      connectSocket();
+    }
+    return () => {
+      disconnectSocket();
+    };
+  }, [user?.id]);
 
   // Logic generate menu items dựa trên Role
   const getMenuData = () => {
