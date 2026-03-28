@@ -4,6 +4,7 @@ import {
   PlusOutlined,
   SaveOutlined,
   HistoryOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { ProjectProgress, ProjectStatus } from "@/src/types";
 import { Role } from "@/src/auth/types";
@@ -19,6 +20,7 @@ interface Props {
   onLoadHistory?: () => void;
   onUpdate: (data: ProjectProgress[]) => void;
   onSaveTasks?: (stage: string, tasks: any[]) => Promise<boolean>;
+  onDeleteTask?: (taskId: string) => Promise<boolean>;
   onTaskAssigned?: (task: { employeeId: string; employeeName: string; work: string }) => void;
 }
 
@@ -30,6 +32,7 @@ const ProjectProgressModal: React.FC<Props> = ({
   onLoadHistory,
   onUpdate,
   onSaveTasks,
+  onDeleteTask,
   onTaskAssigned,
 }) => {
   const [currentStatus, setCurrentStatus] = useState<ProjectProgress | null>(
@@ -146,7 +149,16 @@ const ProjectProgressModal: React.FC<Props> = ({
     }
 
     if (onSaveTasks) {
-      const success = await onSaveTasks(currentStatus.status as string, unsavedTasks);
+      const resolvedTasks = unsavedTasks.map((t) => {
+        let emp = t.employee as any;
+        if (emp && typeof emp === "object") emp = emp.id || emp._id;
+        if (emp && typeof emp === "string" && emp.length !== 24) {
+          const matched = users?.find(u => u.name === emp);
+          if (matched) emp = matched.id;
+        }
+        return { ...t, employee: emp };
+      });
+      const success = await onSaveTasks(currentStatus.status as string, resolvedTasks);
       if (success) {
         const updated: ProjectProgress = {
           ...currentStatus,
@@ -340,6 +352,73 @@ const ProjectProgressModal: React.FC<Props> = ({
                     width: 150,
                     render: (_, record) =>
                       dayjs(record.updatedAt).format("HH:mm DD/MM"),
+                  },
+                  {
+                    title: "Thao tác",
+                    width: 100,
+                    render: (_, record: any) => (
+                      <Space size="small">
+                        {!record.isSaved && (
+                          <Button
+                            type="text"
+                            style={{ color: '#1890ff' }}
+                            icon={<SaveOutlined />}
+                            onClick={async () => {
+                              if (!record.work) {
+                                message.warning("Vui lòng nhập công việc");
+                                return;
+                              }
+                              let resolvedRecord = { ...record };
+                              let emp = resolvedRecord.employee as any;
+                              if (emp && typeof emp === "object") emp = emp.id || emp._id;
+                              if (emp && typeof emp === "string" && emp.length !== 24) {
+                                const matched = users?.find(u => u.name === emp);
+                                if (matched) emp = matched.id;
+                              }
+                              resolvedRecord.employee = emp;
+
+                              if (onSaveTasks) {
+                                const success = await onSaveTasks(currentStatus.status as string, [resolvedRecord]);
+                                if (success) {
+                                  message.success("Cập nhật công việc thành công");
+                                  setCurrentStatus({
+                                    ...currentStatus,
+                                    tasks: currentStatus.tasks.map((t) => 
+                                      t.id === record.id ? { ...t, isSaved: true, updatedAt: dayjs().toISOString() } : t
+                                    )
+                                  });
+                                }
+                              }
+                            }}
+                          />
+                        )}
+                        <Button
+                          type="text"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={async () => {
+                            const isNew = !record.id || String(record.id).length !== 24;
+                            if (isNew) {
+                              setCurrentStatus({
+                                ...currentStatus,
+                                tasks: currentStatus.tasks.filter((t) => t.id !== record.id),
+                              });
+                            } else {
+                              if (onDeleteTask) {
+                                 const success = await onDeleteTask(record.id);
+                                 if (success) {
+                                   message.success("Xóa công việc thành công");
+                                   setCurrentStatus({
+                                     ...currentStatus,
+                                     tasks: currentStatus.tasks.filter((t) => t.id !== record.id),
+                                   });
+                                 }
+                              }
+                            }
+                          }}
+                        />
+                      </Space>
+                    ),
                   },
                 ]}
               />

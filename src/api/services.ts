@@ -92,3 +92,6 @@ export const useAdvanceRequestService = () => useApi<any>('/advance-requests');
 
 // ─── Project Stages ───
 export const useProjectStageService = () => useApi<any>('/project-stages');
+
+// ─── Settings ───
+export const useSettingService = () => useApi<any>('/settings');

@@ -173,6 +173,21 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
+  const handleDeleteProgressTask = async (taskId: string) => {
+    if (!project) return false;
+    const projectId = project.id || (project as any)._id;
+    try {
+      await request('DELETE', `/${projectId}/progress/${taskId}`);
+      
+      const res = await request('GET', `/${projectId}`);
+      if (res.data) setProject(res.data);
+      return true;
+    } catch (e) {
+      message.error('Lỗi khi xóa công việc');
+      return false;
+    }
+  };
+
   return (
     <PageContainer
       header={{
@@ -301,7 +316,7 @@ const ProjectDetailPage: React.FC = () => {
           status: (p.status || p.stage) as any,
           tasks: (p.tasks || p.updates || []).map((t: any) => ({
             ...t,
-            id: t.id || Math.random().toString(),
+            id: t._id || t.id || Math.random().toString(),
             work: t.work || t.name,
             employee: t.employee || t.userId || t.user, // Add userId to support fallback Name
             updatedAt: t.updatedAt,
@@ -313,7 +328,7 @@ const ProjectDetailPage: React.FC = () => {
           status: (p.status || p.stage) as any,
           tasks: (p.tasks || p.updates || []).map((t: any) => ({
             ...t,
-            id: t.id || Math.random().toString(),
+            id: t._id || t.id || Math.random().toString(),
             work: t.work || t.name,
             employee: t.user || t.employee,
             updatedAt: t.updatedAt,
@@ -323,6 +338,7 @@ const ProjectDetailPage: React.FC = () => {
         onLoadHistory={loadHistoryProgress}
         onUpdate={handleUpdateProgress}
         onSaveTasks={handleSaveProgressTasks}
+        onDeleteTask={handleDeleteProgressTask}
         onTaskAssigned={(task) => {
           addNotification({
             projectId: project.id,

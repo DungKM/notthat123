@@ -42,8 +42,8 @@ import {
   toSafeNumber,
 } from "@/src/utils/format";
 import { useAuth } from "@/src/auth/hooks/useAuth";
-import { useAdvanceRequestService } from "@/src/api/services";
-import { useRef } from "react";
+import { useAdvanceRequestService, useSalaryActionService, useAttendanceService, useProjectService } from "@/src/api/services";
+import { useRef, useEffect } from "react";
 import type { ActionType } from "@ant-design/pro-components";
 
 interface ProjectOption {
@@ -115,8 +115,20 @@ const StatisticsPage: React.FC = () => {
   const { user } = useAuth();
   const advanceActionRef = useRef<ActionType>(null);
   const { request, create } = useAdvanceRequestService();
+  const { request: salaryRequest } = useSalaryActionService();
+  const { create: createAttendance, request: attendanceRequest } = useAttendanceService();
+  const { request: projectRequest } = useProjectService();
   const [attendanceOpen, setAttendanceOpen] = useState(false);
   const [advanceOpen, setAdvanceOpen] = useState(false);
+  const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [projectOptions, setProjectOptions] = useState<{ label: string; value: string }[]>([]);
+  const [attendanceSummary, setAttendanceSummary] = useState({
+    totalWorkUnits: 0,
+    totalOTUnits: 0,
+    totalWorkHours: 0,
+    totalOTHours: 0,
+  });
   const [records, setRecords] = useState<AttendanceWorkRecord[]>(
     user
       ? MOCK_ATTENDANCE_WORK.filter(
@@ -125,6 +137,37 @@ const StatisticsPage: React.FC = () => {
       : [],
   );
   if (!user) return null;
+
+  useEffect(() => {
+    if (user) {
+      setLoadingHistory(true);
+      salaryRequest('GET', '/my-history')
+        .then((res: any) => {
+          if (res.success && res.data && res.data.payments) {
+            setPaymentHistory(res.data.payments);
+          }
+        })
+        .catch((err: any) => {
+          console.error("Lỗi lấy lịch sử lương:", err);
+        })
+        .finally(() => {
+          setLoadingHistory(false);
+        });
+    }
+  }, [user, salaryRequest]);
+
+  useEffect(() => {
+    projectRequest('GET', '', null, { status: 'APPROVED', limit: 1000 })
+      .then((res: any) => {
+        const data: any[] = res.data || [];
+        setProjectOptions(data.map((p) => ({
+          label: p.name || p.title || p.code || 'Dự án',
+          value: p.id || p._id,
+        })));
+      })
+      .catch(() => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const employeeInfo = MOCK_EMPLOYEES.find((e) => e.id === user.id) || {
     id: user.id,
@@ -135,18 +178,12 @@ const StatisticsPage: React.FC = () => {
     advance: 0,
   };
 
-  const myRecords = MOCK_ATTENDANCE.filter((r) => r.staffId === user.id);
   const myAdvanceRequests = MOCK_ADVANCE_REQUESTS.filter(
     (r) => r.employeeId === user.id,
   ) as AdvanceRequest[];
-  const totalWorkDays = myRecords.reduce((sum, r) => sum + (r.workDay ?? 0), 0);
-  const totalOTHours = myRecords.reduce((sum, r) => sum + (r.otDays ?? 0), 0);
 
-  const totalDays = totalWorkDays + totalOTHours;
-
-  const workHours = totalWorkDays * 8;
-  const otHours = totalOTHours * 8;
-  const totalHours = totalDays * 8;
+  const totalDays = attendanceSummary.totalWorkUnits + attendanceSummary.totalOTUnits;
+  const totalHours = attendanceSummary.totalWorkHours + attendanceSummary.totalOTHours;
 
   const baseSalary = toSafeNumber(employeeInfo.baseSalary);
   const bonus = toSafeNumber(employeeInfo.bonus);
@@ -168,72 +205,54 @@ const StatisticsPage: React.FC = () => {
   };
 
   const handleSubmitAttendance = async (values: any) => {
-    const selectedProject = MOCK_PROJECT_OPTIONS.find(
-      (p) => p.value === values.projectId,
-    );
-
-    if (!selectedProject) {
-      message.error("Không tìm thấy dự án");
+    try {
+      await createAttendance({
+        date: dayjs(values.date).format("YYYY-MM-DD"),
+        projectId: values.projectId,
+        workHours: Number(values.workingDays || 0),
+        otHours: Number(values.otDays || 0)
+      } as any);
+      return true;
+    } catch (error) {
+      message.error("Có lỗi xảy ra khi chấm công");
       return false;
     }
-
-    const workingDays = Number(values.workingDays || 0);
-    const otDays = Number(values.otDays || 0);
-
-    const amount =
-      workingDays * selectedProject.dailyRate + otDays * selectedProject.otRate;
-
-    const newRecord: AttendanceWorkRecord = {
-      id: Math.random().toString(36).slice(2, 11),
-      staffId: String(user.id),
-      date: dayjs(values.date).format("YYYY-MM-DD"),
-      startTime: "",
-      endTime: "",
-      workDay: 0,
-      projectId: selectedProject.value,
-      projectName: selectedProject.label,
-      workingDays,
-      otDays,
-      amount,
-    };
-
-    setRecords((prev) => [newRecord, ...prev]);
-    message.success("Chấm công thành công");
-    return true;
   };
 
-  const monthlyAttendanceColumns: ProColumns<AttendanceRecord>[] = [
+  const monthlyAttendanceColumns: ProColumns<any>[] = [
     {
-      title: "Ngày",
-      dataIndex: "dateFilter",
-      valueType: "date",
+      title: "Từ ngày - Đến ngày",
+      dataIndex: "dateRange",
+      valueType: "dateRange",
       hideInTable: true,
       search: {
-        transform: (value) => ({
-          dateFilter: value?.format("YYYY-MM-DD"),
-        }),
+        transform: (value) => {
+          return {
+            startDate: value?.[0] ? dayjs(value[0]).format('YYYY-MM-DD') : undefined,
+            endDate: value?.[1] ? dayjs(value[1]).format('YYYY-MM-DD') : undefined,
+          };
+        },
       },
     },
     {
       title: "Ngày",
       dataIndex: "date",
-      valueType: "date",
       hideInSearch: true,
       render: (_, record) => dayjs(record.date).format("DD/MM/YYYY"),
     },
     {
       title: "Số công hành chính",
-      dataIndex: "workDay",
+      dataIndex: "workUnits",
       hideInSearch: true,
     },
     {
       title: "Tăng ca",
-      dataIndex: "otDays",
+      dataIndex: "otUnits",
       hideInSearch: true,
       render: (_, record) =>
-        (record.otDays ?? 0) > 0 ? (
+        (record.otUnits ?? 0) > 0 ? (
           <Tag color="blue" icon={<FieldTimeOutlined />}>
-            {record.otDays} công
+            {record.otUnits} công ({record.otHours}h)
           </Tag>
         ) : (
           "-"
@@ -244,12 +263,16 @@ const StatisticsPage: React.FC = () => {
       dataIndex: "amount",
       hideInSearch: true,
       render: (_, record) => (
-        <span style={{ fontWeight: 700, color: "#52c41a" }}>
-          {new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          }).format(Number(record.workDay || 0))}
-        </span>
+        record.amount ? (
+          <span style={{ fontWeight: 700, color: "#52c41a" }}>
+            {new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(Number(record.amount || 0))}
+          </span>
+        ) : (
+          <span style={{ color: '#aaa' }}>-</span>
+        )
       ),
     },
   ];
@@ -305,7 +328,7 @@ const StatisticsPage: React.FC = () => {
       render: (_, record: any) => {
         const images = record.images || [];
         const firstImg = images.length > 0 ? images[0].url : (record.transferProof || null);
-        
+
         if (!firstImg) {
           return <span style={{ color: '#aaa' }}>Không có ảnh</span>;
         }
@@ -313,17 +336,17 @@ const StatisticsPage: React.FC = () => {
         return (
           <Image.PreviewGroup>
             <div style={{ position: 'relative', display: 'inline-block' }}>
-              <Image 
-                src={firstImg} 
-                width={50} 
-                height={50} 
-                style={{ borderRadius: 4, objectFit: 'cover' }} 
+              <Image
+                src={firstImg}
+                width={50}
+                height={50}
+                style={{ borderRadius: 4, objectFit: 'cover' }}
               />
               {images.length > 1 && (
                 <div style={{
                   position: 'absolute', top: -5, right: -5,
                   background: '#1890ff', color: 'white', borderRadius: '50%',
-                  width: 20, height: 20, display: 'flex', alignItems: 'center', 
+                  width: 20, height: 20, display: 'flex', alignItems: 'center',
                   justifyContent: 'center', fontSize: 10, fontWeight: 'bold'
                 }}>
                   +{images.length - 1}
@@ -354,12 +377,12 @@ const StatisticsPage: React.FC = () => {
             <ProCard style={{ background: "#e6f7ff" }} bordered>
               <Statistic
                 title="Tổng công"
-                value={totalWorkDays}
+                value={attendanceSummary.totalWorkUnits}
                 suffix="công"
                 prefix={<CheckCircleOutlined style={{ color: "#1890ff" }} />}
               />
               <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
-                ≈ {workHours} giờ
+                ≈ {attendanceSummary.totalWorkHours} giờ
               </div>
             </ProCard>
           </Col>
@@ -367,12 +390,12 @@ const StatisticsPage: React.FC = () => {
             <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
                 title="Công OT"
-                value={totalOTHours}
+                value={attendanceSummary.totalOTUnits}
                 suffix="công"
                 prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
               />
               <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
-                ≈ {otHours} giờ
+                ≈ {attendanceSummary.totalOTHours} giờ
               </div>
             </ProCard>
           </Col>
@@ -504,23 +527,33 @@ const StatisticsPage: React.FC = () => {
           </Button>
         }
       >
-        <ProTable<AttendanceRecord>
+        <ProTable<any>
           columns={monthlyAttendanceColumns}
-          rowKey="id"
+          rowKey={(record: any) => record.id || Math.random().toString()}
           search={{ labelWidth: "auto", defaultCollapsed: false }}
           request={async (params) => {
-            let data = myRecords;
-
-            if (params.dateFilter) {
-              data = data.filter((item) =>
-                dayjs(item.date).isSame(params.dateFilter, "day"),
-              );
+            try {
+              const res = await attendanceRequest('GET', '/my-history', null, {
+                startDate: params.startDate,
+                endDate: params.endDate
+              });
+              
+              if (res.success && res.data) {
+                 setAttendanceSummary(res.data.summary || {
+                    totalWorkUnits: 0,
+                    totalOTUnits: 0,
+                    totalWorkHours: 0,
+                    totalOTHours: 0,
+                 });
+                 return {
+                   data: res.data.records || [],
+                   success: true
+                 };
+              }
+              return { data: [], success: true };
+            } catch (error) {
+               return { data: [], success: false };
             }
-
-            return {
-              data,
-              success: true,
-            };
           }}
           pagination={{ pageSize: 5 }}
           options={false}
@@ -535,23 +568,19 @@ const StatisticsPage: React.FC = () => {
         defaultCollapsed
       >
         <ProTable
-          rowKey="id"
+          rowKey={(record: any) => record.id || record._id || Math.random().toString(36)}
           search={false}
           options={false}
           pagination={{ pageSize: 5 }}
           scroll={{ x: 600 }}
-          dataSource={[
-            // Dữ liệu mẫu tạm thời, có thể kết nối API sau
-            { id: '1', paymentDate: '2024-03-05', amount: 8500000, note: 'Lương tháng 2/2024', imageUrl: '' },
-            { id: '2', paymentDate: '2024-02-05', amount: 9200000, note: 'Lương tháng 1/2024', imageUrl: 'https://images.unsplash.com/photo-1544390041-3e5f2a967f1b?auto=format&fit=crop&q=80&w=200' },
-            { id: '3', paymentDate: '2024-01-05', amount: 8800000, note: 'Lương tháng 12/2023', imageUrl: '' },
-          ]}
+          loading={loadingHistory}
+          dataSource={paymentHistory}
           columns={[
             {
               title: "Ngày thanh toán",
-              dataIndex: "paymentDate",
+              dataIndex: "date",
               valueType: "date",
-              render: (_, record: any) => dayjs(record.paymentDate).format("DD/MM/YYYY"),
+              render: (_, record: any) => dayjs(record.date || record.paymentDate).format("DD/MM/YYYY"),
             },
             {
               title: "Số tiền thanh toán",
@@ -568,10 +597,10 @@ const StatisticsPage: React.FC = () => {
             },
             {
               title: "Ảnh chứng từ",
-              dataIndex: "imageUrl",
+              dataIndex: "billImage",
               render: (_, record: any) =>
-                record.imageUrl ? (
-                  <Image src={record.imageUrl} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QardG0sPDwMBx0YEhT18TA4PUeBXtIHBYlD0wGMzlJuU1A9IMDBQCsIiC4IOCfRKDbyAUG3hYWboKAfYDYi6IA8gViA7H8thwBjglIHbCkLtRJgGYJ3oGBISERBZBiKfyLMlAzGRgYIhh4GBgZUBi0UGA8MlQIol+RKjIIEO0GBgS0iwMDMwgBV0QWBfhmEQSKRKDgYGt4YGBpYoBhC7AcY3R0YGBrYJxklEOViYGBIBov+/8//UYaBAuJQYMDwL/p+BgYWBvjNAABBelRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/Pgo8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIj4KICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIvPgogIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4L+5JfAAAAn0lEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOBtwYEAAUFsJp0AAAAASUVORK5CYII=" width={50} height={50} style={{ objectFit: 'cover', borderRadius: 4 }} />
+                record.billImage ? (
+                  <Image src={record.billImage} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QardG0sPDwMBx0YEhT18TA4PUeBXtIHBYlD0wGMzlJuU1A9IMDBQCsIiC4IOCfRKDbyAUG3hYWboKAfYDYi6IA8gViA7H8thwBjglIHbCkLtRJgGYJ3oGBISERBZBiKfyLMlAzGRgYIhh4GBgZUBi0UGA8MlQIol+RKjIIEO0GBgS0iwMDMwgBV0QWBfhmEQSKRKDgYGt4YGBpYoBhC7AcY3R0YGBrYJxklEOViYGBIBov+/8//UYaBAuJQYMDwL/p+BgYWBvjNAABBelRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/Pgo8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIj4KICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIvPgogIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4L+5JfAAAAn0lEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOBtwYEAAUFsJp0AAAAASUVORK5CYII=" width={50} height={50} style={{ objectFit: 'cover', borderRadius: 4 }} />
                 ) : (
                   <span style={{ color: '#aaa' }}>Không có ảnh</span>
                 )
@@ -631,26 +660,26 @@ const StatisticsPage: React.FC = () => {
         <ProFormSelect
           name="projectId"
           label="Dự án"
-          options={MOCK_PROJECT_OPTIONS}
+          options={projectOptions}
           rules={[{ required: true, message: "Vui lòng chọn dự án" }]}
         />
 
         <ProFormDigit
           name="workingDays"
-          label="số giờ hành chính làm được"
+          label="Số giờ hành chính làm được"
           min={0}
-          max={1}
-          fieldProps={{ precision: 2 }}
+          max={24}
+          fieldProps={{ precision: 1 }}
           rules={[{ required: true, message: "Vui lòng nhập số giờ làm" }]}
         />
 
         <ProFormDigit
           name="otDays"
-          label="số giờ tăng ca"
+          label="Số giờ tăng ca"
           min={0}
-          max={1}
+          max={24}
           initialValue={0}
-          fieldProps={{ precision: 2 }}
+          fieldProps={{ precision: 1 }}
         />
       </ModalForm>
     </div>

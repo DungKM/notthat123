@@ -16,10 +16,10 @@ const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { Employee, User, AttendanceRecord } from '@/src/types';
 import { MOCK_ATTENDANCE } from '@/src/mockData';
 import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col, Image } from 'antd';
-import { useSalaryService, useSalaryActionService, useProjectService } from '@/src/api/services';
+import { useSalaryService, useSalaryActionService, useProjectService, useSettingService, useAttendanceService } from '@/src/api/services';
 import type { ActionType } from '@ant-design/pro-components';
 import dayjs from 'dayjs';
-import { HistoryOutlined, CreditCardOutlined, PlusOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
+import { HistoryOutlined, CreditCardOutlined, PlusOutlined, EyeOutlined, EditOutlined, SettingOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -101,6 +101,8 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
   const { request: salaryRequest } = useSalaryService();
   const { request: salaryActionRequest } = useSalaryActionService();
   const { request: projectRequest } = useProjectService();
+  const { request: settingRequest } = useSettingService();
+  const { request: attendanceRequest } = useAttendanceService();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [projectOptions, setProjectOptions] = useState<{ label: string; value: string }[]>([]);
 
@@ -117,12 +119,13 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       .catch(() => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [rewardPenaltyRecords, setRewardPenaltyRecords] =
-    useState<RewardPenaltyRecord[]>(MOCK_REWARD_PENALTY);
+  const [rewardPenaltyRecords, setRewardPenaltyRecords] = useState<RewardPenaltyRecord[]>([]);
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryRecord[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const [detailVisible, setDetailVisible] = useState(false);
   const [rewardPenaltyVisible, setRewardPenaltyVisible] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
   const [paymentVisible, setPaymentVisible] = useState(false);
   const [editSalaryVisible, setEditSalaryVisible] = useState(false);
@@ -131,6 +134,48 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
     dayjs().startOf('month'),
     dayjs().endOf('month'),
   ]);
+
+  React.useEffect(() => {
+    if (detailVisible && selectedEmployee) {
+      setLoadingHistory(true);
+      salaryActionRequest('GET', `/history/${selectedEmployee.id}`)
+        .then((res: any) => {
+          if (res.success && res.data) {
+            const mappedAdjustments = (res.data.adjustments || []).map((item: any, idx: number) => ({
+              id: `adj-${idx}-${item.date}`,
+              employeeId: selectedEmployee.id,
+              employeeName: selectedEmployee.name,
+              position: getPosition(selectedEmployee),
+              type: item.type,
+              amount: item.amount,
+              projectId: '',
+              projectName: item.projectName,
+              content: item.content,
+              createdAt: item.date ? dayjs(item.date).format('DD/MM/YYYY HH:mm') : '',
+            }));
+
+            const mappedPayments = (res.data.payments || []).map((item: any, idx: number) => ({
+              id: `pay-${idx}-${item.date}`,
+              employeeId: selectedEmployee.id,
+              employeeName: selectedEmployee.name,
+              amountPaid: item.amount,
+              paymentDate: item.date,
+              note: item.note,
+              proof: item.billImage,
+            }));
+
+            setRewardPenaltyRecords(mappedAdjustments);
+            setPaymentHistory(mappedPayments);
+          }
+        })
+        .catch((err: any) => {
+          console.error("Lỗi lấy lịch sử:", err);
+        })
+        .finally(() => {
+          setLoadingHistory(false);
+        });
+    }
+  }, [detailVisible, selectedEmployee, salaryActionRequest]);
 
   const employeeOptions = useMemo(
     () =>
@@ -382,24 +427,35 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
     );
   }, [paymentHistory, selectedEmployee]);
 
-  // Logic tính toán Lịch sử chấm công (Công & OT)
-  const attendanceHistory = useMemo(() => {
-    if (!selectedEmployee || !historyRange) return { list: [], totalWorkDays: 0, totalOTDays: 0 };
+  const [attendanceHistory, setAttendanceHistory] = useState<{
+    list: any[];
+    totalWorkDays: number;
+    totalOTDays: number;
+  }>({ list: [], totalWorkDays: 0, totalOTDays: 0 });
+  const [loadingAttendance, setLoadingAttendance] = useState(false);
 
-    const list = MOCK_ATTENDANCE.filter((item) => {
-      const isEmployee = String(item.staffId) === String(selectedEmployee.id);
-      if (!isEmployee) return false;
-
-      const date = dayjs(item.date);
-      return date.isAfter(historyRange[0].subtract(1, 'day')) &&
-        date.isBefore(historyRange[1].add(1, 'day'));
-    });
-
-    const totalWorkDays = list.reduce((sum, item) => sum + (item.workDay || 0), 0);
-    const totalOTDays = list.reduce((sum, item) => sum + (item.otDays || 0), 0);
-
-    return { list, totalWorkDays, totalOTDays };
-  }, [selectedEmployee, historyRange]);
+  React.useEffect(() => {
+    if (historyVisible && selectedEmployee && historyRange && historyRange[0] && historyRange[1]) {
+      setLoadingAttendance(true);
+      attendanceRequest('GET', '/history', null, {
+        userId: selectedEmployee.id,
+        startDate: historyRange[0].format('YYYY-MM-DD'),
+        endDate: historyRange[1].format('YYYY-MM-DD'),
+      })
+        .then((res: any) => {
+          if (res.success && res.data) {
+            setAttendanceHistory({
+              list: res.data.records || [],
+              totalWorkDays: res.data.summary?.totalWorkUnits || 0,
+              totalOTDays: res.data.summary?.totalOTUnits || 0,
+            });
+          }
+        })
+        .finally(() => {
+          setLoadingAttendance(false);
+        });
+    }
+  }, [historyVisible, selectedEmployee, historyRange, attendanceRequest]);
 
   const handleUpdateBaseSalary = async (values: any) => {
     if (!selectedEmployee) return false;
@@ -531,11 +587,63 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
               }
             }}
           />,
+          <Button key="settings" onClick={() => setSettingsVisible(true)} icon={<SettingOutlined />}>
+            Cài đặt giờ công
+          </Button>,
           <Button key="reward-penalty" type="primary" onClick={() => setRewardPenaltyVisible(true)}>
             Thêm thưởng / phạt
           </Button>,
         ]}
       />
+
+      <ModalForm
+        title="Cài đặt hệ số giờ công"
+        open={settingsVisible}
+        onOpenChange={setSettingsVisible}
+        modalProps={{ destroyOnClose: true }}
+        request={async () => {
+          try {
+            const res = await settingRequest('GET', '/work-hours');
+            if (res && res.success && res.data) {
+              return res.data;
+            }
+            return { hoursPerWorkUnit: 8, hoursPerOTUnit: 4 };
+          } catch {
+            return { hoursPerWorkUnit: 8, hoursPerOTUnit: 4 };
+          }
+        }}
+        onFinish={async (values) => {
+          try {
+            await settingRequest('PATCH', '/work-hours', {
+              hoursPerWorkUnit: Number(values.hoursPerWorkUnit),
+              hoursPerOTUnit: Number(values.hoursPerOTUnit),
+            });
+            message.success('Cập nhật cài đặt giờ công thành công');
+            setSettingsVisible(false);
+            return true;
+          } catch {
+            message.error('Có lỗi xảy ra khi cập nhật cài đặt');
+            return false;
+          }
+        }}
+      >
+        <ProFormDigit
+          name="hoursPerWorkUnit"
+          label="Số giờ / 1 công chuẩn"
+          min={1}
+          max={24}
+          fieldProps={{ precision: 1 }}
+          rules={[{ required: true, message: 'Vui lòng nhập số giờ' }]}
+        />
+        <ProFormDigit
+          name="hoursPerOTUnit"
+          label="Số giờ / 1 công OT"
+          min={1}
+          max={24}
+          fieldProps={{ precision: 1 }}
+          rules={[{ required: true, message: 'Vui lòng nhập số giờ' }]}
+        />
+      </ModalForm>
 
       <Modal
         title={`Lịch sử thưởng / phạt - ${selectedEmployee?.name ?? ''}`}
@@ -549,6 +657,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       >
         <Space direction="vertical" style={{ width: '100%' }} size="large">
           <ProTable<RewardPenaltyRecord>
+            loading={loadingHistory}
             columns={detailColumns}
             dataSource={selectedEmployeeHistory}
             rowKey="id"
@@ -558,6 +667,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           />
 
           <ProTable<PaymentHistoryRecord>
+            loading={loadingHistory}
             columns={paymentHistoryColumns}
             dataSource={selectedEmployeePaymentHistory}
             rowKey="id"
@@ -684,18 +794,36 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
             </Row>
           </Card>
 
-          <ProTable<AttendanceRecord>
+          <ProTable<any>
+            loading={loadingAttendance}
             columns={[
-              { title: 'Ngày', dataIndex: 'date', valueType: 'date' },
-              { title: 'Công chính', dataIndex: 'workDay' },
-              { title: 'Tăng ca (OT)', dataIndex: 'otDays' },
               {
-                title: 'Chi tiết',
-                render: (_, record) => `${record.startTime} - ${record.endTime}`
+                title: 'Ngày',
+                dataIndex: 'date',
+                render: (_, record: any) => dayjs(record.date).format('DD/MM/YYYY')
+              },
+              {
+                title: 'Dự án',
+                dataIndex: 'projectName',
+                render: (_, record: any) => record.projectId?.name || '-'
+              },
+              {
+                title: 'Giờ làm / OT',
+                render: (_, record: any) => `${record.workHours || 0}h / ${record.otHours || 0}h`
+              },
+              {
+                title: 'Công chính',
+                dataIndex: 'workUnits',
+                render: (_, record: any) => record.workUnits || 0
+              },
+              {
+                title: 'Công OT',
+                dataIndex: 'otUnits',
+                render: (_, record: any) => record.otUnits || 0
               }
             ]}
             dataSource={attendanceHistory.list}
-            rowKey="id"
+            rowKey={(record: any) => record.id || Math.random().toString()}
             search={false}
             pagination={{ pageSize: 5 }}
             options={false}
