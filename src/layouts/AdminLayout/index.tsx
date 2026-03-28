@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
-import { Dropdown, Space, Tag, Badge } from 'antd';
+import { Dropdown, Space, Tag, Badge, Grid } from 'antd';
 import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import { Role } from '@/src/auth/types';
 import { ROUTES } from '@/src/routes/index';
@@ -22,6 +22,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications(user?.id);
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
 
   useEffect(() => {
     if (user?.id) {
@@ -124,7 +126,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         token={{
           colorPrimary: '#13EC5B',
         }}
-        contentStyle={{ padding: '4px' }}
+        contentStyle={{ padding: isMobile ? '0 2px' : '16px 24px' }}
         avatarProps={{
           src: user?.avatar,
           title: user?.name,
@@ -171,7 +173,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           </div>
         )}
       >
-        <PageContainer ghost tabProps={{ size: 'large' }}>
+        <PageContainer
+          ghost
+          tabProps={{ size: 'large' }}
+          style={{ padding: isMobile ? 0 : undefined }}
+          header={{ style: { padding: isMobile ? '8px 0' : undefined } }}
+        >
           {children}
         </PageContainer>
       </ProLayout>

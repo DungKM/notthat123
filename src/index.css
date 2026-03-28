@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @layer base {
+
   :where(.css-dev-only-do-not-override-mncuj7) a,
   :where(.css-dev-only-do-not-override-mncuj7) a:visited,
   :where(.css-dev-only-do-not-override-mncuj7) a:hover,
@@ -25,29 +26,133 @@
     0% {
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(197, 160, 89, 0.6);
     }
+
     100% {
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1), 0 0 0 20px rgba(197, 160, 89, 0);
     }
   }
+
   @media (max-width: 768px) {
     .hidden-mobile {
       display: none !important;
     }
 
-    /* Admin responsive overrides */
-    .ant-pro-table-search {
-      padding: 12px !important;
+    /* ── FIX: ProLayout Sidebar Drawer Mobile ──
+       Khi sidebar mở ở chế độ drawer, đảm bảo nó nằm trên tất cả nội dung */
+    .ant-pro-sider,
+    .ant-pro-sider-drawer,
+    [class*="ant-pro-sider"] {
+      z-index: 1051 !important;
     }
+
+    /* Ant Design drawer container (ProLayout dùng Drawer nội bộ) */
+    .ant-drawer,
+    .ant-drawer-wrap {
+      z-index: 1050 !important;
+      position: fixed !important;
+    }
+
+    .ant-drawer-content-wrapper {
+      z-index: 1051 !important;
+      position: fixed !important;
+      height: 100dvh !important;
+      /* Dùng svh/dvh chặn lỗi Safari URL bar */
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Backdrop/mask của drawer – đảm bảo che phủ toàn bộ nội dung */
+    .ant-drawer-mask {
+      z-index: 1050 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      background-color: rgba(0, 0, 0, 0.45) !important;
+      backdrop-filter: blur(2px) !important;
+    }
+
+    /* Nội dung drawer (sidebar menu) nằm trên mask */
+    .ant-drawer-content {
+      z-index: 1051 !important;
+      height: 100dvh !important;
+    }
+
+    /* ProLayout layout main area: không được đè lên sidebar */
+    .ant-pro-layout .ant-layout {
+      z-index: 1 !important;
+    }
+
+    /* Header cố định không che sidebar */
+    .ant-pro-layout-header,
+    .ant-layout-header {
+      z-index: 99 !important;
+    }
+
+    /* Menu container có thể scroll */
+    .ant-menu-inline,
+    .ant-menu-vertical {
+      padding-bottom: 0px !important;
+      /* Tránh menu dài bị lấp dưới màn hình dọc */
+    }
+
+    /* ── Xóa padding ngang triệt để trên mobile ── */
+    /* ProLayout: content area */
+    .ant-pro-layout-content,
+    .ant-pro-layout-content>*,
+    [class*="ant-pro-basicLayout-content"] {
+      padding-inline: 2px !important;
+      padding-left: 2px !important;
+      padding-right: 2px !important;
+    }
+
+    /* PageContainer: header + children wrapper */
+    .ant-page-header,
+    .ant-pro-page-container,
+    .ant-pro-page-container>*,
+    .ant-pro-page-container-children-container,
+    .ant-pro-page-container-children-content {
+      padding-inline: 2px !important;
+      padding-left: 2px !important;
+      padding-right: 2px !important;
+      margin-inline: 0 !important;
+    }
+
+    /* ProCard (wrapper bảng) */
+    .ant-pro-card,
+    .ant-pro-card-body {
+      padding-inline: 2px !important;
+      padding-left: 2px !important;
+      padding-right: 2px !important;
+      border-radius: 0 !important;
+      margin-inline: 0 !important;
+    }
+
+    /* Table card nội dung */
+    .ant-pro-table .ant-card-body,
+    .ant-card-body {
+      padding-inline: 2px !important;
+      padding-left: 2px !important;
+      padding-right: 2px !important;
+    }
+
+    /* Table search */
+    .ant-pro-table-search {
+      padding: 8px 4px !important;
+    }
+
     .ant-pro-table-search .ant-form-item {
       margin-bottom: 8px !important;
     }
-    .ant-pro-page-container .ant-page-header {
-      padding: 12px !important;
-    }
+
+    /* Modal */
     .ant-modal {
       max-width: calc(100vw - 16px) !important;
       margin: 8px auto !important;
     }
+
     .ant-modal-body {
       max-height: 70vh;
       overflow-y: auto;

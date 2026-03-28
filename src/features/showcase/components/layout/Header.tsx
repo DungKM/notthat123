@@ -23,6 +23,7 @@ const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const location = useLocation();
   const navigate = useNavigate();
   const [showTopBar, setShowTopBar] = useState(true);
@@ -768,34 +769,57 @@ const Header: React.FC = () => {
                         ))}
                       </div>
                     )}
-                    {/* Danh mục Sản Phẩm trên mobile */}
+                    {/* Danh mục Sản Phẩm trên mobile - Accordion */}
                     {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
                       <div className="pb-4 pl-4 space-y-1">
-                        {productCategories.map((cat: any) => (
-                          <div key={cat.id || cat._id} className="mb-1">
-                            <Link
-                              to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${cat.slug}`}
-                              className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors"
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              <span>{cat.name}</span>
-                            </Link>
-                            {cat.children && cat.children.length > 0 && (
-                              <div className="pl-4 mt-1 space-y-1">
-                                {cat.children.map((child: any) => (
-                                  <Link
-                                    key={child.id || child._id}
-                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
-                                    className="flex items-center py-2 px-3 rounded-lg !text-gray-800 hover:!text-showcase-primary text-[12px] transition-colors"
-                                    onClick={() => setIsMenuOpen(false)}
-                                  >
-                                    - {child.name}
-                                  </Link>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                        {productCategories.map((cat: any) => {
+                          const catId = String(cat.id || cat._id);
+                          const isExpanded = expandedCategories.has(catId);
+                          const hasChildren = cat.children && cat.children.length > 0;
+                          return (
+                            <div key={catId}>
+                              <button
+                                type="button"
+                                className="w-full flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[15px] font-semibold transition-colors"
+                                onClick={() => {
+                                  if (hasChildren) {
+                                    setExpandedCategories(prev => {
+                                      const next = new Set(prev);
+                                      if (next.has(catId)) next.delete(catId);
+                                      else next.add(catId);
+                                      return next;
+                                    });
+                                  } else {
+                                    navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?search=${cat.slug}`);
+                                    setIsMenuOpen(false);
+                                  }
+                                }}
+                              >
+                                <span>{cat.name}</span>
+                                {hasChildren && (
+                                  <DownOutlined
+                                    className={`text-[10px] text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                  />
+                                )}
+                              </button>
+                              {hasChildren && isExpanded && (
+                                <div className="pl-3 mt-1 space-y-0.5">
+                                  {cat.children.map((child: any) => (
+                                    <Link
+                                      key={child.id || child._id}
+                                      to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                      className="flex items-center gap-2 py-2 px-3 rounded-lg !text-gray-600 hover:!text-showcase-primary hover:bg-gray-50 text-[13px] transition-colors"
+                                      onClick={() => setIsMenuOpen(false)}
+                                    >
+                                      <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
+                                      {child.name}
+                                    </Link>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
