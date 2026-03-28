@@ -19,7 +19,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(user?.id);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications(user?.id);
 
   // Logic generate menu items dựa trên Role
   const getMenuData = () => {
@@ -171,6 +171,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         notifications={notifications}
         onMarkAsRead={markAsRead}
         onMarkAllAsRead={markAllAsRead}
+        onDelete={deleteNotification}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Drawer, List, Badge, Button, Typography, Empty, Space, Tag } from 'antd';
-import { CheckOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { CheckOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { TaskNotification } from '@/src/types';
 
@@ -10,6 +10,7 @@ interface NotificationDrawerProps {
   notifications: TaskNotification[];
   onMarkAsRead: (id: string) => void;
   onMarkAllAsRead: () => void;
+  onDelete: (id: string) => void;
 }
 
 const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
@@ -18,6 +19,7 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
+  onDelete,
 }) => {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -25,7 +27,7 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     <Drawer
       title={
         <Space>
-          <span>🔔 Thông báo</span>
+          <span>Thông báo</span>
           {unreadCount > 0 && (
             <Badge count={unreadCount} style={{ backgroundColor: '#ff4d4f' }} />
           )}
@@ -35,17 +37,6 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       onClose={onClose}
       open={open}
       width={420}
-      extra={
-        unreadCount > 0 ? (
-          <Button
-            type="link"
-            icon={<CheckCircleOutlined />}
-            onClick={onMarkAllAsRead}
-          >
-            Đọc tất cả
-          </Button>
-        ) : null
-      }
     >
       {notifications.length === 0 ? (
         <Empty description="Chưa có thông báo nào" />
@@ -69,20 +60,33 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
               <div style={{ width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                   <Space size={4}>
-                    <ClockCircleOutlined style={{ color: '#999', fontSize: 12 }} />
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                       {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
                     </Typography.Text>
                   </Space>
-                  {!item.isRead ? (
-                    <Tag color="blue" style={{ margin: 0, fontSize: 11 }}>Mới</Tag>
-                  ) : (
-                    <Tag color="default" style={{ margin: 0, fontSize: 11 }}>Đã đọc</Tag>
-                  )}
+                  <Space size={4}>
+                    {!item.isRead ? (
+                      <Tag color="blue" style={{ margin: 0, fontSize: 11 }}>Mới</Tag>
+                    ) : (
+                      <Tag color="default" style={{ margin: 0, fontSize: 11 }}>Đã đọc</Tag>
+                    )}
+                    <Button 
+                      type="text" 
+                      danger 
+                      size="small" 
+                      style={{ padding: '0 4px', height: 'auto', fontSize: 12 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(item.id || (item as any)._id);
+                      }}
+                    >
+                      Xóa
+                    </Button>
+                  </Space>
                 </div>
 
                 <Typography.Text strong style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>
-                  📋 {item.taskDescription}
+                  {item.taskDescription}
                 </Typography.Text>
 
                 <Typography.Text type="secondary" style={{ fontSize: 13, lineHeight: 1.5 }}>

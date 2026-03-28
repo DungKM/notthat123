@@ -1,87 +1,69 @@
 import { useState, useEffect, useCallback } from 'react';
+import { message } from 'antd';
+import { useNotificationService } from '@/src/api/services';
 import { TaskNotification } from '@/src/types';
 
-const STORAGE_KEY = 'hochi_notifications';
-
-const getAllNotifications = (): TaskNotification[] => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveAllNotifications = (notifications: TaskNotification[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-};
-
 export const useNotifications = (userId?: string) => {
-  const [notifications, setNotifications] = useState<TaskNotification[]>([]);
-  const [allNotifications, setAllNotifications] = useState<TaskNotification[]>([]);
+  const { list: notifications, request, getAll } = useNotificationService();
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Load notifications cho user hiện tại
-  const loadNotifications = useCallback(() => {
-    const all = getAllNotifications();
-    setAllNotifications(all);
-    if (userId) {
-      setNotifications(all.filter((n) => n.assigneeId === userId));
-    } else {
-      setNotifications([]);
+  const loadNotifications = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const data = await getAll({ page: 1, limit: 100 });
+      if (data) {
+        const notifArray = Array.isArray(data) ? data : ((data as any).data || []);
+        // Calculate unread count right after setting list
+        setUnreadCount(notifArray.filter((n: any) => !n.isRead).length);
+      }
+    } catch (e) {
+      console.error("Lỗi lấy thông báo:", e);
     }
-  }, [userId]);
+  }, [userId, getAll]);
 
   useEffect(() => {
     loadNotifications();
-    // Lắng nghe thay đổi từ tab khác hoặc cùng tab
-    const handleStorage = () => loadNotifications();
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    const interval = setInterval(() => {
+      loadNotifications();
+    }, 30000);
+    return () => clearInterval(interval);
   }, [loadNotifications]);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const addNotification = useCallback((notification: any) => {
+    // Triggers reload after backend creates a task notification
+    setTimeout(() => loadNotifications(), 1000);
+  }, [loadNotifications]);
 
-  // Thêm thông báo mới (Giám đốc giao việc)
-  const addNotification = useCallback((notification: Omit<TaskNotification, 'id' | 'createdAt' | 'isRead'>) => {
-    const all = getAllNotifications();
-    const newNotification: TaskNotification = {
-      ...notification,
-      id: Math.random().toString(36).slice(2, 11),
-      createdAt: new Date().toISOString(),
-      isRead: false,
-    };
-    const updated = [newNotification, ...all];
-    saveAllNotifications(updated);
-    // Trigger reload cho tất cả hook instances
-    window.dispatchEvent(new Event('storage'));
-    return newNotification;
-  }, []);
+  const markAsRead = useCallback(async (id: string) => {
+    try {
+      await request('PATCH', `/${id}/read`);
+      loadNotifications();
+    } catch {}
+  }, [request, loadNotifications]);
 
-  // Đánh dấu đã đọc
-  const markAsRead = useCallback((id: string) => {
-    const all = getAllNotifications();
-    const updated = all.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-    saveAllNotifications(updated);
-    window.dispatchEvent(new Event('storage'));
-  }, []);
-
-  // Đánh dấu tất cả đã đọc
-  const markAllAsRead = useCallback(() => {
-    if (!userId) return;
-    const all = getAllNotifications();
-    const updated = all.map((n) =>
-      n.assigneeId === userId ? { ...n, isRead: true } : n
-    );
-    saveAllNotifications(updated);
-    window.dispatchEvent(new Event('storage'));
-  }, [userId]);
+  const markAllAsRead = useCallback(async () => {
+    const unread = (notifications || []).filter((n: any) => !n.isRead);
+    try {
+      await Promise.all(unread.map(n => request('PATCH', `/${n.id || (n as any)._id}/read`)));
+      loadNotifications();
+    } catch {}
+  }, [notifications, request, loadNotifications]);
+  
+  const deleteNotification = useCallback(async (id: string) => {
+    try {
+       await request('DELETE', `/${id}`);
+       message.success('Xoá thành công');
+       loadNotifications();
+    } catch {}
+  }, [request, loadNotifications]);
 
   return {
-    notifications,
-    allNotifications,
+    notifications: notifications || [],
+    allNotifications: notifications || [],
     unreadCount,
     addNotification,
     markAsRead,
     markAllAsRead,
+    deleteNotification
   };
 };
