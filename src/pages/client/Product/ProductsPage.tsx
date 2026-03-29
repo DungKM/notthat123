@@ -90,7 +90,7 @@ const ProductsPage: React.FC = () => {
   // Toggle Selection
   const toggleCategory = (catId: string) => {
     setSelectedCategories(prev =>
-      prev.includes(catId) ? prev.filter(id => id !== catId) : [...prev, catId]
+      prev.includes(catId) ? [] : [catId]
     );
     setCurrentPage(1);
   };
@@ -199,7 +199,7 @@ const ProductsPage: React.FC = () => {
               <div className="bg-white border text-gray-800 border-gray-200 rounded-lg p-5">
 
                 {/* Search in sidebar */}
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                       <Search className="w-4 h-4 text-gray-400 group-focus-within:text-showcase-primary transition-colors" />
@@ -221,7 +221,7 @@ const ProductsPage: React.FC = () => {
                       </button>
                     )}
                   </div>
-                </div>
+                </div> */}
 
                 <FilterSection title="DANH MỤC" defaultOpen={true}>
                   <div className="max-h-[320px] overflow-y-auto pr-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 hover:[&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full transition-colors">
@@ -438,12 +438,12 @@ const ProductsPage: React.FC = () => {
                         key={`${p}-${index}`}
                         onClick={() => typeof p === 'number' && setCurrentPage(p)}
                         disabled={typeof p === 'string'}
-                        className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage 
-                          ? 'bg-showcase-primary text-white border-showcase-primary' 
+                        className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
+                          ? 'bg-showcase-primary text-white border-showcase-primary'
                           : typeof p === 'string'
                             ? 'bg-transparent border-transparent text-gray-500 cursor-default'
                             : 'bg-white text-gray-500 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
-                        }`}
+                          }`}
                       >
                         {p}
                       </button>

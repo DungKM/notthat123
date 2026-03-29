@@ -79,7 +79,13 @@ const RecruitmentPage: React.FC = () => {
         // error handled by useApi interceptor usually
       }
     } else {
-      toast.error('Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.');
+      setTimeout(() => {
+        const errorElement = document.querySelector('.border-red-500') as HTMLElement;
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          errorElement.focus();
+        }
+      }, 100);
     }
   };
 

@@ -10,6 +10,7 @@ export interface CartItem {
   image: string;
   quantity: number;
   subtotal: number;
+  stockQuantity?: number;
 }
 
 interface CartContextType {
@@ -52,6 +53,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         image: it.productId?.images?.[0]?.url || 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
         quantity: it.quantity,
         subtotal: it.subtotal || (price * it.quantity),
+        stockQuantity: it.productId?.stockQuantity,
       };
     });
     setCartItems(mappedItems);
@@ -76,26 +78,33 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = async (item: CartItem) => {
     // 1. Cập nhật state (Optimistic UI) để báo hiệu cho người dùng ngay lập tức
+    let addedQuantity = item.quantity;
     setCartItems((prev) => {
       const existed = prev.find((p) => p.id === item.id);
       if (existed) {
         return prev.map((p) => {
           if (p.id === item.id) {
-            const newQuantity = p.quantity + item.quantity;
-            return { ...p, quantity: newQuantity, subtotal: newQuantity * p.price };
+            let newQuantity = p.quantity + item.quantity;
+            const max = p.stockQuantity ?? item.stockQuantity;
+            if (max !== undefined && max > 0 && newQuantity > max) {
+              newQuantity = max;
+              addedQuantity = max - p.quantity;
+              setTimeout(() => toast.error(`Trong kho chỉ còn tối đa ${max} sản phẩm`), 0);
+            }
+            return { ...p, quantity: newQuantity, subtotal: newQuantity * p.price, stockQuantity: max };
           }
           return p;
         });
       }
       return [...prev, { ...item, subtotal: item.price * item.quantity }];
     });
-    setTotalAmount((prev) => prev + (item.price * item.quantity));
+    setTotalAmount((prev) => prev + (item.price * addedQuantity));
 
     // 2. Gọi API để lưu dữ liệu thật vào DB
     try {
       const res = await request('POST', '/add', {
         productId: item.id,
-        quantity: item.quantity
+        quantity: addedQuantity > 0 ? addedQuantity : item.quantity // Fallback API payload
       });
       if (res?.data) updateCartStateFromAPI(res.data);
       else fetchCart();
@@ -147,16 +156,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    const item = cartItems.find((i) => i.id === id);
+    if (!item) return;
+
+    let finalQuantity = quantity;
+    if (item.stockQuantity !== undefined && item.stockQuantity > 0 && finalQuantity > item.stockQuantity) {
+      finalQuantity = item.stockQuantity;
+      toast.error(`Sản phẩm này chỉ còn ${item.stockQuantity} sản phẩm`);
+    }
+
     // 1. Optimistic UI: Đổi số lượng trên giao diện NGAY LẬP TỨC (không delay)
     let diffAmount = 0;
     setCartItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newSubtotal = item.price * quantity;
-          diffAmount += newSubtotal - item.subtotal;
-          return { ...item, quantity, subtotal: newSubtotal };
+      prev.map((it) => {
+        if (it.id === id) {
+          const newSubtotal = it.price * finalQuantity;
+          diffAmount += newSubtotal - it.subtotal;
+          return { ...it, quantity: finalQuantity, subtotal: newSubtotal };
         }
-        return item;
+        return it;
       })
     );
     // Tạm thời tính UI
@@ -168,7 +186,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(debounceTimers.current[id]);
     }
     debounceTimers.current[id] = setTimeout(() => {
-      syncQuantityToServer(id, quantity);
+      syncQuantityToServer(id, finalQuantity);
       delete debounceTimers.current[id];
     }, 500);
   };

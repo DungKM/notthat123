@@ -25,7 +25,8 @@ export default function App() {
                   fontSize: '12px',
                   padding: '8px',
                   minWidth: '18px',
-                  fontWeight: '700'
+                  fontWeight: '700',
+                  marginTop: '40px'
                 }
               }}
             />

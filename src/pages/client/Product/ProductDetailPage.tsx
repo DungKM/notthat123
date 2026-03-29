@@ -74,6 +74,7 @@ const ProductDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart, setIsCartOpen } = useCart();
   const [quantity, setQuantity] = React.useState(1);
+  const [activeImgIndex, setActiveImgIndex] = React.useState(0);
 
   const { data: apiProduct, loading, getBySlug, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
   const { list: newProducts, getAll: getNewProducts } = useProductService();
@@ -129,6 +130,7 @@ const ProductDetailPage: React.FC = () => {
   };
 
   React.useEffect(() => {
+    setActiveImgIndex(0);
     if (slug) {
       getBySlug(slug).then((res) => {
         // Fetch products cùng category làm gợi ý nếu có categoryId
@@ -185,9 +187,10 @@ const ProductDetailPage: React.FC = () => {
       image: product.images[0],
       quantity: quantity,
       subtotal: product.price * quantity,
+      stockQuantity: product.stockQuantity,
     });
     // Trigger cart drawer open
-    setIsCartOpen(true);
+    // setIsCartOpen(true);
   };
 
   const handleBuyNow = () => {
@@ -224,7 +227,7 @@ const ProductDetailPage: React.FC = () => {
                     <div className="lg:col-span-5 space-y-4">
                       <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative border border-gray-100 group">
                         <img
-                          src={product.images[0]}
+                          src={product.images[activeImgIndex] || product.images[0]}
                           alt={product.title}
                           className="w-full h-full object-cover"
                           loading="lazy"
@@ -241,7 +244,8 @@ const ProductDetailPage: React.FC = () => {
                         {product.images.slice(0, 4).map((img: string, i: number) => (
                           <div
                             key={i}
-                            className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-gray-300 transition-all bg-gray-50 relative"
+                            onClick={() => setActiveImgIndex(i)}
+                            className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all bg-gray-50 relative ${activeImgIndex === i ? 'border-[#cca32e]' : 'border-transparent hover:border-gray-300'}`}
                           >
                             <img
                               src={img}
@@ -310,7 +314,13 @@ const ProductDetailPage: React.FC = () => {
                             {quantity}
                           </div>
                           <div className="flex flex-col border-l border-gray-300 w-6">
-                            <button onClick={() => setQuantity(q => q + 1)} className="flex-1 flex items-center justify-center hover:bg-gray-100 border-b border-gray-300 text-gray-600 text-[10px] pb-0.5" title="Tăng số lượng">
+                            <button onClick={() => setQuantity(q => {
+                              if (product?.stockQuantity && q >= product.stockQuantity) {
+                                setTimeout(() => toast.error(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`), 0);
+                                return product.stockQuantity;
+                              }
+                              return q + 1;
+                            })} className="flex-1 flex items-center justify-center hover:bg-gray-100 border-b border-gray-300 text-gray-600 text-[10px] pb-0.5" title="Tăng số lượng">
                               <span className="leading-none mt-1">+</span>
                             </button>
                             <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="flex-1 flex items-center justify-center hover:bg-gray-100 text-gray-600 text-[12px] pb-0.5" title="Giảm số lượng">

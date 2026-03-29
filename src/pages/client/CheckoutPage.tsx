@@ -67,7 +67,13 @@ const CheckoutPage: React.FC = () => {
 
   const handleOrder = async () => {
     if (!validate()) {
-      toast.error('Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.');
+      setTimeout(() => {
+        const errorElement = document.querySelector('.border-red-500') as HTMLElement;
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          errorElement.focus();
+        }
+      }, 100);
       return;
     }
 

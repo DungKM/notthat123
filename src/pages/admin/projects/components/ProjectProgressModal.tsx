@@ -5,11 +5,13 @@ import {
   SaveOutlined,
   HistoryOutlined,
   DeleteOutlined,
+  UnorderedListOutlined,
 } from "@ant-design/icons";
 import { ProjectProgress, ProjectStatus } from "@/src/types";
 import { Role } from "@/src/auth/types";
 import dayjs from "dayjs";
 import { useUserService, useProjectStageService } from "@/src/api/services";
+import StageManagerModal from "./StageManagerModal";
 const { Title } = Typography;
 
 interface Props {
@@ -39,26 +41,29 @@ const ProjectProgressModal: React.FC<Props> = ({
     null
   );
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [stageManagerOpen, setStageManagerOpen] = useState(false);
   const [stageOptions, setStageOptions] = useState<string[]>([]);
   const { list: users, getAll } = useUserService();
   const { request: stageRequest } = useProjectStageService();
+
+  const fetchStages = () => {
+    stageRequest('GET', '', null, { page: 1, limit: 100 })
+      .then((res) => {
+        const raw: any[] = res.data || [];
+        const names = raw.map((item: any) =>
+          typeof item === 'string' ? item : item.name
+        ).filter(Boolean);
+        setStageOptions(names);
+      })
+      .catch(() => {});
+  };
 
   React.useEffect(() => {
     if (open) {
       // Fetch user list
       getAll({ page: 1, limit: 1000 }).catch(console.error);
       // Fetch stage options từ API
-      stageRequest('GET', '', null, { page: 1, limit: 100 })
-        .then((res) => {
-          const raw: any[] = res.data || [];
-          const names = raw.map((item: any) =>
-            typeof item === 'string' ? item : item.name
-          ).filter(Boolean);
-          setStageOptions(names);
-        })
-        .catch(() => {
-          // fallback: giữ nguyên options cũ nếu có
-        });
+      fetchStages();
     } else {
       setCurrentStatus(null);
     }
@@ -269,6 +274,13 @@ const ProjectProgressModal: React.FC<Props> = ({
             >
               Lịch sử tiến độ
             </Button>
+
+            <Button
+              icon={<UnorderedListOutlined />}
+              onClick={() => setStageManagerOpen(true)}
+            >
+              Danh mục tiến độ
+            </Button>
           </Space>
 
           {currentStatus && (
@@ -468,6 +480,12 @@ const ProjectProgressModal: React.FC<Props> = ({
           </div>
         ))}
       </Modal>
+
+      <StageManagerModal
+        open={stageManagerOpen}
+        onCancel={() => setStageManagerOpen(false)}
+        onRefresh={() => fetchStages()}
+      />
     </>
   );
 };
