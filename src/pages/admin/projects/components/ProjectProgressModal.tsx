@@ -11,6 +11,7 @@ import { ProjectProgress, ProjectStatus } from "@/src/types";
 import { Role } from "@/src/auth/types";
 import dayjs from "dayjs";
 import { useUserService, useProjectStageService } from "@/src/api/services";
+import { useAuth } from "@/src/auth/hooks/useAuth";
 import StageManagerModal from "./StageManagerModal";
 const { Title } = Typography;
 
@@ -43,8 +44,11 @@ const ProjectProgressModal: React.FC<Props> = ({
   const [historyOpen, setHistoryOpen] = useState(false);
   const [stageManagerOpen, setStageManagerOpen] = useState(false);
   const [stageOptions, setStageOptions] = useState<string[]>([]);
+  const { user } = useAuth();
   const { list: users, getAll } = useUserService();
   const { request: stageRequest } = useProjectStageService();
+
+  const isStaff = user?.role === Role.STAFF;
 
   const fetchStages = () => {
     stageRequest('GET', '', null, { page: 1, limit: 100 })
@@ -253,17 +257,21 @@ const ProjectProgressModal: React.FC<Props> = ({
         open={open}
         width={900}
         onCancel={() => onOpenChange(false)}
-        footer={[
-          <Button key="save" type="primary" icon={<SaveOutlined />} onClick={saveStatus}>
-            Lưu
-          </Button>,
-        ]}
+        footer={
+          !isStaff ? [
+            <Button key="save" type="primary" icon={<SaveOutlined />} onClick={saveStatus}>
+              Lưu
+            </Button>,
+          ] : null
+        }
       >
         <Space direction="vertical" style={{ width: "100%" }} size={24}>
           <Space>
-            <Button type="primary" icon={<PlusOutlined />} onClick={addStatus}>
-              Thêm trạng thái
-            </Button>
+            {!isStaff && (
+              <Button type="primary" icon={<PlusOutlined />} onClick={addStatus}>
+                Thêm trạng thái
+              </Button>
+            )}
 
             <Button
               icon={<HistoryOutlined />}
@@ -275,12 +283,14 @@ const ProjectProgressModal: React.FC<Props> = ({
               Lịch sử tiến độ
             </Button>
 
-            <Button
-              icon={<UnorderedListOutlined />}
-              onClick={() => setStageManagerOpen(true)}
-            >
-              Danh mục tiến độ
-            </Button>
+            {!isStaff && (
+              <Button
+                icon={<UnorderedListOutlined />}
+                onClick={() => setStageManagerOpen(true)}
+              >
+                Danh mục tiến độ
+              </Button>
+            )}
           </Space>
 
           {currentStatus && (
@@ -307,15 +317,18 @@ const ProjectProgressModal: React.FC<Props> = ({
                       tasks: currentStatus.tasks.map((t) => ({ ...t, isSaved: false })),
                     });
                   }}
+                  disabled={isStaff}
                 />
 
-                <Button
-                  icon={<PlusOutlined />}
-                  type="dashed"
-                  onClick={addTask}
-                >
-                  Thêm công việc
-                </Button>
+                {!isStaff && (
+                  <Button
+                    icon={<PlusOutlined />}
+                    type="dashed"
+                    onClick={addTask}
+                  >
+                    Thêm công việc
+                  </Button>
+                )}
               </Space>
 
               <Table
@@ -333,6 +346,7 @@ const ProjectProgressModal: React.FC<Props> = ({
                         onChange={(e) =>
                           updateTask(record.id, "work", e.target.value)
                         }
+                        disabled={isStaff}
                       />
                     ),
                   },
@@ -355,6 +369,7 @@ const ProjectProgressModal: React.FC<Props> = ({
                         onChange={(value) =>
                           updateTask(record.id, "employee", value)
                         }
+                        disabled={isStaff}
                       />
                     ),
                   },
@@ -365,7 +380,7 @@ const ProjectProgressModal: React.FC<Props> = ({
                     render: (_, record) =>
                       dayjs(record.updatedAt).format("HH:mm DD/MM"),
                   },
-                  {
+                  ...(isStaff ? [] : [{
                     title: "Thao tác",
                     width: 100,
                     render: (_, record: any) => (
@@ -431,7 +446,7 @@ const ProjectProgressModal: React.FC<Props> = ({
                         />
                       </Space>
                     ),
-                  },
+                  }])
                 ]}
               />
             </div>

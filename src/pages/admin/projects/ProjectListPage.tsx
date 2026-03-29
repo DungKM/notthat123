@@ -267,17 +267,19 @@ const ProjectListPage: React.FC = () => {
               </Button>
             </Badge>
           ),
-          <Button
-            key="add"
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setSelectedProject(null);
-              setModalVisible(true);
-            }}
-          >
-            Tạo dự án mới
-          </Button>,
+          user.role !== Role.STAFF && (
+            <Button
+              key="add"
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setSelectedProject(null);
+                setModalVisible(true);
+              }}
+            >
+              Tạo dự án mới
+            </Button>
+          ),
         ]}
       />
 

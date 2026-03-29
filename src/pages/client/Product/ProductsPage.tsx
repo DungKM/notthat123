@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import Container from '@/src/features/showcase/components/ui/Container';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import ProductCardSkeleton from '@/src/features/showcase/components/ui/ProductCardSkeleton';
@@ -36,8 +37,8 @@ const ProductsPage: React.FC = () => {
 
   // Filters
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialSlug ? [initialSlug] : []);
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string>('');
+  const [selectedMaterials, setSelectedMaterials] = useState<string>('');
 
   // Price range
   const MIN_PRICE = 0;
@@ -49,18 +50,9 @@ const ProductsPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { list: apiCategories, getAll: getCategories } = useCategoryService();
-  const { request: productRequest, loading: productLoading } = useProductService();
-  const { request: searchRequest, loading: searchLoading } = useApi<any>('/search');
-  const loading = debouncedSearch ? searchLoading : productLoading;
-
-  const [apiProducts, setApiProducts] = useState<any[]>([]);
-  const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
-
-  // Load danh mục 1 lần khi vào trang
-  useEffect(() => {
-    getCategories({ limit: 50 });
-  }, [getCategories]);
+  const { getAll: getCategories } = useCategoryService();
+  const { request: productRequest } = useProductService();
+  const { request: searchRequest } = useApi<any>('/search');
 
   // Đồng bộ URL search -> selectedCategories khi URL thay đổi
   useEffect(() => {
@@ -73,7 +65,7 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // Reset page on new search
+      setCurrentPage(1);
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -95,49 +87,64 @@ const ProductsPage: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const toggleFilter = (item: string, state: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-    setter(state.includes(item) ? state.filter(i => i !== item) : [...state, item]);
+  const toggleRadio = (item: string, current: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
+    setter(current === item ? '' : item);
     setCurrentPage(1);
   };
 
-  // Load Products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        if (debouncedSearch) {
-          // Dùng /search API khi có keyword (giống header)
-          const res = await searchRequest('GET', '', null, { keyword: debouncedSearch, limit: 50 });
-          let products: any[] = res?.data?.products || [];
-          // Lọc thêm theo danh mục nếu đang chọn
-          if (selectedCategories.length > 0) {
-            products = products.filter((p: any) =>
-              selectedCategories.includes(p.categorySlug) ||
-              selectedCategories.includes(p.slug) ||
-              selectedCategories.includes(p.categoryId?.slug)
-            );
-          }
-          setApiProducts(products);
-          setMeta({ page: 1, limit: products.length, total: products.length, totalPages: 1 });
-        } else {
-          // Không có keyword: gọi API sản phẩm gốc
-          const query: any = { page: currentPage, limit: 12 };
-          if (selectedCategories.length > 0) query.search = selectedCategories.join(',');
-          if (debouncedPrice[0] > MIN_PRICE) query.minPrice = debouncedPrice[0];
-          if (debouncedPrice[1] < MAX_PRICE) query.maxPrice = debouncedPrice[1];
-          if (selectedColors.length > 0) query.style = selectedColors.join(',');
-          if (selectedMaterials.length > 0) query.material = selectedMaterials.join(',');
-          if (sortBy) query.sort = sortBy;
+  // ─── useQuery: Danh mục — cache 10 phút, chỉ fetch 1 lần ────────────────
+  const { data: apiCategories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ limit: 50 }),
+    staleTime: 10 * 60 * 1000,
+  });
 
-          const res = await productRequest('GET', '', null, query);
-          setApiProducts(res.data || []);
-          if (res.meta) setMeta(res.meta);
+  // ─── useQuery: Sản phẩm — cache theo filter key ─────────────────────────
+  const productQueryKey = [
+    'products',
+    currentPage,
+    selectedCategories.join(','),
+    debouncedSearch,
+    debouncedPrice[0],
+    debouncedPrice[1],
+    selectedColors,
+    selectedMaterials,
+    sortBy,
+  ];
+
+  const { data: productData, isFetching: loading } = useQuery({
+    queryKey: productQueryKey,
+    queryFn: async () => {
+      if (debouncedSearch) {
+        const res = await searchRequest('GET', '', null, { keyword: debouncedSearch, limit: 50 });
+        let products: any[] = res?.data?.products || [];
+        if (selectedCategories.length > 0) {
+          products = products.filter((p: any) =>
+            selectedCategories.includes(p.categorySlug) ||
+            selectedCategories.includes(p.slug) ||
+            selectedCategories.includes(p.categoryId?.slug)
+          );
         }
-      } catch (error) {
-        console.error('Failed to fetch products', error);
+        return { products, meta: { page: 1, limit: products.length, total: products.length, totalPages: 1 } };
+      } else {
+        const query: any = { page: currentPage, limit: 12 };
+        if (selectedCategories.length > 0) query.search = selectedCategories.join(',');
+        if (debouncedPrice[0] > MIN_PRICE) query.minPrice = debouncedPrice[0];
+        if (debouncedPrice[1] < MAX_PRICE) query.maxPrice = debouncedPrice[1];
+        if (selectedColors) query.style = selectedColors;
+        if (selectedMaterials) query.material = selectedMaterials;
+        if (sortBy) query.sort = sortBy;
+
+        const res = await productRequest('GET', '', null, query);
+        return { products: res.data || [], meta: res.meta || { page: 1, limit: 12, total: 0, totalPages: 1 } };
       }
-    };
-    fetchProducts();
-  }, [currentPage, selectedCategories, debouncedSearch, debouncedPrice, selectedColors, selectedMaterials, sortBy, productRequest]);
+    },
+    staleTime: 2 * 60 * 1000, // Cache sản phẩm 2 phút
+    placeholderData: (prev) => prev, // Giữ data cũ khi đang load trang mới (không flicker)
+  });
+
+  const apiProducts = productData?.products || [];
+  const meta = productData?.meta || { page: 1, limit: 12, total: 0, totalPages: 1 };
 
   const CheckboxItem = ({ label, count, checked, onChange, isSub = false }: { label: string, count?: number, checked: boolean, onChange: () => void, isSub?: boolean }) => (
     <label className={`flex items-center gap-3 cursor-pointer group mb-1 ${isSub ? 'py-1' : 'py-1.5'}`}>
@@ -340,8 +347,8 @@ const ProductsPage: React.FC = () => {
                     <CheckboxItem
                       key={color}
                       label={color}
-                      checked={selectedColors.includes(color)}
-                      onChange={() => toggleFilter(color, selectedColors, setSelectedColors)}
+                      checked={selectedColors === color}
+                      onChange={() => toggleRadio(color, selectedColors, setSelectedColors)}
                     />
                   ))}
                 </FilterSection>
@@ -351,8 +358,8 @@ const ProductsPage: React.FC = () => {
                     <CheckboxItem
                       key={mat}
                       label={mat}
-                      checked={selectedMaterials.includes(mat)}
-                      onChange={() => toggleFilter(mat, selectedMaterials, setSelectedMaterials)}
+                      checked={selectedMaterials === mat}
+                      onChange={() => toggleRadio(mat, selectedMaterials, setSelectedMaterials)}
                     />
                   ))}
                 </FilterSection>

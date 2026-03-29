@@ -120,6 +120,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       title: "Thao tác",
       valueType: "option",
       width: 100,
+      hideInTable: !isAdmin,
       render: (text, record, _, action) => [
         <Button type="link" size="large" key="edit" onClick={() => action?.startEditable?.(record.id)}>
           Sửa
@@ -353,7 +354,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                       }}
                       bordered={false}
                       controls={false}
-                      // Thêm class này (gộp với class align-right-input ở bước trước)
+                      disabled={!isAdmin}
                       className="align-right-input editable-summary-input"
                     />
                     <Text>đ</Text>

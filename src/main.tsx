@@ -3,11 +3,9 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './i18n';
-import { CartProvider } from './features/showcase/context/CartContext';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <CartProvider>
-      <App />
-    </CartProvider>
+    <App />
   </StrictMode>,
 );

@@ -31,6 +31,7 @@ const ProjectManagementPage: React.FC = () => {
 
   if (!user) return null;
 
+  const isDirector = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT;
   const isSiteManager = user.role === Role.SITE_MANAGER;
 
   const managerOptions = mockUsers
@@ -126,9 +127,8 @@ const ProjectManagementPage: React.FC = () => {
           <Button key="view" type="link" size="small" icon={<EyeOutlined />} onClick={() => navigate(`/quan-tri/cong-trinh/${record.id}`)} />
         );
 
-        const canEdit = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT || isSiteManager;
-
-        if (canEdit && !isSiteManager) {
+        // SITE_MANAGER: chỉ được xem, không sửa/xóa dự án
+        if (!isSiteManager) {
           actions.push(
             <Button type="link" size="large" key="edit" icon={<EditOutlined />} onClick={() => {
               setSelectedProject(record);
@@ -194,7 +194,8 @@ const ProjectManagementPage: React.FC = () => {
         pagination={{ pageSize: 10, showSizeChanger: true }}
         scroll={{ x: 1000 }}
         toolBarRender={() => {
-          const canCreate = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT || isSiteManager;
+          // SITE_MANAGER ĐƯỢC phép tạo dự án (công trình có thể tạo)
+          const canCreate = user.role !== Role.STAFF;
           return canCreate ? [
             <Button key="create" type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalVisible(true)}>
               Tạo dự án mới

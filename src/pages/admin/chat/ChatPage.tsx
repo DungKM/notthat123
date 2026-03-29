@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, message, Modal, Dropdown, Button, Space, Typography, Select } from 'antd';
-import { MoreOutlined, UserAddOutlined, UserDeleteOutlined, DeleteOutlined } from '@ant-design/icons';
+import { message, Modal } from 'antd';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Role } from '@/src/auth/types';
 import { socket } from '@/src/api/socket';
 import { useChatGroupService, useUserService, useChatMessageService } from '@/src/api/services';
-import { ChatAttachment, ChatGroup, ChatMessage } from '@/src/features/chat/types';
+import { ChatGroup, ChatMessage } from '@/src/features/chat/types';
 import ChatSidebar from './components/ChatSidebar';
 import ChatMessages from './components/ChatMessages';
 import ChatInput from './components/ChatInput';
@@ -13,7 +12,6 @@ import CreateGroupModal from './components/CreateGroupModal';
 import GroupMembersModal from './components/GroupMembersModal';
 import { User } from '@/src/auth/types';
 
-const { Content, Sider } = Layout;
 
 const ChatPage: React.FC = () => {
     const { user } = useAuth();
@@ -277,70 +275,141 @@ const ChatPage: React.FC = () => {
 
     const selectedGroup = groups.find(g => g.id === selectedGroupId);
 
+    const avatarColors = [
+        '#6366f1',
+        '#ec4899',
+        '#0ea5e9',
+        '#14b8a6',
+        '#f59e0b',
+    ];
+    const getAvatarGradient = (name: string) => {
+        const code = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
+        return avatarColors[code % avatarColors.length];
+    };
+    const getInitials = (name: string) =>
+        name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
     return (
-        <Layout style={{ height: 'calc(100vh - 150px)', background: '#fff', borderRadius: '8px', overflow: 'hidden' }}>
-            {/* Desktop: show sidebar always. Mobile: show sidebar only when no group selected */}
-            <Sider
-                width={isMobile ? '100%' : 300}
-                theme="light"
-                breakpoint="md"
-                collapsedWidth={0}
-                trigger={null}
-                collapsed={!!selectedGroupId && isMobile}
-                style={{
-                    display: selectedGroupId && isMobile ? 'none' : 'block',
-                    width: isMobile ? '100%' : 300,
-                    maxWidth: isMobile ? '100%' : 300,
-                    minWidth: isMobile ? '100%' : 300,
-                }}
-            >
+        <div style={{
+            height: 'calc(100vh - 148px)',
+            display: 'flex',
+            borderRadius: 12,
+            overflow: 'hidden',
+            background: '#f8f9fb',
+            border: '1px solid #e8ecf0',
+        }}>
+            {/* Sidebar */}
+            <div style={{
+                width: isMobile ? (selectedGroupId ? 0 : '100%') : 280,
+                minWidth: isMobile ? (selectedGroupId ? 0 : '100%') : 280,
+                display: isMobile && selectedGroupId ? 'none' : 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                transition: 'width 0.3s',
+            }}>
                 <ChatSidebar
                     groups={groups}
                     selectedGroupId={selectedGroupId}
                     onSelectGroup={handleSelectGroup}
                     onCreateGroup={() => setIsCreateModalOpen(true)}
                 />
-            </Sider>
-            <Layout style={{ display: !selectedGroupId && isMobile ? 'none' : 'flex' }}>
+            </div>
+
+            {/* Main Content */}
+            <div style={{
+                flex: 1,
+                display: isMobile && !selectedGroupId ? 'none' : 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                borderLeft: '1px solid rgba(255,255,255,0.06)',
+            }}>
                 {selectedGroup ? (
                     <>
-                        <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Button
-                                    type="text"
-                                    size="small"
-                                    className="md-hidden"
-                                    onClick={() => setSelectedGroupId(undefined)}
-                                    style={{ padding: '0 4px' }}
-                                >
-                                    ←
-                                </Button>
+                        {/* Chat Header */}
+                        <div style={{
+                            padding: '12px 20px',
+                            background: '#fff',
+                            borderBottom: '1px solid #e8ecf0',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                {isMobile && (
+                                    <button
+                                        onClick={() => setSelectedGroupId(undefined)}
+                                        style={{
+                                            background: 'none', border: 'none', cursor: 'pointer',
+                                            color: '#64748b', fontSize: 20, padding: '0 4px',
+                                        }}
+                                    >←</button>
+                                )}
+                                <div style={{
+                                    width: 40, height: 40, borderRadius: 12,
+                                    background: getAvatarGradient(selectedGroup.name),
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontWeight: 700, fontSize: 14, color: '#fff',
+                                }}>
+                                    {getInitials(selectedGroup.name)}
+                                </div>
                                 <div>
-                                    <Typography.Title level={5} style={{ margin: 0 }}>{selectedGroup.name}</Typography.Title>
-                                    <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                                        {selectedGroup.members.length} thành viên {selectedGroup.createdByName ? `• Tạo bởi: ${selectedGroup.createdByName}` : ''}
-                                    </Typography.Text>
+                                    <div style={{ fontWeight: 700, fontSize: 15, color: '#1e293b' }}>
+                                        {selectedGroup.name}
+                                    </div>
+                                    <div style={{ fontSize: 12, color: '#64748b' }}>
+                                        {selectedGroup.members.length} thành viên
+                                        {selectedGroup.createdByName ? ` · Tạo bởi ${selectedGroup.createdByName}` : ''}
+                                    </div>
                                 </div>
                             </div>
-                            <Button
-                                type="text"
-                                icon={<MoreOutlined style={{ color: '#000', fontSize: '20px', fontWeight: 'bold' }} />}
+                            <button
                                 onClick={() => setIsMembersModalOpen(true)}
-                            />
+                                title="Quản lý nhóm"
+                                style={{
+                                    width: 36, height: 36,
+                                    borderRadius: 10,
+                                    background: 'rgba(0,0,0,0.04)',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#64748b',
+                                    fontSize: 20,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'background 0.2s',
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.07)')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.04)')}
+                            >
+                                ⋯
+                            </button>
                         </div>
-                        <ChatMessages 
-                            messages={messages} 
+
+                        {/* Messages */}
+                        <ChatMessages
+                            messages={messages}
                             onDeleteMessage={handleDeleteMessage}
                             onEditMessage={handleEditMessage}
                         />
+
+                        {/* Input */}
                         <ChatInput onSendMessage={handleSendMessage} />
                     </>
                 ) : (
-                    <Content style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-                        <Typography.Text type="secondary">Chọn một nhóm chat để bắt đầu trò chuyện</Typography.Text>
-                    </Content>
+                    <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#f8f9fb',
+                        gap: 16,
+                    }}>
+                        <div style={{ fontSize: 56 }}>💬</div>
+                        <div style={{ color: '#94a3b8', fontSize: 15 }}>Chọn nhóm để bắt đầu trò chuyện</div>
+                    </div>
                 )}
-            </Layout>
+            </div>
 
             <CreateGroupModal
                 open={isCreateModalOpen}
@@ -359,8 +428,9 @@ const ChatPage: React.FC = () => {
                 onRemoveMember={handleRemoveMember}
                 onDeleteGroup={handleDeleteGroup}
             />
-        </Layout>
+        </div>
     );
 };
 
 export default ChatPage;
+

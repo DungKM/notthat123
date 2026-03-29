@@ -54,6 +54,9 @@ const ProjectDetailPage: React.FC = () => {
 
   const isDirector = user.role === Role.DIRECTOR || user.role === Role.ACCOUNTANT;
   const isSiteManager = user.role === Role.SITE_MANAGER;
+  // SITE_MANAGER: xem + quản lý tiến độ, không sửa thông tin dự án
+  const canManageProgress = isDirector || isSiteManager;
+  const canEditProject = isDirector;
 
   const loadHistoryProgress = async () => {
     if (!project) return;
@@ -194,7 +197,8 @@ const ProjectDetailPage: React.FC = () => {
         title: `Chi tiết dự án: ${project.name}`,
         onBack: () => navigate(-1),
         extra: [
-          isDirector && (
+          // Chỉ Director/Kế toán mới được sửa thông tin dự án
+          canEditProject && (
             <Button
               key="edit"
               icon={<EditOutlined />}
@@ -279,23 +283,21 @@ const ProjectDetailPage: React.FC = () => {
           </ProCard>
         </Col>
 
-        {/* Ẩn phần chi tiết với Công trình */}
-        {!isSiteManager && (
-          <Col span={24}>
-            <ProCard
-              title={<Typography.Text strong style={{ fontSize: '18px' }}>Chi tiết nội thất & hạch toán</Typography.Text>}
-              bordered
-              headerBordered
-            >
-              <ProjectDetailTable
-                projectId={project.id}
-                details={project.details}
-                onUpdate={handleUpdateDetails}
-                role={user.role}
-              />
-            </ProCard>
-          </Col>
-        )}
+        {/* Hiển thị phần chi tiết nội thất & hạch toán */}
+        <Col span={24}>
+          <ProCard
+            title={<Typography.Text strong style={{ fontSize: '18px' }}>Chi tiết nội thất & hạch toán</Typography.Text>}
+            bordered
+            headerBordered
+          >
+            <ProjectDetailTable
+              projectId={project.id}
+              details={project.details}
+              onUpdate={handleUpdateDetails}
+              role={user.role}
+            />
+          </ProCard>
+        </Col>
 
       </Row>
 

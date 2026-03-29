@@ -177,7 +177,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
                 <Space>
                   {dom}
                   <Tag color="green" className="hidden-mobile" style={{ margin: 0 }}>
-                    {user?.role}
+                    {user?.role === Role.DIRECTOR ? 'Giám đốc' : 
+                     user?.role === Role.ACCOUNTANT ? 'Kế toán' :
+                     user?.role === Role.SITE_MANAGER ? 'Quản lý công trình' :
+                     user?.role === Role.STAFF ? 'Nhân viên' : user?.role}
                   </Tag>
                 </Space>
               </Dropdown>
