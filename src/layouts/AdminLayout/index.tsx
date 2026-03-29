@@ -58,10 +58,24 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
       icon: <AppstoreOutlined />,
       children: [
         { path: ROUTES.ADMIN_DON_HANG, name: 'Quản lý đơn hàng', icon: <ShoppingCartOutlined /> },
-        { path: ROUTES.ADMIN_SAN_PHAM, name: 'Quản lý sản phẩm', icon: <AppstoreOutlined /> },
-        { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục sản phẩm', icon: <TagsOutlined /> },
-        { path: ROUTES.ADMIN_DANH_MUC_CONG_TRINH, name: 'Quản lý danh mục công trình', icon: <TagsOutlined /> },
-        { path: ROUTES.ADMIN_SHOWCASE_PROJECTS, name: 'Bài viết công trình', icon: <FileTextOutlined /> },
+        {
+          path: '/quan-tri/san-pham-group/sp',
+          name: 'Sản phẩm',
+          icon: <AppstoreOutlined />,
+          children: [
+            { path: ROUTES.ADMIN_SAN_PHAM, name: 'Quản lý sản phẩm', icon: <AppstoreOutlined /> },
+            { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục ', icon: <TagsOutlined /> },
+          ]
+        },
+        {
+          path: '/quan-tri/san-pham-group/ct',
+          name: 'Công trình',
+          icon: <ProjectOutlined />,
+          children: [
+            { path: ROUTES.ADMIN_SHOWCASE_PROJECTS, name: 'Bài viết công trình', icon: <FileTextOutlined /> },
+            { path: ROUTES.ADMIN_DANH_MUC_CONG_TRINH, name: 'Quản lý danh mục', icon: <TagsOutlined /> },
+          ]
+        },
         { path: ROUTES.ADMIN_QUAN_LY_DOI_TAC, name: 'Quản lý đối tác', icon: <ProjectOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_LIEN_HE, name: 'Quản lý liên hệ', icon: <MessageOutlined /> },
@@ -113,7 +127,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         logo={logo}
         menuDataRender={getMenuData}
         menuItemRender={(item, dom) => (
-          <div onClick={() => navigate(item.path || '/')}>
+          <div onClick={() => {
+            if (!item.children) {
+              navigate(item.path || '/');
+            }
+          }}>
             {dom}
           </div>
         )}

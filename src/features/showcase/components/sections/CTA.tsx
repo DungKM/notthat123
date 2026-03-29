@@ -17,32 +17,64 @@ const CTA: React.FC = () => {
     projectType: '',
     message: ''
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Vui lòng nhập họ tên!';
+    }
+    
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Vui lòng nhập số điện thoại!';
+    } else {
+      const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+      if (!phoneRegex.test(formData.phone.trim())) {
+        newErrors.phone = 'Số điện thoại không hợp lệ!';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone) {
-      message.warning('Vui lòng nhập họ tên và số điện thoại!');
-      return;
-    }
-
-    try {
-      await create({
-        fullName: formData.fullName,
-        phone: formData.phone,
-        email: '',
-        address: formData.projectType, // Map project type to address or just pass it
-        content: formData.projectType ? `[Loại công trình: ${formData.projectType}] - ${formData.message}` : formData.message
-      });
-      setFormData({ fullName: '', phone: '', projectType: '', message: '' });
-      toast.success('Đăng ký tư vấn thành công. Chúng tôi sẽ sớm liên lạc với bạn!');
-    } catch (error) {
-      console.error('Submit contact error:', error);
+    if (validate()) {
+      try {
+        await create({
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: '',
+          address: formData.projectType, // Map project type to address or just pass it
+          content: formData.projectType ? `[Loại công trình: ${formData.projectType}] - ${formData.message}` : formData.message
+        });
+        setFormData({ fullName: '', phone: '', projectType: '', message: '' });
+        toast.success('Đăng ký tư vấn thành công. Chúng tôi sẽ sớm liên lạc với bạn!');
+      } catch (error) {
+        console.error('Submit contact error:', error);
+      }
+    } else {
+      setTimeout(() => {
+        const errorElement = document.querySelector('.border-red-500') as HTMLElement;
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          errorElement.focus();
+        }
+      }, 100);
     }
   };
 
@@ -86,24 +118,29 @@ const CTA: React.FC = () => {
             </div>
             
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <input 
-                type="text" 
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder={t('cta.form_name')} 
-                className="w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm" 
-                required
-              />
-              <input 
-                type="tel" 
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder={t('cta.form_phone')} 
-                className="w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm" 
-                required
-              />
+              <div>
+                <input 
+                  type="text" 
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder={t('cta.form_name')} 
+                  className={`w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm transition-colors border ${errors.fullName ? 'border-red-500' : 'border-transparent'}`} 
+                />
+                {errors.fullName && <p className="mt-1 text-[10px] text-red-400 uppercase tracking-wider">{errors.fullName}</p>}
+              </div>
+
+              <div>
+                <input 
+                  type="tel" 
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder={t('cta.form_phone')} 
+                  className={`w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm transition-colors border ${errors.phone ? 'border-red-500' : 'border-transparent'}`} 
+                />
+                {errors.phone && <p className="mt-1 text-[10px] text-red-400 uppercase tracking-wider">{errors.phone}</p>}
+              </div>
               <select 
                 name="projectType"
                 value={formData.projectType}

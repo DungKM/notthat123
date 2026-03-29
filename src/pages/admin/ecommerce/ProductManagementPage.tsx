@@ -174,7 +174,7 @@ const ProductManagementPage: React.FC = () => {
             onClick={async () => {
               const hide = message.loading('Đang tải dữ liệu sản phẩm...', 0);
               try {
-              const data = await getById(record.id);
+                const data = await getById(record.id);
                 setEditRecord(data);
                 // Pre-load images and descriptions
                 const existingImages = (data.images || []).map((img: any, i: number) => {
@@ -382,7 +382,7 @@ const ProductManagementPage: React.FC = () => {
           const list = await getAll({
             page: current,
             limit: pageSize,
-            name,
+            search: name,
             ...rest,
           });
           return { data: list, success: true };
