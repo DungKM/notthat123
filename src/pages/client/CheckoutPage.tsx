@@ -5,6 +5,7 @@ import { useCart } from '@/src/features/showcase/context/CartContext';
 import { useOrderService } from '@/src/api/services';
 import api from '@/src/api/axiosInstance';
 import SEO from '@/src/components/common/SEO';
+import { Popconfirm } from 'antd';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import {
   ArrowLeftOutlined,
@@ -316,12 +317,21 @@ const CheckoutPage: React.FC = () => {
                                   alt={item.title}
                                   className="h-full w-full object-cover transition-transform group-hover:scale-110"
                                 />
-                                <button
-                                  onClick={() => removeFromCart(item.id)}
-                                  className="absolute top-1 right-1 rounded-full bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                                <Popconfirm
+                                  title="Xoá sản phẩm"
+                                  description="Bạn có chắc muốn xoá sản phẩm này khỏi đơn hàng?"
+                                  onConfirm={() => removeFromCart(item.id)}
+                                  okText="Có, xoá ngay"
+                                  cancelText="Không"
                                 >
-                                  <DeleteOutlined className="text-xs" />
-                                </button>
+                                  <button
+                                    className="absolute top-1 right-1 rounded-full bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                                    title="Xoá sản phẩm"
+                                    type="button"
+                                  >
+                                    <DeleteOutlined className="text-xs" />
+                                  </button>
+                                </Popconfirm>
                               </div>
 
                               <div className="min-w-0 flex-1 flex flex-col justify-between">

@@ -79,7 +79,7 @@ const ChatPage: React.FC = () => {
                     content: (msg.message || msg.content) as string,
                     timestamp: (msg.timestamp || new Date().toISOString()) as string,
                 };
-                
+
                 setMessages(prev => {
                     // Update optimistic message if exists
                     const existingMsgIndex = prev.findIndex(m => m.id === msg.messageId);
@@ -105,7 +105,7 @@ const ChatPage: React.FC = () => {
 
         socket.on('chat:message', handleNewMessage);
         socket.on('chat:message-error', handleMessageError);
-        
+
         socket.on('group_created', handleGroupUpdate);
         socket.on('member_added', handleGroupUpdate);
         socket.on('group_deleted', (deletedId) => {
@@ -152,7 +152,7 @@ const ChatPage: React.FC = () => {
         if (selectedGroupId && user) {
             const hasFiles = files && files.length > 0;
             const tempMessageId = `temp-${Date.now()}-${Math.random()}`;
-            
+
             const optimisticMsg: ChatMessage = {
                 id: tempMessageId,
                 groupId: selectedGroupId,
@@ -180,7 +180,7 @@ const ChatPage: React.FC = () => {
                     });
                     const res = await request('POST', `/${selectedGroupId}/messages`, formData);
                     if (res && (res.id || (res as any)._id)) {
-                       setMessages(prev => prev.map(m => m.id === tempMessageId ? { ...m, id: res.id || (res as any)._id, status: 'sent' } : m));
+                        setMessages(prev => prev.map(m => m.id === tempMessageId ? { ...m, id: res.id || (res as any)._id, status: 'sent' } : m));
                     }
                 } catch (e) {
                     message.error('Lỗi khi gửi tin nhắn đính kèm');

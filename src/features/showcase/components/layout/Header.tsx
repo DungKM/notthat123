@@ -638,7 +638,10 @@ const Header: React.FC = () => {
                       <p className="text-gray-500 text-sm mt-1">{t('cart.empty_desc')}</p>
                     </div>
                     <button
-                      onClick={() => setIsCartOpen(false)}
+                      onClick={() => {
+                        setIsCartOpen(false);
+                        navigate('/san-pham');
+                      }}
                       className="px-8 py-3 bg-showcase-primary text-white rounded-full font-bold hover:opacity-90 transition-opacity"
                     >
                       {t('cart.continue_shopping')}
@@ -657,10 +660,15 @@ const Header: React.FC = () => {
                             <Popconfirm
                               title="Xoá sản phẩm"
                               description="Bạn có chắc muốn xoá sản phẩm này khỏi giỏ?"
-                              onConfirm={() => removeFromCart(item.id)}
+                              onConfirm={(e) => {
+                                e?.stopPropagation();
+                                removeFromCart(item.id);
+                              }}
+                              onCancel={(e) => e?.stopPropagation()}
                               okText="Có, xoá ngay"
                               cancelText="Không"
                               placement="left"
+                              getPopupContainer={(trigger) => trigger.parentNode as HTMLElement}
                             >
                               <button
                                 className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all"
@@ -716,7 +724,10 @@ const Header: React.FC = () => {
                       {t('cart.checkout')}
                     </button>
                     <button
-                      onClick={() => setIsCartOpen(false)}
+                      onClick={() => {
+                        setIsCartOpen(false);
+                        navigate('/san-pham');
+                      }}
                       className="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold hover:bg-gray-100 transition-all"
                     >
                       {t('cart.continue_shopping')}

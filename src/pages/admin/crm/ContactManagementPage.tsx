@@ -145,6 +145,7 @@ const ContactManagementPage: React.FC = () => {
       headerTitle="Quản lý khách hàng liên hệ"
       search={{ labelWidth: 'auto' }}
       pagination={{ pageSize: 10 }}
+      scroll={{ x: 'max-content' }}
       request={async (params) => {
         try {
           const res = await request('GET', '', null, {

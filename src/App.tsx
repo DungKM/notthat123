@@ -16,18 +16,20 @@ export default function App() {
       <AntdApp> {/* QUAN TRỌNG */}
         <BrowserRouter>
           <AppProviders>
-
             <Toaster
               position="top-right"
               toastOptions={{
                 duration: 3000,
                 style: {
-                  fontSize: '12px',
-                  padding: '8px',
-                  minWidth: '18px',
-                  fontWeight: '700',
-                  marginTop: '40px'
+                  fontSize: '13px',
+                  padding: '12px 16px',
+                  fontWeight: '600',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                 }
+              }}
+              containerStyle={{
+                top: 70,
+                zIndex: 9999
               }}
             />
 

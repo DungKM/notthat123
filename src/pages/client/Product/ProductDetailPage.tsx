@@ -161,7 +161,7 @@ const ProductDetailPage: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
-    toast.success('Đã thêm vào giỏ hàng!');
+    toast.success('Đã thêm vào giỏ hàng!', { id: 'add-cart-toast' });
 
     addToCart({
       id: product.id,
@@ -365,7 +365,7 @@ const ProductDetailPage: React.FC = () => {
                   </div>
 
                 </div> {/* End left flex-1 content */}
-                
+
                 {/* RIGHT SIDEBAR - SẢN PHẨM MỚI */}
                 <div className="w-full xl:w-[250px] shrink-0 hidden xl:block">
                   <div className="bg-[#cca32e] rounded-[30px] py-2 px-6 text-center mb-5 shadow-sm">

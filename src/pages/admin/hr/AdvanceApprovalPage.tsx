@@ -121,7 +121,7 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
                 setSelectedRequest(record);
                 setApproveModalVisible(true);
               }}
-              title='Duyệt'
+              title="Duyệt"
             />,
             <Button
               key="reject"
@@ -132,10 +132,11 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
                 setSelectedRequest(record);
                 setRejectModalVisible(true);
               }}
-              title='Từ chối'
+              title="Từ chối"
             />,
-            deleteBtn,
-          ];
+            // Ẩn nút Xóa đối với role GIÁM ĐỐC (DIRECTOR)
+            currentUser?.role !== 'DIRECTOR' ? deleteBtn : null,
+          ].filter(Boolean); // Bỏ các element null/falsy
         }
         return [];
       },
