@@ -56,7 +56,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 background: '#fff',
             }}>
                 <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: '#1e293b' }}>💬 Nhóm Chat</div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: '#1e293b' }}>Nhóm Chat</div>
                     <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{groups.length} nhóm</div>
                 </div>
                 {canCreateGroup && (

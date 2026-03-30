@@ -5,6 +5,7 @@ import Features from '@/src/features/showcase/components/sections/Features';
 import Feedback from '@/src/features/showcase/components/sections/Feedback';
 import Testimonials from '@/src/features/showcase/components/sections/Testimonials';
 import CTA from '@/src/features/showcase/components/sections/CTA';
+import CTAImageSection from '@/src/features/showcase/components/sections/CTAImageSection';
 import ProductShopSection from '@/src/features/showcase/components/sections/ProductShopSection';
 import SEO from '@/src/components/common/SEO';
 
@@ -32,6 +33,7 @@ const PublicHome: React.FC = () => {
       <Features />
       <Feedback />
       <Testimonials />
+      <CTAImageSection />
       <CTA />
     </div>
   );

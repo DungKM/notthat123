@@ -19,21 +19,6 @@ import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import toast from 'react-hot-toast';
 import { useProductService } from '@/src/api/services';
 
-// ─── Mini card giống UI Sản phẩm bán chạy ───
-const StarRating: React.FC<{ rating?: number }> = ({ rating = 0 }) => (
-  <div className="flex gap-0.5 mt-1">
-    {[1, 2, 3, 4, 5].map((star) => (
-      <svg key={star} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-        fill={star <= rating ? '#f59e0b' : 'none'}
-        stroke={star <= rating ? '#f59e0b' : '#d1d5db'}
-        strokeWidth={1.5} className="w-3.5 h-3.5">
-        <path strokeLinecap="round" strokeLinejoin="round"
-          d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-      </svg>
-    ))}
-  </div>
-);
-
 const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
   const image = product.images && product.images.length > 0
     ? product.images[0].url
@@ -55,12 +40,11 @@ const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
           </div>
         )}
       </div>
-      <div className="flex flex-col flex-1 p-3 gap-1">
-        <h3 className="text-sm text-gray-800 font-medium leading-snug line-clamp-2 min-h-[2.5rem]">
+      <div className="flex flex-col flex-1 p-2.5 gap-1">
+        <h3 className="text-[13px] text-gray-800 font-medium leading-[1.4] line-clamp-2 min-h-[36px]">
           {product.name}
         </h3>
-        <StarRating rating={0} />
-        <p className="text-[#a0522d] font-bold text-base mt-1">{priceText}</p>
+        <p className="text-[#a0522d] font-bold text-[14px] mt-1.5">{priceText}</p>
       </div>
       <div className="px-3 pb-3">
         <img src={deliveryLogo} alt="Giao lắp tại nhà" className="w-full h-auto object-contain rounded-lg" />
@@ -209,7 +193,7 @@ const ProductDetailPage: React.FC = () => {
           <SEO title={product.title} description={product.description} />
 
           <main className="pt-22 pb-24">
-            <Container className="!max-w-[1920px] !px-[18px] sm:!px-[18px] lg:!px-[18px]">
+            <Container className="max-w-7xl">
               {/* BREADCRUMB */}
               <div className="text-[13px] !text-gray-500 mb-6 font-medium">
                 <Link to="/" className="hover:text-showcase-primary !text-gray-500">Home</Link>
@@ -380,79 +364,8 @@ const ProductDetailPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Related Products moved inside Middle Column */}
-                  <div className="mb-16">
-                    <div className="text-center mb-8">
-                      <h2 className="text-[24px] font-bold text-gray-900">
-                        Sản phẩm tương tự
-                      </h2>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      {(relatedProducts || []).slice(0, 4).map((rp: any, i: number) => (
-                        <RelatedProductCard key={rp.id || i} product={rp} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Product Description */}
-                  <div className="mt-24 w-full">
-                    {/* Tab Header */}
-                    <div className="flex border-b border-gray-200">
-                      <div className="bg-[#2f231f] text-white px-8 py-3 font-bold text-[13px] uppercase tracking-wider">
-                        MÔ TẢ
-                      </div>
-                    </div>
-
-                    {/* Content Box */}
-                    <div className="border border-t-0 border-gray-200 bg-white p-6 sm:p-10 mb-10">
-                      <div className="prose max-w-none text-gray-900 text-[15px] leading-relaxed">
-                        {/* Mô tả sản phẩm */}
-                        {product.description && (
-                          <p className="font-bold mb-8 text-black">
-                            {product.description}
-                          </p>
-                        )}
-
-                        {/* Thông số kỹ thuật */}
-                        <div className="mb-8 border border-gray-200 rounded-lg overflow-hidden">
-                          <table className="w-full text-[14px]">
-                            <tbody>
-                              {product.specs.map((spec: any, i: number) => (
-                                <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                                  <td className="px-4 py-3 font-semibold text-gray-700 w-[140px] border-r border-gray-200">{spec.label}</td>
-                                  <td className="px-4 py-3 text-gray-800">{spec.value}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Ảnh sản phẩm kèm mô tả */}
-                        {product.imageDetails && product.imageDetails.length > 0 && (
-                          <div className="space-y-6">
-                            {product.imageDetails.map((img: any, i: number) => (
-                              <div key={i} className="flex flex-col items-center">
-                                <img
-                                  src={img.url}
-                                  alt={img.description || product.title}
-                                  className="w-full max-w-4xl mx-auto block rounded"
-                                  loading="lazy"
-                                />
-                                {img.description && (
-                                  <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
-                                    {img.description}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                </div> {/* End Middle Content */}
-
+                </div> {/* End left flex-1 content */}
+                
                 {/* RIGHT SIDEBAR - SẢN PHẨM MỚI */}
                 <div className="w-full xl:w-[250px] shrink-0 hidden xl:block">
                   <div className="bg-[#cca32e] rounded-[30px] py-2 px-6 text-center mb-5 shadow-sm">
@@ -488,6 +401,79 @@ const ProductDetailPage: React.FC = () => {
                 </div>
 
               </div> {/* End Flex Layout wrapper */}
+
+              {/* Product Description */}
+              <div className="mt-16 w-full mx-auto max-w-5xl">
+                {/* Tab Header */}
+                <div className="flex border-b border-gray-200">
+                  <div className="bg-[#2f231f] text-white px-8 py-3 font-bold text-[13px] uppercase tracking-wider">
+                    MÔ TẢ
+                  </div>
+                </div>
+
+                {/* Content Box */}
+                <div className="border border-t-0 border-gray-200 bg-white p-6 sm:p-10 mb-16">
+                  <div className="prose max-w-none text-gray-900 text-[15px] leading-relaxed">
+                    {/* Mô tả sản phẩm */}
+                    {product.description && (
+                      <p className="font-bold mb-8 text-black">
+                        {product.description}
+                      </p>
+                    )}
+
+                    {/* Thông số kỹ thuật */}
+                    <div className="mb-8 border border-gray-200 rounded-lg overflow-hidden">
+                      <table className="w-full text-[14px]">
+                        <tbody>
+                          {product.specs.map((spec: any, i: number) => (
+                            <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                              <td className="px-4 py-3 font-semibold text-gray-700 w-[140px] border-r border-gray-200">{spec.label}</td>
+                              <td className="px-4 py-3 text-gray-800">{spec.value}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Ảnh sản phẩm kèm mô tả */}
+                    {product.imageDetails && product.imageDetails.length > 0 && (
+                      <div className="space-y-6">
+                        {product.imageDetails.map((img: any, i: number) => (
+                          <div key={i} className="flex flex-col items-center">
+                            <img
+                              src={img.url}
+                              alt={img.description || product.title}
+                              className="w-full max-w-4xl mx-auto block rounded"
+                              loading="lazy"
+                            />
+                            {img.description && (
+                              <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
+                                {img.description}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Related Products moved outside to take full width */}
+              <div className="mb-16 w-full mx-auto max-w-7xl">
+                <div className="text-center mb-8">
+                  <h2 className="text-[24px] font-bold text-gray-900">
+                    Sản phẩm tương tự
+                  </h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {(relatedProducts || []).slice(0, 5).map((rp: any, i: number) => (
+                    <RelatedProductCard key={rp.id || i} product={rp} />
+                  ))}
+                </div>
+              </div>
+
+
             </Container>
           </main>
         </>
