@@ -221,7 +221,7 @@ const UsersPage: React.FC = () => {
               limit: params.pageSize || 10,
             };
 
-            if (params.name) queryParams.name = params.name;
+            if (params.name) queryParams.search = params.name;
             if (params.phone) queryParams.phone = params.phone;
             if (params.account) queryParams.account = params.account;
             if (params.role) queryParams.role = params.role;

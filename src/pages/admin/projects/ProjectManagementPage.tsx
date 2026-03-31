@@ -178,6 +178,11 @@ const ProjectManagementPage: React.FC = () => {
               page: params.current || 1,
               limit: params.pageSize || 10,
             };
+            if (params.name) queryParams.search = params.name;
+            if (params.address) queryParams.address = params.address;
+            if (params.ownerName) queryParams.ownerName = params.ownerName;
+            if (params.ownerPhone) queryParams.ownerPhone = params.ownerPhone;
+            
             if (isSiteManager) {
               queryParams.managerId = user.id;
             }

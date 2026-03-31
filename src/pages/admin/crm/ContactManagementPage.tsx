@@ -151,10 +151,14 @@ const ContactManagementPage: React.FC = () => {
       scroll={{ x: 'max-content' }}
       request={async (params) => {
         try {
-          const res = await request('GET', '', null, {
+          const queryParams: Record<string, any> = {
             page: params.current || 1,
             limit: params.pageSize || 10,
-          });
+          };
+          if (params.fullName) queryParams.search = params.fullName;
+          if (params.status) queryParams.status = params.status;
+
+          const res = await request('GET', '', null, queryParams);
           return {
             data: res?.data || [],
             total: res?.meta?.total || 0,

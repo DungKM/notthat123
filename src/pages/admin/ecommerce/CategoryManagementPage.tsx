@@ -287,6 +287,13 @@ const CategoryManagementPage: React.FC = () => {
   // ─── Form fields ─────────────────────────────────────────────────────────
   const renderFormFields = () => (
     <>
+      <div style={{ padding: '12px 16px', marginBottom: 20, backgroundColor: '#fff2f0', border: '1px solid #ffccc7', borderRadius: 8, color: '#cf1322', fontSize: 13, lineHeight: '1.6' }}>
+        <strong style={{ display: 'block', marginBottom: 4, fontSize: 14 }}> Hướng dẫn tạo danh mục:</strong>
+        <ul style={{ margin: 0, paddingLeft: 20 }}>
+          <li>Để tạo <b>Danh mục gốc (cha)</b>: Vui lòng chỉ nhập "TÊN DANH MỤC" và "MÔ TẢ DANH MỤC".</li>
+          <li>Để tạo <b>Danh mục con</b>: Vui lòng nhập đầy đủ "TÊN DANH MỤC", "MÔ TẢ DANH MỤC" và chọn "DANH MỤC CHA".</li>
+        </ul>
+      </div>
       <ProFormText name="name" label="Tên danh mục" rules={[{ required: true, message: 'Nhập tên danh mục' }]} />
       <ProFormSelect
         name="parentSlug"

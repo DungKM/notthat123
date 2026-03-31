@@ -129,7 +129,7 @@ const VideoManagementPage: React.FC = () => {
           const list = await getAll({
             page: current,
             limit: pageSize,
-            title,
+            search: title,
             ...rest
           });
           return { data: list, success: true };

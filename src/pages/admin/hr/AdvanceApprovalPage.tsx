@@ -236,7 +236,7 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
               limit: params.pageSize || 10,
             };
 
-            if (params.employeeName) queryParams.employeeName = params.employeeName;
+            if (params.employeeName) queryParams.search = params.employeeName;
             if (params.reason) queryParams.reason = params.reason;
             if (params.status) queryParams.status = params.status;
 
