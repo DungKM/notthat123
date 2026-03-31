@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { DatePicker, Spin, Typography, Space, Empty, Table, Row, Col, Card, Select } from 'antd';
+import { DatePicker, Spin, Typography, Space, Empty, Table, Row, Col, Card, Select, Grid } from 'antd';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -27,6 +27,7 @@ interface RawPayment {
 }
 
 const IncomeStatisticsPage: React.FC = () => {
+  const screens = Grid.useBreakpoint();
   const [selectedMonth, setSelectedMonth] = useState<dayjs.Dayjs | null>(dayjs());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [payments, setPayments] = useState<RawPayment[]>([]);
@@ -254,27 +255,27 @@ const IncomeStatisticsPage: React.FC = () => {
               <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
                 <Col xs={24} sm={12} md={8} lg={4}>
                   <Card size="small" title="Tổng lương">
-                    <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{formatCurrency(summary.baseAmount)}</Text>
+                    <Text strong style={{ fontSize: 18, paddingLeft: !screens.md ? 24 : 0, color: '#1890ff' }}>{formatCurrency(summary.baseAmount)}</Text>
                   </Card>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={4}>
                   <Card size="small" title="Tổng thưởng">
-                    <Text strong style={{ fontSize: 18 }} type="success">{formatCurrency(summary.bonusAmount)}</Text>
+                    <Text strong style={{ fontSize: 18, paddingLeft: !screens.md ? 24 : 0 }} type="success">{formatCurrency(summary.bonusAmount)}</Text>
                   </Card>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={4}>
                   <Card size="small" title="Tổng phạt">
-                    <Text strong style={{ fontSize: 18 }} type="danger">{formatCurrency(summary.penaltyAmount)}</Text>
+                    <Text strong style={{ fontSize: 18, paddingLeft: !screens.md ? 24 : 0 }} type="danger">{formatCurrency(summary.penaltyAmount)}</Text>
                   </Card>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={5}>
                   <Card size="small" title="Đã ứng">
-                    <Text strong style={{ fontSize: 18 }} type="warning">{formatCurrency(summary.advanceAmount)}</Text>
+                    <Text strong style={{ fontSize: 18, paddingLeft: !screens.md ? 24 : 0 }} type="warning">{formatCurrency(summary.advanceAmount)}</Text>
                   </Card>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={7}>
                   <Card size="small" title="Thực lĩnh ước tính">
-                    <Text strong style={{ fontSize: 24 }}>{formatCurrency(summary.totalAmount)}</Text>
+                    <Text strong style={{ fontSize: 24, paddingLeft: !screens.md ? 24 : 0 }}>{formatCurrency(summary.totalAmount)}</Text>
                   </Card>
                 </Col>
               </Row>
