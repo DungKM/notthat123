@@ -63,7 +63,7 @@ const SalaryManagementPage: React.FC = () => {
     },
     {
       title: 'Vai trò',
-      dataIndex: ['userId', 'role'],
+      dataIndex: 'userId',
       render: (_, r) => <Tag>{roleLabels[r.userId?.role] || r.userId?.role}</Tag>,
     },
     {

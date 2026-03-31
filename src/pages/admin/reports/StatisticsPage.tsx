@@ -659,7 +659,7 @@ const StatisticsPage: React.FC = () => {
           label="Số giờ tăng ca"
           min={0}
           max={24}
-          initialValue={0}
+
           fieldProps={{ precision: 1 }}
         />
       </ModalForm>

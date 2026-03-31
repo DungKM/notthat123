@@ -95,6 +95,13 @@ const MOCK_REWARD_PENALTY: RewardPenaltyRecord[] = [
   },
 ];
 
+const roleLabels: Record<string, string> = {
+  DIRECTOR: 'Giám đốc',
+  ACCOUNTANT: 'Kế toán',
+  STAFF: 'Nhân viên',
+  SITE_MANAGER: 'Quản lý công trình',
+};
+
 const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser }) => {
   const actionRef = useRef<ActionType>(null);
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'));
@@ -187,7 +194,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
   );
 
   const getPosition = (employee: Employee) => {
-    return (employee as any).position || (employee as any).department || 'Nhân viên';
+    return roleLabels[(employee as any).role] || (employee as any).role || 'Nhân viên';
   };
 
   const employeeColumns: ProColumns<Employee>[] = [
@@ -202,7 +209,15 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       title: 'Chức vụ',
       key: 'position',
       hideInSearch: true,
-      render: (_, record) => getPosition(record),
+      render: (_, record) => (
+        <Tag color={
+          record.role === 'DIRECTOR' ? 'purple' :
+          record.role === 'ACCOUNTANT' ? 'blue' :
+          record.role === 'SITE_MANAGER' ? 'orange' : 'default'
+        }>
+          {roleLabels[record.role] || record.role || 'Nhân viên'}
+        </Tag>
+      ),
     },
     {
       title: 'Lương cơ bản',
@@ -840,12 +855,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           <Col span={12}>
             <Statistic
               title="Số tiền đang có"
-              value={
-                (selectedEmployee?.baseSalary ?? 0) +
-                (selectedEmployee?.bonus ?? 0) -
-                (selectedEmployee?.penalty ?? 0) -
-                (selectedEmployee?.advance ?? 0)
-              }
+              value={selectedEmployee?.currentAmount ?? 0}
               suffix="VND"
             />
           </Col>
@@ -860,12 +870,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
                 formatter: (val: any) => val ? String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '',
                 parser: (val: any) => val ? Number(val.replace(/\./g, '')) : 0,
               }}
-              initialValue={
-                (selectedEmployee?.baseSalary ?? 0) +
-                (selectedEmployee?.bonus ?? 0) -
-                (selectedEmployee?.penalty ?? 0) -
-                (selectedEmployee?.advance ?? 0)
-              }
+              initialValue={selectedEmployee?.currentAmount ?? 0}
             />
           </Col>
         </Row>
