@@ -106,6 +106,7 @@ const UsersPage: React.FC = () => {
       title: 'Số điện thoại',
       dataIndex: 'phone',
       width: 150,
+      search: false,
     },
     {
       title: 'Lương cơ bản',
@@ -118,16 +119,19 @@ const UsersPage: React.FC = () => {
       title: 'Tên đăng nhập',
       dataIndex: 'account',
       width: 180,
+      search: false,
     },
     {
       title: 'Vai trò',
       dataIndex: 'role',
+      search: false,
       render: (_, record) => <Tag>{roleLabels[record.role]}</Tag>,
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       width: 130,
+      search: false,
       render: (_, record) =>
         record.status === 'ACTIVE' ? (
           <Tag color="green">Hoạt động</Tag>

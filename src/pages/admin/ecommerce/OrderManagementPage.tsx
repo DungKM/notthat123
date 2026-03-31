@@ -181,6 +181,7 @@ const OrderManagementPage: React.FC = () => {
       title: 'Trạng thái',
       dataIndex: 'status',
       width: 120,
+      search: false,
       filters: true,
       valueEnum: {
         pending: { text: 'Chờ xử lý', status: 'Warning' },

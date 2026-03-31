@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Dropdown, Space, Tag, Badge, Grid } from 'antd';
-import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined, VideoCameraOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Role } from '@/src/auth/types';
 import { ROUTES } from '@/src/routes/index';
 import logo from '@/src/statics/logo_hochi.jpg';
@@ -94,15 +94,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
     const staffMenus: any[] = [
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
-      { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Biểu đồ thu nhập', icon: <BarChartOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <DollarOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Thống kê thu nhập', icon: <BarChartOutlined /> },
     ];
 
     const commonMenus = [
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
-      { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Biểu đồ thu nhập', icon: <BarChartOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <DollarOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Thống kê thu nhập', icon: <BarChartOutlined /> },
     ];
 
     if (user?.role === Role.DIRECTOR) {
@@ -161,7 +161,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           src: user?.avatar,
           title: user?.name,
           render: (_, dom) => (
-            <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
+            <Space style={{ cursor: 'pointer', padding: '0 8px' }} size="middle">
+              <ReloadOutlined
+                style={{ fontSize: 18, cursor: 'pointer', color: '#666' }}
+                title="Tải lại trang"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.reload();
+                }}
+              />
               <Badge count={unreadCount} size="small" offset={[-2, 2]}>
                 <BellOutlined
                   style={{ fontSize: 20, cursor: 'pointer' }}
@@ -212,6 +220,48 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           style={{ padding: isMobile ? 0 : undefined }}
           header={{ style: { padding: isMobile ? '8px 0' : undefined } }}
         >
+          <style>{`
+            /* Tùy chỉnh form tìm kiếm ProTable toàn cục (áp dụng khi chỉ có 1 ô input) */
+            .ant-pro-table-search .ant-row {
+              display: flex !important;
+              flex-wrap: nowrap !important;
+              justify-content: center !important; /* Đưa toàn bộ form ra giữa màn hình */
+            }
+            /* Ẩn các cột đệm trống do grid của ProTable sinh ra */
+            .ant-pro-table-search .ant-row > .ant-col:not(:first-child):not(:last-child) {
+              display: none !important;
+            }
+            /* Cột chứa ô nhập liệu */
+            .ant-pro-table-search .ant-row > .ant-col:first-child {
+              flex: 0 0 400px !important; /* Đặt lại chiều dài cân đối và tối ưu */
+              max-width: 110px !important;
+              width: 110px !important;
+              margin-left: 0 !important;
+              padding-right: 0 !important;
+            }
+            /* Cột chứa các nút hành động (nằm ngay sát ô input) */
+            .ant-pro-table-search .ant-row > .ant-col:last-child {
+              flex: 0 0 auto !important;
+              max-width: none !important;
+              width: auto !important;
+              text-align: left !important;
+              padding-left: 8px !important; /* Khoảng cách siêu nhỏ 8px ngay sát cạnh */
+              margin-left: 0 !important; /* Gỡ bỏ lớp offset mặc định đẩy nút ra xa */
+            }
+            /* Ẩn nút "Đặt lại" */
+            .ant-pro-table-search .ant-btn-default {
+              display: none !important;
+            }
+            /* Canh chỉnh lại form item cuối cùng để nút không bị đẩy xuống */
+            .ant-pro-table-search .ant-form-item {
+              margin-bottom: 0 !important;
+            }
+            /* Đảm bảo ô input giãn hết chiều ngang của vùng chứa (xóa độ phân giải md/sm mặc định của ProForm) */
+            .ant-pro-table-search .ant-form-item-control-input-content > * {
+              width: 100% !important;
+              max-width: 100% !important;
+            }
+          `}</style>
           {children}
         </PageContainer>
       </ProLayout>

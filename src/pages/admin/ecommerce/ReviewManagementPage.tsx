@@ -32,6 +32,7 @@ const ReviewManagementPage: React.FC = () => {
       title: 'Số điện thoại',
       dataIndex: 'phone',
       copyable: true,
+      search: false,
       width: 130,
     },
     {

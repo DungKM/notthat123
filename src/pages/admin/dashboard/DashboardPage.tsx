@@ -17,7 +17,7 @@ const generateData = (year: number) => {
     const revenue = year === 2026 ? baseRevenue * 1.2 : baseRevenue;
     const salary = 80000000 + (Math.random() * 20000000); // Fixed base + variable
     const profit = revenue * (0.2 + (Math.random() * 0.1)); // 20-30% profit margin
-    
+
     return {
       name: `T${month}/${year}`,
       month: `Tháng ${month}`,
@@ -84,10 +84,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
-        <div>
-          <Title level={4} style={{ margin: 0 }}>Bảng Thống Kê Tài Chính</Title>
-          <Text type="secondary">Tổng quan doanh thu, lợi nhuận và quỹ lương</Text>
-        </div>
+
         <div className="flex items-center gap-3">
           <Text className="font-medium text-gray-600">Năm thống kê:</Text>
           <Select
@@ -104,8 +101,8 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={8} xl={4} style={{ flex: '1 1 20%' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div>
           <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-100 p-5 rounded-2xl h-full" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
             <Statistic
               title={<span className="text-gray-500 font-semibold text-xs uppercase tracking-wider">Tổng Doanh Thu</span>}
@@ -117,8 +114,8 @@ const DashboardPage: React.FC = () => {
               suffix="₫"
             />
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={8} xl={4} style={{ flex: '1 1 20%' }}>
+        </div>
+        <div>
           <div className="bg-gradient-to-br from-green-50 to-white border border-green-100 p-5 rounded-2xl h-full" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
             <Statistic
               title={<span className="text-gray-500 font-semibold text-xs uppercase tracking-wider">Tổng Lợi Nhuận</span>}
@@ -130,8 +127,8 @@ const DashboardPage: React.FC = () => {
               suffix="₫"
             />
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={8} xl={4} style={{ flex: '1 1 20%' }}>
+        </div>
+        <div>
           <div className="bg-gradient-to-br from-orange-50 to-white border border-orange-100 p-5 rounded-2xl h-full" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
             <Statistic
               title={<span className="text-gray-500 font-semibold text-xs uppercase tracking-wider">Thanh toán nhân sự</span>}
@@ -143,8 +140,8 @@ const DashboardPage: React.FC = () => {
               suffix="₫"
             />
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={8} xl={4} style={{ flex: '1 1 20%' }}>
+        </div>
+        <div>
           <div className="bg-gradient-to-br from-purple-50 to-white border border-purple-100 p-5 rounded-2xl h-full" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
             <Statistic
               title={<span className="text-gray-500 font-semibold text-xs uppercase tracking-wider">Số lượng nhân sự</span>}
@@ -154,8 +151,8 @@ const DashboardPage: React.FC = () => {
               prefix={<TeamOutlined className="mr-2" />}
             />
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={8} xl={4} style={{ flex: '1 1 20%' }}>
+        </div>
+        <div>
           <div className="bg-gradient-to-br from-cyan-50 to-white border border-cyan-100 p-5 rounded-2xl h-full" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
             <Statistic
               title={<span className="text-gray-500 font-semibold text-xs uppercase tracking-wider">Dự án hiện có</span>}
@@ -165,15 +162,15 @@ const DashboardPage: React.FC = () => {
               formatter={(val) => Number(val).toLocaleString('vi-VN')}
             />
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
       {isDirectorOrAccountant ? (
         <>
-          <ProCard 
-            title={<span className="font-bold text-gray-800">Biểu đồ Doanh thu & Lợi nhuận hàng tháng</span>} 
-            headerBordered 
-            ghost 
+          <ProCard
+            title={<span className="font-bold text-gray-800">Biểu đồ Doanh thu & Lợi nhuận hàng tháng</span>}
+            headerBordered
+            ghost
             className="bg-white"
             style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}
           >
@@ -182,12 +179,12 @@ const DashboardPage: React.FC = () => {
                 <ComposedChart data={currentData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 13 }} dy={10} />
-                  <YAxis 
-                    yAxisId="left" 
-                    tickFormatter={formatCurrency} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#6B7280', fontSize: 12 }} 
+                  <YAxis
+                    yAxisId="left"
+                    tickFormatter={formatCurrency}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#6B7280', fontSize: 12 }}
                     dx={-10}
                   />
                   <Tooltip content={<CustomTooltip />} />
@@ -201,10 +198,10 @@ const DashboardPage: React.FC = () => {
 
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <ProCard 
-                title={<span className="font-bold text-gray-800">Biểu đồ Quỹ Lương Nhân Viên</span>} 
-                headerBordered 
-                ghost 
+              <ProCard
+                title={<span className="font-bold text-gray-800">Biểu đồ Thanh toán Nhân Viên</span>}
+                headerBordered
+                ghost
                 className="bg-white h-full"
                 style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}
               >
@@ -213,8 +210,8 @@ const DashboardPage: React.FC = () => {
                     <AreaChart data={currentData} margin={{ top: 10, right: 10, bottom: 0, left: 10 }}>
                       <defs>
                         <linearGradient id="colorSalary" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#fa8c16" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#fa8c16" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#fa8c16" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#fa8c16" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -222,18 +219,18 @@ const DashboardPage: React.FC = () => {
                       <YAxis tickFormatter={formatCurrency} axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} />
                       <Tooltip content={<CustomTooltip />} />
                       <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                      <Area type="monotone" dataKey="salary" name="Quỹ lương" stroke="#fa8c16" strokeWidth={3} fillOpacity={1} fill="url(#colorSalary)" />
+                      <Area type="monotone" dataKey="salary" name="Thanh toán" stroke="#fa8c16" strokeWidth={3} fillOpacity={1} fill="url(#colorSalary)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </ProCard>
             </Col>
-            
+
             <Col xs={24} lg={12}>
-              <ProCard 
-                title={<span className="font-bold text-gray-800">Tỷ trọng Lợi nhuận trên Doanh thu</span>} 
-                headerBordered 
-                ghost 
+              <ProCard
+                title={<span className="font-bold text-gray-800">Tỷ trọng Lợi nhuận trên Doanh thu</span>}
+                headerBordered
+                ghost
                 className="bg-white h-full"
                 style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}
               >
@@ -242,14 +239,14 @@ const DashboardPage: React.FC = () => {
                     <LineChart data={currentData} margin={{ top: 10, right: 10, bottom: 0, left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                      <YAxis 
-                        tickFormatter={(val) => `${val}%`} 
-                        axisLine={false} 
-                        tickLine={false} 
+                      <YAxis
+                        tickFormatter={(val) => `${val}%`}
+                        axisLine={false}
+                        tickLine={false}
                         domain={[0, 100]}
-                        tick={{ fill: '#6B7280', fontSize: 11 }} 
+                        tick={{ fill: '#6B7280', fontSize: 11 }}
                       />
-                      <Tooltip 
+                      <Tooltip
                         content={({ active, payload, label }) => {
                           if (active && payload && payload.length) {
                             return (
@@ -262,17 +259,17 @@ const DashboardPage: React.FC = () => {
                             );
                           }
                           return null;
-                        }} 
+                        }}
                       />
                       <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                      <Line 
-                        type="monotone" 
-                        dataKey={(row) => ((row.profit / row.revenue) * 100).toFixed(2)} 
-                        name="Tỷ suất lợi nhuận (%)" 
-                        stroke="#8b5cf6" 
-                        strokeWidth={3} 
-                        dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} 
-                        activeDot={{ r: 6 }} 
+                      <Line
+                        type="monotone"
+                        dataKey={(row) => ((row.profit / row.revenue) * 100).toFixed(2)}
+                        name="Tỷ suất lợi nhuận (%)"
+                        stroke="#8b5cf6"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 6 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>

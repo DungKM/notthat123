@@ -123,6 +123,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
       title: 'Danh mục',
       dataIndex: 'categoryId',
       valueType: 'select',
+      search: false,
       valueEnum: categories.reduce((acc, cat) => {
         acc[cat._id] = { text: cat.name };
         return acc;
@@ -134,11 +135,13 @@ const ShowcaseProjectManagementPage: React.FC = () => {
     {
       title: 'Địa điểm',
       dataIndex: 'location',
+      search: false,
       ellipsis: true,
     },
     {
       title: 'Năm',
       dataIndex: 'year',
+      search: false,
       width: 80,
     },
     {

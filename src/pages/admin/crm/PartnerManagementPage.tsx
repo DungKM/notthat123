@@ -108,6 +108,7 @@ const PartnerManagementPage: React.FC = () => {
     {
       title: 'Thương hiệu',
       dataIndex: 'brandName',
+      search: false,
       ellipsis: true,
     },
     {

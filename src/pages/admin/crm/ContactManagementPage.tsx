@@ -58,12 +58,14 @@ const ContactManagementPage: React.FC = () => {
       title: 'Số điện thoại',
       dataIndex: 'phone',
       copyable: true,
+      search: false,
       width: 120,
     },
     {
       title: 'Email',
       dataIndex: 'email',
       copyable: true,
+      search: false,
       width: 150,
     },
     {
@@ -84,6 +86,7 @@ const ContactManagementPage: React.FC = () => {
       title: 'Trạng thái',
       dataIndex: 'status',
       width: 120,
+      search: false,
       filters: true,
       valueEnum: {
         'Chờ xử lý': { text: 'Chờ xử lý', status: 'Warning' },

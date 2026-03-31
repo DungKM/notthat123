@@ -458,7 +458,7 @@ const StatisticsPage: React.FC = () => {
           <Descriptions.Item label="Đã ứng">
             -{formatCurrency(advance)}
           </Descriptions.Item>
-          <Descriptions.Item label="Thực lĩnh" span={2}>
+          <Descriptions.Item label="Số tiền đang có" span={2}>
             <strong
               style={{
                 color: estimatedSalary >= 0 ? "#52c41a" : "#ff4d4f",
@@ -546,22 +546,22 @@ const StatisticsPage: React.FC = () => {
                 startDate: params.startDate,
                 endDate: params.endDate
               });
-              
+
               if (res.success && res.data) {
-                 setAttendanceSummary(res.data.summary || {
-                    totalWorkUnits: 0,
-                    totalOTUnits: 0,
-                    totalWorkHours: 0,
-                    totalOTHours: 0,
-                 });
-                 return {
-                   data: res.data.records || [],
-                   success: true
-                 };
+                setAttendanceSummary(res.data.summary || {
+                  totalWorkUnits: 0,
+                  totalOTUnits: 0,
+                  totalWorkHours: 0,
+                  totalOTHours: 0,
+                });
+                return {
+                  data: res.data.records || [],
+                  success: true
+                };
               }
               return { data: [], success: true };
             } catch (error) {
-               return { data: [], success: false };
+              return { data: [], success: false };
             }
           }}
           pagination={{ pageSize: 5 }}

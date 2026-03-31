@@ -35,6 +35,7 @@ const VideoManagementPage: React.FC = () => {
       title: 'STT',
       dataIndex: 'index',
       valueType: 'index',
+      search: false,
       width: 48,
       align: 'center',
     },
@@ -46,6 +47,7 @@ const VideoManagementPage: React.FC = () => {
     {
       title: 'Đường dẫn URL',
       dataIndex: 'url',
+      search: false,
       ellipsis: true,
       render: (_, record) => (
         <Space>

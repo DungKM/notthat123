@@ -80,15 +80,15 @@ const SortableRow: React.FC<{
           style={{
             cursor: hasChildren ? 'pointer' : 'default',
             marginRight: 6,
-            color: '#999',
-            fontSize: 18,
+            color: '#8c8c8c',
+            fontSize: 15,
             display: 'inline-block',
-            width: 14,
+            width: 15,
           }}
         >
           {hasChildren ? (expanded ? <CaretDownOutlined /> : <CaretRightOutlined />) : null}
         </span>
-        <span style={{ fontWeight: depth === 0 ? 600 : 400, fontSize: depth === 0 ? 17 : 15, color: depth === 0 ? '#1e293b' : '#374151' }}>
+        <span style={{ fontWeight: depth === 0 ? 500 : 400, fontSize: 15, color: 'rgba(0, 0, 0, 0.85)' }}>
           {depth > 0 && <span style={{ color: '#cbd5e1', marginRight: 4 }}>└</span>}
           {item.name}
         </span>
@@ -96,19 +96,19 @@ const SortableRow: React.FC<{
       </td>
 
       {/* Mô tả */}
-      <td style={{ color: '#6b7280', fontSize: 15, maxWidth: 260 }}>
+      <td style={{ color: 'rgba(0, 0, 0, 0.65)', fontSize: 15, maxWidth: 260 }}>
         <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {item.description || '—'}
         </span>
       </td>
 
       {/* Priority */}
-      <td style={{ width: 80, textAlign: 'center', color: '#94a3b8', fontWeight: 600, fontSize: 15 }}>
+      <td style={{ width: 80, textAlign: 'center', color: 'rgba(0, 0, 0, 0.65)', fontWeight: 500, fontSize: 15 }}>
         {item.priority ?? 0}
       </td>
 
       {/* Ngày tạo */}
-      <td style={{ width: 120, color: '#94a3b8', fontSize: 15 }}>
+      <td style={{ width: 120, color: 'rgba(0, 0, 0, 0.65)', fontSize: 15 }}>
         {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—'}
       </td>
 
@@ -321,7 +321,7 @@ const CategoryManagementPage: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: 13 }}>
+          <p style={{ margin: '4px 0 0', color: 'rgba(0, 0, 0, 0.45)', fontSize: 14 }}>
             Kéo thả ☰ để sắp xếp thứ tự hiển thị — thay đổi được lưu tự động
           </p>
         </div>
@@ -336,7 +336,7 @@ const CategoryManagementPage: React.FC = () => {
       {loading ? (
         <div style={{ textAlign: 'center', padding: 60 }}><Spin /></div>
       ) : (
-        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #e8ecf0', overflow: 'hidden' }}>
+        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
           {/* Table header */}
           <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
@@ -348,13 +348,13 @@ const CategoryManagementPage: React.FC = () => {
               <col style={{ width: 140 }} />
             </colgroup>
             <thead>
-              <tr style={{ background: '#f8f9fb', borderBottom: '1px solid #e8ecf0' }}>
-                <th style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 600, fontSize: 12, color: '#64748b' }}></th>
-                <th style={{ padding: '12px 12px', fontWeight: 600, fontSize: 14, color: '#64748b' }}>Tên danh mục</th>
-                <th style={{ padding: '12px 12px', fontWeight: 600, fontSize: 14, color: '#64748b' }}>Mô tả</th>
-                <th style={{ padding: '12px 12px', fontWeight: 600, fontSize: 14, color: '#64748b', textAlign: 'center' }}>Thứ tự</th>
-                <th style={{ padding: '12px 12px', fontWeight: 600, fontSize: 14, color: '#64748b' }}>Ngày tạo</th>
-                <th style={{ padding: '12px 12px', fontWeight: 600, fontSize: 14, color: '#64748b', textAlign: 'right' }}>Thao tác</th>
+              <tr style={{ background: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
+                <th style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}></th>
+                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Tên danh mục</th>
+                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Mô tả</th>
+                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)', textAlign: 'center' }}>Thứ tự</th>
+                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Ngày tạo</th>
+                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)', textAlign: 'right' }}>Thao tác</th>
               </tr>
             </thead>
 
@@ -426,7 +426,7 @@ const CategoryManagementPage: React.FC = () => {
                         )}
 
                         {/* Separator */}
-                        <tr><td colSpan={6} style={{ height: 1, background: '#f1f5f9' }} /></tr>
+                        <tr><td colSpan={6} style={{ height: 1, background: '#f0f0f0' }} /></tr>
                       </React.Fragment>
                     );
                   })}

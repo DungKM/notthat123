@@ -97,8 +97,8 @@ const SalaryManagementPage: React.FC = () => {
       width: 100,
     },
     {
-      title: 'Thực lĩnh',
-      dataIndex: 'netSalary',
+      title: 'Số tiền đang có',
+      dataIndex: 'nextSalary',
       render: (_, r) => (
         <span style={{ fontWeight: 700, fontSize: 15, color: '#13c55a' }}>{fmt(r.netSalary)}</span>
       ),

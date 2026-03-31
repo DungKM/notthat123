@@ -252,7 +252,7 @@ const IncomeStatisticsPage: React.FC = () => {
             <Empty description="Không có phát sinh thanh toán trong tháng này" style={{ margin: '40px 0' }} />
           ) : (
             <div style={{ marginTop: 24 }}>
-              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+              <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
                 <Col xs={24} sm={12} md={8} lg={4}>
                   <Card size="small" title="Tổng lương">
                     <Text strong style={{ fontSize: 18, paddingLeft: !screens.md ? 24 : 0, color: '#1890ff' }}>{formatCurrency(summary.baseAmount)}</Text>
@@ -274,7 +274,7 @@ const IncomeStatisticsPage: React.FC = () => {
                   </Card>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={7}>
-                  <Card size="small" title="Thực lĩnh ước tính">
+                  <Card size="small" title="Tổng tiền lương">
                     <Text strong style={{ fontSize: 24, paddingLeft: !screens.md ? 24 : 0 }}>{formatCurrency(summary.totalAmount)}</Text>
                   </Card>
                 </Col>
