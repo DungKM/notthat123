@@ -40,6 +40,7 @@ const AttendancePage = lazy(() => import('@/src/pages/admin/hr/AttendancePage'))
 const PersonalAdvancePage = lazy(() => import('@/src/pages/admin/hr/PersonalAdvancePage'));
 const RecruitmentManagementPage = lazy(() => import('@/src/pages/admin/hr/RecruitmentManagementPage'));
 const StatisticsPage = lazy(() => import('@/src/pages/admin/reports/StatisticsPage'));
+const IncomeStatisticsPage = lazy(() => import('@/src/pages/admin/reports/IncomeStatisticsPage'));
 // const ProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/ProjectManagementPage'));
 const ProjectDetailPage = lazy(() => import('@/src/pages/admin/projects/ProjectDetailPage'));
 const UsersPage = lazy(() => import('@/src/pages/admin/crm/UsersPage'));
@@ -291,6 +292,14 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedAdminRoute roles={[Role.SITE_MANAGER, Role.STAFF]}>
                 <StatisticsPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_THONG_KE_THU_NHAP}
+            element={
+              <ProtectedAdminRoute roles={[Role.SITE_MANAGER, Role.STAFF]}>
+                <IncomeStatisticsPage />
               </ProtectedAdminRoute>
             }
           />

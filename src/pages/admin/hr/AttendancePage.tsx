@@ -12,6 +12,7 @@ import { Button, Card, Col, Row, Statistic, Tag, message } from 'antd';
 import { PlusOutlined, FieldTimeOutlined, DollarOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAuth } from '@/src/auth/hooks/useAuth';
+import { useProjectService } from '@/src/api/services';
 
 interface ProjectOption {
   label: string;
@@ -48,19 +49,6 @@ const MOCK_ATTENDANCE_WORK: AttendanceWorkRecord[] = [
     otDays: 0.25,
     amount: 550000,
   },
-  {
-    id: '2',
-    staffId: '4',
-    date: '2024-03-02',
-    startTime: '08:00',
-    endTime: '17:00',
-    workDay: 1,
-    projectId: 'p2',
-    projectName: 'Cải tạo văn phòng Quận 1',
-    workingDays: 0.75,
-    otDays: 0.1,
-    amount: 350000,
-  },
 ];
 
 const AttendancePage: React.FC = () => {
@@ -69,6 +57,30 @@ const AttendancePage: React.FC = () => {
     user ? MOCK_ATTENDANCE_WORK.filter((r) => String(r.staffId) === String(user.id)) : []
   );
   const [open, setOpen] = useState(false);
+  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>(MOCK_PROJECT_OPTIONS);
+  
+  const { getAll: getProjects } = useProjectService();
+
+  React.useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await getProjects({ limit: 100 });
+        const list = (res as any)?.data || res || [];
+        const options = Array.isArray(list) ? list.map((p: any) => ({
+          label: p.name || p.title || 'Dự án không tên',
+          value: p._id || p.id,
+          dailyRate: p.dailyRate || 400000,
+          otRate: p.otRate || 600000,
+        })) : [];
+        if (options.length > 0) {
+          setProjectOptions(options);
+        }
+      } catch (error) {
+        console.error('Failed to fetch projects', error);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   const totalWorkingHours = useMemo(
     () => records.reduce((sum, item) => sum + Number(item.workingDays || 0), 0),
@@ -133,7 +145,7 @@ const AttendancePage: React.FC = () => {
   ];
 
   const handleSubmitAttendance = async (values: any) => {
-    const selectedProject = MOCK_PROJECT_OPTIONS.find((p) => p.value === values.projectId);
+    const selectedProject = projectOptions.find((p) => p.value === values.projectId) || MOCK_PROJECT_OPTIONS.find((p) => p.value === values.projectId);
 
     if (!selectedProject) {
       message.error('Không tìm thấy dự án');
@@ -227,25 +239,24 @@ const AttendancePage: React.FC = () => {
         <ProFormSelect
           name="projectId"
           label="Dự án"
-          options={MOCK_PROJECT_OPTIONS}
+          options={projectOptions}
           rules={[{ required: true, message: 'Vui lòng chọn dự án' }]}
+          placeholder="Chọn dự án đang thi công"
+          showSearch
         />
 
         <ProFormDigit
           name="workingDays"
-          label="số giờ hành chính làm được"
+          label="Số giờ hành chính làm được"
           min={0}
-          max={1}
           fieldProps={{ precision: 2 }}
           rules={[{ required: true, message: 'Vui lòng nhập số giờ làm' }]}
         />
 
         <ProFormDigit
           name="otDays"
-          label="số giờ tăng ca"
+          label="Số giờ tăng ca"
           min={0}
-          max={1}
-          initialValue={0}
           fieldProps={{ precision: 2 }}
         />
       </ModalForm>

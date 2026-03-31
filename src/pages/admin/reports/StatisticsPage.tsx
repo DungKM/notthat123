@@ -318,7 +318,16 @@ const StatisticsPage: React.FC = () => {
               ? "red"
               : "orange";
 
-        return <Tag color={color}>{record.status}</Tag>;
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
+            <Tag color={color} style={{ margin: 0 }}>{record.status}</Tag>
+            {record.status === "Từ chối" && record.note && (
+              <span style={{ fontSize: 12, color: "#ff4d4f", whiteSpace: "nowrap" }}>
+                Lý do: {record.note}
+              </span>
+            )}
+          </div>
+        );
       },
     },
     {

@@ -36,6 +36,7 @@ const Header: React.FC = () => {
   const cartButtonRef = useRef<HTMLDivElement | null>(null);
   const cartDrawerRef = useRef<HTMLDivElement | null>(null);
   const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart, isCartOpen, setIsCartOpen } = useCart();
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -657,26 +658,16 @@ const Header: React.FC = () => {
                         <div>
                           <div className="flex justify-between items-start gap-2">
                             <h4 className="text-sm font-bold !text-gray-900 line-clamp-2 leading-tight">{item.title}</h4>
-                            <Popconfirm
-                              title="Xoá sản phẩm"
-                              description="Bạn có chắc muốn xoá sản phẩm này khỏi giỏ?"
-                              onConfirm={(e) => {
-                                e?.stopPropagation();
-                                removeFromCart(item.id);
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setItemToDelete(item.id);
                               }}
-                              onCancel={(e) => e?.stopPropagation()}
-                              okText="Có, xoá ngay"
-                              cancelText="Không"
-                              placement="left"
-                              getPopupContainer={(trigger) => trigger.parentNode as HTMLElement}
+                              className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all"
+                              title="Xoá sản phẩm"
                             >
-                              <button
-                                className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all"
-                                title="Xoá sản phẩm"
-                              >
-                                <DeleteOutlined className="text-[18px]" />
-                              </button>
-                            </Popconfirm>
+                              <DeleteOutlined className="text-[18px]" />
+                            </button>
                           </div>
                           <p className="text-showcase-primary font-black mt-1">{item.price.toLocaleString('vi-VN')} đ</p>
                         </div>
@@ -737,6 +728,54 @@ const Header: React.FC = () => {
               )}
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Confirm Delete Modal */}
+      <AnimatePresence>
+        {itemToDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setItemToDelete(null)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative bg-white rounded-2xl p-6 shadow-2xl w-full max-w-sm overflow-hidden"
+            >
+              <div className="text-center">
+                <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                  <DeleteOutlined className="text-2xl text-red-500" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Xoá sản phẩm</h3>
+                <p className="text-gray-500 text-sm mb-6">Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng không?</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setItemToDelete(null)}
+                    className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors"
+                  >
+                    Huỷ bỏ
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (itemToDelete) {
+                        removeFromCart(itemToDelete);
+                        setItemToDelete(null);
+                      }
+                    }}
+                    className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors"
+                  >
+                    Xoá ngay
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

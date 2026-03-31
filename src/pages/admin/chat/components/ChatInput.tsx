@@ -153,7 +153,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
             border: 'none',
             outline: 'none',
             color: '#1e293b',
-            fontSize: 13.5,
+            fontSize: 16,
             lineHeight: 1.6,
             resize: 'none',
             padding: '6px 4px',

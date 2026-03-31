@@ -45,7 +45,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
   };
 
   const handleSaveColumnTitle = () => {
-    const finalTitle = tempColumnTitle.trim() || "Tên dự án";
+    const finalTitle = tempColumnTitle.trim() || "Nhập tên dự án";
     setNameColumnTitle(finalTitle);
     localStorage.setItem(`project-column-title-${projectId}`, finalTitle);
     setIsColumnModalOpen(false);
@@ -277,7 +277,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           Xuất Excel
         </Button>
         <Button onClick={handleOpenColumnModal}>
-          Tên dự án
+          Nhập tên dự án
         </Button>
       </Space>
       <EditableProTable<ProjectDetail>

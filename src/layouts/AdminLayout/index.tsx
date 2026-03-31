@@ -42,7 +42,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
       name: 'Quản lý nội bộ',
       icon: <TeamOutlined />,
       children: [
-        { path: ROUTES.ADMIN_TONG_QUAN, name: 'Bảng điều khiển', icon: <DashboardOutlined /> },
+        { path: ROUTES.ADMIN_TONG_QUAN, name: 'Bảng thống kê', icon: <DashboardOutlined /> },
         { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
         // { path: ROUTES.ADMIN_DANH_MUC_TIEN_DO, name: 'Danh mục tiến độ dự án', icon: <TagsOutlined /> },
         { path: ROUTES.ADMIN_NHAN_VIEN, name: 'Bảng lương nhân sự', icon: <TeamOutlined /> },
@@ -90,12 +90,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
       { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Biểu đồ thu nhập', icon: <BarChartOutlined /> },
     ];
 
     const commonMenus = [
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
       { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <BarChartOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Biểu đồ thu nhập', icon: <BarChartOutlined /> },
     ];
 
     if (user?.role === Role.DIRECTOR) {
@@ -177,10 +179,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
                 <Space>
                   {dom}
                   <Tag color="green" className="hidden-mobile" style={{ margin: 0 }}>
-                    {user?.role === Role.DIRECTOR ? 'Giám đốc' : 
-                     user?.role === Role.ACCOUNTANT ? 'Kế toán' :
-                     user?.role === Role.SITE_MANAGER ? 'Quản lý công trình' :
-                     user?.role === Role.STAFF ? 'Nhân viên' : user?.role}
+                    {user?.role === Role.DIRECTOR ? 'Giám đốc' :
+                      user?.role === Role.ACCOUNTANT ? 'Kế toán' :
+                        user?.role === Role.SITE_MANAGER ? 'Quản lý công trình' :
+                          user?.role === Role.STAFF ? 'Nhân viên' : user?.role}
                   </Tag>
                 </Space>
               </Dropdown>

@@ -78,6 +78,7 @@ const ChatPage: React.FC = () => {
                     senderName: (msg.userName || msg.senderName) as string,
                     content: (msg.message || msg.content) as string,
                     timestamp: (msg.timestamp || new Date().toISOString()) as string,
+                    attachments: msg.attachments || [],
                 };
 
                 setMessages(prev => {
@@ -85,7 +86,11 @@ const ChatPage: React.FC = () => {
                     const existingMsgIndex = prev.findIndex(m => m.id === msg.messageId);
                     if (existingMsgIndex >= 0) {
                         const newMsgs = [...prev];
-                        newMsgs[existingMsgIndex] = { ...newMsgs[existingMsgIndex], status: 'sent' as any };
+                        newMsgs[existingMsgIndex] = { 
+                            ...newMsgs[existingMsgIndex], 
+                            ...mappedMsg, // Merge server response including attachments
+                            status: 'sent' as any 
+                        };
                         return newMsgs;
                     }
                     return [...prev, mappedMsg];
@@ -179,8 +184,14 @@ const ChatPage: React.FC = () => {
                         formData.append('attachments', file);
                     });
                     const res = await request('POST', `/${selectedGroupId}/messages`, formData);
-                    if (res && (res.id || (res as any)._id)) {
-                        setMessages(prev => prev.map(m => m.id === tempMessageId ? { ...m, id: res.id || (res as any)._id, status: 'sent' } : m));
+                    const msgData = res?.data || res;
+                    if (msgData && (msgData.id || msgData._id)) {
+                        setMessages(prev => prev.map(m => m.id === tempMessageId ? { 
+                            ...m, 
+                            id: msgData.id || msgData._id, 
+                            status: 'sent',
+                            attachments: msgData.attachments || [] 
+                        } : m));
                     }
                 } catch (e) {
                     message.error('Lỗi khi gửi tin nhắn đính kèm');
