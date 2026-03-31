@@ -1,16 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, Segmented, Spin, Typography, Space, Empty } from 'antd';
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Bar,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from 'recharts';
+import { DatePicker, Spin, Typography, Space, Empty, Table, Row, Col, Card, Select } from 'antd';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -25,9 +14,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isoWeek);
 
-const { Title } = Typography;
-
-type TimeRange = 'week' | 'month' | 'year';
+const { Title, Text } = Typography;
 
 interface RawPayment {
   id?: string;
@@ -40,7 +27,8 @@ interface RawPayment {
 }
 
 const IncomeStatisticsPage: React.FC = () => {
-  const [timeRange, setTimeRange] = useState<TimeRange>('month');
+  const [selectedMonth, setSelectedMonth] = useState<dayjs.Dayjs | null>(dayjs());
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [payments, setPayments] = useState<RawPayment[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
@@ -63,21 +51,17 @@ const IncomeStatisticsPage: React.FC = () => {
       });
   }, [user, request]);
 
-  // Nhóm dữ liệu tuỳ chọn theo timeRange
-  const chartData = useMemo(() => {
-    if (!payments.length) return [];
+  const tableData = useMemo(() => {
+    if (!payments.length || !selectedMonth) return [];
 
-    const now = dayjs();
     let aggregatedData: any[] = [];
 
-    // Lọc theo cấu trúc dữ liệu mô phỏng (giả lập bóc tách chi tiết lương)
-    // Thực tế API payment chỉ trả về tổng `amount`. Ta mock một tí chi tiết:
     const parsePayment = (p: RawPayment) => {
       const date = dayjs(p.date || p.paymentDate);
-      const base = p.amount * 0.8; // Giả lập 80% là lương
-      const bonus = p.amount * 0.15; // 15% là thưởng
-      const penalty = p.amount * 0.05; // 5% là phạt
-      const advance = p.amount * 0.1; // Thực lĩnh bị trừ đi 10% do ứng
+      const base = p.amount * 0.8;
+      const bonus = p.amount * 0.15;
+      const penalty = p.amount * 0.05;
+      const advance = p.amount * 0.1;
       return {
         date,
         baseAmount: base,
@@ -88,152 +72,231 @@ const IncomeStatisticsPage: React.FC = () => {
       };
     };
 
-    if (timeRange === 'week') {
-      const startOfWeek = now.startOf('isoWeek');
-      const dataMap = new Map();
-      for (let i = 0; i < 7; i++) {
-        const d = startOfWeek.add(i, 'day');
-        dataMap.set(d.format('DD/MM'), {
-          name: d.format('DD/MM (dd)'),
-          baseAmount: 0,
-          bonusAmount: 0,
-          penaltyAmount: 0,
-          advanceAmount: 0,
-          totalAmount: 0,
-        });
-      }
-
-      payments.forEach((p) => {
-        const parsed = parsePayment(p);
-        if (parsed.date.isSameOrAfter(startOfWeek, 'day')) {
-          const key = parsed.date.format('DD/MM');
-          if (dataMap.has(key)) {
-            const item = dataMap.get(key);
-            item.baseAmount += parsed.baseAmount;
-            item.bonusAmount += parsed.bonusAmount;
-            item.penaltyAmount += parsed.penaltyAmount;
-            item.advanceAmount += parsed.advanceAmount;
-            item.totalAmount += parsed.totalAmount;
-          }
-        }
+    const daysInMonth = selectedMonth.daysInMonth();
+    const dataMap = new Map();
+    for (let i = 1; i <= daysInMonth; i++) {
+      const d = selectedMonth.date(i);
+      dataMap.set(d.format('DD/MM/YYYY'), {
+        key: d.format('DD/MM/YYYY'),
+        name: d.format('DD/MM/YYYY'),
+        baseAmount: 0,
+        bonusAmount: 0,
+        penaltyAmount: 0,
+        advanceAmount: 0,
+        totalAmount: 0,
       });
-      aggregatedData = Array.from(dataMap.values());
-    } else if (timeRange === 'month') {
-      const startOfMonth = now.startOf('month');
-      // Biểu diễn theo 4 hoặc 5 tuần
-      const dataMap = new Map();
-      dataMap.set('Tuần 1', { name: 'Tuần 1', baseAmount: 0, bonusAmount: 0, penaltyAmount: 0, advanceAmount: 0, totalAmount: 0 });
-      dataMap.set('Tuần 2', { name: 'Tuần 2', baseAmount: 0, bonusAmount: 0, penaltyAmount: 0, advanceAmount: 0, totalAmount: 0 });
-      dataMap.set('Tuần 3', { name: 'Tuần 3', baseAmount: 0, bonusAmount: 0, penaltyAmount: 0, advanceAmount: 0, totalAmount: 0 });
-      dataMap.set('Tuần 4', { name: 'Tuần 4', baseAmount: 0, bonusAmount: 0, penaltyAmount: 0, advanceAmount: 0, totalAmount: 0 });
-
-      payments.forEach((p) => {
-        const parsed = parsePayment(p);
-        if (parsed.date.isSame(now, 'month')) {
-          const weekOfMonth = Math.ceil(parsed.date.date() / 7);
-          const key = `Tuần ${weekOfMonth > 4 ? 4 : weekOfMonth}`;
-          if (dataMap.has(key)) {
-            const item = dataMap.get(key);
-            item.baseAmount += parsed.baseAmount;
-            item.bonusAmount += parsed.bonusAmount;
-            item.penaltyAmount += parsed.penaltyAmount;
-            item.advanceAmount += parsed.advanceAmount;
-            item.totalAmount += parsed.totalAmount;
-          }
-        }
-      });
-      aggregatedData = Array.from(dataMap.values());
-    } else if (timeRange === 'year') {
-      const startOfYear = now.startOf('year');
-      const dataMap = new Map();
-      for (let i = 0; i < 12; i++) {
-        const d = startOfYear.add(i, 'month');
-        dataMap.set(d.format('MM/YYYY'), {
-          name: `Th ${d.format('M/YY')}`,
-          baseAmount: 0,
-          bonusAmount: 0,
-          penaltyAmount: 0,
-          advanceAmount: 0,
-          totalAmount: 0,
-        });
-      }
-
-      payments.forEach((p) => {
-        const parsed = parsePayment(p);
-        if (parsed.date.isSame(now, 'year')) {
-          const key = parsed.date.format('MM/YYYY');
-          if (dataMap.has(key)) {
-            const item = dataMap.get(key);
-            item.baseAmount += parsed.baseAmount;
-            item.bonusAmount += parsed.bonusAmount;
-            item.penaltyAmount += parsed.penaltyAmount;
-            item.advanceAmount += parsed.advanceAmount;
-            item.totalAmount += parsed.totalAmount;
-          }
-        }
-      });
-      aggregatedData = Array.from(dataMap.values());
     }
 
-    return aggregatedData;
-  }, [payments, timeRange]);
+    payments.forEach((p) => {
+      const parsed = parsePayment(p);
+      if (parsed.date.isSame(selectedMonth, 'month')) {
+        const key = parsed.date.format('DD/MM/YYYY');
+        if (dataMap.has(key)) {
+          const item = dataMap.get(key);
+          item.baseAmount += parsed.baseAmount;
+          item.bonusAmount += parsed.bonusAmount;
+          item.penaltyAmount += parsed.penaltyAmount;
+          item.advanceAmount += parsed.advanceAmount;
+          item.totalAmount += parsed.totalAmount;
+        }
+      }
+    });
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{ background: '#fff', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}>
-          <p style={{ fontWeight: 600, margin: '0 0 8px 0' }}>{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={`item-${index}`} style={{ color: entry.color, margin: '4px 0', fontSize: 13 }}>
-              {entry.name}: <strong>{formatCurrency(entry.value)}</strong>
-            </p>
-          ))}
-        </div>
-      );
+    // Chỉ hiển thị những ngày có phát sinh giao dịch cho gọn nếu cần, ở đây hiện hết hoặc chỉ những ngày > 0
+    let finalData = Array.from(dataMap.values()).filter(item => item.totalAmount > 0);
+
+    if (selectedDay !== null && selectedDay !== undefined) {
+      const selectedDateString = selectedMonth.date(selectedDay).format('DD/MM/YYYY');
+      finalData = finalData.filter(item => item.key === selectedDateString);
+
+      // Nếu lọc riêng ngày mà không có dữ liệu (totalAmount = 0), vẫn hiển thị 1 dòng trống
+      if (finalData.length === 0) {
+        finalData = [dataMap.get(selectedDateString)!];
+      }
     }
-    return null;
-  };
+
+    return finalData;
+  }, [payments, selectedMonth, selectedDay]);
+
+  const summary = useMemo(() => {
+    return tableData.reduce((acc, curr) => ({
+      baseAmount: acc.baseAmount + curr.baseAmount,
+      bonusAmount: acc.bonusAmount + curr.bonusAmount,
+      penaltyAmount: acc.penaltyAmount + curr.penaltyAmount,
+      advanceAmount: acc.advanceAmount + curr.advanceAmount,
+      totalAmount: acc.totalAmount + curr.totalAmount,
+    }), { baseAmount: 0, bonusAmount: 0, penaltyAmount: 0, advanceAmount: 0, totalAmount: 0 });
+  }, [tableData]);
+
+  const columns = [
+    {
+      title: 'Ngày',
+      dataIndex: 'name',
+      key: 'name',
+      width: 150,
+      render: (text: string) => <Text strong>{text}</Text>
+    },
+    {
+      title: 'Lương nhận',
+      dataIndex: 'baseAmount',
+      key: 'baseAmount',
+      render: (val: number) => <Text style={{ color: '#1890ff' }}>{formatCurrency(val)}</Text>
+    },
+    {
+      title: 'Thưởng',
+      dataIndex: 'bonusAmount',
+      key: 'bonusAmount',
+      render: (val: number) => <Text type="success">{formatCurrency(val)}</Text>
+    },
+    {
+      title: 'Phạt',
+      dataIndex: 'penaltyAmount',
+      key: 'penaltyAmount',
+      render: (val: number) => <Text type="danger">{formatCurrency(val)}</Text>
+    },
+    {
+      title: 'Ứng tiền',
+      dataIndex: 'advanceAmount',
+      key: 'advanceAmount',
+      render: (val: number) => <Text type="warning">{formatCurrency(val)}</Text>
+    },
+    {
+      title: 'Tổng cộng',
+      dataIndex: 'totalAmount',
+      key: 'totalAmount',
+      render: (val: number) => <Text strong>{formatCurrency(val)}</Text>
+    },
+  ];
 
   return (
     <div style={{ padding: '0 0 24px 0' }}>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <ProCard title={<Title level={4} style={{ margin: 0 }}>Biểu đồ Thống kê Thu nhập</Title>} headerBordered>
-          <div style={{ padding: '16px 0', textAlign: 'center' }}>
-            <Segmented
+        <ProCard headerBordered>
+          <div style={{ padding: '24px 0', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <span
+              onClick={() => {
+                setSelectedMonth(prev => prev ? prev.subtract(1, 'month') : dayjs().subtract(1, 'month'));
+                setSelectedDay(null);
+              }}
+              style={{
+                cursor: 'pointer',
+                padding: '8px 16px',
+                background: '#f0f0f0',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+                userSelect: 'none'
+              }}
+            >
+              &lt; Tháng trước
+            </span>
+
+            <Select
+              value={selectedDay}
+              onChange={(val) => setSelectedDay(val)}
+              style={{ width: 120, height: 40 }}
               options={[
-                { label: 'Tuần này', value: 'week' },
-                { label: 'Tháng này', value: 'month' },
-                { label: 'Năm nay', value: 'year' },
+                { label: 'Cả tháng', value: null },
+                ...Array.from({ length: selectedMonth?.daysInMonth() || 31 }, (_, i) => ({
+                  label: `Ngày ${i + 1}`,
+                  value: i + 1,
+                }))
               ]}
-              value={timeRange}
-              onChange={(val) => setTimeRange(val as TimeRange)}
             />
+
+            <Select
+              value={selectedMonth?.month()}
+              onChange={(val) => setSelectedMonth(prev => prev ? prev.month(val) : dayjs().month(val))}
+              style={{ width: 120, height: 40 }}
+              options={Array.from({ length: 12 }, (_, i) => ({
+                label: `Tháng ${i + 1}`,
+                value: i,
+              }))}
+            />
+
+            <Select
+              value={selectedMonth?.year()}
+              onChange={(val) => setSelectedMonth(prev => prev ? prev.year(val) : dayjs().year(val))}
+              style={{ width: 120, height: 40 }}
+              options={Array.from({ length: 10 }, (_, i) => ({
+                label: `Năm ${dayjs().year() - 5 + i}`,
+                value: dayjs().year() - 5 + i,
+              }))}
+            />
+
+            {!(selectedMonth?.isSame(dayjs(), 'month')) && (
+              <span
+                onClick={() => {
+                  setSelectedMonth(prev => prev ? prev.add(1, 'month') : dayjs().add(1, 'month'));
+                  setSelectedDay(null);
+                }}
+                style={{
+                  cursor: 'pointer',
+                  padding: '8px 16px',
+                  background: '#f0f0f0',
+                  borderRadius: '8px',
+                  fontWeight: 'bold',
+                  userSelect: 'none'
+                }}
+              >
+                Tháng sau &gt;
+              </span>
+            )}
           </div>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: 50 }}>
               <Spin size="large" />
             </div>
-          ) : payments.length === 0 ? (
-            <Empty description="Chưa có dữ liệu thanh toán lương" style={{ margin: '40px 0' }} />
+          ) : tableData.length === 0 ? (
+            <Empty description="Không có phát sinh thanh toán trong tháng này" style={{ margin: '40px 0' }} />
           ) : (
-            <div style={{ width: '100%', height: 400, marginTop: 24 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart
-                  data={chartData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(val) => `${val / 1000000}M`} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  <Bar dataKey="baseAmount" name="Lương nhận" stackId="a" fill="#1890ff" radius={[0, 0, 4, 4]} />
-                  <Bar dataKey="bonusAmount" name="Thưởng" stackId="a" fill="#52c41a" />
-                  <Bar dataKey="penaltyAmount" name="Phạt" stackId="a" fill="#f5222d" radius={[4, 4, 0, 0]} />
-                  <Line type="monotone" dataKey="advanceAmount" name="Ứng tiền" stroke="#fa8c16" strokeWidth={2} />
-                </ComposedChart>
-              </ResponsiveContainer>
+            <div style={{ marginTop: 24 }}>
+              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                <Col xs={24} sm={12} md={8} lg={4}>
+                  <Card size="small" title="Tổng lương">
+                    <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{formatCurrency(summary.baseAmount)}</Text>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} md={8} lg={4}>
+                  <Card size="small" title="Tổng thưởng">
+                    <Text strong style={{ fontSize: 18 }} type="success">{formatCurrency(summary.bonusAmount)}</Text>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} md={8} lg={4}>
+                  <Card size="small" title="Tổng phạt">
+                    <Text strong style={{ fontSize: 18 }} type="danger">{formatCurrency(summary.penaltyAmount)}</Text>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} md={8} lg={5}>
+                  <Card size="small" title="Đã ứng">
+                    <Text strong style={{ fontSize: 18 }} type="warning">{formatCurrency(summary.advanceAmount)}</Text>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} md={8} lg={7}>
+                  <Card size="small" title="Thực lĩnh ước tính">
+                    <Text strong style={{ fontSize: 24 }}>{formatCurrency(summary.totalAmount)}</Text>
+                  </Card>
+                </Col>
+              </Row>
+
+              <Table
+                columns={columns}
+                dataSource={tableData}
+                pagination={false}
+                bordered
+                summary={() => (
+                  <Table.Summary fixed>
+                    <Table.Summary.Row style={{ background: '#fafafa' }}>
+                      <Table.Summary.Cell index={0}><Text strong>TỔNG THÁNG</Text></Table.Summary.Cell>
+                      <Table.Summary.Cell index={1}><Text strong style={{ color: '#1890ff' }}>{formatCurrency(summary.baseAmount)}</Text></Table.Summary.Cell>
+                      <Table.Summary.Cell index={2}><Text strong type="success">{formatCurrency(summary.bonusAmount)}</Text></Table.Summary.Cell>
+                      <Table.Summary.Cell index={3}><Text strong type="danger">{formatCurrency(summary.penaltyAmount)}</Text></Table.Summary.Cell>
+                      <Table.Summary.Cell index={4}><Text strong type="warning">{formatCurrency(summary.advanceAmount)}</Text></Table.Summary.Cell>
+                      <Table.Summary.Cell index={5}><Text strong>{formatCurrency(summary.totalAmount)}</Text></Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  </Table.Summary>
+                )}
+              />
             </div>
           )}
         </ProCard>

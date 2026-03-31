@@ -251,7 +251,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       ),
     },
     {
-      title: 'Thực lĩnh',
+      title: 'Số tiền đang có',
       key: 'totalSalary',
       hideInSearch: true,
       render: (_, record) => {
@@ -299,18 +299,18 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
             setHistoryVisible(true);
           }}
         />,
-        <Button
-          key="edit-salary"
-          type="link"
-          size="large"
-          title="Cập nhật lương cơ bản"
-          icon={<EditOutlined />}
-          style={{ color: '#1890ff' }}
-          onClick={() => {
-            setSelectedEmployee(record);
-            setEditSalaryVisible(true);
-          }}
-        />,
+        // <Button
+        //   key="edit-salary"
+        //   type="link"
+        //   size="large"
+        //   title="Cập nhật lương cơ bản"
+        //   icon={<EditOutlined />}
+        //   style={{ color: '#1890ff' }}
+        //   onClick={() => {
+        //     setSelectedEmployee(record);
+        //     setEditSalaryVisible(true);
+        //   }}
+        // />,
         <Button
           key="payment"
           type="link"
@@ -842,7 +842,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         <Row gutter={16}>
           <Col span={12}>
             <Statistic
-              title="Thực lĩnh hiện tại"
+              title="Số tiền đang có"
               value={
                 (selectedEmployee?.baseSalary ?? 0) +
                 (selectedEmployee?.bonus ?? 0) -

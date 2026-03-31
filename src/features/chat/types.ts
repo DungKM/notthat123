@@ -30,6 +30,7 @@ export interface ChatGroup {
   id: string;
   name: string;
   members: string[]; // Member IDs
+  memberDetails?: { id: string; name: string; role?: string }[];
   lastMessage?: ChatMessage;
   createdAt: string;
   createdBy: string;

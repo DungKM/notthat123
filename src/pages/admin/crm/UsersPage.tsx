@@ -180,6 +180,7 @@ const UsersPage: React.FC = () => {
                   >
                   </Button>
                 </Popconfirm>
+                {/* 
                 <Popconfirm
                   title="Xóa người dùng này?"
                   description="Hành động này không thể hoàn tác."
@@ -190,6 +191,7 @@ const UsersPage: React.FC = () => {
                 >
                   <Button type="link" size="large" danger icon={<DeleteOutlined />} title="Xóa" />
                 </Popconfirm>
+                */}
               </>
             )}
           </Space>

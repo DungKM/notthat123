@@ -24,6 +24,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications(user?.id);
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
+  const [collapsed, setCollapsed] = useState(isMobile);
+
+  useEffect(() => {
+    setCollapsed(isMobile);
+  }, [isMobile]);
 
   useEffect(() => {
     if (user?.id) {
@@ -132,11 +137,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           <div onClick={() => {
             if (!item.children) {
               navigate(item.path || '/');
+              if (isMobile) {
+                setCollapsed(true);
+              }
             }
           }}>
             {dom}
           </div>
         )}
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
         layout="mix"
         splitMenus={false}
         fixSiderbar

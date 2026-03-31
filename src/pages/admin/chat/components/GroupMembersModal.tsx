@@ -41,7 +41,18 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({
 
     if (!group) return null;
 
-    const currentMembers = allUsers.filter(u => group.members.includes(u.id));
+    const currentMembers = group.members.map(memberId => {
+        const fullUser = allUsers.find(u => u.id === memberId);
+        if (fullUser) return fullUser;
+        
+        const detail = group.memberDetails?.find((d: any) => d.id === memberId);
+        return {
+            id: memberId,
+            name: detail?.name || 'Thành viên',
+            role: detail?.role || 'STAFF',
+            avatar: undefined
+        } as any;
+    });
     const nonMembers = allUsers.filter(u => !group.members.includes(u.id));
 
     const handleAdd = () => {
@@ -112,9 +123,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({
                         }
                     >
                         <List.Item.Meta
-                            avatar={<Avatar src={member.avatar} icon={<UserOutlined />} />}
                             title={<Text>{member.name} {member.id === currentUser?.id && <Text type="secondary">(Bạn)</Text>}</Text>}
-                            description={<Text type="secondary" style={{ fontSize: 12 }}>{roleLabels[member.role] || member.role}</Text>}
                         />
                     </List.Item>
                 )}

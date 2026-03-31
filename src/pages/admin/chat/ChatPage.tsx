@@ -54,6 +54,7 @@ const ChatPage: React.FC = () => {
                         ...g,
                         id: g.id || g._id,
                         members: (g.members || g.memberIds || []).map((m: any) => typeof m === 'object' ? (m.id || m._id) : m),
+                        memberDetails: (g.members || g.memberIds || []).map((m: any) => typeof m === 'object' ? { id: m.id || m._id, name: m.name || 'Không rõ', role: m.role || 'ROLE_UNSPECIFIED' } : { id: m, name: 'Tài khoản', role: 'ROLE_UNSPECIFIED' }),
                         createdByName: g.createdById?.name || g.createdBy?.name || 'Ẩn danh',
                         createdBy: g.createdById?.id || g.createdBy?.id || g.createdBy || '',
                     }));
