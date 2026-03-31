@@ -42,21 +42,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTotalAmount(0);
       return;
     }
-    const mappedItems: CartItem[] = data.items.map((it: any) => {
-      const pId = it.productId?.id || it.productId?._id;
-      const price = it.productId?.price || 0;
-      return {
-        id: pId,
-        slug: it.productId?.slug || pId,
-        title: it.productId?.name || 'Sản phẩm',
-        price: price,
-        image: it.productId?.images?.[0]?.url || 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
-        quantity: it.quantity,
-        subtotal: it.subtotal || (price * it.quantity),
-        stockQuantity: it.productId?.stockQuantity,
-      };
+    
+    setCartItems((prevItems) => {
+      const mappedItems: CartItem[] = data.items.map((it: any) => {
+        const pId = it.productId?.id || it.productId?._id;
+        const price = it.productId?.price || 0;
+        const oldItem = prevItems.find((p) => p.id === pId);
+        
+        return {
+          id: pId,
+          slug: it.productId?.slug || pId,
+          title: it.productId?.name || 'Sản phẩm',
+          price: price,
+          image: it.productId?.images?.[0]?.url || 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
+          quantity: it.quantity,
+          subtotal: it.subtotal || (price * it.quantity),
+          stockQuantity: it.productId?.stockQuantity ?? oldItem?.stockQuantity,
+        };
+      });
+      return mappedItems;
     });
-    setCartItems(mappedItems);
+
     setTotalAmount(data.totalAmount || 0);
   }, []);
 
@@ -162,7 +168,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let finalQuantity = quantity;
     if (item.stockQuantity !== undefined && item.stockQuantity > 0 && finalQuantity > item.stockQuantity) {
       finalQuantity = item.stockQuantity;
-      toast.error(`Sản phẩm này chỉ còn ${item.stockQuantity} sản phẩm`);
+      toast.error(`Sản phẩm này chỉ còn tối đa ${item.stockQuantity} cái`);
+      
+      // Khách bấm liên tục ở ngưỡng max => không thay đổi gì cả nên không cần gọi API (tránh re-render & fetch lại API làm mất timer)
+      if (item.quantity === item.stockQuantity) return;
     }
 
     // 1. Optimistic UI: Đổi số lượng trên giao diện NGAY LẬP TỨC (không delay)

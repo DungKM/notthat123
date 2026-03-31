@@ -73,6 +73,11 @@ const SortableRow: React.FC<{
         <HolderOutlined />
       </td>
 
+      {/* Priority (Thứ tự) */}
+      <td style={{ width: 80, textAlign: 'center', color: depth === 0 ? '#ff4d4f' : 'rgba(0, 0, 0, 0.65)', fontWeight: depth === 0 ? 600 : 500, fontSize: 16 }}>
+        {item.priority ?? 0}
+      </td>
+
       {/* Tên */}
       <td style={{ paddingLeft: depth * 24 + 12 }}>
         <span
@@ -92,7 +97,6 @@ const SortableRow: React.FC<{
           {depth > 0 && <span style={{ color: '#cbd5e1', marginRight: 4 }}>└</span>}
           {item.name}
         </span>
-
       </td>
 
       {/* Mô tả */}
@@ -102,20 +106,15 @@ const SortableRow: React.FC<{
         </span>
       </td>
 
-      {/* Priority */}
-      <td style={{ width: 80, textAlign: 'center', color: 'rgba(0, 0, 0, 0.65)', fontWeight: 500, fontSize: 15 }}>
-        {item.priority ?? 0}
-      </td>
-
       {/* Ngày tạo */}
-      <td style={{ width: 120, color: 'rgba(0, 0, 0, 0.65)', fontSize: 15 }}>
+      <td style={{ color: 'rgba(0, 0, 0, 0.65)', fontSize: 15 }}>
         {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—'}
       </td>
 
       {/* Thao tác */}
-      <td style={{ width: 110, textAlign: 'right' }}>
+      <td style={{ textAlign: 'right', paddingRight: 32 }}>
         <Space>
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(item)}>Sửa</Button>
+          <Button type="text" style={{ color: '#1890ff', fontSize: 16 }} icon={<EditOutlined />} onClick={() => onEdit(item)}>Sửa</Button>
           <Popconfirm
             title="Xoá danh mục này?"
             description="Hành động này không thể hoàn tác."
@@ -124,7 +123,7 @@ const SortableRow: React.FC<{
             okButtonProps={{ danger: true }}
             onConfirm={() => onDelete(item.id)}
           >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+            <Button type="text" danger style={{ fontSize: 16 }} icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       </td>
@@ -333,28 +332,26 @@ const CategoryManagementPage: React.FC = () => {
         </Space>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: 60 }}><Spin /></div>
-      ) : (
-        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden', minHeight: 200 }}>
           {/* Table header */}
           <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
               <col style={{ width: 36 }} />
+              <col style={{ width: 80 }} />
               <col />
               <col style={{ width: '30%' }} />
-              <col style={{ width: 80 }} />
               <col style={{ width: 120 }} />
               <col style={{ width: 140 }} />
             </colgroup>
             <thead>
               <tr style={{ background: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
                 <th style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}></th>
-                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Tên danh mục</th>
-                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Mô tả</th>
-                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)', textAlign: 'center' }}>Thứ tự</th>
-                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Ngày tạo</th>
-                <th style={{ padding: '12px 12px', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)', textAlign: 'right' }}>Thao tác</th>
+                <th style={{ padding: '12px 12px', textAlign: 'center', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Thứ tự</th>
+                <th style={{ padding: '12px 12px', textAlign: 'left', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Tên danh mục</th>
+                <th style={{ padding: '12px 12px', textAlign: 'left', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Mô tả</th>
+                <th style={{ padding: '12px 12px', textAlign: 'left', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Ngày tạo</th>
+                <th style={{ padding: '12px 24px 12px 12px', textAlign: 'right', fontWeight: 500, fontSize: 15, color: 'rgba(0,0,0,0.85)' }}>Thao tác</th>
               </tr>
             </thead>
 
@@ -391,9 +388,9 @@ const CategoryManagementPage: React.FC = () => {
                               <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                                 <colgroup>
                                   <col style={{ width: 36 }} />
+                                  <col style={{ width: 80 }} />
                                   <col />
                                   <col style={{ width: '30%' }} />
-                                  <col style={{ width: 80 }} />
                                   <col style={{ width: 120 }} />
                                   <col style={{ width: 140 }} />
                                 </colgroup>
@@ -450,7 +447,7 @@ const CategoryManagementPage: React.FC = () => {
             </DndContext>
           </table>
         </div>
-      )}
+      </Spin>
 
       {/* Modal Thêm */}
       <ModalForm<Partial<CategoryItem>>

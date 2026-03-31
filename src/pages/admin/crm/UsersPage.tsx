@@ -317,14 +317,12 @@ const UsersPage: React.FC = () => {
           }}
         />
 
-        {!editingUser && (
-          <ProFormText.Password
-            name="password"
-            label="Mật khẩu"
-            placeholder="Nhập mật khẩu"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
-          />
-        )}
+        <ProFormText.Password
+          name="password"
+          label={editingUser ? "Mật khẩu mới" : "Mật khẩu"}
+          placeholder={editingUser ? "Nhập mật khẩu mới (bỏ trống nếu không đổi)" : "Nhập mật khẩu"}
+          rules={[{ required: !editingUser, message: 'Vui lòng nhập mật khẩu' }]}
+        />
 
         <ProFormSelect
           name="role"

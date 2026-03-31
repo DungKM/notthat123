@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
-import { Dropdown, Space, Tag, Badge, Grid } from 'antd';
+import { Dropdown, Space, Tag, Badge, Grid, message } from 'antd';
 import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined, VideoCameraOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Role } from '@/src/auth/types';
 import { ROUTES } from '@/src/routes/index';
 import logo from '@/src/statics/logo_hochi.jpg';
 import { useNotifications } from '@/src/hooks/useNotifications';
 import NotificationDrawer from '@/src/components/NotificationDrawer';
-
-import { connectSocket, disconnectSocket } from '@/src/api/socket';
-
+import { connectSocket, disconnectSocket, socket } from '@/src/api/socket';
 interface AdminLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -33,10 +31,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
   useEffect(() => {
     if (user?.id) {
       connectSocket();
+
+      const handleLockAccount = (data: any) => {
+        message.error(data?.message || 'Tài khoản của bạn đã bị vô hiệu hóa.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      };
+
+      socket.on('auth:lock_account', handleLockAccount);
+
+      return () => {
+        socket.off('auth:lock_account', handleLockAccount);
+        disconnectSocket();
+      };
+    } else {
+      return () => {
+        disconnectSocket();
+      };
     }
-    return () => {
-      disconnectSocket();
-    };
   }, [user?.id]);
 
   // Logic generate menu items dựa trên Role

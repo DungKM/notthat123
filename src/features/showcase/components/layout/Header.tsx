@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useConstructionCategoryService, useCategoryService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
 import { Popconfirm } from 'antd';
+import toast from 'react-hot-toast';
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -671,18 +672,28 @@ const Header: React.FC = () => {
                           </div>
                           <p className="text-showcase-primary font-black mt-1">{item.price.toLocaleString('vi-VN')} đ</p>
                         </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center bg-gray-50 rounded-full px-2 py-1 border border-stone-100">
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center border border-slate-500 rounded-lg overflow-hidden h-10 w-[110px] bg-white">
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-8 h-8 flex items-center justify-center !text-gray-500 hover:text-gray-900"
+                              className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
                             >
-                              -
+                              −
                             </button>
-                            <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
+                            <span className="flex-1 text-center text-base font-semibold text-slate-900">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="w-8 h-8 flex items-center justify-center !text-gray-500 hover:text-gray-900"
+                              onClick={() => {
+                                if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) {
+                                  toast.error(`Sản phẩm này chỉ còn tối đa ${item.stockQuantity} cái`);
+                                  return;
+                                }
+                                updateQuantity(item.id, item.quantity + 1);
+                              }}
+                              className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${
+                                item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                                  ? 'text-slate-300 bg-slate-50 cursor-not-allowed'
+                                  : 'text-slate-800 hover:bg-slate-100'
+                              }`}
                             >
                               +
                             </button>

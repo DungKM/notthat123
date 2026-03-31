@@ -293,44 +293,55 @@ const ProductDetailPage: React.FC = () => {
                       {/* Action Buttons */}
                       <div className="flex flex-wrap items-stretch gap-3 mb-8">
                         {/* Quantity Selector */}
-                        <div className="flex border border-gray-300 rounded overflow-hidden h-10 w-[64px] bg-white shrink-0">
+                        <div className={`flex border rounded overflow-hidden h-10 w-[72px] shrink-0 transition-opacity ${!product.stockQuantity ? 'border-gray-200 bg-gray-50 opacity-60 pointer-events-none' : 'border-gray-300 bg-white'}`}>
                           <div className="flex-1 flex items-center justify-center font-bold text-gray-800 text-[14px]">
                             {quantity}
                           </div>
-                          <div className="flex flex-col border-l border-gray-300 w-6">
-                            <button onClick={() => setQuantity(q => {
+                          <div className={`flex flex-col border-l w-6 ${!product.stockQuantity ? 'border-gray-200' : 'border-gray-300'}`}>
+                            <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => {
                               if (product?.stockQuantity && q >= product.stockQuantity) {
                                 setTimeout(() => toast.error(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`), 0);
                                 return product.stockQuantity;
                               }
                               return q + 1;
-                            })} className="flex-1 flex items-center justify-center hover:bg-gray-100 border-b border-gray-300 text-gray-600 text-[10px] pb-0.5" title="Tăng số lượng">
+                            })} className={`flex-1 flex items-center justify-center border-b text-[10px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 border-gray-300 text-gray-600'}`} title="Tăng số lượng">
                               <span className="leading-none mt-1">+</span>
                             </button>
-                            <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="flex-1 flex items-center justify-center hover:bg-gray-100 text-gray-600 text-[12px] pb-0.5" title="Giảm số lượng">
+                            <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => Math.max(1, q - 1))} className={`flex-1 flex items-center justify-center text-[12px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`} title="Giảm số lượng">
                               <span className="leading-none mb-1">-</span>
                             </button>
                           </div>
                         </div>
 
-                        <button
-                          onClick={handleAddToCart}
-                          className="h-8 px-5 bg-[#cca32e] hover:bg-[#bea748] text-white font-bold rounded flex items-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer "
-                        >
-                          <ShoppingCartOutlined className="text-[16px]" />
-                          Thêm vào giỏ
-                        </button>
+                        {!product.stockQuantity ? (
+                          <button
+                            disabled
+                            className="h-10 px-8 bg-gray-300 text-gray-500 font-bold rounded flex items-center justify-center gap-2 cursor-not-allowed text-[14px] tracking-wide"
+                          >
+                            Đã bán hết
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={handleAddToCart}
+                              className="h-10 px-6 bg-[#cca32e] hover:bg-[#bea748] text-white font-bold rounded flex items-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer "
+                            >
+                              <ShoppingCartOutlined className="text-[16px]" />
+                              Thêm vào giỏ
+                            </button>
 
-                        <button
-                          onClick={handleBuyNow}
-                          className="h-8 px-6 bg-[#e54d42] hover:bg-[#c93f35] text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
-                        >
-                          Mua ngay
-                        </button>
+                            <button
+                              onClick={handleBuyNow}
+                              className="h-10 px-6 bg-[#e54d42] hover:bg-[#c93f35] text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
+                            >
+                              Mua ngay
+                            </button>
+                          </>
+                        )}
 
                         <a
                           href="tel:0911972789"
-                          className="h-8 px-5 !bg-[#222] hover:bg-black !text-white font-bold rounded flex items-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
+                          className="h-10 px-6 !bg-[#222] hover:bg-black !text-white font-bold rounded flex items-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
                         >
                           <PhoneFilled className="text-[16px]" />
                           Gọi tư vấn

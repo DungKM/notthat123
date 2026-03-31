@@ -377,76 +377,48 @@ const StatisticsPage: React.FC = () => {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <Card
-        title="Tổng quan"
+        title="Số công tháng này"
         bordered
         styles={{ body: { padding: "12px 16px" } }}
       >
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={4}>
+          <Col xs={24} sm={12} md={8}>
             <ProCard style={{ background: "#e6f7ff" }} bordered>
               <Statistic
                 title="Tổng công"
                 value={attendanceSummary.totalWorkUnits}
-                suffix="công"
+                suffix={`công ≈ ${attendanceSummary.totalWorkHours} tiếng`}
                 prefix={<CheckCircleOutlined style={{ color: "#1890ff" }} />}
               />
-              <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
-                ≈ {attendanceSummary.totalWorkHours} giờ
-              </div>
             </ProCard>
           </Col>
-          <Col xs={24} sm={12} md={4}>
+          <Col xs={24} sm={12} md={8}>
             <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
                 title="Công OT"
                 value={attendanceSummary.totalOTUnits}
-                suffix="công"
+                suffix={`công ≈ ${attendanceSummary.totalOTHours} tiếng`}
                 prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
               />
-              <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
-                ≈ {attendanceSummary.totalOTHours} giờ
-              </div>
             </ProCard>
           </Col>
-          <Col xs={24} sm={12} md={4}>
+          <Col xs={24} sm={12} md={8}>
             <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
                 title="Tổng công hành chính và OT"
                 value={totalDays}
-                suffix="công"
+                suffix={`công = ${totalHours} tiếng`}
                 prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
               />
-              <div style={{ marginTop: 8, fontSize: 12, color: "#888" }}>
-                ≈ {totalHours} giờ
-              </div>
             </ProCard>
           </Col>
-          <Col xs={24} sm={12} md={6}>
-            <ProCard style={{ background: "#f6ffed" }} bordered>
-              <Statistic
-                title="Lương cơ bản"
-                value={baseSalary}
-                formatter={(val) => formatCurrency(val)}
-                prefix={<DollarOutlined style={{ color: "#52c41a" }} />}
-              />
-            </ProCard>
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <ProCard style={{ background: "#fff1f0" }} bordered>
-              <Statistic
-                title="Đã ứng"
-                value={advance}
-                formatter={(val) => formatCurrency(val)}
-                prefix={<WalletOutlined style={{ color: "#ff4d4f" }} />}
-              />
-            </ProCard>
-          </Col>
+
         </Row>
       </Card>
 
       <ProCard title="Lương tạm tính (Dự kiến)" bordered headerBordered>
         <Descriptions column={{ xs: 1, sm: 2 }} bordered>
-          <Descriptions.Item label="Lương cơ bản">
+          <Descriptions.Item label="Lương cơ bản/ngày">
             {formatCurrency(baseSalary)}
           </Descriptions.Item>
           <Descriptions.Item label="Thưởng">

@@ -81,21 +81,23 @@ const SearchResultsPage: React.FC = () => {
 
           {/* Search Input */}
           <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
-            <div className="flex items-center bg-white rounded-2xl overflow-hidden shadow-2xl">
-              <SearchOutlined className="text-gray-400 text-lg ml-5 flex-shrink-0" />
-              <input
-                type="text"
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                placeholder="Nhập từ khóa tìm kiếm..."
-                autoFocus
-                className="flex-1 px-4 py-4 text-gray-800 text-base outline-none placeholder-gray-400 bg-transparent"
-              />
+            <div className="flex bg-white  rounded-full overflow-hidden shadow-2xl border-4 border-white/10 transition-all focus-within:border-white/30 group">
+              <div className="flex items-center flex-1 px-2">
+                <SearchOutlined className="text-gray-400 text-xl ml-4 flex-shrink-0 group-focus-within:text-amber-600 transition-colors" />
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  placeholder="Nhập từ khóa tìm kiếm (ví dụ: Sofa, Bàn ăn, Thi công...)"
+                  autoFocus
+                  className="w-full px-4 py-4 text-gray-800 text-[16px] outline-none placeholder-gray-400 bg-transparent font-medium"
+                />
+              </div>
               <button
                 type="submit"
-                className="px-8 py-4 bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm uppercase tracking-widest transition-colors flex-shrink-0"
+                className="px-10 bg-amber-700 hover:bg-amber-800 text-white font-black text-[15px] uppercase tracking-widest transition-colors flex flex-col justify-center border-l-2 border-white/20"
               >
-                Tìm
+                <span>Tìm</span>
               </button>
             </div>
           </form>

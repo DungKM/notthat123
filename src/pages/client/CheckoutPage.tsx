@@ -348,19 +348,29 @@ const CheckoutPage: React.FC = () => {
                                 </div>
 
                                 <div className="mt-3 flex items-center justify-between">
-                                  <div className="flex items-center rounded-lg border border-gray-100 bg-gray-50 overflow-hidden">
+                                  <div className="flex items-center border border-slate-500 rounded-lg overflow-hidden h-10 w-[110px] bg-white">
                                     <button
-                                      className="px-2.5 py-1 text-gray-400 hover:bg-gray-100 transition-colors"
+                                      className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
                                       onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                                     >
-                                      <MinusOutlined className="text-xs" />
+                                      −
                                     </button>
-                                    <span className="w-8 text-center text-xs font-bold text-teal-950">{item.quantity}</span>
+                                    <span className="flex-1 text-center text-base font-semibold text-slate-900">{item.quantity}</span>
                                     <button
-                                      className="px-2.5 py-1 text-gray-400 hover:bg-gray-100 transition-colors"
-                                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                      onClick={() => {
+                                        if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) {
+                                          toast.error(`Sản phẩm này chỉ còn tối đa ${item.stockQuantity} cái`);
+                                          return;
+                                        }
+                                        updateQuantity(item.id, item.quantity + 1);
+                                      }}
+                                      className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${
+                                        item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                                          ? 'text-slate-300 bg-slate-50 cursor-not-allowed'
+                                          : 'text-slate-800 hover:bg-slate-100'
+                                      }`}
                                     >
-                                      <PlusOutlined className="text-xs" />
+                                      +
                                     </button>
                                   </div>
                                 </div>

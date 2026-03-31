@@ -252,14 +252,10 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
     },
     {
       title: 'Số tiền đang có',
-      key: 'totalSalary',
+      key: 'currentAmount',
       hideInSearch: true,
       render: (_, record) => {
-        const total =
-          (record.baseSalary ?? 0) +
-          (record.bonus ?? 0) -
-          (record.penalty ?? 0) -
-          (record.advance ?? 0);
+        const total = record.currentAmount ?? 0;
 
         return (
           <Text strong style={{ fontSize: 16, color: total >= 0 ? '#52c41a' : '#ff4d4f' }}>
@@ -566,6 +562,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
               penalty: r.penalty || 0,
               advance: r.advance || 0,
               totalSalary: r.netSalary || 0,
+              currentAmount: r.currentAmount || 0,
             }));
             setEmployees(mapped);
             return { data: mapped, success: true, total: mapped.length };

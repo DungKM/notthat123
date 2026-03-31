@@ -8,4 +8,5 @@ export interface Employee {
   penalty: number;
   advance: number;
   totalSalary: number;
+  currentAmount: number;
 }

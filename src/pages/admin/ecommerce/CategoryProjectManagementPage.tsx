@@ -33,7 +33,7 @@ const CategoryProjectManagementPage: React.FC = () => {
   // ─── Columns ─────────────────────────────────────────────────────────────
   const columns: ProColumns<CategoryProjectItem>[] = [
     {
-      title: 'Tên danh mục công trình',
+      title: 'Tên danh mục ',
       dataIndex: 'name',
       ellipsis: true,
     },
@@ -120,7 +120,7 @@ const CategoryProjectManagementPage: React.FC = () => {
           const list = await getAll({
             page: current,
             limit: pageSize,
-            name,
+            search: name,
             ...rest
           });
           return { data: list, success: true };

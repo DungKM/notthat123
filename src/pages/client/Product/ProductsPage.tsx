@@ -342,16 +342,7 @@ const ProductsPage: React.FC = () => {
                   </div>
                 </FilterSection>
 
-                <FilterSection title="MÀU SẮC" defaultOpen={true}>
-                  {MOCK_COLORS.map((color) => (
-                    <CheckboxItem
-                      key={color}
-                      label={color}
-                      checked={selectedColors === color}
-                      onChange={() => toggleRadio(color, selectedColors, setSelectedColors)}
-                    />
-                  ))}
-                </FilterSection>
+
 
                 <FilterSection title="CHẤT LIỆU" defaultOpen={true}>
                   {MOCK_MATERIALS.map((mat) => (
