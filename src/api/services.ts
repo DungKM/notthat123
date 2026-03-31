@@ -95,3 +95,6 @@ export const useProjectStageService = () => useApi<any>('/project-stages');
 
 // ─── Settings ───
 export const useSettingService = () => useApi<any>('/settings');
+
+// ─── Stats ───
+export const useStatsService = () => useApi<any>('/stats');
