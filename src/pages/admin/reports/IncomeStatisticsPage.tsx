@@ -279,7 +279,7 @@ const IncomeStatisticsPage: React.FC = () => {
                 </Col>
               </Row>
 
-              <Table
+              {/* <Table
                 columns={columns}
                 dataSource={tableData}
                 pagination={false}
@@ -296,7 +296,7 @@ const IncomeStatisticsPage: React.FC = () => {
                     </Table.Summary.Row>
                   </Table.Summary>
                 )}
-              />
+              /> */}
             </div>
           )}
         </ProCard>
