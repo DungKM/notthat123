@@ -677,35 +677,41 @@ const Header: React.FC = () => {
                           </div>
                           <p className="text-showcase-primary font-black mt-1">{item.price.toLocaleString('vi-VN')} đ</p>
                         </div>
-                        <div className="flex items-center justify-between mt-4">
-                          <div className="flex items-center border border-slate-500 rounded-lg overflow-hidden h-10 w-[110px] bg-white">
-                            <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
-                            >
-                              −
-                            </button>
-                            <span className="flex-1 text-center text-base font-semibold text-slate-900">{item.quantity}</span>
-                            <button
-                              onClick={() => {
-                                if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) {
-                                  toast.error(`Sản phẩm này chỉ còn tối đa ${item.stockQuantity} cái`);
-                                  return;
-                                }
-                                updateQuantity(item.id, item.quantity + 1);
-                              }}
-                              className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${
-                                item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                        <div className="mt-4">
+                          <div className="flex items-center justify-between">
+                            <div className={`flex items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                              ? 'border-red-400'
+                              : 'border-slate-500'
+                              }`}>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
+                              >
+                                −
+                              </button>
+                              <span className="flex-1 text-center text-base font-semibold text-slate-900">{item.quantity}</span>
+                              <button
+                                onClick={() => {
+                                  if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
+                                  updateQuantity(item.id, item.quantity + 1);
+                                }}
+                                className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
                                   ? 'text-slate-300 bg-slate-50 cursor-not-allowed'
                                   : 'text-slate-800 hover:bg-slate-100'
-                              }`}
-                            >
-                              +
-                            </button>
+                                  }`}
+                              >
+                                +
+                              </button>
+                            </div>
+                            <p className="text-xs font-medium text-gray-400">
+                              {t('cart.subtotal')}: <span className="text-gray-900 font-bold">{item.subtotal.toLocaleString('vi-VN')} đ</span>
+                            </p>
                           </div>
-                          <p className="text-xs font-medium text-gray-400">
-                            {t('cart.subtotal')}: <span className="text-gray-900 font-bold">{item.subtotal.toLocaleString('vi-VN')} đ</span>
-                          </p>
+                          {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
+                            <h2 className="mt-1.5 text-sm text-red-500 font-medium">
+                              Sản phẩm chỉ còn {item.stockQuantity} cái
+                            </h2>
+                          )}
                         </div>
                       </div>
                     </div>

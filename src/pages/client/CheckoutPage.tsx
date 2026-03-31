@@ -347,8 +347,12 @@ const CheckoutPage: React.FC = () => {
                                   </p>
                                 </div>
 
-                                <div className="mt-3 flex items-center justify-between">
-                                  <div className="flex items-center border border-slate-500 rounded-lg overflow-hidden h-10 w-[110px] bg-white">
+                                <div className="mt-3">
+                                  <div className={`flex items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${
+                                    item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                                      ? 'border-red-400'
+                                      : 'border-slate-500'
+                                  }`}>
                                     <button
                                       className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
                                       onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
@@ -358,10 +362,7 @@ const CheckoutPage: React.FC = () => {
                                     <span className="flex-1 text-center text-base font-semibold text-slate-900">{item.quantity}</span>
                                     <button
                                       onClick={() => {
-                                        if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) {
-                                          toast.error(`Sản phẩm này chỉ còn tối đa ${item.stockQuantity} cái`);
-                                          return;
-                                        }
+                                        if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
                                         updateQuantity(item.id, item.quantity + 1);
                                       }}
                                       className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${
@@ -373,6 +374,11 @@ const CheckoutPage: React.FC = () => {
                                       +
                                     </button>
                                   </div>
+                                  {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
+                                    <p className="mt-1.5 text-[11px] text-red-500 font-medium">
+                                      ⚠ Chỉ còn tối đa {item.stockQuantity} sản phẩm trong kho
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </div>

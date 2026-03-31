@@ -1,6 +1,11 @@
 import React from 'react';
 import { Drawer, List, Badge, Button, Typography, Empty, Space, Tag } from 'antd';
-import { CheckOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import {
+  CheckOutlined,
+  ProjectOutlined,
+  DollarOutlined,
+  WarningOutlined,
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { TaskNotification } from '@/src/types';
 
@@ -13,6 +18,72 @@ interface NotificationDrawerProps {
   onDelete: (id: string) => void;
 }
 
+// ─── Config theo loại thông báo ───────────────────────────────────────────────
+const typeConfig = {
+  task_assignment: {
+    color: '#1890ff',
+    bg: '#e6f7ff',
+    border: '#91caff',
+    tag: { color: 'blue', label: 'Giao việc' },
+    icon: <ProjectOutlined style={{ color: '#1890ff', fontSize: 16 }} />,
+  },
+  bonus: {
+    color: '#52c41a',
+    bg: '#f6ffed',
+    border: '#b7eb8f',
+    tag: { color: 'success', label: 'Thưởng' },
+    icon: <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />,
+  },
+  penalty: {
+    color: '#ff4d4f',
+    bg: '#fff2f0',
+    border: '#ffccc7',
+    tag: { color: 'error', label: 'Phạt' },
+    icon: <WarningOutlined style={{ color: '#ff4d4f', fontSize: 16 }} />,
+  },
+};
+
+const getConfig = (type: string) =>
+  typeConfig[type as keyof typeof typeConfig] ?? typeConfig.task_assignment;
+
+// ─── Render nội dung theo loại ────────────────────────────────────────────────
+const renderContent = (item: TaskNotification) => {
+  const cfg = getConfig(item.type);
+
+  if (item.type === 'task_assignment') {
+    return (
+      <>
+        <Typography.Text strong style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>
+          {item.taskDescription}
+        </Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: 13, lineHeight: 1.5 }}>
+          <strong>{item.assignedByName}</strong> giao cho bạn tại dự án{' '}
+          <strong style={{ color: cfg.color }}>{item.projectName}</strong>
+        </Typography.Text>
+      </>
+    );
+  }
+
+  if (item.type === 'bonus' || item.type === 'penalty') {
+    return (
+      <>
+        <Typography.Text
+          strong
+          style={{ display: 'block', marginBottom: 4, fontSize: 14, color: cfg.color }}
+        >
+          {item.message}
+        </Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+          Bởi: <strong>{item.assignedByName}</strong>
+        </Typography.Text>
+      </>
+    );
+  }
+
+  return null;
+};
+
+// ─── Component chính ──────────────────────────────────────────────────────────
 const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   open,
   onClose,
@@ -33,6 +104,18 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
           )}
         </Space>
       }
+      extra={
+        unreadCount > 0 && (
+          <Button
+            type="link"
+            size="small"
+            icon={<CheckOutlined />}
+            onClick={onMarkAllAsRead}
+          >
+            Đọc tất cả
+          </Button>
+        )
+      }
       placement="right"
       onClose={onClose}
       open={open}
@@ -43,59 +126,74 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       ) : (
         <List
           dataSource={notifications}
-          renderItem={(item) => (
-            <List.Item
-              style={{
-                background: item.isRead ? 'transparent' : '#f0f8ff',
-                padding: '12px 16px',
-                marginBottom: 8,
-                borderRadius: 8,
-                border: item.isRead ? '1px solid #f0f0f0' : '1px solid #91caff',
-                cursor: 'pointer',
-              }}
-              onClick={() => {
-                if (!item.isRead) onMarkAsRead(item.id);
-              }}
-            >
-              <div style={{ width: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <Space size={4}>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
-                    </Typography.Text>
-                  </Space>
-                  <Space size={4}>
-                    {!item.isRead ? (
-                      <Tag color="blue" style={{ margin: 0, fontSize: 11 }}>Mới</Tag>
-                    ) : (
-                      <Tag color="default" style={{ margin: 0, fontSize: 11 }}>Đã đọc</Tag>
-                    )}
-                    <Button 
-                      type="text" 
-                      danger 
-                      size="small" 
-                      style={{ padding: '0 4px', height: 'auto', fontSize: 12 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(item.id || (item as any)._id);
-                      }}
-                    >
-                      Xóa
-                    </Button>
-                  </Space>
+          renderItem={(item) => {
+            const cfg = getConfig(item.type);
+
+            return (
+              <List.Item
+                style={{
+                  background: item.isRead ? 'transparent' : cfg.bg,
+                  padding: '12px 16px',
+                  marginBottom: 8,
+                  borderRadius: 8,
+                  border: `1px solid ${item.isRead ? '#f0f0f0' : cfg.border}`,
+                  cursor: 'pointer',
+                  display: 'block',
+                }}
+                onClick={() => {
+                  if (!item.isRead) onMarkAsRead(item.id);
+                }}
+              >
+                <div style={{ width: '100%' }}>
+                  {/* Header: icon + loại + thời gian + nút */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Space size={6}>
+                      {cfg.icon}
+                      <Tag
+                        color={cfg.tag.color}
+                        style={{ margin: 0, fontSize: 11, fontWeight: 600 }}
+                      >
+                        {cfg.tag.label}
+                      </Tag>
+                    </Space>
+
+                    <Space size={4}>
+                      <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                        {dayjs(item.createdAt).format('DD/MM HH:mm')}
+                      </Typography.Text>
+                      {!item.isRead && (
+                        <Tag color="blue" style={{ margin: 0, fontSize: 11 }}>
+                          Mới
+                        </Tag>
+                      )}
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        style={{ padding: '0 4px', height: 'auto', fontSize: 12 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(item.id || (item as any)._id);
+                        }}
+                      >
+                        Xóa
+                      </Button>
+                    </Space>
+                  </div>
+
+                  {/* Nội dung theo loại */}
+                  {renderContent(item)}
                 </div>
-
-                <Typography.Text strong style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>
-                  {item.taskDescription}
-                </Typography.Text>
-
-                <Typography.Text type="secondary" style={{ fontSize: 13, lineHeight: 1.5 }}>
-                  <strong>{item.assignedByName}</strong> giao cho bạn tại dự án{' '}
-                  <strong style={{ color: '#1890ff' }}>{item.projectName}</strong>
-                </Typography.Text>
-              </div>
-            </List.Item>
-          )}
+              </List.Item>
+            );
+          }}
         />
       )}
     </Drawer>
