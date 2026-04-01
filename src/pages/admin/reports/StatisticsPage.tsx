@@ -42,7 +42,7 @@ import {
   toSafeNumber,
 } from "@/src/utils/format";
 import { useAuth } from "@/src/auth/hooks/useAuth";
-import { useAdvanceRequestService, useSalaryActionService, useAttendanceService, useProjectService } from "@/src/api/services";
+import { useAdvanceRequestService, useSalaryActionService, useAttendanceService, useProjectService, useStatsService } from "@/src/api/services";
 import { useRef, useEffect } from "react";
 import type { ActionType } from "@ant-design/pro-components";
 
@@ -118,11 +118,20 @@ const StatisticsPage: React.FC = () => {
   const { request: salaryRequest } = useSalaryActionService();
   const { create: createAttendance, request: attendanceRequest } = useAttendanceService();
   const { request: projectRequest } = useProjectService();
+  const { request: statsRequest } = useStatsService();
   const [attendanceOpen, setAttendanceOpen] = useState(false);
   const [advanceOpen, setAdvanceOpen] = useState(false);
   const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [loadingStats, setLoadingStats] = useState(false);
   const [projectOptions, setProjectOptions] = useState<{ label: string; value: string }[]>([]);
+  const [myStats, setMyStats] = useState<{
+    totalSalary: number;
+    totalBonus: number;
+    totalPenalty: number;
+    totalAdvance: number;
+    totalTotal: number;
+  } | null>(null);
   const [attendanceSummary, setAttendanceSummary] = useState({
     totalWorkUnits: 0,
     totalOTUnits: 0,
@@ -157,6 +166,26 @@ const StatisticsPage: React.FC = () => {
   }, [user, salaryRequest]);
 
   useEffect(() => {
+    if (!user) return;
+    setLoadingStats(true);
+    const startDate = dayjs().startOf('month').format('YYYY-MM-DD');
+    const endDate = dayjs().format('YYYY-MM-DD');
+    statsRequest('GET', `/my-stats?startDate=${startDate}&endDate=${endDate}`)
+      .then((res: any) => {
+        if (res.success && res.data) {
+          setMyStats(res.data);
+        }
+      })
+      .catch((err: any) => {
+        console.error('Lỗi lấy thống kê lương:', err);
+      })
+      .finally(() => {
+        setLoadingStats(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
     projectRequest('GET', '', null, { status: 'APPROVED', limit: 1000 })
       .then((res: any) => {
         const data: any[] = res.data || [];
@@ -185,11 +214,12 @@ const StatisticsPage: React.FC = () => {
   const totalDays = attendanceSummary.totalWorkUnits + attendanceSummary.totalOTUnits;
   const totalHours = attendanceSummary.totalWorkHours + attendanceSummary.totalOTHours;
 
-  const baseSalary = toSafeNumber(employeeInfo.baseSalary);
-  const bonus = toSafeNumber(employeeInfo.bonus);
-  const penalty = toSafeNumber(employeeInfo.penalty);
-  const advance = toSafeNumber(employeeInfo.advance);
-  const estimatedSalary = baseSalary + bonus - penalty - advance;
+  // Dùng dữ liệu từ API my-stats nếu có, fallback về mock
+  const baseSalary = myStats ? toSafeNumber(myStats.totalSalary) : toSafeNumber(employeeInfo.baseSalary);
+  const bonus = myStats ? toSafeNumber(myStats.totalBonus) : toSafeNumber(employeeInfo.bonus);
+  const penalty = myStats ? toSafeNumber(myStats.totalPenalty) : toSafeNumber(employeeInfo.penalty);
+  const advance = myStats ? toSafeNumber(myStats.totalAdvance) : toSafeNumber(employeeInfo.advance);
+  const estimatedSalary = myStats ? toSafeNumber(myStats.totalTotal) : (baseSalary + bonus - penalty - advance);
 
   const handleCreateRequest = async (values: any) => {
     try {
@@ -225,6 +255,10 @@ const StatisticsPage: React.FC = () => {
       dataIndex: "dateRange",
       valueType: "dateRange",
       hideInTable: true,
+      initialValue: [dayjs().startOf('month'), dayjs()],
+      fieldProps: {
+        format: 'DD/MM/YYYY',
+      },
       search: {
         transform: (value) => {
           return {
@@ -416,19 +450,24 @@ const StatisticsPage: React.FC = () => {
         </Row>
       </Card>
 
-      <ProCard title="Lương tạm tính (Dự kiến)" bordered headerBordered>
+      <ProCard
+        title={`Lương tạm tính tháng ${dayjs().format('MM/YYYY')} (Dự kiến)`}
+        bordered
+        headerBordered
+        loading={loadingStats}
+      >
         <Descriptions column={{ xs: 1, sm: 2 }} bordered>
-          <Descriptions.Item label="Lương cơ bản/ngày">
+          <Descriptions.Item label="Lương cơ bản">
             {formatCurrency(baseSalary)}
           </Descriptions.Item>
           <Descriptions.Item label="Thưởng">
-            +{formatCurrency(bonus)}
+            <span style={{ color: '#52c41a' }}>+{formatCurrency(bonus)}</span>
           </Descriptions.Item>
           <Descriptions.Item label="Phạt">
-            -{formatCurrency(penalty)}
+            <span style={{ color: '#ff4d4f' }}>-{formatCurrency(penalty)}</span>
           </Descriptions.Item>
           <Descriptions.Item label="Đã ứng">
-            -{formatCurrency(advance)}
+            <span style={{ color: '#fa8c16' }}>-{formatCurrency(advance)}</span>
           </Descriptions.Item>
           <Descriptions.Item label="Số tiền đang có" span={2}>
             <strong
