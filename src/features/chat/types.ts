@@ -1,5 +1,4 @@
 import { Role } from '@/src/auth/types';
-
 export interface ChatMember {
   id: string;
   name: string;

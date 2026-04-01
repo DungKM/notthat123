@@ -158,6 +158,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
+      // Hủy debounce đang chờ (nếu có) để tránh gọi API update sau khi đã xóa
+      if (debounceTimers.current[id]) {
+        clearTimeout(debounceTimers.current[id]);
+        delete debounceTimers.current[id];
+      }
       removeFromCart(id);
       return;
     }
