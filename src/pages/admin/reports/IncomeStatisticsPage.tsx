@@ -65,6 +65,8 @@ const IncomeStatisticsPage: React.FC = () => {
     { label: '3 tháng gần đây', value: [dayjs().subtract(2, 'month').startOf('month'), dayjs().endOf('month')] },
   ];
 
+  const isMobile = !screens.md;
+
   return (
     <div style={{ padding: '0 0 24px 0' }}>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
@@ -72,28 +74,96 @@ const IncomeStatisticsPage: React.FC = () => {
           {/* Bộ lọc khoảng ngày */}
           <div
             style={{
-              padding: '20px 0',
+              padding: isMobile ? '16px 0 8px' : '20px 0',
               display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: 12,
-              flexWrap: 'wrap',
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: isMobile ? 'flex-start' : 'center',
+              alignItems: isMobile ? 'stretch' : 'center',
+              gap: isMobile ? 10 : 12,
             }}
           >
-            <Text strong style={{ fontSize: 14 }}>Chọn khoảng thời gian:</Text>
-            <RangePicker
-              value={dateRange}
-              onChange={(vals) => {
-                if (vals && vals[0] && vals[1]) {
-                  setDateRange([vals[0], vals[1]]);
-                }
-              }}
-              format="DD/MM/YYYY"
-              allowClear={false}
-              presets={presets}
-              style={{ height: 40, minWidth: screens.md ? 280 : '100%' }}
-              placeholder={['Từ ngày', 'Đến ngày']}
-            />
+            <Text strong style={{ fontSize: 14, textAlign: isMobile ? 'left' : 'center' }}>
+              Chọn khoảng thời gian:
+            </Text>
+
+            {isMobile ? (
+              /* Mobile: 2 DatePicker riêng biệt, full width */
+              <Row gutter={[8, 8]}>
+                <Col xs={24}>
+                  <DatePicker
+                    value={dateRange[0]}
+                    onChange={(val) => {
+                      if (val) setDateRange([val, dateRange[1]]);
+                    }}
+                    format="DD/MM/YYYY"
+                    allowClear={false}
+                    placeholder="Từ ngày"
+                    style={{ width: '100%', height: 40 }}
+                    disabledDate={(d) => d.isAfter(dateRange[1])}
+                  />
+                </Col>
+                <Col xs={24}>
+                  <DatePicker
+                    value={dateRange[1]}
+                    onChange={(val) => {
+                      if (val) setDateRange([dateRange[0], val]);
+                    }}
+                    format="DD/MM/YYYY"
+                    allowClear={false}
+                    placeholder="Đến ngày"
+                    style={{ width: '100%', height: 40 }}
+                    disabledDate={(d) => d.isBefore(dateRange[0])}
+                  />
+                </Col>
+                {/* Preset nhanh cho mobile */}
+                <Col xs={24}>
+                  <Row gutter={[6, 6]}>
+                    {presets.map((p) => (
+                      <Col key={p.label}>
+                        <button
+                          onClick={() => setDateRange(p.value)}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: 12,
+                            borderRadius: 16,
+                            border: '1px solid #d9d9d9',
+                            background:
+                              dateRange[0].isSame(p.value[0], 'day') &&
+                              dateRange[1].isSame(p.value[1], 'day')
+                                ? '#1677ff'
+                                : '#fff',
+                            color:
+                              dateRange[0].isSame(p.value[0], 'day') &&
+                              dateRange[1].isSame(p.value[1], 'day')
+                                ? '#fff'
+                                : 'inherit',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {p.label}
+                        </button>
+                      </Col>
+                    ))}
+                  </Row>
+                </Col>
+              </Row>
+            ) : (
+              /* Desktop: giữ nguyên RangePicker */
+              <RangePicker
+                value={dateRange}
+                onChange={(vals) => {
+                  if (vals && vals[0] && vals[1]) {
+                    setDateRange([vals[0], vals[1]]);
+                  }
+                }}
+                format="DD/MM/YYYY"
+                allowClear={false}
+                presets={presets}
+                style={{ height: 40, minWidth: 280 }}
+                placeholder={['Từ ngày', 'Đến ngày']}
+              />
+            )}
           </div>
 
           {/* Hiển thị khoảng chọn */}

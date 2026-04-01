@@ -226,9 +226,14 @@ const OrderManagementPage: React.FC = () => {
           </Button>
           <Popconfirm
             title="Bạn chắc chắn muốn xóa đơn hàng này?"
+            description="Hành động này không thể hoàn tác."
+
             onConfirm={() => handleDelete(record.id)}
             okText="Xóa"
             cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+
+
           >
             <Button type="link" danger icon={<DeleteOutlined />} title="Xóa" size="large" />
           </Popconfirm>
