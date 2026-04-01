@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '@/src/routes/index';
 import ScrollToTop from '@/src/components/common/ScrollToTop';
+import PageLoader from '@/src/features/showcase/components/ui/PageLoader';
 
 // Layouts
 import ClientLayout from '@/src/layouts/ClientLayout';
@@ -68,7 +69,7 @@ const AppRouter: React.FC = () => {
   return (
     <>
       <ScrollToTop />
-      <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public Showcase Routes (wrapped in ClientLayout) */}
           <Route element={<ClientLayout />}>
