@@ -234,57 +234,60 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           header={{ style: { padding: isMobile ? '8px 0' : undefined } }}
         >
           <style>{`
-            /* Tùy chỉnh form tìm kiếm ProTable toàn cục (áp dụng khi chỉ có 1 ô input) */
-            .ant-pro-table-search .ant-row {
-              display: flex !important;
-              flex-wrap: nowrap !important;
-              justify-content: center !important; /* Đưa toàn bộ form ra giữa màn hình */
+            /* ── ProTable search: chỉ layout gọn trên desktop ── */
+            @media (min-width: 769px) {
+              .ant-pro-table-search .ant-row {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                justify-content: center !important;
+              }
+              .ant-pro-table-search .ant-row > .ant-col:not(:first-child):not(:last-child) {
+                display: none !important;
+              }
+              .ant-pro-table-search .ant-row > .ant-col:first-child {
+                flex: 0 0 400px !important;
+                max-width: 110px !important;
+                width: 110px !important;
+                margin-left: 0 !important;
+                padding-right: 0 !important;
+              }
+              .ant-pro-table-search .ant-row > .ant-col:last-child {
+                flex: 0 0 auto !important;
+                max-width: none !important;
+                width: auto !important;
+                text-align: left !important;
+                padding-left: 8px !important;
+                margin-left: 0 !important;
+              }
             }
-            /* Ẩn các cột đệm trống do grid của ProTable sinh ra */
-            .ant-pro-table-search .ant-row > .ant-col:not(:first-child):not(:last-child) {
-              display: none !important;
-            }
-            /* Cột chứa ô nhập liệu */
-            .ant-pro-table-search .ant-row > .ant-col:first-child {
-              flex: 0 0 400px !important; /* Đặt lại chiều dài cân đối và tối ưu */
-              max-width: 110px !important;
-              width: 110px !important;
-              margin-left: 0 !important;
-              padding-right: 0 !important;
-            }
-            /* Cột chứa các nút hành động (nằm ngay sát ô input) */
-            .ant-pro-table-search .ant-row > .ant-col:last-child {
-              flex: 0 0 auto !important;
-              max-width: none !important;
-              width: auto !important;
-              text-align: left !important;
-              padding-left: 8px !important; /* Khoảng cách siêu nhỏ 8px ngay sát cạnh */
-              margin-left: 0 !important; /* Gỡ bỏ lớp offset mặc định đẩy nút ra xa */
-            }
-            /* Ẩn nút "Đặt lại" */
+            /* Ẩn nút "Đặt lại" trên mọi thiết bị */
             .ant-pro-table-search .ant-btn-default {
               display: none !important;
             }
-            /* Canh chỉnh lại form item cuối cùng để nút không bị đẩy xuống */
+            /* Form item không có margin thừa */
             .ant-pro-table-search .ant-form-item {
               margin-bottom: 0 !important;
             }
-            /* Đảm bảo ô input giãn hết chiều ngang của vùng chứa (xóa độ phân giải md/sm mặc định của ProForm) */
             .ant-pro-table-search .ant-form-item-control-input-content > * {
               width: 100% !important;
               max-width: 100% !important;
             }
-            /* ── GLOBAL: Tất cả Button thường trong Admin → size large ── */
-            .ant-btn:not(.ant-btn-sm):not(.ant-btn-link):not(.ant-btn-text):not(.ant-btn-icon-only) {
-              height: 40px !important;
-              padding-inline: 16px !important;
-              font-size: 14px !important;
-              border-radius: 8px !important;
-            }
-            /* Button link/text giữ nguyên (chỉ cần icon + text nhỏ) */
-            .ant-btn-link,
-            .ant-btn-text {
-              height: auto !important;
+            /* ── Mobile: search form stack dọc, full width ── */
+            @media (max-width: 768px) {
+              .ant-pro-table-search .ant-row {
+                flex-wrap: wrap !important;
+              }
+              .ant-pro-table-search .ant-row > .ant-col {
+                display: block !important;
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0  !important;
+              }
+              .ant-pro-table-search .ant-row > .ant-col:last-child {
+                margin-bottom: 0 !important;
+              }
             }
           `}</style>
           {children}
