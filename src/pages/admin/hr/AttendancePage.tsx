@@ -58,7 +58,7 @@ const AttendancePage: React.FC = () => {
   );
   const [open, setOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<ProjectOption[]>(MOCK_PROJECT_OPTIONS);
-  
+
   const { getAll: getProjects } = useProjectService();
 
   React.useEffect(() => {
@@ -181,8 +181,8 @@ const AttendancePage: React.FC = () => {
       <Card
         title="Chấm công theo ngày"
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>
-            Chấm công hôm nay
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setOpen(true)}>
+            Chấm công
           </Button>
         }
         styles={{ body: { padding: '12px 16px' } }}
@@ -250,7 +250,7 @@ const AttendancePage: React.FC = () => {
           label="Số giờ hành chính làm được"
           min={0}
           fieldProps={{ precision: 2 }}
-          rules={[{ required: true, message: 'Vui lòng nhập số giờ làm' }]}
+          rules={[{ required: true, message: 'Vui lòng nhập số giờ làm', max: 8 }]}
         />
 
         <ProFormDigit

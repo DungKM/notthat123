@@ -107,14 +107,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
     const staffMenus: any[] = [
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <DollarOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE, name: 'Chấm công và bảng lương', icon: <DollarOutlined /> },
       { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Thống kê thu nhập', icon: <BarChartOutlined /> },
     ];
 
     const commonMenus = [
       { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
       { path: ROUTES.TRO_CHUYEN, name: 'Tin nhắn nhóm', icon: <MessageOutlined /> },
-      { path: ROUTES.ADMIN_THONG_KE, name: 'Lương', icon: <DollarOutlined /> },
+      { path: ROUTES.ADMIN_THONG_KE, name: 'Chấm công và bảng lương', icon: <DollarOutlined /> },
       { path: ROUTES.ADMIN_THONG_KE_THU_NHAP, name: 'Thống kê thu nhập', icon: <BarChartOutlined /> },
     ];
 
@@ -273,6 +273,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
             .ant-pro-table-search .ant-form-item-control-input-content > * {
               width: 100% !important;
               max-width: 100% !important;
+            }
+            /* ── GLOBAL: Tất cả Button thường trong Admin → size large ── */
+            .ant-btn:not(.ant-btn-sm):not(.ant-btn-link):not(.ant-btn-text):not(.ant-btn-icon-only) {
+              height: 40px !important;
+              padding-inline: 16px !important;
+              font-size: 14px !important;
+              border-radius: 8px !important;
+            }
+            /* Button link/text giữ nguyên (chỉ cần icon + text nhỏ) */
+            .ant-btn-link,
+            .ant-btn-text {
+              height: auto !important;
             }
           `}</style>
           {children}

@@ -121,6 +121,7 @@ const UsersPage: React.FC = () => {
       width: 180,
       search: false,
     },
+
     {
       title: 'Vai trò',
       dataIndex: 'role',

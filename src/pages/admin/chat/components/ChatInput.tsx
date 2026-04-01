@@ -193,9 +193,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
         </button>
       </div>
 
-      <div style={{ fontSize: 11, color: '#cbd5e1', textAlign: 'center', marginTop: 5 }}>
-        Enter để gửi · Shift+Enter xuống dòng
-      </div>
     </div>
   );
 };

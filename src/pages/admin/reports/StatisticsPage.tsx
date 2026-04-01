@@ -10,12 +10,7 @@ import {
   ProFormUploadButton as RawProFormUploadButton,
   ProFormTextArea,
 } from "@ant-design/pro-components";
-import { AttendanceRecord, AdvanceRequest } from "@/src/types";
-import {
-  MOCK_ATTENDANCE,
-  MOCK_ADVANCE_REQUESTS,
-  MOCK_EMPLOYEES,
-} from "@/src/mockData";
+import { AdvanceRequest } from "@/src/types";
 import {
   Card,
   Row,
@@ -28,12 +23,9 @@ import {
   Image,
 } from "antd";
 import {
-  DollarOutlined,
   CheckCircleOutlined,
   FieldTimeOutlined,
-  WalletOutlined,
   PlusOutlined,
-  FileImageOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {
@@ -46,74 +38,12 @@ import { useAdvanceRequestService, useSalaryActionService, useAttendanceService,
 import { useRef, useEffect } from "react";
 import type { ActionType } from "@ant-design/pro-components";
 
-interface ProjectOption {
-  label: string;
-  value: string;
-  dailyRate: number; // tiền 1 công hành chính
-  otRate: number; // tiền 1 công tăng ca
-}
 
-interface AttendanceWorkRecord extends AttendanceRecord {
-  projectId: string;
-  projectName: string;
-  workingDays: number;
-  otDays: number;
-  amount: number;
-}
-
-const MOCK_PROJECT_OPTIONS: ProjectOption[] = [
-  {
-    label: "Thi công nội thất Vinhomes Grand Park",
-    value: "p1",
-    dailyRate: 400000,
-    otRate: 600000,
-  },
-  {
-    label: "Cải tạo văn phòng Quận 1",
-    value: "p2",
-    dailyRate: 450000,
-    otRate: 650000,
-  },
-  {
-    label: "Lắp đặt showroom Thủ Đức",
-    value: "p3",
-    dailyRate: 500000,
-    otRate: 700000,
-  },
-];
-
-const MOCK_ATTENDANCE_WORK: AttendanceWorkRecord[] = [
-  {
-    id: "1",
-    staffId: "4",
-    date: "2024-03-01",
-    startTime: "08:00",
-    endTime: "17:00",
-    workDay: 1,
-    projectId: "p1",
-    projectName: "Thi công nội thất Vinhomes Grand Park",
-    workingDays: 1,
-    otDays: 0.25,
-    amount: 550000,
-  },
-  {
-    id: "2",
-    staffId: "4",
-    date: "2024-03-02",
-    startTime: "08:00",
-    endTime: "17:00",
-    workDay: 1,
-    projectId: "p2",
-    projectName: "Cải tạo văn phòng Quận 1",
-    workingDays: 0.75,
-    otDays: 0.1,
-    amount: 350000,
-  },
-];
 
 const StatisticsPage: React.FC = () => {
   const { user } = useAuth();
   const advanceActionRef = useRef<ActionType>(null);
+  const attendanceActionRef = useRef<ActionType>(null);
   const { request, create } = useAdvanceRequestService();
   const { request: salaryRequest } = useSalaryActionService();
   const { create: createAttendance, request: attendanceRequest } = useAttendanceService();
@@ -138,13 +68,6 @@ const StatisticsPage: React.FC = () => {
     totalWorkHours: 0,
     totalOTHours: 0,
   });
-  const [records, setRecords] = useState<AttendanceWorkRecord[]>(
-    user
-      ? MOCK_ATTENDANCE_WORK.filter(
-        (r) => String(r.staffId) === String(user.id),
-      )
-      : [],
-  );
   if (!user) return null;
 
   useEffect(() => {
@@ -165,23 +88,21 @@ const StatisticsPage: React.FC = () => {
     }
   }, [user, salaryRequest]);
 
-  useEffect(() => {
-    if (!user) return;
+  const fetchStats = () => {
     setLoadingStats(true);
     const startDate = dayjs().startOf('month').format('YYYY-MM-DD');
-    const endDate = dayjs().format('YYYY-MM-DD');
+    const endDate = dayjs().endOf('month').format('YYYY-MM-DD');
     statsRequest('GET', `/my-stats?startDate=${startDate}&endDate=${endDate}`)
       .then((res: any) => {
-        if (res.success && res.data) {
-          setMyStats(res.data);
-        }
+        if (res.success && res.data) setMyStats(res.data);
       })
-      .catch((err: any) => {
-        console.error('Lỗi lấy thống kê lương:', err);
-      })
-      .finally(() => {
-        setLoadingStats(false);
-      });
+      .catch((err: any) => console.error('Lỗi lấy thống kê lương:', err))
+      .finally(() => setLoadingStats(false));
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -198,28 +119,14 @@ const StatisticsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const employeeInfo = MOCK_EMPLOYEES.find((e) => e.id === user.id) || {
-    id: user.id,
-    name: user.name,
-    baseSalary: 12000000,
-    bonus: 0,
-    penalty: 0,
-    advance: 0,
-  };
-
-  const myAdvanceRequests = MOCK_ADVANCE_REQUESTS.filter(
-    (r) => r.employeeId === user.id,
-  ) as AdvanceRequest[];
-
   const totalDays = attendanceSummary.totalWorkUnits + attendanceSummary.totalOTUnits;
   const totalHours = attendanceSummary.totalWorkHours + attendanceSummary.totalOTHours;
 
-  // Dùng dữ liệu từ API my-stats nếu có, fallback về mock
-  const baseSalary = myStats ? toSafeNumber(myStats.totalSalary) : toSafeNumber(employeeInfo.baseSalary);
-  const bonus = myStats ? toSafeNumber(myStats.totalBonus) : toSafeNumber(employeeInfo.bonus);
-  const penalty = myStats ? toSafeNumber(myStats.totalPenalty) : toSafeNumber(employeeInfo.penalty);
-  const advance = myStats ? toSafeNumber(myStats.totalAdvance) : toSafeNumber(employeeInfo.advance);
-  const estimatedSalary = myStats ? toSafeNumber(myStats.totalTotal) : (baseSalary + bonus - penalty - advance);
+  const baseSalary = toSafeNumber(myStats?.totalSalary);
+  const bonus = toSafeNumber(myStats?.totalBonus);
+  const penalty = toSafeNumber(myStats?.totalPenalty);
+  const advance = toSafeNumber(myStats?.totalAdvance);
+  const estimatedSalary = toSafeNumber(myStats?.totalTotal);
 
   const handleCreateRequest = async (values: any) => {
     try {
@@ -242,6 +149,9 @@ const StatisticsPage: React.FC = () => {
         workHours: Number(values.workingDays || 0),
         otHours: Number(values.otDays || 0)
       } as any);
+      // Reload bảng chi tiết công và cập nhật lại thống kê lương
+      attendanceActionRef.current?.reload();
+      fetchStats();
       return true;
     } catch (error) {
       message.error("Có lỗi xảy ra khi chấm công");
@@ -255,15 +165,22 @@ const StatisticsPage: React.FC = () => {
       dataIndex: "dateRange",
       valueType: "dateRange",
       hideInTable: true,
-      initialValue: [dayjs().startOf('month'), dayjs()],
+      initialValue: [dayjs().startOf('month'), dayjs().endOf('month')],
       fieldProps: {
         format: 'DD/MM/YYYY',
       },
       search: {
         transform: (value) => {
+          const toYMD = (v: any) => {
+            if (!v) return undefined;
+            // Nếu đã là dayjs object thì format trực tiếp
+            if (dayjs.isDayjs(v)) return v.format('YYYY-MM-DD');
+            // Nếu là string DD/MM/YYYY (do fieldProps format) thì parse đúng format
+            return dayjs(v, 'DD/MM/YYYY').format('YYYY-MM-DD');
+          };
           return {
-            startDate: value?.[0] ? dayjs(value[0]).format('YYYY-MM-DD') : undefined,
-            endDate: value?.[1] ? dayjs(value[1]).format('YYYY-MM-DD') : undefined,
+            startDate: toYMD(value?.[0]),
+            endDate: toYMD(value?.[1]),
           };
         },
       },
@@ -542,20 +459,25 @@ const StatisticsPage: React.FC = () => {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setAttendanceOpen(true)}
+            size="large"
           >
-            Chấm công hôm nay
+            Chấm công
           </Button>
         }
       >
         <ProTable<any>
+          actionRef={attendanceActionRef}
           columns={monthlyAttendanceColumns}
           rowKey={(record: any) => record.id || Math.random().toString()}
           search={{ labelWidth: "auto", defaultCollapsed: false }}
           request={async (params) => {
             try {
+              // startDate/endDate đã được transform đảm bảo format YYYY-MM-DD
+              const startDate = params.startDate || dayjs().startOf('month').format('YYYY-MM-DD');
+              const endDate = params.endDate || dayjs().endOf('month').format('YYYY-MM-DD');
               const res = await attendanceRequest('GET', '/my-history', null, {
-                startDate: params.startDate,
-                endDate: params.endDate
+                startDate,
+                endDate
               });
 
               if (res.success && res.data) {
@@ -688,7 +610,7 @@ const StatisticsPage: React.FC = () => {
           name="workingDays"
           label="Số giờ hành chính làm được"
           min={0}
-          max={24}
+          max={8}
           fieldProps={{ precision: 1 }}
           rules={[{ required: true, message: "Vui lòng nhập số giờ làm" }]}
         />

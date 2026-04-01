@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DatePicker, Spin, Typography, Space, Empty, Row, Col, Card, Grid } from 'antd';
+import { Button, DatePicker, Spin, Typography, Space, Empty, Row, Col, Card, Grid } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 
@@ -120,29 +120,19 @@ const IncomeStatisticsPage: React.FC = () => {
                   <Row gutter={[6, 6]}>
                     {presets.map((p) => (
                       <Col key={p.label}>
-                        <button
+                        <Button
+                          size="small"
+                          type={
+                            dateRange[0].isSame(p.value[0], 'day') &&
+                            dateRange[1].isSame(p.value[1], 'day')
+                              ? 'primary'
+                              : 'default'
+                          }
                           onClick={() => setDateRange(p.value)}
-                          style={{
-                            padding: '4px 10px',
-                            fontSize: 12,
-                            borderRadius: 16,
-                            border: '1px solid #d9d9d9',
-                            background:
-                              dateRange[0].isSame(p.value[0], 'day') &&
-                              dateRange[1].isSame(p.value[1], 'day')
-                                ? '#1677ff'
-                                : '#fff',
-                            color:
-                              dateRange[0].isSame(p.value[0], 'day') &&
-                              dateRange[1].isSame(p.value[1], 'day')
-                                ? '#fff'
-                                : 'inherit',
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap',
-                          }}
+                          style={{ borderRadius: 16, whiteSpace: 'nowrap', height: 28 }}
                         >
                           {p.label}
-                        </button>
+                        </Button>
                       </Col>
                     ))}
                   </Row>
