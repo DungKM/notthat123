@@ -273,11 +273,7 @@ const AppRouter: React.FC = () => {
           {/* Common Staff Modules */}
           <Route
             path={ROUTES.ADMIN_CHAM_CONG_CA_NHAN}
-            element={
-              <ProtectedAdminRoute roles={[Role.SITE_MANAGER, Role.STAFF, Role.ACCOUNTANT]}>
-                <AttendancePage />
-              </ProtectedAdminRoute>
-            }
+            element={<Navigate to={ROUTES.ADMIN_THONG_KE} replace />}
           />
           <Route
             path={ROUTES.ADMIN_YEU_CAU_UNG_TIEN}
