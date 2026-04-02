@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-white text-gray-800 pt-16 pb-8 border-t border-gray-100">
       <Container>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_2fr] gap-8 mb-12 border-b border-gray-100 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 border-b border-gray-100 pb-12">
           {/* Brand Column */}
           <div className="space-y-6">
             <Link to="/" className="flex items-center gap-2 group cursor-pointer">
@@ -40,40 +40,70 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-6">
-            <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary">{t('footer.contact_info')}</h4>
-            <ul className="space-y-4 text-sm text-gray-600">
-              <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary" /> TT Chàm, TP. Vinh, Nghệ An</li>
-              <li className="flex items-center gap-3"><PhoneOutlined className="text-showcase-primary" /> 0123 456 789</li>
-              <li className="flex items-center gap-3"><MailOutlined className="text-showcase-primary" /> info@noithathochi.com</li>
-            </ul>
+          {/* Trụ sở chính */}
+          <div className="flex flex-col h-full gap-4">
+            <div>
+              <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">TRỤ SỞ CHÍNH</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> Toà nhà VIMECO, Phạm Hùng, Cầu Giấy, Hà Nội</li>
+                <li className="flex items-center gap-3"><PhoneOutlined className="text-showcase-primary shrink-0" /> 0326 908 884</li>
+              </ul>
+            </div>
+            <div className="border border-gray-100 rounded overflow-hidden flex-1 min-h-[180px] w-full shadow-sm transition-all duration-500">
+              <iframe
+                title="Map Trụ sở chính"
+                src="https://www.google.com/maps?q=To%C3%A0+nh%C3%A0+VIMECO,+Ph%E1%BA%A1m+H%C3%B9ng,+C%E1%BA%A7u+Gi%E1%BA%A5y,+H%C3%A0+N%E1%BB%99i&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+              ></iframe>
+            </div>
           </div>
 
-
-
-          {/* Newsletter */}
-          <div className="space-y-6">
-            <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary">{t('footer.about_us')}</h4>
-            <ul className="space-y-4 text-sm text-gray-600">
-              <li><a href="#" className="hover:text-showcase-primary !text-gray-600 transition-colors">{t('footer.real_projects')}</a></li>
-              <li><a href="#" className="hover:text-showcase-primary !text-gray-600 transition-colors">{t('footer.quote')}</a></li>
-              <li><a href="#" className="hover:text-showcase-primary !text-gray-600 transition-colors">{t('footer.process')}</a></li>
-              <li><a href="#" className="hover:text-showcase-primary !text-gray-600 transition-colors">{t('footer.warranty')}</a></li>
-            </ul>
+          {/* Văn phòng giao dịch */}
+          <div className="flex flex-col h-full gap-4">
+            <div>
+              <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">VĂN PHÒNG GIAO DỊCH</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> Ngõ 21 Tả Thanh Oai, Đại Thanh, Hà Nội</li>
+                <li className="flex items-center gap-3"><PhoneOutlined className="text-showcase-primary shrink-0" /> 0326 908 884</li>
+              </ul>
+            </div>
+            <div className="border border-gray-100 rounded overflow-hidden flex-1 min-h-[180px] w-full shadow-sm transition-all duration-500">
+              <iframe
+                title="Map Văn phòng giao dịch"
+                src="https://www.google.com/maps?q=Ng%C3%B5+21+T%E1%BA%A3+Thanh+Oai,+%C4%90%E1%BA%A1i+Thanh,+H%C3%A0+N%E1%BB%99i&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+              ></iframe>
+            </div>
           </div>
 
-          {/* Map Column */}
-          <div className="space-y-6 border border-gray-100 rounded-lg overflow-hidden h-[200px] shadow-sm transition-all duration-500">
-            <iframe
-              title="Google Map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3725.326265744883!2d105.8037340760463!3d20.979555689471587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ace4443722a5%3A0xe5a3c26cb7f06bad!2zMzEgTmd1eeG7hW4gWGnhu4NuLCBUaGFuaCBYdcOibiBOYW0sIFRoYW5oIFh1w6JuLCBIw6AgTuG7mWksIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1710000000000!5m2!1svi!2s"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen={true}
-              loading="lazy"
-            ></iframe>
+          {/* Xưởng sản xuất */}
+          <div className="flex flex-col h-full gap-4">
+            <div>
+              <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">XƯỞNG SẢN XUẤT</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> Ngõ 41 Tả Thanh Oai, Đại Thanh, Hà Nội</li>
+                <li className="flex items-center gap-3"><PhoneOutlined className="text-showcase-primary shrink-0" /> 0326 908 884</li>
+              </ul>
+            </div>
+            <div className="border border-gray-100 rounded overflow-hidden flex-1 min-h-[180px] w-full shadow-sm transition-all duration-500">
+              <iframe
+                title="Map Xưởng sản xuất"
+                src="https://www.google.com/maps?q=Ng%C3%B5+41+T%E1%BA%A3+Thanh+Oai,+%C4%90%E1%BA%A1i+Thanh,+H%C3%A0+N%E1%BB%99i&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+              ></iframe>
+            </div>
           </div>
         </div>
         <FloatingSocials />

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Drawer, List, Badge, Button, Typography, Empty, Space, Tag } from 'antd';
 import {
   CheckOutlined,
@@ -41,6 +42,20 @@ const typeConfig = {
     tag: { color: 'error', label: 'Phạt' },
     icon: <WarningOutlined style={{ color: '#ff4d4f', fontSize: 16 }} />,
   },
+  advance_request: {
+    color: '#faad14', // yellow/orange
+    bg: '#fffbe6',
+    border: '#ffe58f',
+    tag: { color: 'warning', label: 'Ứng tiền' },
+    icon: <DollarOutlined style={{ color: '#faad14', fontSize: 16 }} />,
+  },
+  advance_status: {
+    color: '#13c2c2', // cyan
+    bg: '#e6fffb',
+    border: '#87e8de',
+    tag: { color: 'cyan', label: 'Trạng thái ứng' },
+    icon: <DollarOutlined style={{ color: '#13c2c2', fontSize: 16 }} />,
+  },
 };
 
 const getConfig = (type: string) =>
@@ -58,7 +73,7 @@ const renderContent = (item: TaskNotification) => {
         </Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: 13, lineHeight: 1.5 }}>
           <strong>{item.assignedByName}</strong> giao cho bạn tại dự án{' '}
-          <strong style={{ color: cfg.color }}>{item.projectName}</strong>
+          <strong>{item.projectName}</strong>
         </Typography.Text>
       </>
     );
@@ -69,12 +84,28 @@ const renderContent = (item: TaskNotification) => {
       <>
         <Typography.Text
           strong
-          style={{ display: 'block', marginBottom: 4, fontSize: 14, color: cfg.color }}
+          style={{ display: 'block', marginBottom: 4, fontSize: 14, color: '#000' }}
         >
           {item.message}
         </Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: 13 }}>
           Bởi: <strong>{item.assignedByName}</strong>
+        </Typography.Text>
+      </>
+    );
+  }
+
+  if (item.type === 'advance_request' || item.type === 'advance_status') {
+    return (
+      <>
+        <Typography.Text
+          strong
+          style={{ display: 'block', marginBottom: 4, fontSize: 14, color: '#000' }}
+        >
+          {item.message || (item.type === 'advance_status' ? 'Cập nhật trạng thái ứng tiền' : 'Có yêu cầu ứng tiền mới')}
+        </Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+          Từ: <strong>{item.assignedByName}</strong>
         </Typography.Text>
       </>
     );
@@ -92,6 +123,7 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   onMarkAllAsRead,
   onDelete,
 }) => {
+  const navigate = useNavigate();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
@@ -132,16 +164,23 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
             return (
               <List.Item
                 style={{
-                  background: item.isRead ? 'transparent' : cfg.bg,
+                  background: item.isRead ? 'transparent' : '#e6f7ff',
                   padding: '12px 16px',
                   marginBottom: 8,
                   borderRadius: 8,
-                  border: `1px solid ${item.isRead ? '#f0f0f0' : cfg.border}`,
+                  border: `1px solid ${item.isRead ? '#f0f0f0' : '#91caff'}`,
                   cursor: 'pointer',
                   display: 'block',
                 }}
                 onClick={() => {
                   if (!item.isRead) onMarkAsRead(item.id);
+                  if (item.type === 'advance_request') {
+                    navigate('/quan-tri/duyet-ung-tien');
+                    onClose();
+                  } else if (item.type === 'advance_status') {
+                    navigate('/quan-tri/thong-ke');
+                    onClose();
+                  }
                 }}
               >
                 <div style={{ width: '100%' }}>

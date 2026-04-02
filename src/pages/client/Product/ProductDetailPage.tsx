@@ -57,7 +57,7 @@ const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>(); // Lấy slug thật từ URL
   const navigate = useNavigate();
   const { addToCart, setIsCartOpen } = useCart();
-  const [quantity, setQuantity] = React.useState(1);
+  const [quantity, setQuantity] = React.useState<number | string>(1);
   const [activeImgIndex, setActiveImgIndex] = React.useState(0);
 
   const { data: apiProduct, loading, getBySlug, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
@@ -169,8 +169,8 @@ const ProductDetailPage: React.FC = () => {
       title: product.title,
       price: product.price,
       image: product.images[0],
-      quantity: quantity,
-      subtotal: product.price * quantity,
+      quantity: Number(quantity) || 1,
+      subtotal: product.price * (Number(quantity) || 1),
       stockQuantity: product.stockQuantity,
     });
     // Trigger cart drawer open
@@ -292,22 +292,46 @@ const ProductDetailPage: React.FC = () => {
 
                       {/* Action Buttons */}
                       <div className="flex flex-wrap items-stretch gap-3 mb-8">
-                        {/* Quantity Selector */}
-                        <div className={`flex border rounded overflow-hidden h-10 w-[72px] shrink-0 transition-opacity ${!product.stockQuantity ? 'border-gray-200 bg-gray-50 opacity-60 pointer-events-none' : 'border-gray-300 bg-white'}`}>
-                          <div className="flex-1 flex items-center justify-center font-bold text-gray-800 text-[14px]">
-                            {quantity}
-                          </div>
-                          <div className={`flex flex-col border-l w-6 ${!product.stockQuantity ? 'border-gray-200' : 'border-gray-300'}`}>
+                        <div className={`flex border rounded overflow-hidden h-10 w-[80px] shrink-0 transition-opacity ${!product.stockQuantity ? 'border-gray-200 bg-gray-50 opacity-60 pointer-events-none' : 'border-gray-300 bg-white'}`}>
+                          <input
+                            type="text"
+                            value={quantity}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '') {
+                                setQuantity('');
+                                return;
+                              }
+                              const numVal = parseInt(val, 10);
+                              if (isNaN(numVal)) return;
+
+                              if (product?.stockQuantity && numVal > product.stockQuantity) {
+                                toast.error(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`);
+                                setQuantity(product.stockQuantity);
+                              } else {
+                                setQuantity(numVal);
+                              }
+                            }}
+                            onBlur={() => {
+                              if (quantity === '' || Number(quantity) < 1) {
+                                setQuantity(1);
+                              }
+                            }}
+                            className="flex-1 w-full text-center font-bold text-gray-800 text-[14px] focus:outline-none bg-transparent"
+                            disabled={!product.stockQuantity}
+                          />
+                          <div className={`flex flex-col border-l w-6 shrink-0 ${!product.stockQuantity ? 'border-gray-200' : 'border-gray-300'}`}>
                             <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => {
-                              if (product?.stockQuantity && q >= product.stockQuantity) {
+                              const currentQ = Number(q) || 1;
+                              if (product?.stockQuantity && currentQ >= product.stockQuantity) {
                                 setTimeout(() => toast.error(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`), 0);
                                 return product.stockQuantity;
                               }
-                              return q + 1;
+                              return currentQ + 1;
                             })} className={`flex-1 flex items-center justify-center border-b text-[10px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 border-gray-300 text-gray-600'}`} title="Tăng số lượng">
                               <span className="leading-none mt-1">+</span>
                             </button>
-                            <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => Math.max(1, q - 1))} className={`flex-1 flex items-center justify-center text-[12px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`} title="Giảm số lượng">
+                            <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => Math.max(1, (Number(q) || 1) - 1))} className={`flex-1 flex items-center justify-center text-[12px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`} title="Giảm số lượng">
                               <span className="leading-none mb-1">-</span>
                             </button>
                           </div>
@@ -340,7 +364,7 @@ const ProductDetailPage: React.FC = () => {
                         )}
 
                         <a
-                          href="tel:0911972789"
+                          href="tel:0326908884"
                           className="h-10 px-6 !bg-[#222] hover:bg-black !text-white font-bold rounded flex items-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
                         >
                           <PhoneFilled className="text-[16px]" />

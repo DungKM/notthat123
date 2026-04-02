@@ -207,7 +207,7 @@ const Header: React.FC = () => {
               <img
                 src="/assets/images/image-logo.png"
                 alt="Nội Thất Hochi"
-                className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? 'brightness-0 invert' : ''}`}
+                className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? '' : ''}`}
               />
             </div>
           </Link>

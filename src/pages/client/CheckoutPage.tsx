@@ -278,7 +278,7 @@ const CheckoutPage: React.FC = () => {
                       "{t('checkout.payment_note')}"
                     </p>
                     <p className="mt-4 text-sm font-medium text-teal-950/80">
-                      {t('checkout.payment_hotline')}: <span className="text-red-600 font-bold hover:underline cursor-pointer">0911.972.789</span>
+                      {t('checkout.payment_hotline')}: <span className="text-red-600 font-bold hover:underline cursor-pointer">0326.908.884</span>
                     </p>
                   </div>
                 </div>
@@ -317,42 +317,44 @@ const CheckoutPage: React.FC = () => {
                                   alt={item.title}
                                   className="h-full w-full object-cover transition-transform group-hover:scale-110"
                                 />
-                                <Popconfirm
-                                  title="Xoá sản phẩm"
-                                  description="Bạn có chắc muốn xoá sản phẩm này khỏi đơn hàng?"
-                                  onConfirm={() => removeFromCart(item.id)}
-                                  okText="Có, xoá ngay"
-                                  cancelText="Không"
-                                >
-                                  <button
-                                    className="absolute top-1 right-1 rounded-full bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
-                                    title="Xoá sản phẩm"
-                                    type="button"
-                                  >
-                                    <DeleteOutlined className="text-xs" />
-                                  </button>
-                                </Popconfirm>
                               </div>
 
                               <div className="min-w-0 flex-1 flex flex-col justify-between">
-                                <div>
-                                  <h3 className="line-clamp-2 text-sm font-bold text-teal-950 transition-colors hover:text-showcase-primary">
-                                    {item.title}
-                                  </h3>
-                                  <p className="mt-1 text-xs text-gray-400 font-medium">
-                                    {t('checkout.unit_price')}: {item.price.toLocaleString('vi-VN')} đ
-                                  </p>
-                                  <p className="text-sm font-bold text-showcase-primary mt-1">
-                                    {item.subtotal.toLocaleString('vi-VN')} <span className="text-[10px] uppercase">{t('common.vnd')}</span>
-                                  </p>
+                                <div className="flex justify-between items-start gap-2">
+                                  <div>
+                                    <h3 className="line-clamp-2 text-sm font-bold text-teal-950 transition-colors hover:text-showcase-primary">
+                                      {item.title}
+                                    </h3>
+                                    <p className="mt-1 text-xs text-gray-400 font-medium">
+                                      {t('checkout.unit_price')}: {item.price.toLocaleString('vi-VN')} đ
+                                    </p>
+                                    <p className="text-sm font-bold text-showcase-primary mt-1">
+                                      {item.subtotal.toLocaleString('vi-VN')} <span className="text-[10px] uppercase">{t('common.vnd')}</span>
+                                    </p>
+                                  </div>
+                                  <Popconfirm
+                                    title="Xoá sản phẩm"
+                                    description="Bạn có chắc chắn muốn xoá?"
+                                    onConfirm={() => removeFromCart(item.id)}
+                                    okText="Xoá"
+                                    cancelText="Không"
+                                    placement="left"
+                                  >
+                                    <button
+                                      className=" cursor-pointer text-red-500 transition-colors p-1"
+                                      title="Xoá sản phẩm"
+                                      type="button"
+                                    >
+                                      <DeleteOutlined className="text-[20px]" />
+                                    </button>
+                                  </Popconfirm>
                                 </div>
 
                                 <div className="mt-3">
-                                  <div className={`flex items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${
-                                    item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
-                                      ? 'border-red-400'
-                                      : 'border-slate-500'
-                                  }`}>
+                                  <div className={`flex items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                                    ? 'border-slate-500'
+                                    : 'border-slate-500'
+                                    }`}>
                                     <button
                                       className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
                                       onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
@@ -365,18 +367,17 @@ const CheckoutPage: React.FC = () => {
                                         if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
                                         updateQuantity(item.id, item.quantity + 1);
                                       }}
-                                      className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${
-                                        item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
-                                          ? 'text-slate-300 bg-slate-50 cursor-not-allowed'
-                                          : 'text-slate-800 hover:bg-slate-100'
-                                      }`}
+                                      className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                                        ? 'text-slate-300 bg-slate-50 cursor-not-allowed'
+                                        : 'text-slate-800 hover:bg-slate-100'
+                                        }`}
                                     >
                                       +
                                     </button>
                                   </div>
                                   {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
                                     <p className="mt-1.5 text-[11px] text-red-500 font-medium">
-                                      ⚠ Chỉ còn tối đa {item.stockQuantity} sản phẩm trong kho
+                                      Chỉ còn tối đa {item.stockQuantity} sản phẩm trong kho
                                     </p>
                                   )}
                                 </div>

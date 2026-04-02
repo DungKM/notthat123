@@ -1,6 +1,6 @@
 // ─── Notification Types ───
 
-export type NotificationType = 'task_assignment' | 'penalty' | 'bonus';
+export type NotificationType = 'task_assignment' | 'penalty' | 'bonus' | 'advance_request' | 'advance_status';
 
 interface BaseNotification {
   id: string;
@@ -12,6 +12,7 @@ interface BaseNotification {
   isRead: boolean;
   createdAt: string;
   updatedAt?: string;
+  message?: string;
 }
 
 export interface TaskAssignmentNotification extends BaseNotification {
@@ -19,12 +20,10 @@ export interface TaskAssignmentNotification extends BaseNotification {
   projectId: string;
   projectName: string;
   taskDescription: string;
-  message?: string;
 }
 
 export interface PenaltyNotification extends BaseNotification {
   type: 'penalty';
-  message: string;
   projectId?: string;
   projectName?: string;
   taskDescription?: string;
@@ -32,13 +31,22 @@ export interface PenaltyNotification extends BaseNotification {
 
 export interface BonusNotification extends BaseNotification {
   type: 'bonus';
-  message: string;
   projectId?: string;
   projectName?: string;
   taskDescription?: string;
 }
 
+export interface AdvanceRequestNotification extends BaseNotification {
+  type: 'advance_request';
+}
+
+export interface AdvanceStatusNotification extends BaseNotification {
+  type: 'advance_status';
+}
+
 export type TaskNotification =
   | TaskAssignmentNotification
   | PenaltyNotification
-  | BonusNotification;
+  | BonusNotification
+  | AdvanceRequestNotification
+  | AdvanceStatusNotification;

@@ -189,7 +189,7 @@ const StatisticsPage: React.FC = () => {
       title: "Ngày",
       dataIndex: "date",
       hideInSearch: true,
-      render: (_, record) => dayjs(record.date).format("DD/MM/YYYY"),
+      render: (_, record) => dayjs((record as any).createdAt || record.date).format("DD/MM/YYYY HH:mm"),
     },
     {
       title: "Số công hành chính",
@@ -336,7 +336,7 @@ const StatisticsPage: React.FC = () => {
           <Col xs={24} sm={12} md={8}>
             <ProCard style={{ background: "#e6f7ff" }} bordered>
               <Statistic
-                title="Tổng công"
+                title="Tổng công hành chính"
                 value={attendanceSummary.totalWorkUnits}
                 suffix={`công ≈ ${attendanceSummary.totalWorkHours} tiếng`}
                 prefix={<CheckCircleOutlined style={{ color: "#1890ff" }} />}
@@ -346,7 +346,7 @@ const StatisticsPage: React.FC = () => {
           <Col xs={24} sm={12} md={8}>
             <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
-                title="Công OT"
+                title="Tổng công tăng ca"
                 value={attendanceSummary.totalOTUnits}
                 suffix={`công ≈ ${attendanceSummary.totalOTHours} tiếng`}
                 prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
@@ -356,7 +356,7 @@ const StatisticsPage: React.FC = () => {
           <Col xs={24} sm={12} md={8}>
             <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
-                title="Tổng công hành chính và OT"
+                title="Tổng công hành chính và và tăng ca"
                 value={totalDays}
                 suffix={`công = ${totalHours} tiếng`}
                 prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
@@ -373,9 +373,22 @@ const StatisticsPage: React.FC = () => {
         headerBordered
         loading={loadingStats}
       >
-        <Descriptions column={{ xs: 1, sm: 2 }} bordered>
-          <Descriptions.Item label="Lương cơ bản">
+        <Descriptions column={{ xs: 1, sm: 2, md: 3 }} bordered>
+          <Descriptions.Item label="Lương tháng này đang có">
             {formatCurrency(baseSalary)}
+          </Descriptions.Item>
+          <Descriptions.Item label="Số tiền tháng trước đang còn">
+            {formatCurrency(0)}
+          </Descriptions.Item>
+          <Descriptions.Item label="Tổng tiền công ty phải thanh toán">
+            <strong
+              style={{
+                color: estimatedSalary >= 0 ? "#52c41a" : "#ff4d4f",
+                fontSize: 16,
+              }}
+            >
+              {formatCurrency(estimatedSalary)}
+            </strong>
           </Descriptions.Item>
           <Descriptions.Item label="Thưởng">
             <span style={{ color: '#52c41a' }}>+{formatCurrency(bonus)}</span>
@@ -386,68 +399,8 @@ const StatisticsPage: React.FC = () => {
           <Descriptions.Item label="Đã ứng">
             <span style={{ color: '#fa8c16' }}>-{formatCurrency(advance)}</span>
           </Descriptions.Item>
-          <Descriptions.Item label="Số tiền đang có" span={2}>
-            <strong
-              style={{
-                color: estimatedSalary >= 0 ? "#52c41a" : "#ff4d4f",
-                fontSize: 18,
-              }}
-            >
-              {formatCurrency(estimatedSalary)}
-            </strong>
-          </Descriptions.Item>
         </Descriptions>
       </ProCard>
-
-      <ProCard
-        title="Lịch sử ứng tiền"
-        bordered
-        headerBordered
-        collapsible
-        defaultCollapsed
-        extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setAdvanceOpen(true)}
-          >
-            Tạo ứng tiền
-          </Button>
-        }
-      >
-
-        <ProTable<AdvanceRequest>
-          actionRef={advanceActionRef}
-          columns={advanceColumns}
-          rowKey={(record) => record.id || (record as any)._id}
-          search={{ labelWidth: "auto", defaultCollapsed: false }}
-          request={async (params) => {
-            try {
-              const res = await request('GET', '', null, {
-                page: params.current || 1,
-                limit: params.pageSize || 10,
-              });
-              let data = res.data || [];
-              if (params.requestDateFilter) {
-                data = data.filter((item: AdvanceRequest) =>
-                  dayjs((item as any).createdAt || item.requestDate).isSame(params.requestDateFilter, "day"),
-                );
-              }
-              return {
-                data,
-                success: true,
-                total: res.meta?.total || 0,
-              };
-            } catch {
-              return { data: [], success: false, total: 0 };
-            }
-          }}
-          pagination={{ pageSize: 5 }}
-          options={false}
-          scroll={{ x: 500 }}
-        />
-      </ProCard>
-
       <ProCard
         title="Chi tiết công"
         bordered
@@ -501,6 +454,57 @@ const StatisticsPage: React.FC = () => {
           options={false}
         />
       </ProCard>
+
+      <ProCard
+        title="Lịch sử ứng tiền"
+        bordered
+        headerBordered
+        collapsible
+        defaultCollapsed
+        extra={
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setAdvanceOpen(true)}
+          >
+            Tạo ứng tiền
+          </Button>
+        }
+      >
+
+        <ProTable<AdvanceRequest>
+          actionRef={advanceActionRef}
+          columns={advanceColumns}
+          rowKey={(record) => record.id || (record as any)._id}
+          search={{ labelWidth: "auto", defaultCollapsed: false }}
+          request={async (params) => {
+            try {
+              const res = await request('GET', '', null, {
+                page: params.current || 1,
+                limit: params.pageSize || 10,
+              });
+              let data = res.data || [];
+              if (params.requestDateFilter) {
+                data = data.filter((item: AdvanceRequest) =>
+                  dayjs((item as any).createdAt || item.requestDate).isSame(params.requestDateFilter, "day"),
+                );
+              }
+              return {
+                data,
+                success: true,
+                total: res.meta?.total || 0,
+              };
+            } catch {
+              return { data: [], success: false, total: 0 };
+            }
+          }}
+          pagination={{ pageSize: 5 }}
+          options={false}
+          scroll={{ x: 500 }}
+        />
+      </ProCard>
+
+
 
       <ProCard
         title="Lịch sử thanh toán lương"

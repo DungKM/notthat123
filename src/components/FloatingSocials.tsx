@@ -24,21 +24,21 @@ const FloatingSocials: React.FC = () => {
     <>
       {/* Button số điện thoại bên trái */}
       <a
-        href="tel:0911972789"
+        href="tel:0326908884"
         className="fixed bottom-4 left-4 md:bottom-10 md:left-6 z-999
         flex items-center gap-2 !bg-showcase-primary !text-white 
         px-4 py-3 rounded-full shadow-xl hover:scale-105 transition-all duration-300 animate-ripple"
       >
         <PhoneOutlined className="text-xl" />
         <span className="font-semibold ">
-          0911 972 789
+          0326 908 884
         </span>
       </a>
 
       {/* Social bên phải */}
       <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-999 flex flex-col gap-3">
         <a
-          href="https://zalo.me/0911972789"
+          href="https://zalo.me/0326908884"
           target="_blank"
           rel="noopener noreferrer"
           className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300 animate-ripple"

@@ -47,7 +47,7 @@ const Features: React.FC = () => {
               </p>
               <div className="pt-4">
                 <span className="block text-gray-500 uppercase text-[10px] tracking-widest mb-1">{t('features.hotline_label')}</span>
-                <span className="text-xl font-bold text-showcase-primary">0123 456 789</span>
+                <span className="text-xl font-bold text-showcase-primary">0326 908 884</span>
               </div>
             </div>
             
