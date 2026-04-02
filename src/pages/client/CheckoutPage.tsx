@@ -5,8 +5,9 @@ import { useCart } from '@/src/features/showcase/context/CartContext';
 import { useOrderService } from '@/src/api/services';
 import api from '@/src/api/axiosInstance';
 import SEO from '@/src/components/common/SEO';
-import { Popconfirm } from 'antd';
+
 import Badge from '@/src/features/showcase/components/ui/Badge';
+import PopConfirm from '@/src/components/ui/PopConfirm';
 import {
   ArrowLeftOutlined,
   UserOutlined,
@@ -332,22 +333,22 @@ const CheckoutPage: React.FC = () => {
                                       {item.subtotal.toLocaleString('vi-VN')} <span className="text-[10px] uppercase">{t('common.vnd')}</span>
                                     </p>
                                   </div>
-                                  <Popconfirm
+                                  <PopConfirm
                                     title="Xoá sản phẩm"
-                                    description="Bạn có chắc chắn muốn xoá?"
+                                    description="Bạn có chắc chắn muốn xoá sản phẩm này?"
                                     onConfirm={() => removeFromCart(item.id)}
-                                    okText="Xoá"
+                                    okText="Xoá ngay"
                                     cancelText="Không"
                                     placement="left"
                                   >
                                     <button
-                                      className=" cursor-pointer text-red-500 transition-colors p-1"
+                                      className="cursor-pointer text-red-400 hover:text-red-600 transition-colors p-1"
                                       title="Xoá sản phẩm"
                                       type="button"
                                     >
-                                      <DeleteOutlined className="text-[20px]" />
+                                      <DeleteOutlined className="text-[18px]" />
                                     </button>
-                                  </Popconfirm>
+                                  </PopConfirm>
                                 </div>
 
                                 <div className="mt-3">

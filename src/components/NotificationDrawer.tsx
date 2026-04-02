@@ -6,6 +6,7 @@ import {
   ProjectOutlined,
   DollarOutlined,
   WarningOutlined,
+  DownOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { TaskNotification } from '@/src/types';
@@ -17,6 +18,8 @@ interface NotificationDrawerProps {
   onMarkAsRead: (id: string) => void;
   onMarkAllAsRead: () => void;
   onDelete: (id: string) => void;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 // ─── Config theo loại thông báo ───────────────────────────────────────────────
@@ -122,6 +125,8 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   onMarkAsRead,
   onMarkAllAsRead,
   onDelete,
+  hasMore = false,
+  onLoadMore,
 }) => {
   const navigate = useNavigate();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -233,6 +238,20 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
               </List.Item>
             );
           }}
+          footer={
+            hasMore ? (
+              <div style={{ textAlign: 'center' }}>
+                <Button
+                  type="link"
+                  icon={<DownOutlined />}
+                  onClick={onLoadMore}
+                  style={{ fontSize: 17, color: "#ff1818ff", fontWeight: 700 }}
+                >
+                  Xem thêm
+                </Button>
+              </div>
+            ) : null
+          }
         />
       )}
     </Drawer>

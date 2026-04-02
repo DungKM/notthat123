@@ -18,7 +18,6 @@ import { useCart } from '../../context/CartContext';
 import { useTranslation } from 'react-i18next';
 import { useConstructionCategoryService, useCategoryService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
-import { Popconfirm } from 'antd';
 import toast from 'react-hot-toast';
 
 const Header: React.FC = () => {
@@ -207,7 +206,7 @@ const Header: React.FC = () => {
               <img
                 src="/assets/images/image-logo.png"
                 alt="Nội Thất Hochi"
-                className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? '' : ''}`}
+                className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? 'brightness-0 invert' : ''}`}
               />
             </div>
           </Link>
@@ -659,21 +658,13 @@ const Header: React.FC = () => {
                         <div>
                           <div className="flex justify-between items-start gap-2">
                             <h4 className="text-sm font-bold !text-gray-900 line-clamp-2 leading-tight">{item.title}</h4>
-                            <Popconfirm
-                              title="Xoá sản phẩm"
-                              description="Bạn có chắc muốn xoá sản phẩm này khỏi giỏ hàng?"
-                              onConfirm={(e) => { e?.stopPropagation(); removeFromCart(item.id); }}
-                              okText="Có, xoá ngay"
-                              cancelText="Không"
-                            >
-                              <button
-                                onClick={(e) => e.stopPropagation()}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setItemToDelete(item.id); }}
                                 className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all"
                                 title="Xoá sản phẩm"
                               >
                                 <DeleteOutlined className="text-[18px]" />
                               </button>
-                            </Popconfirm>
                           </div>
                           <p className="text-showcase-primary font-black mt-1">{item.price.toLocaleString('vi-VN')} đ</p>
                         </div>

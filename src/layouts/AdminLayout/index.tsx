@@ -19,7 +19,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications(user?.id);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, hasMore, loadMore } = useNotifications(user?.id);
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
   const [collapsed, setCollapsed] = useState(isMobile);
@@ -174,52 +174,47 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           src: user?.avatar,
           title: user?.name,
           render: (_, dom) => (
-            <Space style={{ cursor: 'pointer', padding: '0 8px' }} size="middle">
-              <ReloadOutlined
-                style={{ fontSize: 18, cursor: 'pointer', color: '#666' }}
-                title="Tải lại trang"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.reload();
-                }}
-              />
-              <Badge count={unreadCount} size="small" offset={[-2, 2]}>
-                <BellOutlined
-                  style={{ fontSize: 20, cursor: 'pointer' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setNotifOpen(true);
-                  }}
-                />
-              </Badge>
-              <Dropdown
-                menu={{
-                  items: [
-                    {
-                      key: 'logout',
-                      icon: <LogoutOutlined />,
-                      label: 'Đăng xuất',
-                      onClick: () => {
-                        logout();
-                        navigate('/login');
-                      },
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: 'logout',
+                    icon: <LogoutOutlined />,
+                    label: 'Đăng xuất',
+                    onClick: () => {
+                      logout();
+                      navigate('/login');
                     },
-                  ],
-                }}
-              >
-                <Space>
-                  {dom}
-                  <Tag color="green" className="hidden-mobile" style={{ margin: 0 }}>
-                    {user?.role === Role.DIRECTOR ? 'Giám đốc' :
-                      user?.role === Role.ACCOUNTANT ? 'Kế toán' :
-                        user?.role === Role.SITE_MANAGER ? 'Quản lý công trình' :
-                          user?.role === Role.STAFF ? 'Nhân viên' : user?.role}
-                  </Tag>
-                </Space>
-              </Dropdown>
-            </Space>
+                  },
+                ],
+              }}
+            >
+              <Space style={{ cursor: 'pointer' }}>
+                {dom}
+                <Tag color="green" className="hidden-mobile" style={{ margin: 0 }}>
+                  {user?.role === Role.DIRECTOR ? 'Giám đốc' :
+                    user?.role === Role.ACCOUNTANT ? 'Kế toán' :
+                      user?.role === Role.SITE_MANAGER ? 'Quản lý công trình' :
+                        user?.role === Role.STAFF ? 'Nhân viên' : user?.role}
+                </Tag>
+              </Space>
+            </Dropdown>
           ),
         }}
+        actionsRender={() => [
+          <ReloadOutlined
+            key="reload"
+            style={{ fontSize: 22, cursor: 'pointer', color: '#666' }}
+            title="Tải lại trang"
+            onClick={() => window.location.reload()}
+          />,
+          <Badge key="notif" count={unreadCount} size="default" offset={[2, 2]} style={{ overflow: 'visible' }}>
+            <BellOutlined
+              style={{ fontSize: 22, cursor: 'pointer' }}
+              onClick={() => setNotifOpen(true)}
+            />
+          </Badge>,
+        ]}
         headerTitleRender={(logo, title) => (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {logo}
@@ -288,6 +283,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
               .ant-pro-table-search .ant-row > .ant-col:last-child {
                 margin-bottom: 0 !important;
               }
+            /* ── Fix: Badge thông báo luôn hiển thị trên mobile ── */
+            .ant-pro-layout .ant-pro-layout-header-actions-header-action,
+            .ant-pro-layout .ant-pro-global-header .ant-space,
+            .ant-pro-layout .ant-pro-global-header-header-actions-avatar {
+              overflow: visible !important;
+            }
+            .ant-badge {
+              overflow: visible !important;
+            }
+            .ant-badge .ant-badge-count {
+              z-index: 99 !important;
             }
           `}</style>
           {children}
@@ -301,6 +307,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         onMarkAsRead={markAsRead}
         onMarkAllAsRead={markAllAsRead}
         onDelete={deleteNotification}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
       />
     </div>
   );

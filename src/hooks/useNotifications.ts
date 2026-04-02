@@ -1,33 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { message } from 'antd';
 import { useNotificationService } from '@/src/api/services';
 import { TaskNotification } from '@/src/types';
-
 import { socket } from '@/src/api/socket';
 
-export const useNotifications = (userId?: string) => {
-  const { list: notifications, request, getAll } = useNotificationService();
-  const [unreadCount, setUnreadCount] = useState(0);
+const PAGE_SIZE = 10;
 
-  const loadNotifications = useCallback(async () => {
+export const useNotifications = (userId?: string) => {
+  const { request, getAll, meta } = useNotificationService();
+  const [notifications, setNotifications] = useState<TaskNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageRef = useRef(1);
+
+  const loadPage = useCallback(async (page: number, append: boolean = false) => {
     if (!userId) return;
     try {
-      const data = await getAll({ page: 1, limit: 100 });
-      if (data) {
-        const notifArray = Array.isArray(data) ? data : ((data as any).data || []);
-        // Calculate unread count right after setting list
-        setUnreadCount(notifArray.filter((n: any) => !n.isRead).length);
-      }
+      const notifArray = await getAll({ page, limit: PAGE_SIZE });
+      setNotifications(prev => {
+        const updated = append ? [...prev, ...notifArray] : notifArray;
+        setUnreadCount(updated.filter((n: any) => !n.isRead).length);
+        return updated;
+      });
     } catch (e) {
       console.error("Lỗi lấy thông báo:", e);
     }
   }, [userId, getAll]);
 
+  // Cập nhật total từ meta (meta thay đổi sau mỗi getAll)
+  useEffect(() => {
+    if (meta?.total !== undefined) {
+      setTotal(meta.total);
+    }
+  }, [meta]);
+
+  // Reset về page 1 khi reload
+  const loadNotifications = useCallback(() => {
+    pageRef.current = 1;
+    loadPage(1, false);
+  }, [loadPage]);
+
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(() => {
-      loadNotifications();
-    }, 30000);
+    const interval = setInterval(loadNotifications, 30000);
 
     const handleNewNotification = () => {
       loadNotifications();
@@ -42,8 +57,13 @@ export const useNotifications = (userId?: string) => {
     };
   }, [loadNotifications]);
 
-  const addNotification = useCallback((notification: any) => {
-    // Triggers reload after backend creates a task notification
+  const loadMore = useCallback(() => {
+    const nextPage = pageRef.current + 1;
+    pageRef.current = nextPage;
+    loadPage(nextPage, true);
+  }, [loadPage]);
+
+  const addNotification = useCallback((_notification: any) => {
     setTimeout(() => loadNotifications(), 1000);
   }, [loadNotifications]);
 
@@ -55,28 +75,30 @@ export const useNotifications = (userId?: string) => {
   }, [request, loadNotifications]);
 
   const markAllAsRead = useCallback(async () => {
-    const unread = (notifications || []).filter((n: any) => !n.isRead);
+    const unread = notifications.filter((n: any) => !n.isRead);
     try {
       await Promise.all(unread.map(n => request('PATCH', `/${n.id || (n as any)._id}/read`)));
       loadNotifications();
     } catch {}
   }, [notifications, request, loadNotifications]);
-  
+
   const deleteNotification = useCallback(async (id: string) => {
     try {
-       await request('DELETE', `/${id}`);
-       message.success('Xoá thành công');
-       loadNotifications();
+      await request('DELETE', `/${id}`);
+      message.success('Xoá thành công');
+      loadNotifications();
     } catch {}
   }, [request, loadNotifications]);
 
   return {
-    notifications: notifications || [],
-    allNotifications: notifications || [],
+    notifications,
+    allNotifications: notifications,
     unreadCount,
+    hasMore: total > 0 && notifications.length < total,
+    loadMore,
     addNotification,
     markAsRead,
     markAllAsRead,
-    deleteNotification
+    deleteNotification,
   };
 };
