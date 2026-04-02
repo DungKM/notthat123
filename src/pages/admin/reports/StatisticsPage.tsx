@@ -211,15 +211,15 @@ const StatisticsPage: React.FC = () => {
     },
     {
       title: "Thành tiền",
-      dataIndex: "amount",
+      dataIndex: "totalAmount",
       hideInSearch: true,
       render: (_, record) => (
-        record.amount ? (
+        record.totalAmount ? (
           <span style={{ fontWeight: 700, color: "#52c41a" }}>
             {new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",
-            }).format(Number(record.amount || 0))}
+            }).format(Number(record.totalAmount || 0))}
           </span>
         ) : (
           <span style={{ color: '#aaa' }}>-</span>

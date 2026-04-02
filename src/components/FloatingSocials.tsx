@@ -51,13 +51,13 @@ const FloatingSocials: React.FC = () => {
         </a>
 
         <a
-          href="https://www.facebook.com/"
+          href="https://www.facebook.com/profile.php?id=61575740525417"
           target="_blank"
           rel="noopener noreferrer"
           className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-showcase-primary shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300 animate-ripple"
         >
           <img
-            src="/assets/images/fb-logo.png"
+            src="/assets/images/logo_fb.png"
             alt="Facebook"
             className="w-9 h-9 md:w-9 md:h-9 object-contain"
           />

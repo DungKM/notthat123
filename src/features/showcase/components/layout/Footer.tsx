@@ -1,9 +1,6 @@
 import React from 'react';
 import Container from '../ui/Container';
 import {
-  FacebookOutlined,
-  YoutubeOutlined,
-  InstagramOutlined,
   PhoneOutlined,
   MailOutlined,
   EnvironmentOutlined
@@ -34,9 +31,15 @@ const Footer: React.FC = () => {
               {t('footer.brand_desc')}
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center !text-gray-400 hover:bg-showcase-primary hover:border-showcase-primary hover:text-white transition-all"><FacebookOutlined /></a>
-              <a href="#" className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center !text-gray-400 hover:bg-showcase-primary hover:border-showcase-primary hover:text-white transition-all"><YoutubeOutlined /></a>
-              <a href="#" className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center !text-gray-400 hover:bg-showcase-primary hover:border-showcase-primary hover:text-white transition-all"><InstagramOutlined /></a>
+              <a href="https://www.facebook.com/profile.php?id=61575740525417" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center bg-white shadow-sm hover:shadow hover:scale-110 transition-all duration-300 overflow-hidden">
+                <img src="/assets/images/logo_fb.png" alt="Facebook" className="w-full h-full object-cover" />
+              </a>
+              <a href="https://zalo.me/0326908884" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center bg-white shadow-sm hover:shadow hover:scale-110 transition-all duration-300 overflow-hidden">
+                <img src="/assets/images/zalo-logo.png" alt="Zalo" className="w-8 h-8 object-contain" />
+              </a>
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center bg-white shadow-sm hover:shadow hover:scale-110 transition-all duration-300 overflow-hidden">
+                <img src="/assets/images/logo-tt.png" alt="Tiktok" className="w-full h-full object-cover" />
+              </a>
             </div>
           </div>
 

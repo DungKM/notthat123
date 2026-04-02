@@ -4,12 +4,14 @@ import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Role } from '@/src/auth/types';
 import { socket } from '@/src/api/socket';
 import { useChatGroupService, useUserService, useChatMessageService } from '@/src/api/services';
+import { PictureOutlined } from '@ant-design/icons';
 import { ChatGroup, ChatMessage } from '@/src/features/chat/types';
 import ChatSidebar from './components/ChatSidebar';
 import ChatMessages from './components/ChatMessages';
 import ChatInput from './components/ChatInput';
 import CreateGroupModal from './components/CreateGroupModal';
 import GroupMembersModal from './components/GroupMembersModal';
+import GroupMediaModal from './components/GroupMediaModal';
 import { User } from '@/src/auth/types';
 
 
@@ -28,6 +30,7 @@ const ChatPage: React.FC = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+    const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
     const [allUsers, setAllUsers] = useState<User[]>([]);
 
     const isAdmin = user?.role === Role.DIRECTOR || user?.role === Role.ACCOUNTANT;
@@ -374,27 +377,47 @@ const ChatPage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => setIsMembersModalOpen(true)}
-                                title="Quản lý nhóm"
-                                style={{
-                                    width: 36, height: 36,
-                                    borderRadius: 10,
-                                    background: 'rgba(0,0,0,0.04)',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: '#64748b',
-                                    fontSize: 20,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'background 0.2s',
-                                }}
-                                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.07)')}
-                                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.04)')}
-                            >
-                                ⋯
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                {/* Media button */}
+                                <button
+                                    onClick={() => setIsMediaModalOpen(true)}
+                                    title="Xem ảnh & tài liệu"
+                                    style={{
+                                        width: 36, height: 36, borderRadius: 10,
+                                        background: 'rgba(99,102,241,0.08)',
+                                        border: 'none', cursor: 'pointer',
+                                        color: '#6366f1', fontSize: 17,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        transition: 'background 0.2s',
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.18)')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.08)')}
+                                >
+                                    <PictureOutlined style={{ fontSize: 17 }} />
+                                </button>
+                                {/* Members button */}
+                                <button
+                                    onClick={() => setIsMembersModalOpen(true)}
+                                    title="Quản lý nhóm"
+                                    style={{
+                                        width: 36, height: 36,
+                                        borderRadius: 10,
+                                        background: 'rgba(0,0,0,0.04)',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: '#64748b',
+                                        fontSize: 20,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'background 0.2s',
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.07)')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.04)')}
+                                >
+                                    ⋯
+                                </button>
+                            </div>
                         </div>
 
                         {/* Messages */}
@@ -440,6 +463,14 @@ const ChatPage: React.FC = () => {
                 onRemoveMember={handleRemoveMember}
                 onDeleteGroup={handleDeleteGroup}
             />
+            {selectedGroupId && selectedGroup && (
+                <GroupMediaModal
+                    open={isMediaModalOpen}
+                    onCancel={() => setIsMediaModalOpen(false)}
+                    groupId={selectedGroupId}
+                    groupName={selectedGroup.name}
+                />
+            )}
         </div>
     );
 };

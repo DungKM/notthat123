@@ -58,6 +58,7 @@ const ProductDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart, setIsCartOpen } = useCart();
   const [quantity, setQuantity] = React.useState<number | string>(1);
+  const [stockWarning, setStockWarning] = React.useState<string | null>(null);
   const [activeImgIndex, setActiveImgIndex] = React.useState(0);
 
   const { data: apiProduct, loading, getBySlug, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
@@ -306,9 +307,10 @@ const ProductDetailPage: React.FC = () => {
                               if (isNaN(numVal)) return;
 
                               if (product?.stockQuantity && numVal > product.stockQuantity) {
-                                toast.error(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`);
+                                setStockWarning(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`);
                                 setQuantity(product.stockQuantity);
                               } else {
+                                setStockWarning(null);
                                 setQuantity(numVal);
                               }
                             }}
@@ -324,14 +326,18 @@ const ProductDetailPage: React.FC = () => {
                             <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => {
                               const currentQ = Number(q) || 1;
                               if (product?.stockQuantity && currentQ >= product.stockQuantity) {
-                                setTimeout(() => toast.error(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`), 0);
+                                setStockWarning(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`);
                                 return product.stockQuantity;
                               }
+                              setStockWarning(null);
                               return currentQ + 1;
                             })} className={`flex-1 flex items-center justify-center border-b text-[10px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 border-gray-300 text-gray-600'}`} title="Tăng số lượng">
                               <span className="leading-none mt-1">+</span>
                             </button>
-                            <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => Math.max(1, (Number(q) || 1) - 1))} className={`flex-1 flex items-center justify-center text-[12px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`} title="Giảm số lượng">
+                            <button disabled={!product.stockQuantity} onClick={() => {
+                              setStockWarning(null);
+                              setQuantity(q => Math.max(1, (Number(q) || 1) - 1));
+                            }} className={`flex-1 flex items-center justify-center text-[12px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`} title="Giảm số lượng">
                               <span className="leading-none mb-1">-</span>
                             </button>
                           </div>
@@ -371,6 +377,12 @@ const ProductDetailPage: React.FC = () => {
                           Gọi tư vấn
                         </a>
                       </div>
+
+                      {stockWarning && (
+                          <div className="text-red-500 text-[13px] font-medium -mt-5 mb-5 block">
+                            {stockWarning}
+                          </div>
+                      )}
 
                       {/* Policy Box */}
                       <div className="border border-gray-100 rounded-lg p-5 bg-[#fafafa]">

@@ -3,7 +3,6 @@
 export interface AdvanceRequest {
   id: string;
   employeeId: string;
-  employeeName: string;
   amount: number;
   reason: string;
   requestDate: string;

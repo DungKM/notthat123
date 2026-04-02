@@ -12,8 +12,8 @@ import SEO from '@/src/components/common/SEO';
 const PublicHome: React.FC = () => {
   return (
     <div className="bg-white font-sans selection:bg-teal-100">
-      <SEO 
-        title="Trang chủ" 
+      <SEO
+        title="Trang chủ"
         description="Chào mừng đến với Nội Thất Hochi - Đơn vị hàng đầu về thiết kế và thi công nội thất gỗ óc chó cao cấp tại Việt Nam."
       />
       {/* Global CSS for animations */}
@@ -26,13 +26,13 @@ const PublicHome: React.FC = () => {
           animation: fadeIn 1s ease-out forwards;
         }
       `}</style>
-      
+
       <Hero />
       {/* <ProductShopSection /> */}
       <Showcase />
       <Features />
       <Feedback />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <CTAImageSection />
       <CTA />
     </div>
