@@ -93,7 +93,13 @@ const Footer: React.FC = () => {
               <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">XƯỞNG SẢN XUẤT</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> Ngõ 41 Tả Thanh Oai, Đại Thanh, Hà Nội</li>
-                <li className="flex items-center gap-3"><PhoneOutlined className="text-showcase-primary shrink-0" /> 0326 908 884</li>
+                <li className="flex items-start gap-3">
+                  <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
+                  <div className="flex flex-col gap-1">
+                    <span>0787 356 388 (Mr Lương)</span>
+                    <span>0395 852 062 (Mrs Hoa)</span>
+                  </div>
+                </li>
               </ul>
             </div>
             <div className="border border-gray-100 rounded overflow-hidden flex-1 min-h-[180px] w-full shadow-sm transition-all duration-500">

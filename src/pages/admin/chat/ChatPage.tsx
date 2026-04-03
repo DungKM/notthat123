@@ -86,13 +86,20 @@ const ChatPage: React.FC = () => {
                 };
 
                 setMessages(prev => {
+                    const incomingId = msg._id || msg.id;
+                    const messageIdToMatch = msg.messageId; // Could be undefined
+                    
                     // Update optimistic message if exists
-                    const existingMsgIndex = prev.findIndex(m => m.id === msg.messageId);
+                    const existingMsgIndex = prev.findIndex(m => 
+                        (messageIdToMatch && m.id === messageIdToMatch) || 
+                        (incomingId && m.id === incomingId)
+                    );
                     if (existingMsgIndex >= 0) {
                         const newMsgs = [...prev];
                         newMsgs[existingMsgIndex] = { 
                             ...newMsgs[existingMsgIndex], 
                             ...mappedMsg, // Merge server response including attachments
+                            id: incomingId || newMsgs[existingMsgIndex].id, // Ensure real ID is used
                             status: 'sent' as any 
                         };
                         return newMsgs;
@@ -184,18 +191,27 @@ const ChatPage: React.FC = () => {
                     setMessages(prev => [...prev, optimisticMsg]);
                     const formData = new FormData();
                     formData.append('content', content);
+                    formData.append('messageId', tempMessageId);
                     files.forEach((file) => {
                         formData.append('attachments', file);
                     });
                     const res = await request('POST', `/${selectedGroupId}/messages`, formData);
                     const msgData = res?.data || res;
                     if (msgData && (msgData.id || msgData._id)) {
-                        setMessages(prev => prev.map(m => m.id === tempMessageId ? { 
-                            ...m, 
-                            id: msgData.id || msgData._id, 
-                            status: 'sent',
-                            attachments: msgData.attachments || [] 
-                        } : m));
+                        const realId = msgData.id || msgData._id;
+                        setMessages(prev => {
+                            // If socket already added this message via its real ID, just remove the explicit temp optimistic message
+                            if (prev.some(m => m.id === realId)) {
+                                return prev.filter(m => m.id !== tempMessageId);
+                            }
+                            // Otherwise update tempMessageId with the real ID
+                            return prev.map(m => m.id === tempMessageId ? { 
+                                ...m, 
+                                id: realId, 
+                                status: 'sent',
+                                attachments: msgData.attachments || [] 
+                            } : m);
+                        });
                     }
                 } catch (e) {
                     message.error('Lỗi khi gửi tin nhắn đính kèm');

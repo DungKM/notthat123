@@ -249,7 +249,13 @@ const AttendancePage: React.FC = () => {
           name="workingDays"
           label="Số giờ hành chính làm được"
           min={0}
-          fieldProps={{ precision: 2 }}
+          fieldProps={{ 
+            precision: 2,
+            onKeyDown: (e) => {
+              if (e.ctrlKey || e.metaKey || e.key.length > 1) return;
+              if (!/^[0-9.]$/.test(e.key)) e.preventDefault();
+            }
+          }}
           rules={[{ required: true, message: 'Vui lòng nhập số giờ làm', max: 8 }]}
         />
 
@@ -257,7 +263,13 @@ const AttendancePage: React.FC = () => {
           name="otDays"
           label="Số giờ tăng ca"
           min={0}
-          fieldProps={{ precision: 2 }}
+          fieldProps={{ 
+            precision: 2,
+            onKeyDown: (e) => {
+              if (e.ctrlKey || e.metaKey || e.key.length > 1) return;
+              if (!/^[0-9.]$/.test(e.key)) e.preventDefault();
+            }
+          }}
         />
       </ModalForm>
     </div>

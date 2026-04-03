@@ -362,7 +362,27 @@ const CheckoutPage: React.FC = () => {
                                     >
                                       −
                                     </button>
-                                    <span className="flex-1 text-center text-base font-semibold text-slate-900">{item.quantity}</span>
+                                    <input
+                                      type="number"
+                                      value={item.quantity || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val === '') {
+                                          updateQuantity(item.id, 0); // Temporary state for empty input
+                                          return;
+                                        }
+                                        let numVal = parseInt(val);
+                                        if (isNaN(numVal) || numVal < 1) numVal = 1;
+                                        if (item.stockQuantity !== undefined && numVal > item.stockQuantity) numVal = item.stockQuantity;
+                                        updateQuantity(item.id, numVal);
+                                      }}
+                                      onBlur={(e) => {
+                                        if (!e.target.value || parseInt(e.target.value) < 1) {
+                                          updateQuantity(item.id, 1);
+                                        }
+                                      }}
+                                      className="flex-[1.5] w-full text-center text-base font-semibold text-slate-900 focus:outline-none focus:bg-gray-50 h-full border-x border-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    />
                                     <button
                                       onClick={() => {
                                         if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
@@ -377,9 +397,9 @@ const CheckoutPage: React.FC = () => {
                                     </button>
                                   </div>
                                   {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
-                                    <p className="mt-1.5 text-[11px] text-red-500 font-medium">
-                                      Chỉ còn tối đa {item.stockQuantity} sản phẩm trong kho
-                                    </p>
+                                    <h2 className="mt-1.5 text-sm text-red-500 font-medium">
+                                      Sản phẩm chỉ còn {item.stockQuantity} cái
+                                    </h2>
                                   )}
                                 </div>
                               </div>

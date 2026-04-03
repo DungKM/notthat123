@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import { Modal, Button, Select, Input, Space, Table, message, Typography } from "antd";
+import { Modal, Button, Select, Input, Space, Table, message, Typography, DatePicker } from "antd";
 import {
   PlusOutlined,
   SaveOutlined,
   HistoryOutlined,
   DeleteOutlined,
   UnorderedListOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
+import { ModalForm, ProFormSelect, ProFormText, ProFormDigit } from "@ant-design/pro-components";
+import type { ProFormInstance } from "@ant-design/pro-components";
 import { ProjectProgress, ProjectStatus } from "@/src/types";
 import { Role } from "@/src/auth/types";
 import dayjs from "dayjs";
@@ -43,9 +46,11 @@ const ProjectProgressModal: React.FC<Props> = ({
   );
   const [historyOpen, setHistoryOpen] = useState(false);
   const [stageManagerOpen, setStageManagerOpen] = useState(false);
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const userFormRef = React.useRef<ProFormInstance>(null);
   const [stageOptions, setStageOptions] = useState<string[]>([]);
   const { user } = useAuth();
-  const { list: users, getAll } = useUserService();
+  const { list: users, getAll, create: createUser } = useUserService();
   const { request: stageRequest } = useProjectStageService();
 
   const isStaff = user?.role === Role.STAFF;
@@ -59,7 +64,7 @@ const ProjectProgressModal: React.FC<Props> = ({
         ).filter(Boolean);
         setStageOptions(names);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   React.useEffect(() => {
@@ -291,6 +296,15 @@ const ProjectProgressModal: React.FC<Props> = ({
                 Danh mục tiến độ
               </Button>
             )}
+
+            {(user?.role === Role.DIRECTOR || user?.role === Role.ACCOUNTANT) && (
+              <Button
+                icon={<UserAddOutlined />}
+                onClick={() => setAddUserOpen(true)}
+              >
+                Thêm thành viên
+              </Button>
+            )}
           </Space>
 
           {currentStatus && (
@@ -359,6 +373,13 @@ const ProjectProgressModal: React.FC<Props> = ({
                         value={record.employee}
                         style={{ width: "100%" }}
                         placeholder="Chọn nhân viên"
+                        showSearch
+                        optionFilterProp="label"
+                        popupMatchSelectWidth={false}
+                        listHeight={256}
+                        filterOption={(input, option) =>
+                          (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                        }
                         options={assignableEmployees.map((e) => {
                           const roleLabel = e.role === Role.STAFF ? 'Nhân viên' : e.role === Role.SITE_MANAGER ? 'Quản lý công trình' : e.role;
                           return {
@@ -370,6 +391,23 @@ const ProjectProgressModal: React.FC<Props> = ({
                           updateTask(record.id, "employee", value)
                         }
                         disabled={isStaff}
+                      />
+                    ),
+                  },
+                  {
+                    title: "Ngày giao",
+                    dataIndex: "assignedDate",
+                    width: 150,
+                    render: (_, record: any) => (
+                      <DatePicker
+                        value={record.assignedDate ? dayjs(record.assignedDate) : undefined}
+                        format="DD/MM/YYYY"
+                        placeholder="Chọn ngày"
+                        onChange={(date) =>
+                          updateTask(record.id, "assignedDate", date ? date.toISOString() : "")
+                        }
+                        disabled={isStaff}
+                        style={{ width: "100%" }}
                       />
                     ),
                   },
@@ -410,7 +448,7 @@ const ProjectProgressModal: React.FC<Props> = ({
                                   message.success("Cập nhật công việc thành công");
                                   setCurrentStatus({
                                     ...currentStatus,
-                                    tasks: currentStatus.tasks.map((t) => 
+                                    tasks: currentStatus.tasks.map((t) =>
                                       t.id === record.id ? { ...t, isSaved: true, updatedAt: dayjs().toISOString() } : t
                                     )
                                   });
@@ -432,14 +470,14 @@ const ProjectProgressModal: React.FC<Props> = ({
                               });
                             } else {
                               if (onDeleteTask) {
-                                 const success = await onDeleteTask(record.id);
-                                 if (success) {
-                                   message.success("Xóa công việc thành công");
-                                   setCurrentStatus({
-                                     ...currentStatus,
-                                     tasks: currentStatus.tasks.filter((t) => t.id !== record.id),
-                                   });
-                                 }
+                                const success = await onDeleteTask(record.id);
+                                if (success) {
+                                  message.success("Xóa công việc thành công");
+                                  setCurrentStatus({
+                                    ...currentStatus,
+                                    tasks: currentStatus.tasks.filter((t) => t.id !== record.id),
+                                  });
+                                }
                               }
                             }
                           }}
@@ -486,6 +524,11 @@ const ProjectProgressModal: React.FC<Props> = ({
                 { title: "Công việc", dataIndex: "work" },
                 { title: "Nhân viên", dataIndex: "employee" },
                 {
+                  title: "Ngày giao",
+                  dataIndex: "assignedDate",
+                  render: (v) => v ? dayjs(v).format("DD/MM/YYYY") : "-",
+                },
+                {
                   title: "Cập nhật",
                   dataIndex: "updatedAt",
                   render: (v) => dayjs(v).format("HH:mm DD/MM/YYYY"),
@@ -501,6 +544,95 @@ const ProjectProgressModal: React.FC<Props> = ({
         onCancel={() => setStageManagerOpen(false)}
         onRefresh={() => fetchStages()}
       />
+
+      <ModalForm
+        formRef={userFormRef}
+        title="Tạo tài khoản người dùng"
+        open={addUserOpen}
+        onOpenChange={(visible) => {
+          if (!visible) {
+            setAddUserOpen(false);
+            userFormRef.current?.resetFields();
+          }
+        }}
+        modalProps={{
+          destroyOnClose: true,
+          onCancel: () => {
+            setAddUserOpen(false);
+            userFormRef.current?.resetFields();
+          },
+        }}
+        onFinish={async (values: any) => {
+          try {
+            const payload = {
+              name: values.name,
+              account: values.account,
+              password: values.password,
+              role: values.role,
+              ...(values.phone && { phone: values.phone }),
+              ...(values.baseSalary !== undefined && { baseSalary: values.baseSalary }),
+            };
+            await createUser(payload);
+            setAddUserOpen(false);
+            userFormRef.current?.resetFields();
+            getAll({ page: 1, limit: 1000 }).catch(console.error);
+            return true;
+          } catch (error) {
+            return false;
+          }
+        }}
+      >
+        <ProFormText
+          name="name"
+          label="Họ tên"
+          placeholder="Nhập họ tên"
+          rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+        />
+        <ProFormText
+          name="account"
+          label="Tên đăng nhập"
+          placeholder="Nhập tên đăng nhập"
+          rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]}
+        />
+        <ProFormText
+          name="phone"
+          label="Số điện thoại"
+          placeholder="Nhập số điện thoại"
+          rules={[
+            { required: false, message: 'Vui lòng nhập số điện thoại' },
+            { pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ' }
+          ]}
+        />
+        <ProFormDigit
+          name="baseSalary"
+          label="Lương cơ bản"
+          placeholder="Nhập lương cơ bản"
+          fieldProps={{
+            formatter: (value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+            parser: (value) => value ? Number(value.replace(/\$\s?|(,*)/g, '')) : 0,
+            addonAfter: 'VND'
+          }}
+        />
+        <ProFormText.Password
+          name="password"
+          label="Mật khẩu"
+          placeholder="Nhập mật khẩu"
+          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+        />
+        <ProFormSelect
+          name="role"
+          label="Vai trò"
+          placeholder="Chọn vai trò"
+          options={[
+            { label: 'Giám đốc', value: Role.DIRECTOR },
+            { label: 'Kế toán', value: Role.ACCOUNTANT },
+            { label: 'Nhân viên', value: Role.STAFF },
+            { label: 'Quản lý công trình', value: Role.SITE_MANAGER },
+            { label: 'Khách hàng', value: Role.CUSTOMER }
+          ]}
+          rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
+        />
+      </ModalForm>
     </>
   );
 };

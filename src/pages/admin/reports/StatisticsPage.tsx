@@ -615,7 +615,13 @@ const StatisticsPage: React.FC = () => {
           label="Số giờ hành chính làm được"
           min={0}
           max={8}
-          fieldProps={{ precision: 1 }}
+          fieldProps={{ 
+            precision: 1,
+            onKeyDown: (e) => {
+              if (e.ctrlKey || e.metaKey || e.key.length > 1) return;
+              if (!/^[0-9.]$/.test(e.key)) e.preventDefault();
+            }
+          }}
           rules={[{ required: true, message: "Vui lòng nhập số giờ làm" }]}
         />
 
@@ -624,8 +630,13 @@ const StatisticsPage: React.FC = () => {
           label="Số giờ tăng ca"
           min={0}
           max={24}
-
-          fieldProps={{ precision: 1 }}
+          fieldProps={{ 
+            precision: 1,
+            onKeyDown: (e) => {
+              if (e.ctrlKey || e.metaKey || e.key.length > 1) return;
+              if (!/^[0-9.]$/.test(e.key)) e.preventDefault();
+            }
+          }}
         />
       </ModalForm>
     </div>

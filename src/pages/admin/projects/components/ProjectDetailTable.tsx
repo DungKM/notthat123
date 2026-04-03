@@ -28,29 +28,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
   details,
   onUpdate,
   role,
+  nameColumnTitle,
 }) => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [manualTotal, setManualTotal] = useState<number | null>(null);
   const [manualProfit, setManualProfit] = useState<number | null>(null);
-  const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [nameColumnTitle, setNameColumnTitle] = useState(
-    localStorage.getItem(`project-column-title-${projectId}`) || "Tên dự án"
-  );
-  const [tempColumnTitle, setTempColumnTitle] = useState(nameColumnTitle);
 
-  const handleOpenColumnModal = () => {
-    setTempColumnTitle(nameColumnTitle);
-    setIsColumnModalOpen(true);
-  };
-
-  const handleSaveColumnTitle = () => {
-    const finalTitle = tempColumnTitle.trim() || "Nhập tên dự án";
-    setNameColumnTitle(finalTitle);
-    localStorage.setItem(`project-column-title-${projectId}`, finalTitle);
-    setIsColumnModalOpen(false);
-    message.success("Đổi tên cột thành công");
-  };
   const isAdmin = role === Role.DIRECTOR || role === Role.ACCOUNTANT;
 
   const columns: ProColumns<ProjectDetail>[] = [
@@ -143,15 +126,10 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 
   // Logic tổng kết
   const summaryData = useMemo(() => {
-    const totalSelected = details
-      .filter((item) => selectedRowKeys.includes(item.id))
-      .reduce((acc, curr) => acc + (curr.quantity * curr.price || 0), 0);
-
-    const totalUnselected = details
-      .filter((item) => !selectedRowKeys.includes(item.id))
-      .reduce((acc, curr) => acc + (curr.quantity * curr.price || 0), 0);
-
-    const totalCalculated = totalSelected + totalUnselected;
+    const totalCalculated = details.reduce(
+      (acc, curr) => acc + (curr.quantity * curr.price || 0),
+      0
+    );
     const totalCost = details.reduce(
       (acc, curr) => acc + (Number(curr.costPrice) || 0),
       0,
@@ -159,13 +137,11 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     const profit = (manualTotal ?? totalCalculated) - totalCost;
 
     return {
-      totalSelected,
-      totalUnselected,
       totalCalculated,
       totalCost,
       profit,
     };
-  }, [details, selectedRowKeys, manualTotal]);
+  }, [details, manualTotal]);
 
   const handleAddRow = () => {
     const newId = (Math.random() * 1000000).toFixed(0);
@@ -213,12 +189,8 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           [nameColumnTitle || "Tên dự án"]: "TỔNG KẾT",
         },
         {
-          [nameColumnTitle || "Tên dự án"]: "Tổng số tiền sản phẩm của công ty",
-          "Thành tiền (đ)": summaryData.totalSelected,
-        },
-        {
-          [nameColumnTitle || "Tên dự án"]: "Tổng số tiền sản phẩm chưa có",
-          "Thành tiền (đ)": summaryData.totalUnselected,
+          [nameColumnTitle || "Tên dự án"]: "Tổng số tiền sản phẩm",
+          "Thành tiền (đ)": summaryData.totalCalculated,
         },
         {
           [nameColumnTitle || "Tên dự án"]: "DOANH THU",
@@ -251,22 +223,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 
   return (
     <div className="project-detail-table">
-      <h3 style={{ color: 'red', margin: '16px 0' }}>Lưu ý: Tích vào những sản phẩm của công ty có sẵn</h3>
-      <Modal
-        title="Đổi tên cột đầu"
-        open={isColumnModalOpen}
-        onOk={handleSaveColumnTitle}
-        onCancel={() => setIsColumnModalOpen(false)}
-        okText="Lưu"
-        cancelText="Hủy"
-      >
-        <Input
-          value={tempColumnTitle}
-          onChange={(e) => setTempColumnTitle(e.target.value)}
-          placeholder="Ví dụ: Tên hạng mục"
-          onPressEnter={handleSaveColumnTitle}
-        />
-      </Modal>
       <Space style={{ marginBottom: 16 }}>
         {isAdmin && (
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRow}>
@@ -275,9 +231,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         )}
         <Button icon={<DownloadOutlined />} onClick={handleExportExcel}>
           Xuất Excel
-        </Button>
-        <Button onClick={handleOpenColumnModal}>
-          Nhập tên dự án
         </Button>
       </Space>
       <EditableProTable<ProjectDetail>
@@ -288,10 +241,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         columns={columns}
         value={details}
         onChange={(newDetails) => onUpdate(newDetails as ProjectDetail[], false)}
-        rowSelection={{
-          selectedRowKeys,
-          onChange: setSelectedRowKeys,
-        }}
         editable={{
           type: "multiple",
           editableKeys,
@@ -315,27 +264,17 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         }}
         summary={() => (
           <ProTable.Summary fixed>
-            {/* Dòng 1: Sản phẩm đã có (Selected) */}
+            {/* Dòng 1: Tổng số tiền sản phẩm */}
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
               <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 9 : 5}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
-                  <Text style={{ fontSize: 16 }}>Tổng số tiền sản phẩm của công ty:</Text>
-                  <Text strong style={{ fontSize: 16 }}>{formatCurrency(summaryData.totalSelected)}</Text>
+                  <Text style={{ fontSize: 16 }}>Tổng số tiền sản phẩm:</Text>
+                  <Text strong style={{ fontSize: 16 }}>{formatCurrency(summaryData.totalCalculated)}</Text>
                 </div>
               </ProTable.Summary.Cell>
             </ProTable.Summary.Row>
 
-            {/* Dòng 2: Sản phẩm chưa có (Unselected) */}
-            <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 9 : 5}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
-                  <Text style={{ fontSize: 16 }}>Tổng số tiền sản phẩm chưa có:</Text>
-                  <Text strong style={{ fontSize: 16 }}>{formatCurrency(summaryData.totalUnselected)}</Text>
-                </div>
-              </ProTable.Summary.Cell>
-            </ProTable.Summary.Row>
-
-            {/* Dòng 3: DOANH THU */}
+            {/* Dòng 2: DOANH THU */}
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
               <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 9 : 5}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>

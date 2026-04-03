@@ -295,6 +295,7 @@ const ProjectDetailPage: React.FC = () => {
               details={project.details}
               onUpdate={handleUpdateDetails}
               role={user.role}
+              nameColumnTitle={project.name}
             />
           </ProCard>
         </Col>

@@ -73,7 +73,7 @@ const LoginPage: React.FC = () => {
             maxWidth: 328,
             width: '100%',
           }}
-          title="HỆ THỐNG NỘI BỘ"
+          title="NỘI THẤT HOCHI"
           subTitle="Giải pháp quản lý doanh nghiệp toàn diện"
           initialValues={{
             autoLogin: true,
