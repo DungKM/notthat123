@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Container from '@/src/features/showcase/components/ui/Container';
@@ -48,7 +48,29 @@ const ProductsPage: React.FC = () => {
 
   // Sort & Pagination
   const [sortBy, setSortBy] = useState<string>('');
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const sortOptions = [
+    { value: '', label: 'Tùy chọn gợi ý' },
+    { value: 'newest', label: 'Hàng mới về' },
+    { value: 'price_desc', label: 'Giá: Từ cao tới thấp' },
+    { value: 'price_asc', label: 'Giá: Từ thấp tới cao' },
+    { value: 'name_asc', label: 'Tên: Từ A - Z' },
+    { value: 'name_desc', label: 'Tên: Từ Z - A' }
+  ];
+
+  // Close sort dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const { getAll: getCategories } = useCategoryService();
   const { request: productRequest } = useProductService();
@@ -369,21 +391,34 @@ const ProductsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600 font-medium whitespace-nowrap hidden sm:inline-block">Sắp xếp theo:</span>
-                  <select
-                    className="border border-gray-200 text-sm rounded-md px-3 py-2 bg-white outline-none focus:border-showcase-primary cursor-pointer w-[180px] text-gray-700"
-                    value={sortBy}
-                    onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-                  >
-                    <option value="">Gợi ý</option>
-                    <option value="newest">Hàng mới về</option>
-                    {/* <option value="soldCount_desc">Hàng bán chạy</option> */}
-                    <option value="price_desc">Giá từ cao tới thấp</option>
-                    <option value="price_asc">Giá từ thấp tới cao</option>
-                    <option value="name_asc">Tên A - Z</option>
-                    <option value="name_desc">Tên Z - A</option>
-                  </select>
+                <div className="flex items-center sm:justify-end gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                  <span className="text-[13px] text-gray-600 font-semibold whitespace-nowrap hidden sm:inline-block">Sắp xếp:</span>
+                  <div className="relative w-full sm:w-[200px]" ref={sortRef}>
+                    <div
+                      className="w-full flex items-center justify-between border border-gray-200 text-[13px] font-medium rounded-xl px-4 py-2.5 bg-white cursor-pointer text-gray-800 transition-all hover:bg-gray-50 shadow-sm"
+                      onClick={() => setSortOpen(!sortOpen)}
+                    >
+                      <span className="truncate pr-2 border-r border-gray-200">{sortOptions.find(opt => opt.value === sortBy)?.label || 'Tùy chọn gợi ý'}</span>
+                      <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                    {sortOpen && (
+                      <div className="absolute top-full right-0 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden py-1">
+                        {sortOptions.map(option => (
+                          <div
+                            key={option.value}
+                            className={`px-4 py-2.5 text-[13px] cursor-pointer transition-colors ${sortBy === option.value ? 'bg-showcase-primary/10 text-showcase-primary font-bold' : 'text-gray-700 hover:bg-[#C5A059] hover:text-white font-medium'}`}
+                            onClick={() => {
+                              setSortBy(option.value);
+                              setCurrentPage(1);
+                              setSortOpen(false);
+                            }}
+                          >
+                            {option.label}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 

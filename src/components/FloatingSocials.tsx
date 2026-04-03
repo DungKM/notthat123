@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { UpOutlined, PhoneOutlined } from "@ant-design/icons";
+import { useCart } from "@/src/features/showcase/context/CartContext";
 
 const FloatingSocials: React.FC = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const { isCartOpen } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,7 +23,7 @@ const FloatingSocials: React.FC = () => {
   };
 
   return (
-    <>
+    <div className={`transition-all duration-300 ${isCartOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
       {/* Button số điện thoại bên trái */}
       <a
         href="tel:0326908884"
@@ -73,7 +75,7 @@ const FloatingSocials: React.FC = () => {
           </button>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -147,7 +147,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = await patch('update', {
         items: [{ productId: id, quantity }]
-      });
+      }, { showSuccessMsg: false });
+
+      // Suy luận tồn kho: Nếu Backend âm thầm bóp số lượng nhỏ hơn số ta gửi đi -> đó chính là giới hạn Stock tối đa!
+      if (data && data.items) {
+        const pId = id;
+        const returnedItem = data.items.find((it: any) => (it.productId?.id || it.productId?._id) === pId);
+        
+        if (returnedItem && returnedItem.quantity < quantity) {
+          // Gắn cưỡng bức limit này vào productId gốc để updateCartStateFromAPI ghi nhận
+          if (!returnedItem.productId) returnedItem.productId = {};
+          returnedItem.productId.stockQuantity = returnedItem.quantity;
+        }
+      }
+
       if (data) updateCartStateFromAPI(data);
       else fetchCart();
     } catch (err) {
@@ -173,7 +186,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let finalQuantity = quantity;
     if (item.stockQuantity !== undefined && item.stockQuantity > 0 && finalQuantity > item.stockQuantity) {
       finalQuantity = item.stockQuantity;
-      toast.error(`Sản phẩm này chỉ còn tối đa ${item.stockQuantity} cái`);
       
       // Khách bấm liên tục ở ngưỡng max => không thay đổi gì cả nên không cần gọi API (tránh re-render & fetch lại API làm mất timer)
       if (item.quantity === item.stockQuantity) return;

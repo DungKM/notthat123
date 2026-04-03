@@ -37,6 +37,7 @@ const Header: React.FC = () => {
   const cartDrawerRef = useRef<HTMLDivElement | null>(null);
   const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart, isCartOpen, setIsCartOpen } = useCart();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -248,14 +249,14 @@ const Header: React.FC = () => {
                   <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                     <div className="bg-white py-4 min-w-[240px] border border-gray-100 overflow-hidden">
                       {link.submenu.map((sub) => (
-                        <Link
+                        <a
                           key={sub.title}
-                          to={sub.href}
+                          href={sub.href}
                           className="flex items-center justify-between px-6 py-3 text-[13px] font-medium !text-gray-700 hover:text-showcase-primary hover:bg-gray-50 transition-colors"
                         >
                           {sub.title}
                           <ArrowRightOutlined className="text-[10px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                        </Link>
+                        </a>
                       ))}
                     </div>
                   </div>
@@ -310,9 +311,9 @@ const Header: React.FC = () => {
                             return (
                               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
                                 {currentCat.children.map((child: any) => (
-                                  <Link
+                                  <a
                                     key={child.id || child._id}
-                                    to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                    href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
                                     className="flex items-center gap-3 px-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(false); }}
                                   >
@@ -326,7 +327,7 @@ const Header: React.FC = () => {
                                         <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain" alt="" />
                                       )}
                                     </div>
-                                  </Link>
+                                  </a>
                                 ))}
                               </div>
                             );
@@ -343,23 +344,23 @@ const Header: React.FC = () => {
                     <div className="bg-gray-950 py-3 min-w-[260px] overflow-hidden">
                       <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Danh mục</p>
                       {congTrinhCategories.map((cat) => (
-                        <Link
+                        <a
                           key={cat._id || cat.id}
-                          to={`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id}`}
+                          href={`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id}`}
                           className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-200 hover:!text-white hover:bg-white/10 transition-colors group/item"
                         >
                           <span>{cat.name}</span>
                           <ArrowRightOutlined className="text-[10px] text-gray-500 group-hover/item:text-white group-hover/item:translate-x-1 transition-all duration-200" />
-                        </Link>
+                        </a>
                       ))}
                       <div className="border-t border-white/10 mt-2 pt-2">
-                        <Link
-                          to={ROUTES.CONG_TRINH}
+                        <a
+                          href={ROUTES.CONG_TRINH}
                           className="flex items-center justify-between px-5 py-2.5 text-[12px] font-bold !text-showcase-primary hover:!text-white hover:bg-white/10 transition-colors uppercase tracking-wide"
                         >
                           Xem tất cả
                           <ArrowRightOutlined className="text-[10px]" />
-                        </Link>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -682,22 +683,44 @@ const Header: React.FC = () => {
                               </button>
                               <input
                                 type="number"
-                                value={item.quantity || ''}
+                                value={tempQuantities[item.id] !== undefined ? tempQuantities[item.id] : (item.quantity || '')}
                                 onChange={(e) => {
-                                  const val = e.target.value;
-                                  if (val === '') {
-                                    updateQuantity(item.id, 0); // Temporary state for empty input
-                                    return;
+                                  let val = e.target.value;
+                                  
+                                  if (val !== '') {
+                                    let numVal = parseInt(val);
+                                    if (!isNaN(numVal)) {
+                                      if (numVal > 999) {
+                                        numVal = 999;
+                                      }
+
+                                      if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
+                                        numVal = item.stockQuantity;
+                                      }
+                                      
+                                      val = numVal.toString();
+
+                                      if (numVal >= 1) {
+                                        updateQuantity(item.id, numVal);
+                                      }
+                                    }
                                   }
-                                  let numVal = parseInt(val);
-                                  if (isNaN(numVal) || numVal < 1) numVal = 1;
-                                  if (item.stockQuantity !== undefined && numVal > item.stockQuantity) numVal = item.stockQuantity;
-                                  updateQuantity(item.id, numVal);
+
+                                  setTempQuantities(prev => ({ ...prev, [item.id]: val }));
                                 }}
                                 onBlur={(e) => {
-                                  if (!e.target.value || parseInt(e.target.value) < 1) {
+                                  let numVal = parseInt(e.target.value);
+                                  if (isNaN(numVal) || numVal < 1) {
                                     updateQuantity(item.id, 1);
+                                  } else if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
+                                    updateQuantity(item.id, item.stockQuantity);
                                   }
+                                  
+                                  setTempQuantities(prev => {
+                                    const next = { ...prev };
+                                    delete next[item.id];
+                                    return next;
+                                  });
                                 }}
                                 className="flex-[1.5] w-full text-center text-base font-semibold text-slate-900 focus:outline-none focus:bg-gray-50 h-full border-x border-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                               />
@@ -851,14 +874,14 @@ const Header: React.FC = () => {
                     {link.submenu && (
                       <div className="pb-4 pl-4 space-y-3">
                         {link.submenu.map((sub) => (
-                          <Link
+                          <a
                             key={sub.title}
-                            to={sub.href}
+                            href={sub.href}
                             className="block !text-gray-500 font-medium hover:text-showcase-primary"
                             onClick={() => setIsMenuOpen(false)}
                           >
                             {sub.title}
-                          </Link>
+                          </a>
                         ))}
                       </div>
                     )}
@@ -898,15 +921,15 @@ const Header: React.FC = () => {
                               {hasChildren && isExpanded && (
                                 <div className="pl-3 mt-1 space-y-0.5">
                                   {cat.children.map((child: any) => (
-                                    <Link
+                                    <a
                                       key={child.id || child._id}
-                                      to={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                      href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
                                       className="flex items-center gap-2 py-2 px-3 rounded-lg !text-gray-600 hover:!text-showcase-primary hover:bg-gray-50 text-[13px] transition-colors"
                                       onClick={() => setIsMenuOpen(false)}
                                     >
                                       <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
                                       {child.name}
-                                    </Link>
+                                    </a>
                                   ))}
                                 </div>
                               )}
@@ -920,15 +943,15 @@ const Header: React.FC = () => {
                     {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
                       <div className="pb-4 pl-4 space-y-1">
                         {congTrinhCategories.map((cat) => (
-                          <Link
+                          <a
                             key={cat._id || cat.id}
-                            to={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
+                            href={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
                             className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-sm font-medium transition-colors mb-1"
                             onClick={() => setIsMenuOpen(false)}
                           >
                             <span>{cat.name}</span>
                             <ArrowRightOutlined className="text-[10px] text-gray-500" />
-                          </Link>
+                          </a>
                         ))}
                       </div>
                     )}

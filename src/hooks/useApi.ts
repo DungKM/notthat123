@@ -29,8 +29,8 @@ export interface UseApiReturn<T> {
   getById: (id: string) => Promise<T>;
   getBySlug: (slug: string) => Promise<T>;
   create: (payload: Partial<T>) => Promise<T>;
-  update: (id: string, payload: Partial<T>) => Promise<T>;
-  patch: (id: string, payload: Partial<T>) => Promise<T>;
+  update: (id: string, payload: Partial<T>, config?: { showSuccessMsg?: boolean }) => Promise<T>;
+  patch: (id: string, payload: Partial<T>, config?: { showSuccessMsg?: boolean }) => Promise<T>;
   remove: (id: string) => Promise<void>;
 
   // Custom request
@@ -123,12 +123,14 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
   }, [basePath, handleError]);
 
   // ─── UPDATE (PUT) ───
-  const update = useCallback(async (id: string, payload: Partial<T>): Promise<T> => {
+  const update = useCallback(async (id: string, payload: Partial<T>, config?: { showSuccessMsg?: boolean }): Promise<T> => {
     setLoading(true);
     setError(null);
     try {
       const res: ApiResponse<T> = await api.put(`${basePath}/${id}`, payload);
-      message.success(res.message || 'Cập nhật thành công!');
+      if (config?.showSuccessMsg !== false) {
+        message.success(res.message || 'Cập nhật thành công!');
+      }
       return res.data;
     } catch (err: any) {
       handleError(err);
@@ -139,12 +141,14 @@ export function useApi<T = any>(basePath: string): UseApiReturn<T> {
   }, [basePath, handleError]);
 
   // ─── PATCH ───
-  const patch = useCallback(async (id: string, payload: Partial<T>): Promise<T> => {
+  const patch = useCallback(async (id: string, payload: Partial<T>, config?: { showSuccessMsg?: boolean }): Promise<T> => {
     setLoading(true);
     setError(null);
     try {
       const res: ApiResponse<T> = await api.patch(`${basePath}/${id}`, payload);
-      message.success(res.message || 'Cập nhật thành công!');
+      if (config?.showSuccessMsg !== false) {
+        message.success(res.message || 'Cập nhật thành công!');
+      }
       return res.data;
     } catch (err: any) {
       handleError(err);
