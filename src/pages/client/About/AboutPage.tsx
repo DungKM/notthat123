@@ -68,7 +68,7 @@ const AboutPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: 'Chất liệu đẳng cấp', desc: 'Gỗ Óc Chó nhập khẩu 100% FAS Bắc Mỹ với vân gỗ tinh xảo và độ bền vĩnh cửu.' },
+              { title: 'Chất liệu đẳng cấp', desc: 'Tất cả được chọn lọc khắt khe nhằm đảm bảo độ bền vượt trội, tính thẩm mỹ tinh tế và giá trị trường tồn theo thời gian.' },
               { title: 'Thiết kế độc bản', desc: 'Mỗi không gian được thiết kế dựa trên phong cách và nhu cầu thực tế của gia chủ.' },
               { title: 'Thi công chuyên nghiệp', desc: 'Đội ngũ nghệ nhân lành nghề cùng quy trình tẩm sấy và lắp đặt chuẩn quốc tế.' }
             ].map((item, i) => (

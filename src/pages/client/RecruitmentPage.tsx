@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 const RecruitmentPage: React.FC = () => {
   const { create: submitApplication, loading } = useApplicationService();
   const [formData, setFormData] = useState({
-    position: 'Kiến trúc sư', // default
+    position: '', // default empty
     fullName: '',
     phone: '',
     gender: 'Nam', // map directly for backend ENUM
@@ -30,7 +30,12 @@ const RecruitmentPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    if (name === 'fullName') {
+      value = value.replace(/[^\p{L}\s]/gu, '');
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors(prev => {

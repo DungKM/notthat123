@@ -41,7 +41,7 @@ const ProductsPage: React.FC = () => {
   const [selectedMaterials, setSelectedMaterials] = useState<string>('');
 
   // Price range
-  const MIN_PRICE = 0;
+  const MIN_PRICE = 50000;
   const MAX_PRICE = 1000000000;
   const [priceRange, setPriceRange] = useState<[number, number]>([MIN_PRICE, MAX_PRICE]);
   const [debouncedPrice, setDebouncedPrice] = useState<[number, number]>([MIN_PRICE, MAX_PRICE]);
@@ -290,16 +290,27 @@ const ProductsPage: React.FC = () => {
                     <div className="flex items-center gap-2 mb-4">
                       <input
                         type="text"
-                        readOnly
                         value={priceRange[0].toLocaleString('vi-VN')}
-                        className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-gray-50 focus:outline-none"
+                        onChange={(e) => {
+                          const valStr = e.target.value.replace(/\D/g, '');
+                          setPriceRange([valStr ? Number(valStr) : 0, priceRange[1]]);
+                        }}
+                        className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-white focus:outline-none focus:border-showcase-primary transition-all"
                       />
                       <span className="text-gray-400 shrink-0 text-sm">-</span>
                       <input
                         type="text"
-                        readOnly
                         value={priceRange[1].toLocaleString('vi-VN')}
-                        className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-gray-50 focus:outline-none"
+                        onChange={(e) => {
+                          const valStr = e.target.value.replace(/\D/g, '');
+                          setPriceRange([priceRange[0], valStr ? Number(valStr) : 0]);
+                        }}
+                        onBlur={() => {
+                          if (priceRange[1] < priceRange[0]) {
+                            setPriceRange([priceRange[0], priceRange[0]]);
+                          }
+                        }}
+                        className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-white focus:outline-none focus:border-showcase-primary transition-all"
                       />
                     </div>
 

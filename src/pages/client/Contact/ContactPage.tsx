@@ -28,7 +28,12 @@ const ContactPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+
+    if (name === 'fullName') {
+      value = value.replace(/[^\p{L}\s]/gu, '');
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors(prev => {
@@ -123,30 +128,30 @@ const ContactPage: React.FC = () => {
               </div>
 
               <div className="space-y-8">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 ">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shrink-0">
                     <EnvironmentOutlined className="text-xl" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-1 leading-snug">Showroom: Tầng 3 Tòa nhà 31 Nguyễn Xiển - Thanh Xuân - Hà Nội</h4>
+                    <h4 className="font-bold text-gray-900 leading-snug m-0">Trụ sở chính: Toà nhà VIMECO, Phạm Hùng, Cầu Giấy, Hà Nội</h4>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 ">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shrink-0">
                     <EnvironmentOutlined className="text-xl" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-1 leading-snug">Chi Nhánh Quảng Ninh : BIỆT THỰ BT05 KHU ĐÔ THỊ GREEN PARK - TP MÓNG CÁI - TỈNH QUẢNG NINH.</h4>
+                    <h4 className="font-bold text-gray-900 leading-snug m-0">Văn phòng giao dịch: Ngõ 21 Tả Thanh Oai, Đại Thanh, Hà Nội</h4>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 ">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shrink-0">
                     <EnvironmentOutlined className="text-xl" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-1 leading-snug">Chi Nhánh Quảng Bình : 57 NGUYỄN ĐÌNH CHIỂU - THÀNH PHỐ ĐỒNG HỚI - TỈNH QUẢNG BÌNH</h4>
+                    <h4 className="font-bold text-gray-900 leading-snug m-0">Xưởng sản xuất: Ngõ 41 Tả Thanh Oai, Đại Thanh, Hà Nội</h4>
                   </div>
                 </div>
               </div>
@@ -154,15 +159,15 @@ const ContactPage: React.FC = () => {
               <div className="pt-8 space-y-4 border-t border-gray-100">
                 <div className="flex items-center gap-3 text-lg">
                   <PhoneOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">{t('common.hotline')}: <span className="text-teal-700">091.1972.789</span></span>
+                  <span className="font-bold">{t('common.hotline')}: <span className="text-teal-700">0326.908.884</span></span>
                 </div>
-                <div className="flex items-center gap-3 text-lg">
+                {/* <div className="flex items-center gap-3 text-lg">
                   <MailOutlined className="text-[#C5A059]" />
                   <span className="font-bold">Email: <span className="text-teal-700">NOITHAT102.VN@GMAIL.COM</span></span>
-                </div>
+                </div> */}
                 <div className="flex items-center gap-3 text-lg">
                   <GlobalOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">Website: <a href="https://noithat102.vn" className="text-teal-700 hover:underline">https://noithat102.vn</a></span>
+                  <span className="font-bold">Website: <a href="https://noithathochi.vn" className="text-teal-700 hover:underline">https://noithathochi.vn</a></span>
                 </div>
               </div>
             </div>

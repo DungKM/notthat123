@@ -41,7 +41,13 @@ const CheckoutPage: React.FC = () => {
   const [minQtyWarnings, setMinQtyWarnings] = useState<Record<string, boolean>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    if (name === 'fullName') {
+      // Nhập họ tên không ký tự đặc biệt và số
+      value = value.replace(/[^\p{L}\s]/gu, '');
+    }
+
     setCustomer(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors(prev => {

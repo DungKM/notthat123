@@ -57,7 +57,12 @@ const Feedback: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    if (name === 'name') {
+      value = value.replace(/[^\p{L}\s]/gu, '');
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error if user starts typing
