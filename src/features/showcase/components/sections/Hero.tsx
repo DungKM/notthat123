@@ -4,7 +4,7 @@ import Button from '../ui/Button';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/src/routes/index';
-
+import heroBg from '../../../../statics/banner_noithat.jpg'
 const Hero: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ const Hero: React.FC = () => {
       {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=2000"
+          src={heroBg}
           alt="Luxury Living"
           className="w-full h-full object-cover"
           loading="lazy"

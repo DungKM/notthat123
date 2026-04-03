@@ -3,6 +3,8 @@ import Container from '../ui/Container';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import { useTranslation } from 'react-i18next';
+import hoan_hao from '../../../../statics/su_hoan_hao.jpg';
+import showroom from '../../../../statics/da_dang.jpg';
 
 const Showcase: React.FC = () => {
   const { t } = useTranslation();
@@ -25,7 +27,7 @@ const Showcase: React.FC = () => {
           <div className="relative">
             <div className="absolute -inset-4 bg-gray-50 -z-10 rounded-2xl transform rotate-3"></div>
             <img
-              src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=1200"
+              src={hoan_hao}
               alt="Perfection"
               className="rounded-xl shadow-2xl w-full aspect-[4/3] object-cover"
               loading="lazy"
@@ -52,7 +54,7 @@ const Showcase: React.FC = () => {
           <div className="order-1 lg:order-2 relative">
             <div className="absolute -inset-4 bg-teal-50 -z-10 rounded-2xl transform -rotate-3"></div>
             <img
-              src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1200"
+              src={showroom}
               alt="Showroom"
               className="rounded-xl shadow-2xl w-full aspect-[4/3] object-cover"
               loading="lazy"

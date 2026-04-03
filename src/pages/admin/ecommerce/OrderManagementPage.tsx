@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Tag, Popconfirm, message, Modal, Descriptions, Space } from 'antd';
+import { Button, Tag, Popconfirm, message, Modal, Descriptions, Space, Select } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, ModalForm, ProFormText, ProFormSelect, ProFormTextArea } from '@ant-design/pro-components';
@@ -46,6 +46,7 @@ const OrderManagementPage: React.FC = () => {
   const { request } = useOrderService();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<OrderItem | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>('');
 
   // Xem chi tiết đơn hàng
   // Xem chi tiết đơn hàng
@@ -182,14 +183,6 @@ const OrderManagementPage: React.FC = () => {
       dataIndex: 'status',
       width: 120,
       search: false,
-      filters: true,
-      valueEnum: {
-        pending: { text: 'Chờ xử lý', status: 'Warning' },
-        confirmed: { text: 'Đã xác nhận', status: 'Processing' },
-        shipping: { text: 'Đang giao hàng', status: 'Processing' },
-        delivered: { text: 'Đã giao hàng', status: 'Success' },
-        cancelled: { text: 'Đã hủy', status: 'Error' },
-      },
       render: (_, record) => {
         const st = statusMap[record.status];
         return <Tag color={st?.color || 'default'}>{st?.text || record.status}</Tag>;
@@ -243,6 +236,28 @@ const OrderManagementPage: React.FC = () => {
   ];
   return (
     <>
+      {/* Filter bar trạng thái */}
+      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontWeight: 600, fontSize: 14, color: '#555' }}>Lọc trạng thái:</span>
+        <Select
+          allowClear
+          placeholder="Tất cả trạng thái"
+          style={{ width: 200 }}
+          value={filterStatus || undefined}
+          onChange={(val) => {
+            setFilterStatus(val || '');
+            actionRef.current?.reload();
+          }}
+          options={[
+            { label: 'Chờ xử lý', value: 'pending' },
+            { label: 'Đã xác nhận', value: 'confirmed' },
+            { label: 'Đang giao hàng', value: 'shipping' },
+            { label: 'Đã giao hàng', value: 'delivered' },
+            { label: 'Đã hủy', value: 'cancelled' },
+          ]}
+        />
+      </div>
+
       <ProTable<OrderItem>
         columns={columns}
         actionRef={actionRef}
@@ -258,7 +273,7 @@ const OrderManagementPage: React.FC = () => {
               limit: params.pageSize || 10,
             };
             if (params.fullName) queryParams.search = params.fullName;
-            if (params.status) queryParams.status = params.status;
+            if (filterStatus) queryParams.status = filterStatus;
 
             const res = await request('GET', '/list', null, queryParams);
             return {

@@ -94,7 +94,7 @@ const SearchResultsPage: React.FC = () => {
           </h1>
 
           {/* Search Input */}
-          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
+          {/* <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
             <div className="flex bg-white  rounded-full overflow-hidden shadow-2xl border-4 border-white/10 transition-all focus-within:border-white/30 group">
               <div className="flex items-center flex-1 px-2">
                 <SearchOutlined className="text-gray-400 text-xl ml-4 flex-shrink-0 group-focus-within:text-amber-600 transition-colors" />
@@ -114,7 +114,7 @@ const SearchResultsPage: React.FC = () => {
                 <span>Tìm</span>
               </button>
             </div>
-          </form>
+          </form> */}
 
           {/* Result count */}
           {searched && !loading && query && (

@@ -61,7 +61,7 @@ const PartnerDetailPage: React.FC = () => {
             </div>
 
             {/* Content Body */}
-            <div className="p-8 md:p-16 max-w-4xl mx-auto">
+            <div className="p-8 md:p-16">
               {partner.description && (
                 <p className="text-2xl text-teal-950 font-semibold mb-8 leading-relaxed">
                   {partner.description}

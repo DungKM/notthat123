@@ -413,7 +413,7 @@ const CheckoutPage: React.FC = () => {
                                   onConfirm={() => removeFromCart(item.id)}
                                   okText="Xoá ngay"
                                   cancelText="Không"
-                                  placement="left"
+                                  placement="top"
                                 >
                                   <button
                                     className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors"
