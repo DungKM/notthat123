@@ -47,11 +47,11 @@ const CategoryExplorerPage = () => {
   const parentCategories = apiCategories ? apiCategories.filter(cat => !cat.parentSlug) : [];
 
   // Set default active parent category
-  useEffect(() => {
-    if (parentCategories.length > 0 && !activeParentId) {
-      setActiveParentId(parentCategories[0].id || parentCategories[0]._id);
-    }
-  }, [parentCategories, activeParentId]);
+  // useEffect(() => {
+  //   if (parentCategories.length > 0 && !activeParentId) {
+  //     setActiveParentId(parentCategories[0].id || parentCategories[0]._id);
+  //   }
+  // }, [parentCategories, activeParentId]);
 
   const activeParent = parentCategories.find(cat => (cat.id || cat._id) === activeParentId);
   const allChildren = activeParent?.children || [];
@@ -82,8 +82,9 @@ const CategoryExplorerPage = () => {
   // Submit form (Enter or click button)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    doSearch(inputValue);
+    if (inputValue.trim()) {
+      navigate(`${ROUTES.TIM_KIEM}?q=${encodeURIComponent(inputValue.trim())}`);
+    }
   };
 
   // Clear search and go back to category browsing
@@ -150,13 +151,6 @@ const CategoryExplorerPage = () => {
                       type="text"
                       value={inputValue}
                       onChange={e => setInputValue(sanitizeInput(e.target.value))}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          if (debounceRef.current) clearTimeout(debounceRef.current);
-                          doSearch(inputValue);
-                        }
-                      }}
                       placeholder="Tìm kiếm sản phẩm..."
                       className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition"
                     />
@@ -181,23 +175,52 @@ const CategoryExplorerPage = () => {
                   {parentCategories.map(cat => {
                     const catId = cat.id || cat._id;
                     const isActive = activeParentId === catId && !isInSearchMode;
+                    const hasChildren = cat.children && cat.children.length > 0;
                     return (
-                      <button
-                        key={catId}
-                        onClick={() => {
-                          setActiveParentId(catId);
-                          setInputValue('');
-                          setKeyword('');
-                          setSearchResults([]);
-                          setSearched(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive
-                          ? 'bg-showcase-primary text-white  '
-                          : 'text-gray-600'
-                          }`}
-                      >
-                        {cat.name}
-                      </button>
+                      <div key={catId} className="flex flex-col">
+                        <button
+                          onClick={() => {
+                            setActiveParentId(isActive ? '' : catId);
+                            setInputValue('');
+                            setKeyword('');
+                            setSearchResults([]);
+                            setSearched(false);
+                          }}
+                          className={`w-full text-left flex justify-between items-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive
+                            ? 'bg-showcase-primary text-white '
+                            : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                          {cat.name}
+                          {hasChildren && (
+                            <svg className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          )}
+                        </button>
+
+                        {/* Subcategories Dropdown */}
+                        {hasChildren && (
+                          <div
+                            className={`grid transition-all duration-300 ease-in-out ${isActive ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'
+                              }`}
+                          >
+                            <div className="overflow-hidden">
+                              <div className="flex flex-col gap-1.5 pl-4 border-l-2 border-gray-100 ml-4 py-1">
+                                {cat.children.map((child: any) => (
+                                  <button
+                                    key={child.id || child.slug}
+                                    onClick={() => navigate(`/san-pham/danh-sach?category=${child.slug}`)}
+                                    className="text-left text-[13px] text-gray-500 hover:text-showcase-primary hover:font-semibold py-1.5 transition-colors"
+                                  >
+                                    {child.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                   {parentCategories.length === 0 && (
@@ -317,7 +340,19 @@ const CategoryExplorerPage = () => {
                   )}
                 </div>
 
-                {allChildren.length > 0 ? (
+                {!activeParent ? (
+                  <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 max-w-2xl mt-8">
+                    <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <InboxOutlined className="text-2xl text-amber-500" />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">
+                      Vui lòng chọn danh mục
+                    </h4>
+                    <p className="text-gray-500 text-sm">
+                      Chọn một danh mục từ bộ lọc bên trái để khám phá các loại sản phẩm tương ứng.
+                    </p>
+                  </div>
+                ) : allChildren.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                     {allChildren.map((child: any) => (
                       <div

@@ -24,17 +24,17 @@ const Hero: React.FC = () => {
 
       <Container className="relative z-10 text-white text-center">
         <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn">
-          <div 
+          <div
             className="inline-block border-y border-showcase-primary py-2 px-8 mb-6"
-            style={{ 
-              opacity: 0, 
-              animation: 'tracking-in-expand-fwd-badge 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both' 
+            style={{
+              opacity: 0,
+              animation: 'tracking-in-expand-fwd-badge 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both'
             }}
           >
             <span className="text-sm font-bold uppercase text-showcase-primary">{t('hero.badge')}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight" style={{ fontFamily: "'Inter', sans-serif", perspective: '1000px' }}>
-            <span 
+            <span
               className="block"
               style={{
                 opacity: 0,
@@ -43,7 +43,7 @@ const Hero: React.FC = () => {
             >
               {t('hero.title_line1')}
             </span>
-            <span 
+            <span
               className="block"
               style={{
                 opacity: 0,
@@ -88,17 +88,17 @@ const Hero: React.FC = () => {
               to { opacity: 1; transform: translateY(0); }
             }
           `}</style>
-          <p 
+          <p
             className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed"
-            style={{ 
-              opacity: 0, 
-              animation: 'softFadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards' 
+            style={{
+              opacity: 0,
+              animation: 'softFadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards'
             }}
           >
             {t('hero.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <div 
+            <div
               className="w-full sm:w-auto"
               style={{ opacity: 0, animation: 'softFadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.1s forwards' }}
             >
@@ -111,7 +111,7 @@ const Hero: React.FC = () => {
                 {t('hero.btn_explore')}
               </Button>
             </div>
-            <div 
+            <div
               className="w-full sm:w-auto"
               style={{ opacity: 0, animation: 'softFadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.3s forwards' }}
             >

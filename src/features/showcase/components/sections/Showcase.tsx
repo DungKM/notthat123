@@ -8,7 +8,7 @@ const Showcase: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section className="py-20 bg-white overflow-hidden">
       <Container>
         {/* Section Title */}
         <div className="text-center mb-16 space-y-4">
@@ -24,9 +24,9 @@ const Showcase: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-20 lg:mb-32">
           <div className="relative">
             <div className="absolute -inset-4 bg-gray-50 -z-10 rounded-2xl transform rotate-3"></div>
-            <img 
-              src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=1200" 
-              alt="Perfection" 
+            <img
+              src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=1200"
+              alt="Perfection"
               className="rounded-xl shadow-2xl w-full aspect-[4/3] object-cover"
               loading="lazy"
             />
@@ -51,9 +51,9 @@ const Showcase: React.FC = () => {
           </div>
           <div className="order-1 lg:order-2 relative">
             <div className="absolute -inset-4 bg-teal-50 -z-10 rounded-2xl transform -rotate-3"></div>
-            <img 
-              src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1200" 
-              alt="Showroom" 
+            <img
+              src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1200"
+              alt="Showroom"
               className="rounded-xl shadow-2xl w-full aspect-[4/3] object-cover"
               loading="lazy"
             />

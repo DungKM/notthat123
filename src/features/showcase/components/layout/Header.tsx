@@ -569,6 +569,20 @@ const Header: React.FC = () => {
               </div>
             </div>
 
+            {/* Mobile Search Button */}
+            <div className="md:hidden">
+              <button
+                type="button"
+                onClick={() => navigate('/tim-kiem')}
+                className={`group flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-300 ${isDarkHeader
+                  ? 'text-gray-800 border-gray-200 hover:bg-gray-50'
+                  : 'text-white border-white/30 hover:bg-white/10'
+                  }`}
+              >
+                <SearchOutlined className="text-lg group-hover:scale-110 transition-transform" />
+              </button>
+            </div>
+
             {/* Cart Button */}
             <div className="relative" ref={cartButtonRef}>
               <button
