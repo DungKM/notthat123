@@ -62,6 +62,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
       children: [
         { path: ROUTES.ADMIN_TONG_QUAN, name: 'Bảng thống kê', icon: <DashboardOutlined /> },
         { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
+        { path: ROUTES.ADMIN_HANG_MUC, name: 'Quản lý hạng mục', icon: <TagsOutlined /> },
         // { path: ROUTES.ADMIN_DANH_MUC_TIEN_DO, name: 'Danh mục tiến độ dự án', icon: <TagsOutlined /> },
         { path: ROUTES.ADMIN_NHAN_VIEN, name: 'Bảng lương nhân sự', icon: <TeamOutlined /> },
         { path: ROUTES.ADMIN_DUYET_UNG_TIEN, name: 'Phê duyệt ứng tiền', icon: <DollarOutlined /> },

@@ -37,6 +37,7 @@ const CheckoutPage: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -364,22 +365,44 @@ const CheckoutPage: React.FC = () => {
                                     </button>
                                     <input
                                       type="number"
-                                      value={item.quantity || ''}
+                                      value={tempQuantities[item.id] !== undefined ? tempQuantities[item.id] : item.quantity.toString()}
                                       onChange={(e) => {
-                                        const val = e.target.value;
-                                        if (val === '') {
-                                          updateQuantity(item.id, 0); // Temporary state for empty input
-                                          return;
+                                        let val = e.target.value;
+                                        
+                                        if (val !== '') {
+                                          let numVal = parseInt(val);
+                                          if (!isNaN(numVal)) {
+                                            if (numVal > 999) {
+                                              numVal = 999;
+                                            }
+
+                                            if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
+                                              numVal = item.stockQuantity;
+                                            }
+                                            
+                                            val = numVal.toString();
+
+                                            if (numVal >= 1) {
+                                              updateQuantity(item.id, numVal);
+                                            }
+                                          }
                                         }
-                                        let numVal = parseInt(val);
-                                        if (isNaN(numVal) || numVal < 1) numVal = 1;
-                                        if (item.stockQuantity !== undefined && numVal > item.stockQuantity) numVal = item.stockQuantity;
-                                        updateQuantity(item.id, numVal);
+
+                                        setTempQuantities(prev => ({ ...prev, [item.id]: val }));
                                       }}
                                       onBlur={(e) => {
-                                        if (!e.target.value || parseInt(e.target.value) < 1) {
+                                        let numVal = parseInt(e.target.value);
+                                        if (isNaN(numVal) || numVal < 1) {
                                           updateQuantity(item.id, 1);
+                                        } else {
+                                          updateQuantity(item.id, numVal);
                                         }
+                                        
+                                        setTempQuantities(prev => {
+                                          const next = { ...prev };
+                                          delete next[item.id];
+                                          return next;
+                                        });
                                       }}
                                       className="flex-[1.5] w-full text-center text-base font-semibold text-slate-900 focus:outline-none focus:bg-gray-50 h-full border-x border-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     />

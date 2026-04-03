@@ -204,9 +204,9 @@ const ProductsPage: React.FC = () => {
         <Container className="relative z-10 text-center text-white">
           <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>SẢN PHẨM</h1>
           <div className="mt-4 text-sm font-medium opacity-80 flex items-center justify-center gap-2">
-            <Link to="/" className="text-white hover:text-gray-300 transition-colors">Trang chủ</Link>
-            <span className="text-white">/</span>
-            <Link to="/san-pham" className="text-white hover:text-gray-300 transition-colors">Sản phẩm</Link>
+            <Link to="/" className="!text-white hover:!text-gray-300 transition-colors">Trang chủ</Link>
+            <span className="!text-white">/</span>
+            <Link to="/san-pham" className="!text-white hover:!text-gray-300 transition-colors">Sản phẩm</Link>
           </div>
         </Container>
       </section>

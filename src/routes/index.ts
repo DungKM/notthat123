@@ -54,4 +54,5 @@ export const ROUTES = {
   ADMIN_VIDEO: '/quan-tri/video',
   ADMIN_DANH_GIA: '/quan-tri/danh-gia',
   ADMIN_DANH_MUC_TIEN_DO: '/quan-tri/danh-muc-tien-do-du-an',
+  ADMIN_HANG_MUC: '/quan-tri/hang-muc',
 };
