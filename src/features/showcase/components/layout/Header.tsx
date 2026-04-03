@@ -39,6 +39,8 @@ const Header: React.FC = () => {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
   const [minQtyWarnings, setMinQtyWarnings] = useState<Record<string, boolean>>({});
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileSearchQuery, setMobileSearchQuery] = useState('');
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -573,7 +575,7 @@ const Header: React.FC = () => {
             <div className="md:hidden">
               <button
                 type="button"
-                onClick={() => navigate('/tim-kiem')}
+                onClick={() => setMobileSearchOpen(true)}
                 className={`group flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-300 ${isDarkHeader
                   ? 'text-gray-800 border-gray-200 hover:bg-gray-50'
                   : 'text-white border-white/30 hover:bg-white/10'
@@ -582,6 +584,58 @@ const Header: React.FC = () => {
                 <SearchOutlined className="text-lg group-hover:scale-110 transition-transform" />
               </button>
             </div>
+
+            {/* Mobile Search Overlay */}
+            {mobileSearchOpen && (
+              <div className="fixed inset-0 z-[200] flex flex-col md:hidden" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                {/* Header of overlay */}
+                <div className="bg-white px-4 py-3 flex items-center gap-3 shadow-md">
+                  <SearchOutlined className="text-gray-400 text-lg flex-shrink-0" />
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Tìm kiếm sản phẩm, công trình..."
+                    value={mobileSearchQuery}
+                    onChange={e => setMobileSearchQuery(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && mobileSearchQuery.trim()) {
+                        setMobileSearchOpen(false);
+                        setMobileSearchQuery('');
+                        navigate(`/tim-kiem?q=${encodeURIComponent(mobileSearchQuery.trim())}`);
+                      }
+                    }}
+                    className="flex-1 outline-none text-gray-800 text-base placeholder-gray-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { setMobileSearchOpen(false); setMobileSearchQuery(''); }}
+                    className="text-gray-400 hover:text-gray-700 transition-colors p-1"
+                  >
+                    <CloseOutlined className="text-lg" />
+                  </button>
+                </div>
+                {/* Nút tìm */}
+                {mobileSearchQuery.trim() && (
+                  <div className="bg-white border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileSearchOpen(false);
+                        navigate(`/tim-kiem?q=${encodeURIComponent(mobileSearchQuery.trim())}`);
+                        setMobileSearchQuery('');
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-amber-50 text-left transition-colors"
+                    >
+                      <SearchOutlined className="text-showcase-primary" />
+                      <span className="text-sm text-gray-700">Tìm kiếm <span className="font-bold text-gray-900">"{mobileSearchQuery}"</span></span>
+                      <ArrowRightOutlined className="text-[11px] text-gray-400 ml-auto" />
+                    </button>
+                  </div>
+                )}
+                {/* Backdrop click to close */}
+                <div className="flex-1" onClick={() => { setMobileSearchOpen(false); setMobileSearchQuery(''); }} />
+              </div>
+            )}
 
             {/* Cart Button */}
             <div className="relative" ref={cartButtonRef}>
