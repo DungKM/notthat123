@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 const CTA: React.FC = () => {
   const { t } = useTranslation();
   const { create, loading } = useContactService();
-  
+
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -37,7 +37,7 @@ const CTA: React.FC = () => {
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Vui lòng nhập họ tên!';
     }
-    
+
     if (!formData.phone.trim()) {
       newErrors.phone = 'Vui lòng nhập số điện thoại!';
     } else {
@@ -46,7 +46,7 @@ const CTA: React.FC = () => {
         newErrors.phone = 'Số điện thoại không hợp lệ!';
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -79,7 +79,7 @@ const CTA: React.FC = () => {
   };
 
   return (
-    <section id="tu-van-ngay-form" className="py-24 bg-gray-50">
+    <section id="tu-van-ngay-form" className="py-10 bg-gray-50">
       <Container>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* FAQ Column */}
@@ -91,8 +91,8 @@ const CTA: React.FC = () => {
                 { q: t('cta.faq_q2'), a: t('cta.faq_a2') },
                 { q: t('cta.faq_q3'), a: t('cta.faq_a3') }
               ].map((item, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className="border-b border-gray-200 pb-4 cursor-pointer"
                   onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                 >
@@ -116,32 +116,32 @@ const CTA: React.FC = () => {
               <h3 className="text-2xl font-bold italic" style={{ fontFamily: "'Inter', sans-serif" }}>{t('cta.form_title')}</h3>
               <p className="text-xs text-gray-400 font-light">{t('cta.form_desc')}</p>
             </div>
-            
+
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  placeholder={t('cta.form_name')} 
-                  className={`w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm transition-colors border ${errors.fullName ? 'border-red-500' : 'border-transparent'}`} 
+                  placeholder={t('cta.form_name')}
+                  className={`w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm transition-colors border ${errors.fullName ? 'border-red-500' : 'border-transparent'}`}
                 />
                 {errors.fullName && <p className="mt-1 text-[10px] text-red-400 uppercase tracking-wider">{errors.fullName}</p>}
               </div>
 
               <div>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder={t('cta.form_phone')} 
-                  className={`w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm transition-colors border ${errors.phone ? 'border-red-500' : 'border-transparent'}`} 
+                  placeholder={t('cta.form_phone')}
+                  className={`w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm transition-colors border ${errors.phone ? 'border-red-500' : 'border-transparent'}`}
                 />
                 {errors.phone && <p className="mt-1 text-[10px] text-red-400 uppercase tracking-wider">{errors.phone}</p>}
               </div>
-              <select 
+              <select
                 name="projectType"
                 value={formData.projectType}
                 onChange={handleChange}
@@ -152,18 +152,18 @@ const CTA: React.FC = () => {
                 <option value={t('cta.form_apartment')}>{t('cta.form_apartment')}</option>
                 <option value={t('cta.form_townhouse')}>{t('cta.form_townhouse')}</option>
               </select>
-              <textarea 
-                rows={3} 
+              <textarea
+                rows={3}
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder={t('cta.form_content')} 
+                placeholder={t('cta.form_content')}
                 className="w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm resize-none"
               ></textarea>
-              <Button 
-                type="submit" 
-                disabled={loading} 
-                fullWidth 
+              <Button
+                type="submit"
+                disabled={loading}
+                fullWidth
                 className="bg-showcase-primary border-none py-4 text-xs font-bold tracking-widest hover:scale-[1.02] hover:bg-showcase-hover disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {loading ? 'ĐANG GỬI...' : t('cta.form_submit')}

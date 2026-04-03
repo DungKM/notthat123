@@ -138,7 +138,7 @@ const Feedback: React.FC = () => {
   };
 
   return (
-    <section className="py-24 bg-gray-50 border-t border-gray-100">
+    <section className="py-10 lg:py-24 bg-gray-50 border-t border-gray-100">
       <Container>
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-teal-950 uppercase tracking-widest mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>

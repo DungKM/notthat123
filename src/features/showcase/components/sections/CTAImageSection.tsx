@@ -4,7 +4,7 @@ import ctaImage from '@/src/statics/cta.jpg';
 
 const CTAImageSection: React.FC = () => {
   return (
-    <section className="py-5 bg-white">
+    <section className="py-0 lg:py-5 bg-white">
       <Container>
         <div className="rounded-2xl overflow-hidden  w-full">
           <img

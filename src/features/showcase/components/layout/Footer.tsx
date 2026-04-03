@@ -45,14 +45,20 @@ const Footer: React.FC = () => {
 
           {/* Trụ sở chính */}
           <div className="flex flex-col h-full gap-4">
-            <div>
+            <div className="flex-1">
               <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">TRỤ SỞ CHÍNH</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> Toà nhà VIMECO, Phạm Hùng, Cầu Giấy, Hà Nội</li>
-                <li className="flex items-center gap-3"><PhoneOutlined className="text-showcase-primary shrink-0" /> 0326 908 884</li>
+                <li className="flex items-start gap-3">
+                  <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
+                  <div className="flex flex-col gap-1">
+                    <span>0787 356 388 (Mr Lương)</span>
+                    <span>0395 852 062 (Mrs Hoa)</span>
+                  </div>
+                </li>
               </ul>
             </div>
-            <div className="border border-gray-100 rounded overflow-hidden flex-1 min-h-[180px] w-full shadow-sm transition-all duration-500">
+            <div className="border border-gray-100 rounded overflow-hidden h-[180px] shrink-0 w-full shadow-sm transition-all duration-500">
               <iframe
                 title="Map Trụ sở chính"
                 src="https://www.google.com/maps?q=To%C3%A0+nh%C3%A0+VIMECO,+Ph%E1%BA%A1m+H%C3%B9ng,+C%E1%BA%A7u+Gi%E1%BA%A5y,+H%C3%A0+N%E1%BB%99i&output=embed"
@@ -67,14 +73,20 @@ const Footer: React.FC = () => {
 
           {/* Văn phòng giao dịch */}
           <div className="flex flex-col h-full gap-4">
-            <div>
+            <div className="flex-1">
               <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">VĂN PHÒNG GIAO DỊCH</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> Ngõ 21 Tả Thanh Oai, Đại Thanh, Hà Nội</li>
-                <li className="flex items-center gap-3"><PhoneOutlined className="text-showcase-primary shrink-0" /> 0326 908 884</li>
+                <li className="flex items-start gap-3">
+                  <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
+                  <div className="flex flex-col gap-1">
+                    <span>0787 356 388 (Mr Lương)</span>
+                    <span>0395 852 062 (Mrs Hoa)</span>
+                  </div>
+                </li>
               </ul>
             </div>
-            <div className="border border-gray-100 rounded overflow-hidden flex-1 min-h-[180px] w-full shadow-sm transition-all duration-500">
+            <div className="border border-gray-100 rounded overflow-hidden h-[180px] shrink-0 w-full shadow-sm transition-all duration-500">
               <iframe
                 title="Map Văn phòng giao dịch"
                 src="https://www.google.com/maps?q=Ng%C3%B5+21+T%E1%BA%A3+Thanh+Oai,+%C4%90%E1%BA%A1i+Thanh,+H%C3%A0+N%E1%BB%99i&output=embed"
@@ -89,7 +101,7 @@ const Footer: React.FC = () => {
 
           {/* Xưởng sản xuất */}
           <div className="flex flex-col h-full gap-4">
-            <div>
+            <div className="flex-1">
               <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">XƯỞNG SẢN XUẤT</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-start gap-3"><EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> Ngõ 41 Tả Thanh Oai, Đại Thanh, Hà Nội</li>
@@ -102,7 +114,7 @@ const Footer: React.FC = () => {
                 </li>
               </ul>
             </div>
-            <div className="border border-gray-100 rounded overflow-hidden flex-1 min-h-[180px] w-full shadow-sm transition-all duration-500">
+            <div className="border border-gray-100 rounded overflow-hidden h-[180px] shrink-0 w-full shadow-sm transition-all duration-500">
               <iframe
                 title="Map Xưởng sản xuất"
                 src="https://www.google.com/maps?q=Ng%C3%B5+41+T%E1%BA%A3+Thanh+Oai,+%C4%90%E1%BA%A1i+Thanh,+H%C3%A0+N%E1%BB%99i&output=embed"
