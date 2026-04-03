@@ -10,7 +10,7 @@ const Hero: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative min-h-[600px] md:h-screen md:min-h-[700px] flex items-center pt-20 overflow-hidden">
+    <section className="relative min-h-[600px] md:h-screen md:min-h-[700px] flex items-center pt-20 pb-16 md:pb-0 overflow-hidden">
       {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -105,7 +105,7 @@ const Hero: React.FC = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full border-white text-white hover:bg-white hover:text-black transition-all duration-700 hover:-translate-y-1 hover:shadow-lg"
+                className="w-full border-white text-white hover:bg-white hover:text-black transition-all duration-700 hover:-translate-y-1 hover:shadow-lg py-4 sm:py-3"
                 onClick={() => navigate(ROUTES.CONG_TRINH)}
               >
                 {t('hero.btn_explore')}
@@ -118,7 +118,7 @@ const Hero: React.FC = () => {
               <Button
                 variant="primary"
                 size="lg"
-                className="w-full bg-showcase-primary border-none hover:bg-showcase-hover transition-all duration-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-showcase-primary/30"
+                className="w-full bg-showcase-primary border-none hover:bg-showcase-hover transition-all duration-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-showcase-primary/30 py-4 sm:py-3"
                 onClick={() => {
                   const formElement = document.getElementById('tu-van-ngay-form');
                   if (formElement) {

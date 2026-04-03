@@ -151,6 +151,11 @@ const CTA: React.FC = () => {
                 <option value={t('cta.form_villa')}>{t('cta.form_villa')}</option>
                 <option value={t('cta.form_apartment')}>{t('cta.form_apartment')}</option>
                 <option value={t('cta.form_townhouse')}>{t('cta.form_townhouse')}</option>
+                <option value="Văn phòng">Văn phòng</option>
+                <option value="Showroom / Cửa hàng">Showroom / Cửa hàng</option>
+                <option value="Khách sạn / Resort">Khách sạn / Resort</option>
+                <option value="Nhà hàng / Cafe">Nhà hàng / Cafe</option>
+                <option value="Khác">Khác</option>
               </select>
               <textarea
                 rows={3}
