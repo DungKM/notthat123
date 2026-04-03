@@ -669,8 +669,8 @@ const Header: React.FC = () => {
                           <p className="text-showcase-primary font-black mt-1">{item.price.toLocaleString('vi-VN')} đ</p>
                         </div>
                         <div className="mt-4">
-                          <div className="flex items-center justify-between">
-                            <div className={`flex items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
+                          <div className="flex flex-wrap items-center justify-between gap-2 mt-2 sm:mt-0">
+                            <div className={`flex shrink-0 items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
                               ? 'border-red-400'
                               : 'border-slate-500'
                               }`}>
