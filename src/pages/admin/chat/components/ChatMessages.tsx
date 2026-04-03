@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, Modal } from 'antd';
+import { Image, Modal, Spin, Tooltip } from 'antd';
+import { DownloadOutlined, FileWordOutlined, FileExcelOutlined, FilePdfOutlined, FileZipOutlined, FileOutlined } from '@ant-design/icons';
 import { ChatMessage } from '@/src/features/chat/types';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import dayjs from 'dayjs';
@@ -33,6 +34,35 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, onDeleteMessage, 
     const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
     const [editContent, setEditContent] = useState('');
     const [hoverMsgId, setHoverMsgId] = useState<string | null>(null);
+    const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
+
+    const handleDownloadFile = async (url: string, name: string, key: string) => {
+        setDownloadingKey(key);
+        try {
+            const downloadUrl = `/api/chat/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(name)}`;
+            const response = await fetch(downloadUrl);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = name;
+            link.click();
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (e) {
+            console.error('Download failed:', e);
+        } finally {
+            setDownloadingKey(null);
+        }
+    };
+
+    const getFileIcon = (fmt: string, color: string) => {
+        const style = { fontSize: 28, color };
+        if (['doc', 'docx'].includes(fmt)) return <FileWordOutlined style={{ ...style, color: '#2B5796' }} />;
+        if (['xls', 'xlsx'].includes(fmt)) return <FileExcelOutlined style={{ ...style, color: '#1D6F42' }} />;
+        if (['pdf'].includes(fmt)) return <FilePdfOutlined style={{ ...style, color: '#E74C3C' }} />;
+        if (['zip', 'rar', '7z'].includes(fmt)) return <FileZipOutlined style={style} />;
+        return <FileOutlined style={style} />;
+    };
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -110,9 +140,25 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, onDeleteMessage, 
                             const prevMsg = index > 0 ? group.msgs[index - 1] : null;
                             const sameAsPrev = prevMsg?.senderId === item.senderId;
 
-                            const imageUrls: string[] = ((item.attachments || []) as any[]).map((a: any) =>
+                            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                            const allAttachments: any[] = (item.attachments || []) as any[];
+                            const imageAttachments = allAttachments.filter((a: any) => {
+                                const url = typeof a === 'string' ? a : a.url;
+                                const fmt = (typeof a === 'string' ? '' : a.format || '').toLowerCase();
+                                const ext = url?.split('.').pop()?.toLowerCase() || '';
+                                return imageExtensions.includes(fmt) || imageExtensions.includes(ext);
+                            });
+                            const fileAttachments = allAttachments.filter((a: any) => {
+                                const url = typeof a === 'string' ? a : a.url;
+                                const fmt = (typeof a === 'string' ? '' : a.format || '').toLowerCase();
+                                const ext = url?.split('.').pop()?.toLowerCase() || '';
+                                return !imageExtensions.includes(fmt) && !imageExtensions.includes(ext);
+                            });
+                            const imageUrls: string[] = imageAttachments.map((a: any) =>
                                 typeof a === 'string' ? a : a.url
                             ).filter(Boolean);
+
+
 
                             return (
                                 <div
@@ -176,6 +222,51 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, onDeleteMessage, 
                                                             preview={{ mask: <span style={{ fontSize: 11 }}>Xem ảnh</span> }}
                                                         />
                                                     ))}
+                                                </div>
+                                            )}
+
+                                            {/* File attachments */}
+                                            {fileAttachments.length > 0 && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                                    {fileAttachments.map((a: any, idx: number) => {
+                                                        const url = typeof a === 'string' ? a : a.url;
+                                                        const name = (typeof a === 'string' ? url.split('/').pop() : a.name) || 'Tệp đính kèm';
+                                                        const fmt = ((typeof a === 'string' ? '' : a.format || url.split('.').pop()) || '').toLowerCase();
+                                                        const downloadKey = `${msgId}-${idx}`;
+                                                        const isDownloading = downloadingKey === downloadKey;
+                                                        const iconColor = isMe ? '#fff' : '#6366f1';
+                                                        return (
+                                                            <Tooltip key={idx} title="Bấm để tải xuống">
+                                                                <div
+                                                                    onClick={() => !isDownloading && handleDownloadFile(url, name, downloadKey)}
+                                                                    style={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: 10,
+                                                                        padding: '10px 14px',
+                                                                        borderRadius: 12,
+                                                                        background: isMe ? '#6366f1' : '#fff',
+                                                                        border: isMe ? 'none' : '1px solid #e2e8f0',
+                                                                        color: isMe ? '#fff' : '#1e293b',
+                                                                        maxWidth: 280,
+                                                                        cursor: isDownloading ? 'wait' : 'pointer',
+                                                                        transition: 'opacity 0.15s',
+                                                                        opacity: isDownloading ? 0.7 : 1,
+                                                                    }}
+                                                                >
+                                                                    <span style={{ flexShrink: 0, lineHeight: 1 }}>{getFileIcon(fmt, iconColor)}</span>
+                                                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                                                        <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+                                                                        <div style={{ fontSize: 11, opacity: 0.65, textTransform: 'uppercase', marginTop: 2 }}>{fmt || 'file'}</div>
+                                                                    </div>
+                                                                    {isDownloading
+                                                                        ? <Spin size="small" style={{ marginLeft: 'auto' }} />
+                                                                        : <DownloadOutlined style={{ marginLeft: 'auto', fontSize: 16, opacity: 0.8, color: isMe ? '#fff' : '#6366f1' }} />
+                                                                    }
+                                                                </div>
+                                                            </Tooltip>
+                                                        );
+                                                    })}
                                                 </div>
                                             )}
 
