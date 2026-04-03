@@ -118,7 +118,7 @@ const ContactPage: React.FC = () => {
             {/* Info Column */}
             <div className="space-y-12">
               <div className="space-y-4">
-                <h2 className="text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>NỘI THẤT 102</h2>
+                <h2 className="text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>Nội Thất HOCHI</h2>
                 <div className="w-20 h-1 bg-[#C5A059]"></div>
               </div>
 

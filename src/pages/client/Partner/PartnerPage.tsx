@@ -26,7 +26,7 @@ const PartnerPage: React.FC = () => {
     <div className="bg-white">
       <SEO
         title="Đối tác"
-        description="Digiworld trở thành đối tác chiến lược của các thương hiệu hàng đầu."
+        description="HOCHI tự hào hợp tác cùng các đối tác uy tín, mang đến những trải nghiệm không điểm trừ cho khách hàng."
       />
 
       {/* Hero Banner Section */}
@@ -71,11 +71,7 @@ const PartnerPage: React.FC = () => {
               Đối tác
             </h2>
             <p className="text-gray-500 leading-relaxed text-lg text-justify md:text-left">
-              Digiworld tự hào là đối tác chiến lược hàng đầu, mang đến các sản
-              phẩm công nghệ, tiêu dùng và sức khỏe tiên tiến từ các thương hiệu
-              nổi tiếng toàn cầu. Chúng tôi luôn cam kết cung cấp các sản phẩm
-              và dịch vụ uy tín, chất lượng với định hướng phát triển bền vững
-              cùng các đối tác của mình tại thị trường Việt Nam.
+              Chúng tôi tự hào hợp tác cùng các đối tác uy tín trong nhiều lĩnh vực, mang đến những sản phẩm và giải pháp chất lượng cao, đáp ứng các tiêu chuẩn khắt khe. Với định hướng phát triển bền vững, HOCHI luôn đề cao sự đồng hành lâu dài, cùng nhau kiến tạo giá trị và nâng tầm trải nghiệm cho khách hàng tại thị trường Việt Nam.
             </p>
           </div>
 

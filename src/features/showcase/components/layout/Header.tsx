@@ -38,6 +38,7 @@ const Header: React.FC = () => {
   const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart, isCartOpen, setIsCartOpen } = useCart();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
+  const [minQtyWarnings, setMinQtyWarnings] = useState<Record<string, boolean>>({});
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -131,6 +132,18 @@ const Header: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Ngăn chặn cuộn body khi giỏ hàng đang mở
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCartOpen]);
 
   // Close cart when clicking outside (Desktop only, mobile uses full screen overlay)
   useEffect(() => {
@@ -629,7 +642,7 @@ const Header: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                 {cartItems.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
                     <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
@@ -651,101 +664,102 @@ const Header: React.FC = () => {
                   </div>
                 ) : (
                   cartItems.map((item) => (
-                    <div key={item.id} className="flex gap-4 group">
-                      <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 flex-shrink-0">
+                    <div key={item.id} className="flex gap-4 group mb-4 border-b border-gray-100 pb-5 last:border-0 last:pb-0">
+                      <div className="relative w-[100px] h-[130px] rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
                         <img src={item.image} alt={item.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       </div>
-                      <div className="flex-1 flex flex-col justify-between py-1">
-                        <div>
-                          <div className="flex justify-between items-start gap-2">
-                            <h4 className="text-sm font-bold !text-gray-900 line-clamp-2 leading-tight">{item.title}</h4>
+                      <div className="flex-1 flex flex-col">
+                        <h4 className="text-[15px] font-medium !text-gray-900 line-clamp-2 leading-snug">{item.title}</h4>
+
+                        <div className="mt-3">
+                          <div className={`flex shrink-0 items-center rounded-full overflow-hidden h-9 w-[100px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity ? 'border-red-400' : 'border-gray-200'}`}>
                             <button
-                                onClick={(e) => { e.stopPropagation(); setItemToDelete(item.id); }}
-                                className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all"
-                                title="Xoá sản phẩm"
-                              >
-                                <DeleteOutlined className="text-[18px]" />
-                              </button>
-                          </div>
-                          <p className="text-showcase-primary font-black mt-1">{item.price.toLocaleString('vi-VN')} đ</p>
-                        </div>
-                        <div className="mt-4">
-                          <div className="flex flex-wrap items-center justify-between gap-2 mt-2 sm:mt-0">
-                            <div className={`flex shrink-0 items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
-                              ? 'border-red-400'
-                              : 'border-slate-500'
-                              }`}>
-                              <button
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
-                              >
-                                −
-                              </button>
-                              <input
-                                type="number"
-                                value={tempQuantities[item.id] !== undefined ? tempQuantities[item.id] : (item.quantity || '')}
-                                onChange={(e) => {
-                                  let val = e.target.value;
-                                  
-                                  if (val !== '') {
-                                    let numVal = parseInt(val);
-                                    if (!isNaN(numVal)) {
-                                      if (numVal > 999) {
-                                        numVal = 999;
-                                      }
+                              onClick={() => {
+                                if (item.quantity <= 1) {
+                                  setMinQtyWarnings(prev => ({ ...prev, [item.id]: true }));
+                                  setTimeout(() => setMinQtyWarnings(prev => ({ ...prev, [item.id]: false })), 3000);
+                                  return;
+                                }
+                                setMinQtyWarnings(prev => ({ ...prev, [item.id]: false }));
+                                updateQuantity(item.id, item.quantity - 1);
+                              }}
+                              className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
+                            >
+                              −
+                            </button>
+                            <input
+                              type="number"
+                              value={tempQuantities[item.id] !== undefined ? tempQuantities[item.id] : (item.quantity || '')}
+                              onChange={(e) => {
+                                let val = e.target.value;
 
-                                      if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
-                                        numVal = item.stockQuantity;
-                                      }
-                                      
-                                      val = numVal.toString();
-
-                                      if (numVal >= 1) {
-                                        updateQuantity(item.id, numVal);
-                                      }
+                                if (val !== '') {
+                                  let numVal = parseInt(val);
+                                  if (!isNaN(numVal)) {
+                                    if (numVal > 999) numVal = 999;
+                                    if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
+                                      numVal = item.stockQuantity;
                                     }
+                                    val = numVal.toString();
+                                    if (numVal >= 1) updateQuantity(item.id, numVal);
                                   }
-
-                                  setTempQuantities(prev => ({ ...prev, [item.id]: val }));
-                                }}
-                                onBlur={(e) => {
-                                  let numVal = parseInt(e.target.value);
-                                  if (isNaN(numVal) || numVal < 1) {
-                                    updateQuantity(item.id, 1);
-                                  } else if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
+                                }
+                                setTempQuantities(prev => ({ ...prev, [item.id]: val }));
+                              }}
+                              onBlur={(e) => {
+                                let numVal = parseInt(e.target.value);
+                                if (isNaN(numVal) || numVal < 1) {
+                                  updateQuantity(item.id, 1);
+                                  setMinQtyWarnings(prev => ({ ...prev, [item.id]: true }));
+                                  setTimeout(() => setMinQtyWarnings(prev => ({ ...prev, [item.id]: false })), 3000);
+                                } else {
+                                  setMinQtyWarnings(prev => ({ ...prev, [item.id]: false }));
+                                  if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
                                     updateQuantity(item.id, item.stockQuantity);
                                   }
-                                  
-                                  setTempQuantities(prev => {
-                                    const next = { ...prev };
-                                    delete next[item.id];
-                                    return next;
-                                  });
-                                }}
-                                className="flex-[1.5] w-full text-center text-base font-semibold text-slate-900 focus:outline-none focus:bg-gray-50 h-full border-x border-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                              />
-                              <button
-                                onClick={() => {
-                                  if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
-                                  updateQuantity(item.id, item.quantity + 1);
-                                }}
-                                className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
-                                  ? 'text-slate-300 bg-slate-50 cursor-not-allowed'
-                                  : 'text-slate-800 hover:bg-slate-100'
-                                  }`}
-                              >
-                                +
-                              </button>
-                            </div>
-                            <p className="text-xs font-medium text-gray-400">
-                              {t('cart.subtotal')}: <span className="text-gray-900 font-bold">{item.subtotal.toLocaleString('vi-VN')} đ</span>
-                            </p>
+                                }
+                                setTempQuantities(prev => {
+                                  const next = { ...prev };
+                                  delete next[item.id];
+                                  return next;
+                                });
+                              }}
+                              className="flex-[1.5] w-full text-center text-[13px] font-semibold text-slate-900 focus:outline-none focus:bg-gray-50 h-full border-x border-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <button
+                              onClick={() => {
+                                if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
+                                updateQuantity(item.id, item.quantity + 1);
+                              }}
+                              className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity ? 'text-slate-300 bg-slate-50 cursor-not-allowed' : 'text-slate-800 hover:bg-slate-100'}`}
+                            >
+                              +
+                            </button>
                           </div>
-                          {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
-                            <h2 className="mt-1.5 text-sm text-red-500 font-medium">
-                              Sản phẩm chỉ còn {item.stockQuantity} cái
-                            </h2>
+
+                          {minQtyWarnings[item.id] && (
+                            <p className="mt-1.5 text-[11px] text-amber-600 font-medium">Số lượng đặt hàng tối thiểu 1</p>
                           )}
+                          {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
+                            <h2 className="mt-1.5 text-[11px] text-red-500 font-medium">Sản phẩm chỉ còn {item.stockQuantity} cái</h2>
+                          )}
+                        </div>
+
+                        <div className="mt-auto flex items-end justify-between pt-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setItemToDelete(item.id); }}
+                            className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                            title="Xoá sản phẩm"
+                          >
+                            <DeleteOutlined className="text-[15px]" />
+                            <span className="text-[13px]">Xóa</span>
+                          </button>
+
+                          <div className="flex flex-col items-end">
+                            <span className="text-[16px] font-black text-gray-900 leading-none">
+                              {item.subtotal.toLocaleString('vi-VN')} đ
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -756,8 +770,8 @@ const Header: React.FC = () => {
               {cartItems.length > 0 && (
                 <div className="p-6 bg-gray-50 border-t space-y-4 border-stone-100">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600 font-medium">{t('cart.total')}:</span>
-                    <span className="text-2xl font-black text-showcase-primary">{totalAmount.toLocaleString('vi-VN')} đ</span>
+                    <span className="text-gray-500 font-medium">{t('cart.total')}:</span>
+                    <span className="text-2xl font-bold text-showcase-primary">{totalAmount.toLocaleString('vi-VN')} đ</span>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
                     <button
@@ -766,7 +780,7 @@ const Header: React.FC = () => {
                         navigate('/checkout');
                         setIsCartOpen(false);
                       }}
-                      className="w-full py-4 bg-showcase-primary text-white rounded-2xl font-black uppercase tracking-widest hover:shadow-lg hover:shadow-showcase-primary/20 transition-all"
+                      className="w-full py-4 bg-showcase-primary cursor-pointer text-white font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-showcase-primary/20 transition-all"
                     >
                       {t('cart.checkout')}
                     </button>
@@ -775,7 +789,7 @@ const Header: React.FC = () => {
                         setIsCartOpen(false);
                         navigate('/san-pham');
                       }}
-                      className="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold hover:bg-gray-100 transition-all"
+                      className="w-full cursor-pointer py-4 bg-white text-gray-700 border border-gray-200  font-bold hover:bg-showcase-primary/10 transition-all"
                     >
                       {t('cart.continue_shopping')}
                     </button>

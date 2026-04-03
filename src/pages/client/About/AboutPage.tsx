@@ -7,17 +7,17 @@ import SEO from '@/src/components/common/SEO';
 const AboutPage: React.FC = () => {
   return (
     <div className="bg-white">
-      <SEO 
-        title="Về chúng tôi" 
+      <SEO
+        title="Về chúng tôi"
         description="Nội Thất Hochi - Đơn vị tiên phong trong lĩnh vực thiết kế và thi công nội thất gỗ óc chó cao cấp tại Việt Nam với hơn 10 năm kinh nghiệm."
       />
-      
+
       {/* Hero */}
       <section className="relative h-[450px] flex items-center pt-20">
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600" 
-            alt="About Hero" 
+          <img
+            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600"
+            alt="About Hero"
             className="w-full h-full object-cover"
             loading="lazy"
           />
@@ -39,11 +39,12 @@ const AboutPage: React.FC = () => {
                 <div className="w-20 h-1 bg-showcase-primary"></div>
               </div>
               <p className="text-gray-600 leading-relaxed text-lg italic">
-                "Khởi nguồn từ niềm đam mê với vẻ đẹp tự nhiên của Gỗ Óc Chó, HOCHI đã không ngừng kiến tạo những không gian sống đẳng cấp, mang đậm dấu ấn cá nhân của từng gia chủ."
+                "Khởi nguồn từ niềm đam mê bất tận với vẻ đẹp của vật liệu và nghệ thuật kiến tạo không gian, HOCHI không chỉ thiết kế nội thất - chúng tôi định hình phong cách sống."
               </p>
               <div className="space-y-4 text-gray-500 leading-relaxed">
-                <p>Với hơn 10 năm kinh nghiệm, chúng tôi tự hào là đơn vị tiên phong trong lĩnh vực thiết kế và thi công nội thất gỗ óc chó cao cấp tại Việt Nam. Mỗi sản phẩm không chỉ là một món đồ nội thất, mà là lời cam kết về chất lượng và gu thẩm mỹ đỉnh cao.</p>
-                <p>Nội Thất HOCHI sở hữu quy trình sản xuất khép kín, từ khâu nhập khẩu gỗ FAS Bắc Mỹ đến nghệ thuật chế tác thủ công tinh xảo, mang lại sự hài lòng tuyệt đối cho quý khách hàng.</p>
+                <p>Với hơn một thập kỷ kinh nghiệm, HOCHI khẳng định vị thế trong lĩnh vực thiết kế và thi công nội thất cao cấp tại Việt Nam. Chúng tôi tinh tuyển và kết hợp hoàn mỹ giữa gỗ tự nhiên, nhựa cao cấp, kim loại, kính cùng các vật liệu hiện đại, để tạo nên những không gian sống sang trọng, khác biệt và trường tồn theo thời gian.</p>
+                <p>Mỗi công trình của HOCHI là một tuyên ngôn cá nhân - nơi gu thẩm mỹ, đẳng cấp và cá tính của gia chủ được thể hiện một cách tinh tế và đầy cảm hứng.</p>
+                <p>Sở hữu quy trình sản xuất khép kín cùng sự giao thoa giữa công nghệ tiên tiến và nghệ thuật chế tác thủ công, HOCHI cam kết mang đến những giá trị vượt trên cả một sản phẩm nội thất - đó là trải nghiệm sống xứng tầm.s</p>
               </div>
             </div>
             <div className="relative group">
@@ -64,7 +65,7 @@ const AboutPage: React.FC = () => {
             <h2 className="text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>VÌ SAO CHỌN CHÚNG TÔI?</h2>
             <div className="w-20 h-1 bg-showcase-primary mx-auto"></div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { title: 'Chất liệu đẳng cấp', desc: 'Gỗ Óc Chó nhập khẩu 100% FAS Bắc Mỹ với vân gỗ tinh xảo và độ bền vĩnh cửu.' },

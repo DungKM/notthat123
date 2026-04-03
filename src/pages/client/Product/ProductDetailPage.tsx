@@ -421,7 +421,7 @@ const ProductDetailPage: React.FC = () => {
 
                   <div className="flex flex-col">
                     {(newProducts || []).slice(0, 5).map((rp: any, i: number) => (
-                      <Link to={`/san-pham/${rp.slug || rp.id}`} key={i} className={`flex gap-3 group bg-white py-4 ${i !== 0 ? 'border-t border-gray-100' : ''}`}>
+                      <a href={`/san-pham/${rp.slug || rp.id}`} key={i} className={`flex gap-3 group bg-white py-4 ${i !== 0 ? 'border-t border-gray-100' : ''}`}>
                         <div className="w-[75px] h-[75px] shrink-0 overflow-hidden bg-gray-50 border border-transparent group-hover:border-[#c49a0e] transition-colors rounded">
                           <img
                             src={rp.images?.[0]?.url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=200'}
@@ -434,15 +434,12 @@ const ProductDetailPage: React.FC = () => {
                             {rp.name}
                           </h4>
                           <div className="flex items-center gap-2 mt-auto">
-                            <span className="text-gray-400 line-through text-[12px]">
-                              {rp.oldPrice ? `${rp.oldPrice.toLocaleString()}đ` : '700.000'}
-                            </span>
                             <span className="text-gray-900 font-bold text-[14px]">
-                              {(rp.price || 0).toLocaleString()}
+                              {(rp.price || 0).toLocaleString()} VND
                             </span>
                           </div>
                         </div>
-                      </Link>
+                      </a>
                     ))}
                   </div>
                 </div>

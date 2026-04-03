@@ -5,13 +5,28 @@ import SEO from '@/src/components/common/SEO';
 import { useApi } from '@/src/hooks/useApi';
 import { SearchOutlined, ArrowRightOutlined, InboxOutlined } from '@ant-design/icons';
 
+// Chỉ cho phép: chữ cái (bao gồm tiếng Việt), số, khoảng trắng, dấu gạch ngang, dấu phẩy, chấm
+const ALLOWED_CHARS_REGEX = /[^\p{L}\p{N}\s\-,.']/gu;
+
+const sanitizeInput = (value: string): string => {
+  return value.replace(ALLOWED_CHARS_REGEX, '').replace(/\s{2,}/g, ' ');
+};
+
 const SearchResultsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const initialQ = searchParams.get('q') || '';
 
-  const [inputValue, setInputValue] = useState(initialQ);
-  const [query, setQuery] = useState(initialQ);
+  // Phân biệt: reload (F5) thì input rỗng, navigate từ trang khác thì hiển thị query
+  const getInitialInput = () => {
+    try {
+      const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      if (navEntry?.type === 'reload') return '';
+    } catch { /* ignore */ }
+    return searchParams.get('q') || '';
+  };
+
+  const [inputValue, setInputValue] = useState(getInitialInput);
+  const [query, setQuery] = useState(searchParams.get('q') || '');
   const [results, setResults] = useState<{ products: any[]; constructions: any[] }>({ products: [], constructions: [] });
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -41,10 +56,9 @@ const SearchResultsPage: React.FC = () => {
     }
   }, [searchRequest]);
 
-  // Run search when URL query changes
+  // Chạy tìm kiếm khi URL query thay đổi (KHÔNG cập nhật inputValue để tránh hiển thị lại khi reload)
   useEffect(() => {
     const q = searchParams.get('q') || '';
-    setInputValue(q);
     setQuery(q);
     doSearch(q);
   }, [searchParams]);
@@ -87,7 +101,7 @@ const SearchResultsPage: React.FC = () => {
                 <input
                   type="text"
                   value={inputValue}
-                  onChange={e => setInputValue(e.target.value)}
+                  onChange={e => setInputValue(sanitizeInput(e.target.value))}
                   placeholder="Nhập từ khóa tìm kiếm (ví dụ: Sofa, Bàn ăn, Thi công...)"
                   autoFocus
                   className="w-full px-4 py-4 text-gray-800 text-[16px] outline-none placeholder-gray-400 bg-transparent font-medium"

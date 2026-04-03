@@ -127,7 +127,7 @@ const RecruitmentPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: <CrownOutlined />, title: 'Môi trường Premium', desc: 'Làm việc trong không gian showroom đẳng cấp, tiếp xúc với khách hàng thượng lưu.' },
+              { icon: <CrownOutlined />, title: 'Môi trường Chuyên nghiệp', desc: 'Làm việc trong không gian hiện đại, quy trình chuẩn, tiếp xúc với khách hàng cao cấp và tác phong chuyên nghiệp.' },
               { icon: <ThunderboltOutlined />, title: 'Sáng tạo không giới hạn', desc: 'Mọi ý tưởng kiến trúc độc bản luôn được tôn trọng và hiện thực hóa.' },
               { icon: <TeamOutlined />, title: 'Đội ngũ chuyên gia', desc: 'Đồng hành cùng những nghệ nhân và kiến trúc sư hàng đầu trong nghề nội thất.' },
               { icon: <PlusOutlined />, title: 'Chế độ đãi ngộ', desc: 'Thưởng xứng đáng theo năng lực và các kỳ nghỉ dưỡng cao cấp hàng năm.' }
@@ -159,14 +159,14 @@ const RecruitmentPage: React.FC = () => {
 
               <div className="prose prose-gray">
                 <p className="text-gray-600 leading-relaxed text-lg">
-                  Chúng tôi luôn chào đón những ứng viên có niềm đam mê với Gỗ Óc Chó và khao khát khẳng định gu thẩm mỹ độc bản.
+                  Chúng tôi tìm kiếm những cá nhân đam mê thiết kế và nội thất cao cấp, khao khát kiến tạo những không gian sống mang dấu ấn riêng và giá trị thẩm mỹ khác biệt.
                 </p>
                 <ul className="space-y-4 mt-8">
                   {[
-                    'Quy trình làm việc chuyên nghiệp, rõ ràng.',
-                    'Vật liệu nhập khẩu FAS Bắc Mỹ tiêu chuẩn cao nhất.',
-                    'Dự án biệt thự, penthouse cao cấp toàn quốc.',
-                    'Cơ hội phát triển kỹ năng nghệ thuật mộc.'
+                    'Quy trình làm việc chuyên nghiệp, minh bạch và chuẩn mực.',
+                    'Sử dụng vật liệu cao cấp, được tuyển chọn theo tiêu chuẩn chất lượng khắt khe.',
+                    'Tham gia các dự án biệt thự, penthouse đẳng cấp trên toàn quốc.',
+                    'Môi trường phát triển toàn diện về tư duy thiết kế và kỹ năng nghề nghiệp.'
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-gray-500">
                       <CheckCircleFilled className="text-showcase-primary" /> {item}
@@ -178,7 +178,7 @@ const RecruitmentPage: React.FC = () => {
               <div className="bg-teal-950 p-8 rounded-2xl text-white shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
                 <h4 className="text-showcase-primary font-bold uppercase tracking-widest text-sm mb-2">Hotline Tuyển dụng</h4>
-                <p className="text-2xl font-bold">091.1972.789</p>
+                <p className="text-2xl font-bold">032.690.8884</p>
                 <p className="text-xs text-gray-400 mt-2">Hỗ trợ 24/7 cho các ứng viên</p>
               </div>
             </div>

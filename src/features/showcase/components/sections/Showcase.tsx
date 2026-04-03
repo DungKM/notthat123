@@ -43,7 +43,7 @@ const Showcase: React.FC = () => {
         {/* Feature 2: Text Left, Image Right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="order-2 lg:order-1 space-y-6">
-            <h3 className="text-3xl font-bold text-gray-900 uppercase tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>SHOWROOM <br />{t('showcase.title')}</h3>
+            <h3 className="text-3xl font-bold text-gray-900 uppercase tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>{t('showcase.showroom_title')}</h3>
             <p className="text-gray-600 leading-relaxed">
               {t('showcase.showroom_desc')}
             </p>

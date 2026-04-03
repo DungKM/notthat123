@@ -1,10 +1,10 @@
 import React from 'react';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
-import { 
-  SafetyCertificateOutlined, 
-  ThunderboltOutlined, 
-  TeamOutlined, 
+import {
+  SafetyCertificateOutlined,
+  ThunderboltOutlined,
+  TeamOutlined,
   CrownOutlined,
   CheckCircleFilled
 } from '@ant-design/icons';
@@ -15,38 +15,38 @@ const WhyChooseUsPage: React.FC = () => {
     {
       icon: <CrownOutlined className="text-4xl text-showcase-primary" />,
       title: 'Chất lượng Thượng hạng',
-      desc: 'Chúng tôi chỉ sử dụng Gỗ Óc Chó nhập khẩu 100% từ Bắc Mỹ (FAS Grade), đảm bảo vân gỗ sắc nét và độ bền vĩnh cửu.'
+      desc: 'Tinh tuyển vật liệu thượng hạng đạt chuẩn quốc tế, chế tác chuẩn mực hoàn mỹ - kiến tạo giá trị bền vững vượt thời gian.'
     },
     {
       icon: <ThunderboltOutlined className="text-4xl text-showcase-primary" />,
       title: 'Thi công Tốc độ',
-      desc: 'Quy trình sản xuất hiện đại giúp rút ngắn 30% thời gian thi công so với thị trường mà vẫn đảm bảo độ tinh xảo tuyệt đối.'
+      desc: 'Quy trình sản xuất hiện đại giúp rút ngắn thời gian thi công so với thị trường mà vẫn đảm bảo độ tinh xảo tuyệt đối.'
     },
     {
       icon: <TeamOutlined className="text-4xl text-showcase-primary" />,
       title: 'Đội ngũ Chuyên gia',
-      desc: 'Hơn 10 năm kinh nghiệm với đội ngũ kiến trúc sư và nghệ nhân mộc tài hoa, am hiểu sâu sắc về phong cách Luxury.'
+      desc: 'Quy tụ những kiến trúc sư và nghệ nhân giàu kinh nghiệm, HOCHI sở hữu hơn một thập kỷ tinh hoa trong thiết kế và chế tác nội thất, am hiểu sâu sắc nhiều phong cách - từ hiện đại, tối giản đến luxury và tân cổ điển - mang đến những không gian sống được cá nhân hóa đầy tinh tế và đẳng cấp.'
     },
     {
       icon: <SafetyCertificateOutlined className="text-4xl text-showcase-primary" />,
-      title: 'Bảo hành Dài hạn',
-      desc: 'Cam kết bảo hành 5 năm và bảo trì trọn đời cho mọi sản phẩm nội thất mang thương hiệu Hochi.'
+      title: 'Bảo hành Uy tín',
+      desc: 'Cam kết bảo hành 1 năm cho toàn bộ sản phẩm nội thất HOCHI, đảm bảo chất lượng thi công và sự an tâm trong suốt quá trình sử dụng.'
     }
   ];
 
   return (
     <div className="bg-white">
-      <SEO 
-        title="Vì sao chọn chúng tôi" 
+      <SEO
+        title="Vì sao chọn chúng tôi"
         description="Ưu điểm vượt trội của Nội Thất Hochi: Chất liệu gỗ óc chó FAS Bắc Mỹ, thi công thần tốc, đội ngũ nghệ nhân tài hoa và chế độ bảo hành vĩnh cửu."
       />
-      
+
       {/* Hero */}
       <section className="relative h-[450px] flex items-center pt-20">
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1600" 
-            alt="Why Choose Us Hero" 
+          <img
+            src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1600"
+            alt="Why Choose Us Hero"
             className="w-full h-full object-cover"
             loading="lazy"
           />
@@ -87,12 +87,12 @@ const WhyChooseUsPage: React.FC = () => {
             <div className="space-y-8">
               <div className="space-y-4">
                 <span className="text-showcase-primary font-bold tracking-widest text-sm uppercase">QUY TRÌNH CHUYÊN NGHIỆP</span>
-                <h2 className="text-4xl font-bold uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>CHẾ TÁC TỪ TÂM - <br/> NÂNG TẦM ĐIỂM SỐNG</h2>
+                <h2 className="text-4xl font-bold uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>CHẾ TÁC TỪ TÂM - <br /> NÂNG TẦM ĐIỂM SỐNG</h2>
               </div>
               <div className="space-y-6">
                 {[
-                  'Gỗ FAS nhập khẩu trực tiếp từ Bắc Mỹ, tẩm sấy tiêu chuẩn 12% độ ẩm.',
-                  'Sử dụng sơn Inchem (Mỹ) 7 lớp, bảo vệ bề mặt tối ưu, an toàn sức khỏe.',
+                  'Nguyên vật liệu tuyển chọn kỹ lưỡng, xử lý đạt chuẩn, đảm bảo độ bền ổn định lâu dài.',
+                  'Phủ sơn nhiều lớp công nghệ cao, bền đẹp tinh tế và an toàn khi sử dụng.',
                   'Kết cấu mộng truyền thống kết hợp công nghệ CNC chính xác 0.1mm.',
                   'Lắp đặt và bàn giao chìa khóa trao tay với dịch vụ tận tâm 24/7.'
                 ].map((text, i) => (
@@ -116,7 +116,7 @@ const WhyChooseUsPage: React.FC = () => {
               Chúng tôi không chỉ bán nội thất, chúng tôi kiến tạo không gian sống mơ ước nơi mỗi gia chủ tìm thấy sự bình yên và đẳng cấp thực sự.
             </p>
             <div className="w-16 h-1 bg-showcase-primary mx-auto"></div>
-            <p className="font-bold text-teal-950 uppercase tracking-widest">GĐ. Nguyễn Văn Tú</p>
+            <p className="font-bold text-teal-950 uppercase tracking-widest">GĐ. Hồ Chí Lương</p>
           </div>
         </Container>
       </section>

@@ -38,6 +38,7 @@ const CheckoutPage: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
+  const [minQtyWarnings, setMinQtyWarnings] = useState<Record<string, boolean>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -311,120 +312,113 @@ const CheckoutPage: React.FC = () => {
                     <div className="space-y-6">
                       <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         {cartItems.map((item) => (
-                          <div key={item.id} className="group mb-4 border-b border-gray-50 pb-4 last:border-b-0 last:mb-0">
-                            <div className="flex gap-4">
-                              <div className="relative h-20 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50">
-                                <img
-                                  src={item.image}
-                                  alt={item.title}
-                                  className="h-full w-full object-cover transition-transform group-hover:scale-110"
-                                />
+                          <div key={item.id} className="flex gap-4 group mb-5 border-b border-gray-100 pb-5 last:border-0 last:pb-0">
+                            <div className="relative w-[100px] h-[130px] rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+
+                            <div className="flex-1 flex flex-col">
+                              <h4 className="text-[15px] font-medium !text-gray-900 line-clamp-2 leading-snug">{item.title}</h4>
+
+                              <div className="mt-3">
+                                <div className={`flex shrink-0 items-center rounded-full overflow-hidden h-9 w-[100px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity ? 'border-red-400' : 'border-gray-200'}`}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (item.quantity <= 1) {
+                                        setMinQtyWarnings(prev => ({ ...prev, [item.id]: true }));
+                                        setTimeout(() => setMinQtyWarnings(prev => ({ ...prev, [item.id]: false })), 3000);
+                                        return;
+                                      }
+                                      setMinQtyWarnings(prev => ({ ...prev, [item.id]: false }));
+                                      updateQuantity(item.id, item.quantity - 1);
+                                    }}
+                                    className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
+                                  >
+                                    −
+                                  </button>
+                                  <input
+                                    type="number"
+                                    value={tempQuantities[item.id] !== undefined ? tempQuantities[item.id] : (item.quantity || '')}
+                                    onChange={(e) => {
+                                      let val = e.target.value;
+                                      if (val !== '') {
+                                        let numVal = parseInt(val);
+                                        if (!isNaN(numVal)) {
+                                          if (numVal > 999) numVal = 999;
+                                          if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
+                                            numVal = item.stockQuantity;
+                                          }
+                                          val = numVal.toString();
+                                          if (numVal >= 1) updateQuantity(item.id, numVal);
+                                        }
+                                      }
+                                      setTempQuantities(prev => ({ ...prev, [item.id]: val }));
+                                    }}
+                                    onBlur={(e) => {
+                                      let numVal = parseInt(e.target.value);
+                                      if (isNaN(numVal) || numVal < 1) {
+                                        updateQuantity(item.id, 1);
+                                        setMinQtyWarnings(prev => ({ ...prev, [item.id]: true }));
+                                        setTimeout(() => setMinQtyWarnings(prev => ({ ...prev, [item.id]: false })), 3000);
+                                      } else {
+                                        setMinQtyWarnings(prev => ({ ...prev, [item.id]: false }));
+                                        if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
+                                          updateQuantity(item.id, item.stockQuantity);
+                                        }
+                                      }
+                                      setTempQuantities(prev => {
+                                        const next = { ...prev };
+                                        delete next[item.id];
+                                        return next;
+                                      });
+                                    }}
+                                    className="flex-[1.5] w-full text-center text-[13px] font-semibold text-slate-900 focus:outline-none focus:bg-gray-50 h-full border-x border-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
+                                      updateQuantity(item.id, item.quantity + 1);
+                                    }}
+                                    className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity ? 'text-slate-300 bg-slate-50 cursor-not-allowed' : 'text-slate-800 hover:bg-slate-100'}`}
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                                
+                                {minQtyWarnings[item.id] && (
+                                  <p className="mt-1.5 text-[11px] text-amber-600 font-medium">Số lượng đặt hàng tối thiểu 1</p>
+                                )}
+                                {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
+                                  <h2 className="mt-1.5 text-[11px] text-red-500 font-medium">Sản phẩm chỉ còn {item.stockQuantity} cái</h2>
+                                )}
                               </div>
 
-                              <div className="min-w-0 flex-1 flex flex-col justify-between">
-                                <div className="flex justify-between items-start gap-2">
-                                  <div>
-                                    <h3 className="line-clamp-2 text-sm font-bold text-teal-950 transition-colors hover:text-showcase-primary">
-                                      {item.title}
-                                    </h3>
-                                    <p className="mt-1 text-xs text-gray-400 font-medium">
-                                      {t('checkout.unit_price')}: {item.price.toLocaleString('vi-VN')} đ
-                                    </p>
-                                    <p className="text-sm font-bold text-showcase-primary mt-1">
-                                      {item.subtotal.toLocaleString('vi-VN')} <span className="text-[10px] uppercase">{t('common.vnd')}</span>
-                                    </p>
-                                  </div>
-                                  <PopConfirm
+                              <div className="mt-auto flex items-end justify-between pt-2">
+                                <PopConfirm
+                                  title="Xoá sản phẩm"
+                                  description="Bạn có chắc chắn muốn xoá sản phẩm này?"
+                                  onConfirm={() => removeFromCart(item.id)}
+                                  okText="Xoá ngay"
+                                  cancelText="Không"
+                                  placement="left"
+                                >
+                                  <button
+                                    className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors"
                                     title="Xoá sản phẩm"
-                                    description="Bạn có chắc chắn muốn xoá sản phẩm này?"
-                                    onConfirm={() => removeFromCart(item.id)}
-                                    okText="Xoá ngay"
-                                    cancelText="Không"
-                                    placement="left"
+                                    type="button"
                                   >
-                                    <button
-                                      className="cursor-pointer text-red-400 hover:text-red-600 transition-colors p-1"
-                                      title="Xoá sản phẩm"
-                                      type="button"
-                                    >
-                                      <DeleteOutlined className="text-[18px]" />
-                                    </button>
-                                  </PopConfirm>
-                                </div>
-
-                                <div className="mt-3">
-                                  <div className={`flex items-center rounded-lg overflow-hidden h-10 w-[110px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
-                                    ? 'border-slate-500'
-                                    : 'border-slate-500'
-                                    }`}>
-                                    <button
-                                      className="flex-1 h-full flex items-center justify-center text-slate-800 hover:bg-slate-100 transition-colors text-xl font-light pb-0.5"
-                                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                                    >
-                                      −
-                                    </button>
-                                    <input
-                                      type="number"
-                                      value={tempQuantities[item.id] !== undefined ? tempQuantities[item.id] : item.quantity.toString()}
-                                      onChange={(e) => {
-                                        let val = e.target.value;
-                                        
-                                        if (val !== '') {
-                                          let numVal = parseInt(val);
-                                          if (!isNaN(numVal)) {
-                                            if (numVal > 999) {
-                                              numVal = 999;
-                                            }
-
-                                            if (item.stockQuantity !== undefined && numVal > item.stockQuantity) {
-                                              numVal = item.stockQuantity;
-                                            }
-                                            
-                                            val = numVal.toString();
-
-                                            if (numVal >= 1) {
-                                              updateQuantity(item.id, numVal);
-                                            }
-                                          }
-                                        }
-
-                                        setTempQuantities(prev => ({ ...prev, [item.id]: val }));
-                                      }}
-                                      onBlur={(e) => {
-                                        let numVal = parseInt(e.target.value);
-                                        if (isNaN(numVal) || numVal < 1) {
-                                          updateQuantity(item.id, 1);
-                                        } else {
-                                          updateQuantity(item.id, numVal);
-                                        }
-                                        
-                                        setTempQuantities(prev => {
-                                          const next = { ...prev };
-                                          delete next[item.id];
-                                          return next;
-                                        });
-                                      }}
-                                      className="flex-[1.5] w-full text-center text-base font-semibold text-slate-900 focus:outline-none focus:bg-gray-50 h-full border-x border-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                    />
-                                    <button
-                                      onClick={() => {
-                                        if (item.stockQuantity !== undefined && item.quantity >= item.stockQuantity) return;
-                                        updateQuantity(item.id, item.quantity + 1);
-                                      }}
-                                      className={`flex-1 h-full flex items-center justify-center transition-colors text-xl font-light pb-0.5 ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity
-                                        ? 'text-slate-300 bg-slate-50 cursor-not-allowed'
-                                        : 'text-slate-800 hover:bg-slate-100'
-                                        }`}
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-                                  {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
-                                    <h2 className="mt-1.5 text-sm text-red-500 font-medium">
-                                      Sản phẩm chỉ còn {item.stockQuantity} cái
-                                    </h2>
-                                  )}
-                                </div>
+                                    <DeleteOutlined className="text-lg" />
+                                    <span className="text-[13px] font-medium">Xóa</span>
+                                  </button>
+                                </PopConfirm>
+                                <span className="text-lg font-black text-gray-900">{item.subtotal.toLocaleString('vi-VN')} đ</span>
                               </div>
                             </div>
                           </div>
