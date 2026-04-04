@@ -27,9 +27,9 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import { useAuth } from '../../../auth/hooks/useAuth';
-import { useApi } from '../../../hooks/useApi';
-import api from '../../../api/axiosInstance';
+import { useAuth } from '@/src/auth/hooks/useAuth';
+import { useApi } from '@/src/hooks/useApi';
+import api from '@/src/api/axiosInstance';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface CategoryItem {

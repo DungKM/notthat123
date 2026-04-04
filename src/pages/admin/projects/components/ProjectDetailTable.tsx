@@ -5,7 +5,7 @@ import {
   ProTable,
   EditableFormInstance,
 } from "@ant-design/pro-components";
-import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Tag, Upload } from "antd";
+import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Tag, Upload, Checkbox } from "antd";
 import {
   PlusOutlined,
   DownloadOutlined,
@@ -240,12 +240,115 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     {
       title: "STT",
       dataIndex: "stt",
-      width: 60,
+      width: 50,
+      align: "center",
       editable: false,
       render: (_, record) => <strong>{indexMapping[record.id!]}</strong>,
     },
     {
-      title: nameColumnTitle || "Tên dự án",
+      title: "Mua ngoài",
+      dataIndex: "isExternalPurchase",
+      align: "center",
+      width: 80,
+      render: (_, record) => record.type === 'group' ? null : (
+        <Checkbox
+          checked={record.isExternalPurchase}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            const newData = details.map(d => d.id === record.id ? {
+              ...d,
+              isExternalPurchase: checked,
+              isCommercialProduct: checked ? false : d.isCommercialProduct,
+              isCompanyProduct: checked ? false : d.isCompanyProduct
+            } : d);
+            onUpdate(newData, false);
+          }}
+        />
+      ),
+      renderFormItem: (_, config: any, form: any) => (
+        <Checkbox
+          checked={config.value}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            config.onChange?.(checked);
+            if (checked && form) {
+              form.setFieldValue([config.recordKey, 'isCommercialProduct'], false);
+              form.setFieldValue([config.recordKey, 'isCompanyProduct'], false);
+            }
+          }}
+        />
+      ),
+    },
+    {
+      title: "SP Thương mại",
+      dataIndex: "isCommercialProduct",
+      align: "center",
+      width: 100,
+      render: (_, record) => record.type === 'group' ? null : (
+        <Checkbox
+          checked={record.isCommercialProduct}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            const newData = details.map(d => d.id === record.id ? {
+              ...d,
+              isCommercialProduct: checked,
+              isExternalPurchase: checked ? false : d.isExternalPurchase,
+              isCompanyProduct: checked ? false : d.isCompanyProduct
+            } : d);
+            onUpdate(newData, false);
+          }}
+        />
+      ),
+      renderFormItem: (_, config: any, form: any) => (
+        <Checkbox
+          checked={config.value}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            config.onChange?.(checked);
+            if (checked && form) {
+              form.setFieldValue([config.recordKey, 'isExternalPurchase'], false);
+              form.setFieldValue([config.recordKey, 'isCompanyProduct'], false);
+            }
+          }}
+        />
+      ),
+    },
+    {
+      title: "SP Công ty",
+      dataIndex: "isCompanyProduct",
+      align: "center",
+      width: 100,
+      render: (_, record) => record.type === 'group' ? null : (
+        <Checkbox
+          checked={record.isCompanyProduct}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            const newData = details.map(d => d.id === record.id ? {
+              ...d,
+              isCompanyProduct: checked,
+              isExternalPurchase: checked ? false : d.isExternalPurchase,
+              isCommercialProduct: checked ? false : d.isCommercialProduct
+            } : d);
+            onUpdate(newData, false);
+          }}
+        />
+      ),
+      renderFormItem: (_, config: any, form: any) => (
+        <Checkbox
+          checked={config.value}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            config.onChange?.(checked);
+            if (checked && form) {
+              form.setFieldValue([config.recordKey, 'isExternalPurchase'], false);
+              form.setFieldValue([config.recordKey, 'isCommercialProduct'], false);
+            }
+          }}
+        />
+      ),
+    },
+    {
+      title: nameColumnTitle || "Hạng mục",
       dataIndex: "name",
       width: "25%",
       renderFormItem: (_, { record }) => {
@@ -258,10 +361,17 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       },
       render: (_, record) => {
         if (record.type === 'group') {
-          return <strong style={{ color: '#ce7c10', textTransform: 'uppercase' }}>{record.name}</strong>;
+          return <span style={{ textTransform: 'uppercase' }}>{record.name}</span>;
         }
         return <span>{record.name}</span>;
       }
+    },
+    {
+      title: "Kích thước (DxRxC mm)",
+      dataIndex: "dimensions",
+      width: 150,
+      render: (_, record) => record.type === 'group' ? null : <span>{record.dimensions}</span>,
+      editable: (_, record) => record.type !== 'group',
     },
     {
       title: "Chất liệu",
@@ -270,16 +380,10 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       editable: (_, record) => record.type !== 'group',
     },
     {
-      title: "Kích thước",
-      dataIndex: "dimensions",
-      width: 120,
-      render: (_, record) => record.type === 'group' ? null : <span>{record.dimensions}</span>,
-      editable: (_, record) => record.type !== 'group',
-    },
-    {
       title: "Đơn vị",
       dataIndex: "unit",
       width: 80,
+      align: "center",
       render: (_, record) => record.type === 'group' ? null : <span>{record.unit}</span>,
       editable: (_, record) => record.type !== 'group',
     },
@@ -288,13 +392,15 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       dataIndex: "quantity",
       valueType: "digit",
       width: 80,
+      align: "center",
       render: (_, record) => record.type === 'group' ? null : <span>{record.quantity}</span>,
       editable: (_, record) => record.type !== 'group',
     },
     {
-      title: "Đơn giá",
+      title: "Đơn giá (VND)",
       dataIndex: "price",
       valueType: "digit",
+      align: "right",
       render: (_, record) => record.type === 'group' ? null : <span>{formatCurrency(record.price)}</span>,
       editable: (_, record) => record.type !== 'group',
       fieldProps: {
@@ -303,9 +409,10 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       },
     },
     {
-      title: "Thành tiền",
+      title: "Thành tiền (VND)",
       dataIndex: "amount",
       valueType: "digit",
+      align: "right",
       editable: false,
       render: (_, record) => {
         if (record.type === 'group') {
@@ -329,6 +436,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       title: "Giá vốn",
       dataIndex: "costPrice",
       valueType: "digit",
+      align: "right",
       hideInTable: !isAdmin,
       hideInForm: !isAdmin,
       render: (_, record) => record.type === 'group' ? null : <span>{formatCurrency(record.costPrice || 0)}</span>,
@@ -544,6 +652,9 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         maxLength={100}
         recordCreatorProps={false}
         columns={columns}
+        onRow={(record) => ({
+          style: record.type === 'group' ? { backgroundColor: '#d9d2a6', fontWeight: 'bold' } : {}
+        })}
         value={details}
         onChange={(newDetails) => onUpdate(newDetails as ProjectDetail[], false)}
         editable={{

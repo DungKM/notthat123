@@ -11,7 +11,7 @@ import {
   ProFormUploadButton,
   ProTable,
 } from '@ant-design/pro-components';
-import { useApi } from '../../../hooks/useApi';
+import { useApi } from '@/src/api';
 import { message as antMessage } from 'antd';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -380,7 +380,7 @@ const ProductManagementPage: React.FC = () => {
         request={async (params) => {
           const { current, pageSize, name, ...rest } = params;
           try {
-            const res = await (await import('../../../api/axiosInstance')).default.get('/products', {
+            const res = await (await import('@/src/api/axiosInstance')).default.get('/products', {
               params: {
                 page: current,
                 limit: pageSize,

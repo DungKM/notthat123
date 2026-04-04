@@ -11,8 +11,8 @@ import dayjs from 'dayjs';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useProjectService } from '@/src/api/services';
-import ProjectForm from './components/ProjectForm';
-import ProjectApprovalModal from './components/ProjectApprovalModal';
+import ProjectForm from '../components/ProjectForm';
+import ProjectApprovalModal from '../components/ProjectApprovalModal';
 
 const ProjectListPage: React.FC = () => {
   const { user } = useAuth();

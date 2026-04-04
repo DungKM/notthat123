@@ -32,31 +32,31 @@ const SearchResultsPage = lazy(() => import('@/src/pages/client/Search/SearchRes
 
 // Pages - Admin
 const DashboardPage = lazy(() => import('@/src/pages/admin/dashboard/DashboardPage'));
-const ProjectListPage = lazy(() => import('@/src/pages/admin/projects/ProjectListPage'));
-const EmployeeManagementPage = lazy(() => import('@/src/pages/admin/hr/EmployeeManagementPage'));
-const AdvanceApprovalPage = lazy(() => import('@/src/pages/admin/hr/AdvanceApprovalPage'));
-const AttendanceSummaryPage = lazy(() => import('@/src/pages/admin/hr/AttendanceSummaryPage'));
-const SalaryManagementPage = lazy(() => import('@/src/pages/admin/hr/SalaryManagementPage'));
-const AttendancePage = lazy(() => import('@/src/pages/admin/hr/AttendancePage'));
-const PersonalAdvancePage = lazy(() => import('@/src/pages/admin/hr/PersonalAdvancePage'));
-const RecruitmentManagementPage = lazy(() => import('@/src/pages/admin/hr/RecruitmentManagementPage'));
-const StatisticsPage = lazy(() => import('@/src/pages/admin/reports/StatisticsPage'));
-const IncomeStatisticsPage = lazy(() => import('@/src/pages/admin/reports/IncomeStatisticsPage'));
-// const ProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/ProjectManagementPage'));
-const ProjectDetailPage = lazy(() => import('@/src/pages/admin/projects/ProjectDetailPage'));
-const UsersPage = lazy(() => import('@/src/pages/admin/crm/UsersPage'));
-const OrderManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/OrderManagementPage'));
-const ProductManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ProductManagementPage'));
-const CategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/CategoryManagementPage'));
-const CategoryProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/CategoryProjectManagementPage'));
-const ContactManagementPage = lazy(() => import('@/src/pages/admin/crm/ContactManagementPage'));
-const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage'));
-const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ShowcaseProjectManagementPage'));
-const PartnerManagementPage = lazy(() => import('@/src/pages/admin/crm/PartnerManagementPage'));
-const VideoManagementPage = lazy(() => import('@/src/pages/admin/marketing/VideoManagementPage'));
-const ReviewManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ReviewManagementPage'));
-const ProjectStagesPage = lazy(() => import('@/src/pages/admin/projects/ProjectStagesPage'));
-const ItemCategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/ItemCategoryManagementPage'));
+const ProjectListPage = lazy(() => import('@/src/pages/admin/projects/danhSachCongTrinh/ProjectListPage'));
+const EmployeeManagementPage = lazy(() => import('@/src/pages/admin/hr/nhanVien/EmployeeManagementPage'));
+const AdvanceApprovalPage = lazy(() => import('@/src/pages/admin/hr/duyetUngTien/AdvanceApprovalPage'));
+const AttendanceSummaryPage = lazy(() => import('@/src/pages/admin/hr/tongHopChamCong/AttendanceSummaryPage'));
+const SalaryManagementPage = lazy(() => import('@/src/pages/admin/hr/luong/SalaryManagementPage'));
+const AttendancePage = lazy(() => import('@/src/pages/admin/hr/chamCongCaNhan/AttendancePage'));
+const PersonalAdvancePage = lazy(() => import('@/src/pages/admin/hr/ungTienCaNhan/PersonalAdvancePage'));
+const RecruitmentManagementPage = lazy(() => import('@/src/pages/admin/hr/tuyenDung/RecruitmentManagementPage'));
+const StatisticsPage = lazy(() => import('@/src/pages/admin/reports/thongKeChung/StatisticsPage'));
+const IncomeStatisticsPage = lazy(() => import('@/src/pages/admin/reports/thongKeThuNhap/IncomeStatisticsPage'));
+// const ProjectManagementPage = lazy(() => import('@/src/pages/admin/projects/quanLyCongTrinh/ProjectManagementPage'));
+const ProjectDetailPage = lazy(() => import('@/src/pages/admin/projects/chiTietCongTrinh/ProjectDetailPage'));
+const UsersPage = lazy(() => import('@/src/pages/admin/crm/nguoiDung/UsersPage'));
+const OrderManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/donHang/OrderManagementPage'));
+const ProductManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/sanPham/ProductManagementPage'));
+const CategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/danhMuc/CategoryManagementPage'));
+const CategoryProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/danhMucDuAn/CategoryProjectManagementPage'));
+const ContactManagementPage = lazy(() => import('@/src/pages/admin/crm/lienHe/ContactManagementPage'));
+const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage')); // Không đổi
+const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/duAnTieuBieu/ShowcaseProjectManagementPage'));
+const PartnerManagementPage = lazy(() => import('@/src/pages/admin/crm/doiTac/PartnerManagementPage'));
+const VideoManagementPage = lazy(() => import('@/src/pages/admin/marketing/VideoManagementPage')); // Không đổi
+const ReviewManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/danhGia/ReviewManagementPage'));
+const ProjectStagesPage = lazy(() => import('@/src/pages/admin/projects/giaiDoanCongTrinh/ProjectStagesPage'));
+const ItemCategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/hangMuc/ItemCategoryManagementPage'));
 
 const Unauthorized = () => (
   <div style={{ padding: 50, textAlign: 'center' }}>

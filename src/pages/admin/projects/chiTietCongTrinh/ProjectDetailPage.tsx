@@ -8,9 +8,9 @@ import { useAuth } from '@/src/auth/hooks/useAuth';
 import { useProjectService } from '@/src/api/services';
 import { useNotifications } from '@/src/hooks/useNotifications';
 
-import ProjectDetailTable from './components/ProjectDetailTable';
-import ProjectForm from './components/ProjectForm';
-import ProjectProgressModal from './components/ProjectProgressModal';
+import ProjectDetailTable from '../components/ProjectDetailTable';
+import ProjectForm from '../components/ProjectForm';
+import ProjectProgressModal from '../components/ProjectProgressModal';
 import dayjs from 'dayjs';
 
 const ProjectDetailPage: React.FC = () => {
@@ -155,6 +155,7 @@ const ProjectDetailPage: React.FC = () => {
           await request('PATCH', `/${projectId}/progress/${taskId}`, {
             name: task.work,
             userId,
+            assignedDate: task.assignedDate,
           });
         } else {
           // Task mới tạo ở frontend → POST để tạo mới
@@ -162,6 +163,7 @@ const ProjectDetailPage: React.FC = () => {
             stage: stage,
             name: task.work,
             userId,
+            assignedDate: task.assignedDate,
           });
         }
       }
@@ -195,7 +197,7 @@ const ProjectDetailPage: React.FC = () => {
     if (!project) return null;
     const projectId = project.id || (project as any)._id;
     try {
-      const res = await request('GET', `/${projectId}/progress/by-stage`, null, { stage });
+      const res = await request('GET', `/${projectId}/progress/by-stage`, null, { stage, projectId });
       // Trả về dạng object ProjectProgress như UI mong đợi
       if (res.data) {
         return {
@@ -348,6 +350,7 @@ const ProjectDetailPage: React.FC = () => {
             id: t._id || t.id || Math.random().toString(),
             work: t.work || t.name,
             employee: t.employee || t.userId || t.user, // Add userId to support fallback Name
+            assignedDate: t.assignedDate,
             updatedAt: t.updatedAt,
             isSaved: true
           }))
@@ -360,6 +363,7 @@ const ProjectDetailPage: React.FC = () => {
             id: t._id || t.id || Math.random().toString(),
             work: t.work || t.name,
             employee: t.user || t.employee,
+            assignedDate: t.assignedDate,
             updatedAt: t.updatedAt,
             isSaved: true
           }))

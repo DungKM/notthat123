@@ -6,6 +6,8 @@ export interface ProjectProgressTask {
   employee?: string;
   name?: string; // Backend API format
   user?: string; // Backend API format
+  userId?: string; 
+  assignedDate?: string; // Ngày được giao việc
   updatedAt: string;
 }
 
@@ -40,6 +42,8 @@ export interface ProjectDetail {
   amount: number;     // Thành tiền (quantity * price)
   costPrice?: number;
   isCompanyProduct: boolean; // Hàng do công ty tự sản xuất
+  isExternalPurchase?: boolean; // Bộ phận mua ngoài
+  isCommercialProduct?: boolean; // Sản phẩm thương mại
   note: string;       // Ghi chú thêm
 }
 

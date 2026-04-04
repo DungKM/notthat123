@@ -8,9 +8,9 @@ import {
   CaretRightOutlined, CaretDownOutlined, FolderOutlined, FileOutlined,
   SearchOutlined, InboxOutlined, BranchesOutlined,
 } from '@ant-design/icons';
-import { useAuth } from '../../../auth/hooks/useAuth';
-import { ITEM_CATEGORIES_MOCK, getMinPrice } from '../../../data/itemCategories';
-import type { ItemCategory, ItemVariant } from '../../../data/itemCategories';
+import { useAuth } from '../../../../auth/hooks/useAuth';
+import { ITEM_CATEGORIES_MOCK, getMinPrice } from '../../../../data/itemCategories';
+import type { ItemCategory, ItemVariant } from '../../../../data/itemCategories';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -670,15 +670,15 @@ const ItemCategoryManagementPage: React.FC = () => {
 
       {/* Table */}
       <Spin spinning={loading} tip="Đang tải...">
-        <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflow: 'hidden', minHeight: 200 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflowX: 'auto', minHeight: 200 }}>
+          <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ minWidth: 150 }} />
-              <col style={{ width: '22%' }} />
-              <col style={{ width: 130 }} />
-              <col style={{ width: 70 }} />
-              <col style={{ width: 120 }} />
-              <col style={{ width: 150 }} />
+              <col style={{ width: '25%' }} />
+              <col style={{ width: 'auto' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: 170 }} />
             </colgroup>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>

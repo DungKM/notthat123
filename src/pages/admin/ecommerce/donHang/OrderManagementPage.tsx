@@ -246,6 +246,7 @@ const OrderManagementPage: React.FC = () => {
           value={filterStatus || undefined}
           onChange={(val) => {
             setFilterStatus(val || '');
+            // Đảm bảo ProTable tự load lại
             actionRef.current?.reload();
           }}
           options={[
