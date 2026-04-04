@@ -34,7 +34,7 @@ import {
   toSafeNumber,
 } from "@/src/utils/format";
 import { useAuth } from "@/src/auth/hooks/useAuth";
-import { useAdvanceRequestService, useSalaryActionService, useAttendanceService, useProjectService, useStatsService } from "@/src/api/services";
+import { useAdvanceRequestService, useSalaryActionService, useAttendanceService, useProjectService } from "@/src/api/services";
 import { useRef, useEffect } from "react";
 import type { ActionType } from "@ant-design/pro-components";
 
@@ -48,7 +48,6 @@ const StatisticsPage: React.FC = () => {
   const { request: salaryRequest } = useSalaryActionService();
   const { create: createAttendance, request: attendanceRequest } = useAttendanceService();
   const { request: projectRequest } = useProjectService();
-  const { request: statsRequest } = useStatsService();
   const [attendanceOpen, setAttendanceOpen] = useState(false);
   const [advanceOpen, setAdvanceOpen] = useState(false);
   const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
@@ -56,18 +55,18 @@ const StatisticsPage: React.FC = () => {
   const [loadingStats, setLoadingStats] = useState(false);
   const [projectOptions, setProjectOptions] = useState<{ label: string; value: string }[]>([]);
   const [myStats, setMyStats] = useState<{
-    totalSalary: number;
-    totalBonus: number;
-    totalPenalty: number;
-    totalAdvance: number;
-    totalTotal: number;
+    userId?: any;
+    bonus: number;
+    penalty: number;
+    advance: number;
+    currentAmount: number;
+    companyDebt: number;
+    workDays: number;
+    otHours: number;
+    totalWorkHours: number;
+    totalOTHours: number;
+    netSalary: number;
   } | null>(null);
-  const [attendanceSummary, setAttendanceSummary] = useState({
-    totalWorkUnits: 0,
-    totalOTUnits: 0,
-    totalWorkHours: 0,
-    totalOTHours: 0,
-  });
   if (!user) return null;
 
   useEffect(() => {
@@ -92,7 +91,7 @@ const StatisticsPage: React.FC = () => {
     setLoadingStats(true);
     const startDate = dayjs().startOf('month').format('YYYY-MM-DD');
     const endDate = dayjs().endOf('month').format('YYYY-MM-DD');
-    statsRequest('GET', `/my-stats?startDate=${startDate}&endDate=${endDate}`)
+    salaryRequest('GET', `/my-salary?startDate=${startDate}&endDate=${endDate}`)
       .then((res: any) => {
         if (res.success && res.data) setMyStats(res.data);
       })
@@ -119,14 +118,15 @@ const StatisticsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const totalDays = attendanceSummary.totalWorkUnits + attendanceSummary.totalOTUnits;
-  const totalHours = attendanceSummary.totalWorkHours + attendanceSummary.totalOTHours;
+  const totalDays = (myStats?.workDays || 0) + (myStats?.otHours || 0);
+  const totalHours = (myStats?.totalWorkHours || 0) + (myStats?.totalOTHours || 0);
 
-  const baseSalary = toSafeNumber(myStats?.totalSalary);
-  const bonus = toSafeNumber(myStats?.totalBonus);
-  const penalty = toSafeNumber(myStats?.totalPenalty);
-  const advance = toSafeNumber(myStats?.totalAdvance);
-  const estimatedSalary = toSafeNumber(myStats?.totalTotal);
+  const baseSalary = toSafeNumber(myStats?.currentAmount);
+  const bonus = toSafeNumber(myStats?.bonus);
+  const penalty = toSafeNumber(myStats?.penalty);
+  const advance = toSafeNumber(myStats?.advance);
+  const companyDebt = toSafeNumber(myStats?.companyDebt);
+  const estimatedSalary = toSafeNumber(myStats?.netSalary);
 
   const handleCreateRequest = async (values: any) => {
     try {
@@ -337,8 +337,8 @@ const StatisticsPage: React.FC = () => {
             <ProCard style={{ background: "#e6f7ff" }} bordered>
               <Statistic
                 title="Tổng công hành chính"
-                value={attendanceSummary.totalWorkUnits}
-                suffix={`công ≈ ${attendanceSummary.totalWorkHours} tiếng`}
+                value={myStats?.workDays || 0}
+                suffix={`công ≈ ${myStats?.totalWorkHours || 0} tiếng`}
                 prefix={<CheckCircleOutlined style={{ color: "#1890ff" }} />}
               />
             </ProCard>
@@ -347,8 +347,8 @@ const StatisticsPage: React.FC = () => {
             <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
                 title="Tổng công tăng ca"
-                value={attendanceSummary.totalOTUnits}
-                suffix={`công ≈ ${attendanceSummary.totalOTHours} tiếng`}
+                value={myStats?.otHours || 0}
+                suffix={`công ≈ ${myStats?.totalOTHours || 0} tiếng`}
                 prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
               />
             </ProCard>
@@ -378,7 +378,7 @@ const StatisticsPage: React.FC = () => {
             {formatCurrency(baseSalary)}
           </Descriptions.Item>
           <Descriptions.Item label="Số tiền công ty đang nợ">
-            {formatCurrency(0)}
+            {formatCurrency(companyDebt)}
           </Descriptions.Item>
           <Descriptions.Item label="Tổng tiền công ty phải thanh toán">
             <strong
@@ -434,12 +434,6 @@ const StatisticsPage: React.FC = () => {
               });
 
               if (res.success && res.data) {
-                setAttendanceSummary(res.data.summary || {
-                  totalWorkUnits: 0,
-                  totalOTUnits: 0,
-                  totalWorkHours: 0,
-                  totalOTHours: 0,
-                });
                 return {
                   data: res.data.records || [],
                   success: true

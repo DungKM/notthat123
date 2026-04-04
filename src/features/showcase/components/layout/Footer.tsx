@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
                   <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
                   <div className="flex flex-col gap-1">
                     <span>0326 908 884 (Mr Thường)</span>
-                    <span>0787 356 388 (Mr Lương)</span>
+                    <span>0917 087 055 (Mr Lương)</span>
                   </div>
                 </li>
               </ul>
@@ -81,7 +81,7 @@ const Footer: React.FC = () => {
                   <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
                   <div className="flex flex-col gap-1">
                     <span>0326 908 884 (Mr Thường)</span>
-                    <span>0787 356 388 (Mr Lương)</span>
+                    <span>0917 087 055 (Mr Lương)</span>
                   </div>
                 </li>
               </ul>
@@ -108,7 +108,7 @@ const Footer: React.FC = () => {
                 <li className="flex items-start gap-3">
                   <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
                   <div className="flex flex-col gap-1">
-                    <span>0787 356 388 (Mr Lương)</span>
+                    <span>0917 087 055 (Mr Lương)</span>
                     <span>0395 852 062 (Mrs Hoa)</span>
                   </div>
                 </li>

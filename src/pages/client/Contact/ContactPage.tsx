@@ -159,6 +159,10 @@ const ContactPage: React.FC = () => {
               <div className="pt-8 space-y-4 border-t border-gray-100">
                 <div className="flex items-center gap-3 text-lg">
                   <PhoneOutlined className="text-[#C5A059]" />
+                  <span className="font-bold">Mr Lương: <span className="text-teal-700">0326.908.884</span></span>
+                </div>
+                <div className="flex items-center gap-3 text-lg">
+                  <PhoneOutlined className="text-[#C5A059]" />
                   <span className="font-bold">{t('common.hotline')}: <span className="text-teal-700">0326.908.884</span></span>
                 </div>
                 {/* <div className="flex items-center gap-3 text-lg">
