@@ -191,6 +191,32 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
+  const handleLoadTasksByStage = async (stage: string) => {
+    if (!project) return null;
+    const projectId = project.id || (project as any)._id;
+    try {
+      const res = await request('GET', `/${projectId}/progress/by-stage`, null, { stage });
+      // Trả về dạng object ProjectProgress như UI mong đợi
+      if (res.data) {
+        return {
+          id: Math.random().toString(),
+          status: stage as any,
+          tasks: res.data.map((t: any) => ({
+            id: t.id || t._id,
+            work: t.name,
+            employee: t.userId || t.user,
+            assignedDate: t.assignedDate,
+            updatedAt: t.updatedAt,
+            isSaved: true
+          }))
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return null;
+  };
+
   return (
     <PageContainer
       header={{
@@ -342,6 +368,7 @@ const ProjectDetailPage: React.FC = () => {
         onUpdate={handleUpdateProgress}
         onSaveTasks={handleSaveProgressTasks}
         onDeleteTask={handleDeleteProgressTask}
+        onLoadTasksByStage={handleLoadTasksByStage}
         onTaskAssigned={(task) => {
           addNotification({
             projectId: project.id,

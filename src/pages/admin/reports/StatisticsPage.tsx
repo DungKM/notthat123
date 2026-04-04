@@ -377,7 +377,7 @@ const StatisticsPage: React.FC = () => {
           <Descriptions.Item label="Lương tháng này đang có">
             {formatCurrency(baseSalary)}
           </Descriptions.Item>
-          <Descriptions.Item label="Số tiền tháng trước đang còn">
+          <Descriptions.Item label="Số tiền công ty đang nợ">
             {formatCurrency(0)}
           </Descriptions.Item>
           <Descriptions.Item label="Tổng tiền công ty phải thanh toán">
@@ -615,7 +615,7 @@ const StatisticsPage: React.FC = () => {
           label="Số giờ hành chính làm được"
           min={0}
           max={8}
-          fieldProps={{ 
+          fieldProps={{
             precision: 1,
             onKeyDown: (e) => {
               if (e.ctrlKey || e.metaKey || e.key.length > 1) return;
@@ -630,7 +630,7 @@ const StatisticsPage: React.FC = () => {
           label="Số giờ tăng ca"
           min={0}
           max={24}
-          fieldProps={{ 
+          fieldProps={{
             precision: 1,
             onKeyDown: (e) => {
               if (e.ctrlKey || e.metaKey || e.key.length > 1) return;

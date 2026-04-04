@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Button, Popconfirm, Space, Spin, Tag, Tooltip, Input, Select, Empty,
-  Modal, Form, message as antMessage, InputNumber, Divider,
+  Modal, Form, message as antMessage, InputNumber, Divider, AutoComplete,
 } from 'antd';
 import {
   EditOutlined, DeleteOutlined, PlusOutlined,
@@ -147,7 +147,7 @@ const CategoryRow: React.FC<{
             </div>
             {isParent && (
               <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>
-                {(item.children?.length || 0)} hạng mục con
+                {(item.children?.length || 0)} hạng mục
               </div>
             )}
           </div>
@@ -186,18 +186,14 @@ const CategoryRow: React.FC<{
             : <span style={{ color: '#d1d5db' }}>—</span>}
       </td>
 
-      {/* Ngày tạo */}
-      <td style={{ padding: '12px 16px', color: '#9ca3af', fontSize: 13, whiteSpace: 'nowrap' }}>
-        {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—'}
-      </td>
 
       {/* Thao tác */}
       <td style={{ padding: '12px 16px', textAlign: 'right' }}>
         <Space size={4}>
           {isParent && (
-            <Tooltip title="Thêm hạng mục con">
+            <Tooltip title="Thêm hạng mục">
               <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(item.id)}>
-                Thêm con
+                Thêm
               </Button>
             </Tooltip>
           )}
@@ -205,8 +201,8 @@ const CategoryRow: React.FC<{
             Sửa
           </Button>
           <Popconfirm
-            title="Xoá hạng mục này?"
-            description={hasChildren ? 'Các hạng mục con cũng sẽ bị ảnh hưởng.' : 'Hành động này không thể hoàn tác.'}
+            title="Xoá mục này?"
+            description={hasChildren ? 'Các hạng mục bên trong cũng sẽ bị ảnh hưởng.' : 'Hành động này không thể hoàn tác.'}
             okText="Xóa" cancelText="Hủy"
             okButtonProps={{ danger: true }}
             onConfirm={() => onDelete(item.id)}
@@ -313,18 +309,18 @@ const VariantEditor: React.FC<{
             </div>
             <div style={{ width: 120 }}>
               <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 2 }}>Đơn vị (nếu khác)</div>
-              <Select
+              <AutoComplete
                 size="small"
                 style={{ width: '100%' }}
                 allowClear
                 placeholder={parentUnit || 'Đơn vị'}
                 value={v.unit !== parentUnit ? v.unit : undefined}
                 onChange={val => updateVariant(i, 'unit', val || parentUnit)}
-              >
-                {['Chiếc', 'Bộ', 'm2', 'm', 'md', 'Cái', 'Kg'].map(u => (
-                  <Option key={u} value={u}>{u}</Option>
-                ))}
-              </Select>
+                options={['Chiếc', 'Bộ', 'm2', 'm', 'md', 'Cái', 'Kg'].map(u => ({ value: u, label: u }))}
+                filterOption={(input, option) =>
+                  String(option?.value ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+              />
             </div>
           </div>
         </div>
@@ -384,7 +380,7 @@ const CategoryFormModal: React.FC<{
       title={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {mode === 'create' ? <PlusOutlined style={{ color: '#10b981' }} /> : <EditOutlined style={{ color: '#3b82f6' }} />}
-          <span>{mode === 'create' ? 'Thêm hạng mục mới' : 'Chỉnh sửa hạng mục'}</span>
+          <span>{mode === 'create' ? 'Thêm mục mới' : 'Chỉnh sửa'}</span>
         </div>
       }
       open={open}
@@ -400,41 +396,31 @@ const CategoryFormModal: React.FC<{
         form={form}
         layout="vertical"
         style={{ marginTop: 16 }}
-        onValuesChange={(changed) => {
-          if ('parentId' in changed) setHasParent(!!changed.parentId);
-        }}
       >
-        {/* Hạng mục cha */}
-        <Form.Item name="parentId" label="Hạng mục cha" tooltip="Để trống nếu đây là hạng mục gốc">
-          <Select allowClear placeholder="Không chọn (Hạng mục gốc)" showSearch optionFilterProp="label">
-            {parentOptions.map(p => (
-              <Option key={p.id} value={p.id} label={p.name}>
-                <FolderOutlined style={{ color: '#f59e0b', marginRight: 6 }} />{p.name}
-              </Option>
-            ))}
-          </Select>
+        {/* Tên — luôn hiện */}
+        <Form.Item
+          name="name"
+          label="Tên"
+          rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
+        >
+          <Input placeholder={hasParent ? 'VD: Giường ngủ, Tủ áo...' : 'VD: Nội thất phòng ngủ, Nội thất bếp...'} />
         </Form.Item>
 
-        <div style={{ display: 'flex', gap: 12 }}>
-          {/* Tên hạng mục */}
-          <Form.Item
-            name="name"
-            label="Tên hạng mục"
-            rules={[{ required: true, message: 'Vui lòng nhập tên hạng mục' }]}
-            style={{ flex: 2 }}
-          >
-            <Input placeholder="VD: Nội thất phòng ngủ, Giường ngủ..." />
+        {/* Đơn vị — chỉ hiện khi là hạng mục (có parentId) */}
+        {hasParent && (
+          <Form.Item name="unit" label="Đơn vị tính">
+            <AutoComplete
+              allowClear
+              placeholder="VD: Chiếc, Bộ, m2..."
+              options={[
+                'Chiếc', 'Bộ', 'm2', 'm', 'md', 'Cái', 'Phòng', 'Kg', 'Tấm', 'Cụm'
+              ].map(u => ({ value: u, label: u }))}
+              filterOption={(input, option) =>
+                String(option?.value ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+            />
           </Form.Item>
-
-          {/* Đơn vị */}
-          <Form.Item name="unit" label="Đơn vị tính" style={{ flex: 1 }}>
-            <Select allowClear placeholder="Chọn đơn vị" showSearch optionFilterProp="label">
-              {['Chiếc', 'Bộ', 'm2', 'm', 'md', 'Cái', 'Phòng', 'Kg', 'Tấm', 'Cụm'].map(u => (
-                <Option key={u} value={u} label={u}>{u}</Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </div>
+        )}
 
         {/* Phần biến thể — chỉ hiện khi là hạng mục con */}
         {hasParent && (
@@ -451,36 +437,6 @@ const CategoryFormModal: React.FC<{
               parentUnit={currentUnit}
               onChange={setVariants}
             />
-
-            {/* Mô tả chính — chỉ hiện khi chưa dùng variants */}
-            {variants.length === 0 && (
-              <>
-                <Divider style={{ margin: '12px 0' }} />
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <Form.Item name="description" label="Mô tả / Chất liệu" style={{ flex: 2 }}>
-                    <Input placeholder="VD: Gỗ MDF xanh chống ẩm phủ Melamin..." />
-                  </Form.Item>
-                  <Form.Item
-                    name="dimensions"
-                    label="Kích thước (mm)"
-                    tooltip="Dài x Rộng x Cao"
-                    style={{ flex: 1 }}
-                  >
-                    <Input placeholder="1800x2000x950" addonAfter="mm" />
-                  </Form.Item>
-                </div>
-                <Form.Item name="price" label="Đơn giá (VNĐ)">
-                  <InputNumber
-                    style={{ width: '100%' }}
-                    placeholder="VD: 5.500.000"
-                    min={0}
-                    formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                    parser={v => Number(v!.replace(/\./g, '')) as unknown as 0}
-                    addonAfter="₫"
-                  />
-                </Form.Item>
-              </>
-            )}
           </>
         )}
       </Form>
@@ -686,7 +642,7 @@ const ItemCategoryManagementPage: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ color: '#6b7280', fontSize: 13 }}>
-          Quản lý hạng mục cha và hạng mục con. Hỗ trợ nhiều biến thể (loại) cho mỗi hạng mục.
+          Quản lý danh mục và hạng mục bên trong. Hỗ trợ nhiều biến thể (loại) cho mỗi hạng mục.
         </div>
         <Space wrap>
           <Input
@@ -695,17 +651,17 @@ const ItemCategoryManagementPage: React.FC = () => {
             value={searchText} onChange={e => setSearchText(e.target.value)}
             allowClear style={{ width: 240 }}
           />
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Thêm hạng mục</Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Thêm danh mục</Button>
         </Space>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         <Tag color="gold" style={{ fontSize: 13, padding: '4px 10px' }}>
-          <FolderOutlined style={{ marginRight: 4 }} />{rootItems.length} hạng mục cha
+          <FolderOutlined style={{ marginRight: 4 }} />{rootItems.length} danh mục
         </Tag>
         <Tag color="blue" style={{ fontSize: 13, padding: '4px 10px' }}>
-          <FileOutlined style={{ marginRight: 4 }} />{rootItems.reduce((acc, r) => acc + (r.children?.length || 0), 0)} hạng mục con
+          <FileOutlined style={{ marginRight: 4 }} />{rootItems.reduce((acc, r) => acc + (r.children?.length || 0), 0)} hạng mục
         </Tag>
         <Tag color="purple" style={{ fontSize: 13, padding: '4px 10px' }}>
           <BranchesOutlined style={{ marginRight: 4 }} />{rootItems.reduce((acc, r) => acc + (r.children || []).reduce((a, c) => a + (c.variants?.length || 0), 0), 0)} biến thể
@@ -717,37 +673,35 @@ const ItemCategoryManagementPage: React.FC = () => {
         <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflow: 'hidden', minHeight: 200 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ minWidth: 200 }} />
+              <col style={{ minWidth: 150 }} />
               <col style={{ width: '22%' }} />
               <col style={{ width: 130 }} />
               <col style={{ width: 70 }} />
               <col style={{ width: 120 }} />
-              <col style={{ width: 90 }} />
-              <col style={{ width: 170 }} />
+              <col style={{ width: 150 }} />
             </colgroup>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Tên hạng mục</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Tên</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Mô tả</th>
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Kích thước (mm)</th>
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Đơn vị</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#d97706' }}>Đơn giá (VNĐ)</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Ngày tạo</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#374151', paddingRight: 20 }}>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={6}>
                     <Empty
                       image={<InboxOutlined style={{ fontSize: 48, color: '#d1d5db' }} />}
-                      description={searchText ? 'Không tìm thấy hạng mục phù hợp' : 'Chưa có hạng mục nào'}
+                      description={searchText ? 'Không tìm thấy phù hợp' : 'Chưa có mục nào'}
                       style={{ padding: '40px 0' }}
                     >
                       {!searchText && (
                         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: '#059669' }}>
-                          Thêm hạng mục đầu tiên
+                          Thêm danh mục đầu tiên
                         </Button>
                       )}
                     </Empty>
@@ -765,7 +719,7 @@ const ItemCategoryManagementPage: React.FC = () => {
                     <CategoryRow
                       item={root} depth={0}
                       expanded={isExpanded} hasChildren={children.length > 0}
-                      variantsExpanded={false} onToggle={() => toggleExpand(root.id)} onToggleVariants={() => {}}
+                      variantsExpanded={false} onToggle={() => toggleExpand(root.id)} onToggleVariants={() => { }}
                       onEdit={openEdit} onDelete={handleDelete} onAddChild={openAddChild}
                     />
 
@@ -780,7 +734,7 @@ const ItemCategoryManagementPage: React.FC = () => {
                             item={child} depth={1}
                             expanded={false} hasChildren={false}
                             variantsExpanded={childVariantsExpanded}
-                            onToggle={() => {}} onToggleVariants={() => toggleVariantExpand(child.id)}
+                            onToggle={() => { }} onToggleVariants={() => toggleVariantExpand(child.id)}
                             onEdit={openEdit} onDelete={handleDelete} onAddChild={openAddChild}
                           />
                           {/* Dòng biến thể */}

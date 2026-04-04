@@ -28,9 +28,13 @@ export interface ProjectProgress {
 export interface ProjectDetail {
   id?: string;
   projectId?: string;
+  type?: 'group' | 'item'; // Loại dòng bảng (danh mục hay hạng mục)
+  categoryId?: string;     // Mã danh mục định danh từ ItemCategory
+  parentCategoryId?: string; // Nếu là 'item', đây là ID của nhóm cha
   name: string;       // Tên hạng mục/vật tư
   material: string;   // Chất liệu
   unit: string;       // Đơn vị tính
+  dimensions?: string;// Kích thước
   quantity: number;   // Số lượng
   price: number;      // Đơn giá bán
   amount: number;     // Thành tiền (quantity * price)

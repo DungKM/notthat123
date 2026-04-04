@@ -126,6 +126,9 @@ export const ITEM_CATEGORIES_MOCK: ItemCategory[] = [
   },
 ];
 
+// Lấy tất cả danh mục GỐC (parent)
+export const getRootCategories = (): ItemCategory[] => ITEM_CATEGORIES_MOCK;
+
 // Lấy tất cả hạng mục CON (flat), mỗi item có thể có variants
 export const getAllChildCategories = (): ItemCategory[] =>
   ITEM_CATEGORIES_MOCK.flatMap(p => p.children || []);

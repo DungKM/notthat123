@@ -28,6 +28,7 @@ interface Props {
   onSaveTasks?: (stage: string, tasks: any[]) => Promise<boolean>;
   onDeleteTask?: (taskId: string) => Promise<boolean>;
   onTaskAssigned?: (task: { employeeId: string; employeeName: string; work: string }) => void;
+  onLoadTasksByStage?: (stage: string) => Promise<ProjectProgress | null>;
 }
 
 const ProjectProgressModal: React.FC<Props> = ({
@@ -40,9 +41,11 @@ const ProjectProgressModal: React.FC<Props> = ({
   onSaveTasks,
   onDeleteTask,
   onTaskAssigned,
+  onLoadTasksByStage,
 }) => {
   const [currentStatus, setCurrentStatus] = useState<ProjectProgress | null>(
     null
+
   );
   const [historyOpen, setHistoryOpen] = useState(false);
   const [stageManagerOpen, setStageManagerOpen] = useState(false);
@@ -323,12 +326,20 @@ const ProjectProgressModal: React.FC<Props> = ({
                     label: s,
                     value: s,
                   }))}
-                  onChange={(value) => {
-                    // Đổi stage → đánh dấu toàn bộ task cần lưu lại
+                  onChange={async (value) => {
+                    if (onLoadTasksByStage) {
+                      const stageTasks = await onLoadTasksByStage(value as string);
+                      if (stageTasks) {
+                        setCurrentStatus(stageTasks);
+                        return;
+                      }
+                    }
+                    
+                    // Fallback
                     setCurrentStatus({
                       ...currentStatus,
                       status: value,
-                      tasks: currentStatus.tasks.map((t) => ({ ...t, isSaved: false })),
+                      tasks: [],
                     });
                   }}
                   disabled={isStaff}
