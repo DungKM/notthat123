@@ -80,15 +80,14 @@ const GroupMediaModal: React.FC<GroupMediaModalProps> = ({ open, onCancel, group
     });
   };
 
-  const isImage = (url: string) => /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
-
+ 
   const tabItems = [
     {
       key: 'media',
       label: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <PictureOutlined />
-          Ảnh & Video
+          Ảnh đính kèm
           {mediaList.length > 0 && (
             <span style={{
               background: '#6366f1', color: '#fff', borderRadius: 10,
@@ -100,32 +99,26 @@ const GroupMediaModal: React.FC<GroupMediaModalProps> = ({ open, onCancel, group
       children: loadingMedia ? (
         <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div>
       ) : mediaList.length === 0 ? (
-        <Empty description="Chưa có ảnh hoặc video nào được chia sẻ" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <Empty description="Chưa có ảnh nào được chia sẻ" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
         <Image.PreviewGroup>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-            {mediaList.map((item: any, idx: number) => (
+            {mediaList.map((item: any, idx: number) => {
+              const att = item.attachment || item;
+              const url = att.url || att.fileUrl || '';
+              const name = att.name || att.fileName || '';
+              
+              return (
               <div key={item.id || item._id || idx} style={{
                 aspectRatio: '1', borderRadius: 8, overflow: 'hidden',
                 border: '1px solid #f0f0f0', background: '#f8f9fb', position: 'relative',
               }}>
-                {isImage(item.url || item.fileUrl || '') ? (
-                  <Image
-                    src={item.url || item.fileUrl}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    alt={item.fileName || ''}
-                  />
-                ) : (
-                  <div style={{
-                    height: '100%', display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', justifyContent: 'center', color: '#64748b',
-                  }}>
-                    <span style={{ fontSize: 28 }}>🎬</span>
-                    <span style={{ fontSize: 10, marginTop: 4, textAlign: 'center', padding: '0 4px' }}>
-                      {item.fileName || 'Video'}
-                    </span>
-                  </div>
-                )}
+                <Image
+                  src={url}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  alt={name}
+                  fallback="https://via.placeholder.com/150?text=L%E1%BB%97i+%E1%BA%A3nh"
+                />
                 {item.senderName && (
                   <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -137,7 +130,8 @@ const GroupMediaModal: React.FC<GroupMediaModalProps> = ({ open, onCancel, group
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </Image.PreviewGroup>
       ),

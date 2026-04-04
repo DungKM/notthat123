@@ -104,7 +104,6 @@ const roleLabels: Record<string, string> = {
 
 const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser }) => {
   const actionRef = useRef<ActionType>(null);
-  const [month, setMonth] = useState(dayjs().format('YYYY-MM'));
   const { request: salaryRequest } = useSalaryService();
   const { request: salaryActionRequest } = useSalaryActionService();
   const { request: projectRequest } = useProjectService();
@@ -495,7 +494,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       // POST /salary - Thêm thưởng/phạt/tạm ứng vào lịch sử
       await salaryActionRequest('POST', '', {
         userId: employee.id,
-        month,
+        month: dayjs().format('YYYY-MM'),
         type: values.type,
         amount: Number(values.amount || 0),
         content: values.content,
@@ -520,7 +519,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       if (billFile instanceof File) {
         const formData = new FormData();
         formData.append('userId', String(selectedEmployee.id));
-        formData.append('month', month);
+        formData.append('month', dayjs().format('YYYY-MM'));
 
         // Gửi amount ở dạng nguyên thuỷ để Axios serialize với paramsSerializer hoặc BE middleware tự bóc
         formData.append('amount', amount as any);
@@ -538,7 +537,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       } else {
         await salaryActionRequest('POST', '/pay', {
           userId: selectedEmployee.id,
-          month,
+          month: dayjs().format('YYYY-MM'),
           amount,
           date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : undefined,
           note: values.note,
@@ -566,7 +565,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         scroll={{ x: 1200 }}
         request={async () => {
           try {
-            const res = await salaryRequest('GET', '', null, { month });
+            const res = await salaryRequest('GET', '');
             const raw: any[] = res.data || [];
             const mapped: Employee[] = raw.map((r: any) => ({
               id: r.userId?.id || r.userId,
@@ -586,19 +585,6 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           }
         }}
         toolBarRender={() => [
-          <DatePicker
-            key="month"
-            picker="month"
-            value={dayjs(month, 'YYYY-MM')}
-            format="MM/YYYY"
-            allowClear={false}
-            onChange={(d) => {
-              if (d) {
-                setMonth(d.format('YYYY-MM'));
-                setTimeout(() => actionRef.current?.reload(), 100);
-              }
-            }}
-          />,
           <Button key="settings" onClick={() => setSettingsVisible(true)} icon={<SettingOutlined />}>
             Cài đặt giờ công
           </Button>,

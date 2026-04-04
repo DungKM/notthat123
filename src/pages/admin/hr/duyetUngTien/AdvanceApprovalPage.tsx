@@ -52,12 +52,12 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
       title: 'Nhân viên',
       dataIndex: 'employeeName',
       width: 150,
+
       render: (_, record: any) => record.employeeId?.name || record.employeeName || 'Unknown',
     },
     {
       title: 'Số tiền',
       dataIndex: 'amount',
-      hideInSearch: true,
       render: (_, record) => (
         <Text strong style={{ fontSize: 14 }}>
           {formatCurrency(Number(record.amount))}
@@ -70,6 +70,7 @@ const AdvanceApprovalPage: React.FC<AdvanceApprovalProps> = ({ currentUser }) =>
       dataIndex: 'reason',
       ellipsis: true,
       width: 200,
+      hideInSearch: true
     },
     {
       title: 'Ngày yêu cầu',
