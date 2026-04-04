@@ -91,7 +91,7 @@ const StatisticsPage: React.FC = () => {
     setLoadingStats(true);
     const startDate = dayjs().startOf('month').format('YYYY-MM-DD');
     const endDate = dayjs().endOf('month').format('YYYY-MM-DD');
-    salaryRequest('GET', `/my-salary?startDate=${startDate}&endDate=${endDate}`)
+    salaryRequest('GET', `/my-salary`)
       .then((res: any) => {
         if (res.success && res.data) setMyStats(res.data);
       })
@@ -189,7 +189,7 @@ const StatisticsPage: React.FC = () => {
       title: "Ngày",
       dataIndex: "date",
       hideInSearch: true,
-      render: (_, record) => dayjs((record as any).createdAt || record.date).format("DD/MM/YYYY HH:mm"),
+      render: (_, record) => dayjs((record as any).date || record.createdAt).format("DD/MM/YYYY HH:mm"),
     },
     {
       title: "Số công hành chính",
@@ -328,7 +328,7 @@ const StatisticsPage: React.FC = () => {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <Card
-        title="Số công tháng này"
+        title="Số công tính đến thời điểm hiện tại"
         bordered
         styles={{ body: { padding: "12px 16px" } }}
       >
@@ -368,7 +368,7 @@ const StatisticsPage: React.FC = () => {
       </Card>
 
       <ProCard
-        title={`Lương tạm tính tháng ${dayjs().format('MM/YYYY')} (Dự kiến)`}
+        title={`Lương tạm tính (Dự kiến)`}
         bordered
         headerBordered
         loading={loadingStats}

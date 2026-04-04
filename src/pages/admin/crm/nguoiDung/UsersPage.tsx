@@ -109,7 +109,7 @@ const UsersPage: React.FC = () => {
       search: false,
     },
     {
-      title: 'Lương cơ bản',
+      title: 'Lương cơ bản/ngày',
       dataIndex: 'baseSalary',
       width: 150,
       search: false,
