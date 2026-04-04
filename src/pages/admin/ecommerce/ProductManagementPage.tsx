@@ -379,15 +379,25 @@ const ProductManagementPage: React.FC = () => {
         ]}
         request={async (params) => {
           const { current, pageSize, name, ...rest } = params;
-          const list = await getAll({
-            page: current,
-            limit: pageSize,
-            search: name,
-            ...rest,
-          });
-          return { data: list, success: true };
+          try {
+            const res = await (await import('../../../api/axiosInstance')).default.get('/products', {
+              params: {
+                page: current,
+                limit: pageSize,
+                search: name,
+                ...rest,
+              },
+            }) as any;
+            return {
+              data: res.data || [],
+              success: true,
+              total: res.meta?.total ?? 0,
+            };
+          } catch {
+            return { data: [], success: false, total: 0 };
+          }
         }}
-        pagination={{ pageSize: 10, showSizeChanger: true }}
+        pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Tổng ${total} sản phẩm` }}
         search={{ labelWidth: 'auto' }}
         dateFormatter="string"
         scroll={{ x: 'max-content' }}

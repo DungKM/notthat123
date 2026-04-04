@@ -4,18 +4,198 @@ import {
   ProColumns,
   ProTable,
 } from "@ant-design/pro-components";
-import { Button, Space, Typography, message, InputNumber, Input, Modal } from "antd";
+import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Tag } from "antd";
 import {
   PlusOutlined,
   DownloadOutlined,
-  HistoryOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { ProjectDetail, Role } from "@/src/types";
 import { formatCurrency } from "@/src/utils/format";
+import { getCategoriesGrouped, getMinPrice } from "@/src/data/itemCategories";
+import type { ItemCategory, ItemVariant } from "@/src/data/itemCategories";
 import * as XLSX from "xlsx";
 
 const { Text } = Typography;
 
+// ─── Modal chọn hạng mục từ danh sách ────────────────────────────────────────
+const SelectCategoryModal: React.FC<{
+  open: boolean;
+  onCancel: () => void;
+  onSelect: (category: ItemCategory, variant?: ItemVariant) => void;
+}> = ({ open, onCancel, onSelect }) => {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const grouped = getCategoriesGrouped();
+
+  const allChildren = grouped.flatMap(g => g.options);
+  const selectedItem = allChildren.find(c => c.id === selectedId);
+  const hasVariants = (selectedItem?.variants?.length ?? 0) > 0;
+  const selectedVariant = hasVariants
+    ? selectedItem?.variants?.find(v => v.id === selectedVariantId)
+    : undefined;
+
+  const handleOk = () => {
+    if (!selectedItem) {
+      message.warning("Vui lòng chọn một hạng mục");
+      return;
+    }
+    if (hasVariants && !selectedVariant) {
+      message.warning("Vui lòng chọn loại cụ thể");
+      return;
+    }
+    onSelect(selectedItem, selectedVariant);
+    setSelectedId(null);
+    setSelectedVariantId(null);
+  };
+
+  // Khi đổi item, reset variant
+  const handleItemChange = (id: string | null) => {
+    setSelectedId(id);
+    setSelectedVariantId(null);
+  };
+
+  // Preview info để hiển thị
+  const previewDesc = selectedVariant?.description || selectedItem?.description;
+  const previewDimensions = selectedVariant?.dimensions || selectedItem?.dimensions;
+  const previewUnit = selectedVariant?.unit || selectedItem?.unit;
+  const previewPrice = selectedVariant?.price ?? selectedItem?.price;
+
+  return (
+    <Modal
+      title={
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <AppstoreOutlined style={{ color: "#10b981" }} />
+          <span>Chọn hạng mục nội thất</span>
+        </div>
+      }
+      open={open}
+      onCancel={() => { setSelectedId(null); setSelectedVariantId(null); onCancel(); }}
+      onOk={handleOk}
+      okText="Thêm vào danh sách"
+      cancelText="Hủy"
+      width={580}
+    >
+      <div style={{ marginTop: 12 }}>
+        {/* Bước 1: Chọn hạng mục */}
+        <div style={{ marginBottom: 4, fontSize: 12, color: '#6b7280' }}>Hạng mục</div>
+        <Select
+          style={{ width: "100%" }}
+          placeholder="Tìm và chọn hạng mục..."
+          showSearch
+          allowClear
+          value={selectedId}
+          onChange={handleItemChange}
+          filterOption={(input, option) =>
+            String(option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+          }
+          optionLabelProp="label"
+          size="large"
+        >
+          {grouped.map(group => (
+            <Select.OptGroup key={group.label} label={group.label}>
+              {group.options.map(item => (
+                <Select.Option key={item.id} value={item.id} label={item.name}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: 14 }}>
+                        {item.name}
+                        {(item.variants?.length ?? 0) > 0 && (
+                          <Tag color="blue" style={{ marginLeft: 6, fontSize: 10 }}>
+                            {item.variants!.length} loại
+                          </Tag>
+                        )}
+                      </div>
+                      {!(item.variants?.length) && item.description && (
+                        <div style={{ fontSize: 12, color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 260 }}>
+                          {item.description}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: "right", flexShrink: 0, marginLeft: 8 }}>
+                      {!(item.variants?.length) && item.dimensions && (
+                        <div style={{ fontSize: 11, color: "#6366f1", fontFamily: "monospace" }}>{item.dimensions} mm</div>
+                      )}
+                      {!(item.variants?.length) && item.price != null && (
+                        <div style={{ fontSize: 12, color: "#d97706", fontWeight: 600 }}>
+                          {item.price.toLocaleString("vi-VN")}₫
+                        </div>
+                      )}
+                      {(item.variants?.length ?? 0) > 0 && (() => {
+                        const min = getMinPrice(item);
+                        return min != null ? <div style={{ fontSize: 12, color: "#d97706" }}>từ {min.toLocaleString('vi-VN')}₫</div> : null;
+                      })()}
+                    </div>
+                  </div>
+                </Select.Option>
+              ))}
+            </Select.OptGroup>
+          ))}
+        </Select>
+
+        {/* Bước 2: Chọn loại/biến thể (nếu có) */}
+        {selectedItem && hasVariants && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ marginBottom: 4, fontSize: 12, color: '#6b7280' }}>
+              Loại cụ thể <span style={{ color: '#ef4444' }}>*</span>
+            </div>
+            <Select
+              style={{ width: "100%" }}
+              placeholder="Chọn loại/biến thể..."
+              size="large"
+              value={selectedVariantId}
+              onChange={setSelectedVariantId}
+              allowClear
+            >
+              {selectedItem.variants!.map(v => (
+                <Select.Option key={v.id} value={v.id}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ fontWeight: 500 }}>{v.label}</div>
+                      {v.description && (
+                        <div style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 220 }}>
+                          {v.description}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
+                      {v.dimensions && <div style={{ fontSize: 11, color: '#6366f1', fontFamily: 'monospace' }}>{v.dimensions} mm</div>}
+                      {v.price != null && <div style={{ fontSize: 12, color: '#d97706', fontWeight: 600 }}>{v.price.toLocaleString('vi-VN')}₫/{v.unit || selectedItem.unit}</div>}
+                    </div>
+                  </div>
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+        )}
+
+        {/* Preview */}
+        {selectedItem && (!hasVariants || selectedVariant) && (
+          <div style={{
+            marginTop: 16, padding: "12px 16px",
+            background: "#f0fdf4", borderRadius: 8, border: "1px solid #bbf7d0",
+          }}>
+            <div style={{ fontWeight: 600, fontSize: 15, color: "#111827", marginBottom: 6 }}>
+              {selectedItem.name}
+              {selectedVariant && (
+                <Tag color="blue" style={{ marginLeft: 8, fontSize: 12 }}>{selectedVariant.label}</Tag>
+              )}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px", fontSize: 13, color: "#374151" }}>
+              {previewDesc && <div><span style={{ color: "#9ca3af" }}>Chất liệu: </span>{previewDesc}</div>}
+              {previewDimensions && <div><span style={{ color: "#9ca3af" }}>Kích thước: </span><b style={{ fontFamily: "monospace" }}>{previewDimensions} mm</b></div>}
+              {previewUnit && <div><span style={{ color: "#9ca3af" }}>Đơn vị: </span>{previewUnit}</div>}
+              {previewPrice != null && <div><span style={{ color: "#9ca3af" }}>Đơn giá: </span><b style={{ color: "#d97706" }}>{previewPrice.toLocaleString("vi-VN")}₫</b></div>}
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+};
+
+
+// ─── Main Table Component ─────────────────────────────────────────────────────
 interface ProjectDetailTableProps {
   projectId: string;
   details: ProjectDetail[];
@@ -33,6 +213,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [manualTotal, setManualTotal] = useState<number | null>(null);
   const [manualProfit, setManualProfit] = useState<number | null>(null);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
   const isAdmin = role === Role.DIRECTOR || role === Role.ACCOUNTANT;
 
@@ -143,7 +324,37 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     };
   }, [details, manualTotal]);
 
-  const handleAddRow = () => {
+  // Khi chọn hạng mục từ modal → tạo dòng mới tự điền data
+  const handleCategorySelect = (category: ItemCategory, variant?: ItemVariant) => {
+    const newId = (Math.random() * 1000000).toFixed(0);
+    // Ưu tiên dùng thông tin từ variant nếu có, khảng không dùng thước item
+    const resolvedDesc = variant?.description || category.description || "";
+    const resolvedUnit = variant?.unit || category.unit || "Chiếc";
+    const resolvedPrice = variant?.price ?? category.price ?? 0;
+    const resolvedDim = variant?.dimensions || category.dimensions;
+    const displayName = variant ? `${category.name} - ${variant.label}` : category.name;
+
+    const newRow: ProjectDetail = {
+      id: newId,
+      projectId,
+      name: displayName,
+      material: resolvedDesc,
+      unit: resolvedUnit,
+      quantity: 1,
+      price: resolvedPrice,
+      amount: resolvedPrice,
+      costPrice: 0,
+      isCompanyProduct: true,
+      note: resolvedDim ? `Kích thước: ${resolvedDim} mm` : "",
+    };
+    onUpdate([newRow, ...details], false);
+    setEditableRowKeys([newId]);
+    setCategoryModalOpen(false);
+    message.success(`Đã thêm "${displayName}" vào danh sách`);
+  };
+
+  // Thêm dòng trống (nhập tay)
+  const handleAddEmptyRow = () => {
     const newId = (Math.random() * 1000000).toFixed(0);
     const newRow: ProjectDetail = {
       id: newId,
@@ -158,7 +369,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       isCompanyProduct: true,
       note: "",
     };
-    onUpdate([newRow, ...details], false); // Chỉ cập nhật UI, không gọi API patch toàn bộ
+    onUpdate([newRow, ...details], false);
     setEditableRowKeys([newId]);
   };
 
@@ -223,16 +434,29 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 
   return (
     <div className="project-detail-table">
-      <Space style={{ marginBottom: 16 }}>
+      <Space style={{ marginBottom: 16 }} wrap>
         {isAdmin && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRow}>
-            Thêm dòng chi tiết
-          </Button>
+          <>
+            {/* Nút chọn từ danh sách hạng mục */}
+            <Button
+              type="primary"
+              icon={<AppstoreOutlined />}
+              onClick={() => setCategoryModalOpen(true)}
+              style={{ background: "#10b981", borderColor: "#10b981" }}
+            >
+              Chọn hạng mục
+            </Button>
+            {/* Nút thêm dòng nhập tay */}
+            <Button icon={<PlusOutlined />} onClick={handleAddEmptyRow}>
+              Thêm dòng thủ công
+            </Button>
+          </>
         )}
         <Button icon={<DownloadOutlined />} onClick={handleExportExcel}>
           Xuất Excel
         </Button>
       </Space>
+
       <EditableProTable<ProjectDetail>
         rowKey="id"
         headerTitle="Danh sách chi tiết vật tư"
@@ -308,7 +532,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                 <ProTable.Summary.Cell index={0} colSpan={9}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                     <Text style={{ fontSize: 16 }}>LỢI NHUẬN:</Text>
-                    {/* Đã bổ sung thẻ div bọc InputNumber và Text ở đây giống hệt dòng Doanh Thu */}
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <InputNumber
                         value={manualProfit ?? summaryData.profit}
@@ -323,7 +546,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                         }}
                         bordered={false}
                         controls={false}
-                        // Thêm class này (gộp với class align-right-input ở bước trước)
                         className="align-right-input editable-summary-input"
                       />
                       <Text>đ</Text>
@@ -363,6 +585,13 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           background-color: #f0f5ff; /* Đổi màu nền nhẹ cho dễ nhìn */
         }
       `}</style>
+
+      {/* Modal chọn hạng mục */}
+      <SelectCategoryModal
+        open={categoryModalOpen}
+        onCancel={() => setCategoryModalOpen(false)}
+        onSelect={handleCategorySelect}
+      />
     </div>
   );
 };
