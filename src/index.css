@@ -173,6 +173,17 @@
       max-height: 70vh;
       overflow-y: auto;
     }
+
+    /* Ngăn tự động zoom khi focus input trên iOS */
+    input, 
+    textarea, 
+    select,
+    .ant-input,
+    .ant-input-number-input,
+    .ant-select-selection-search-input,
+    .ant-picker-input input {
+      font-size: 16px !important;
+    }
   }
 
   @media (min-width: 769px) {
