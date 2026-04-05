@@ -374,7 +374,7 @@ const StatisticsPage: React.FC = () => {
         loading={loadingStats}
       >
         <Descriptions column={{ xs: 1, sm: 2, md: 3 }} bordered>
-          <Descriptions.Item label="Lương tháng này đang có">
+          <Descriptions.Item label="Số tiền đang có">
             {formatCurrency(baseSalary)}
           </Descriptions.Item>
           <Descriptions.Item label="Số tiền công ty đang nợ">

@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import SEO from '@/src/components/common/SEO';
-import { Search, X, Filter } from 'lucide-react';
+import { Search, X, Filter, ChevronDown, ChevronRight } from 'lucide-react';
 import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
 
@@ -59,6 +59,7 @@ const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // Đồng bộ selectedCategoryId khi url thay đổi (từ menu)
   useEffect(() => {
@@ -190,7 +191,7 @@ const ProjectsPage: React.FC = () => {
                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
                       Danh mục
                     </p>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <button
                         type="button"
                         onClick={() => handleCategorySelect('')}
@@ -204,18 +205,78 @@ const ProjectsPage: React.FC = () => {
 
                       {categories.map((cat) => {
                         const catValue = cat.slug || cat._id || cat.id;
+                        const hasChildren = cat.children && cat.children.length > 0;
+                        const isExpanded = expandedCategories.has(cat._id || cat.id);
+                        const isParentActive = selectedCategoryId === catValue;
+                        const isChildActive = hasChildren && cat.children.some(
+                          (child: any) => (child.slug || child._id || child.id) === selectedCategoryId
+                        );
+
                         return (
-                          <button
-                            key={cat._id || cat.id}
-                            type="button"
-                            onClick={() => handleCategorySelect(catValue)}
-                            className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${selectedCategoryId === catValue
-                              ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
-                              : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
-                              }`}
-                          >
-                            {cat.name}
-                          </button>
+                          <div key={cat._id || cat.id}>
+                            {/* Danh mục cha */}
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!hasChildren) {
+                                    handleCategorySelect(catValue);
+                                  } else {
+                                    handleCategorySelect(catValue);
+                                  }
+                                }}
+                                className={`flex-1 text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${isParentActive || isChildActive
+                                  ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
+                                  : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
+                                  }`}
+                              >
+                                {cat.name}
+                              </button>
+                              {hasChildren && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedCategories(prev => {
+                                      const next = new Set(prev);
+                                      const id = cat._id || cat.id;
+                                      if (next.has(id)) next.delete(id);
+                                      else next.add(id);
+                                      return next;
+                                    });
+                                  }}
+                                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
+                                >
+                                  {isExpanded
+                                    ? <ChevronDown className="w-3 h-3" />
+                                    : <ChevronRight className="w-3 h-3" />
+                                  }
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Danh mục con */}
+                            {hasChildren && isExpanded && (
+                              <div className="mt-1 ml-3 space-y-1 border-l-2 border-gray-100 pl-2">
+                                {cat.children.map((child: any) => {
+                                  const childValue = child.slug || child._id || child.id;
+                                  return (
+                                    <button
+                                      key={child._id || child.id}
+                                      type="button"
+                                      onClick={() => handleCategorySelect(childValue)}
+                                      className={`w-full text-left px-3 py-1.5 rounded-lg border text-xs transition-all ${selectedCategoryId === childValue
+                                        ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm font-semibold'
+                                        : 'bg-white text-gray-600 border-gray-100 hover:border-showcase-primary/30 hover:bg-gray-50 font-medium'
+                                        }`}
+                                    >
+                                      {child.name}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -272,7 +333,7 @@ const ProjectsPage: React.FC = () => {
                     } else {
                       pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
                     }
-                    
+
                     return pages.map((p, index) => (
                       <button
                         key={`${p}-${index}`}

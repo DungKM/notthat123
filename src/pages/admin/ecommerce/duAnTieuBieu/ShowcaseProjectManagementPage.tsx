@@ -5,12 +5,11 @@ import {
   ProColumns,
   ModalForm,
   ProFormText,
-  ProFormSelect,
   ProFormTextArea,
   ProFormDigit,
   ProFormUploadButton,
 } from '@ant-design/pro-components';
-import { Button, Space, message, Popconfirm, Image, Tag } from 'antd';
+import { Button, Space, message, Popconfirm, Image, Tag, Form, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
 
@@ -27,15 +26,25 @@ interface ShowcaseProject {
   images?: any[];
 }
 
+interface CategoryChild {
+  _id: string;
+  id?: string;
+  name: string;
+  slug: string;
+}
+
 interface CategoryProjectItem {
   _id: string;
+  id?: string;
   name: string;
+  children?: CategoryChild[];
 }
 
 const ShowcaseProjectManagementPage: React.FC = () => {
   const actionRef = useRef<ActionType | undefined>(undefined);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentProject, setCurrentProject] = useState<ShowcaseProject | null>(null);
+  const [form] = Form.useForm();
 
   const { request: constructionRequest } = useConstructionService();
   const { getAll: getCategories } = useConstructionCategoryService();
@@ -45,6 +54,22 @@ const ShowcaseProjectManagementPage: React.FC = () => {
   useEffect(() => {
     getCategories({ limit: 100 }).then(res => setCategories(res || []));
   }, [getCategories]);
+
+  // Tạo options grouped: nếu cha có con → nhóm children, nếu không có con → hiện cha như leaf
+  const categorySelectOptions = categories.map(parent => {
+    const parentId = parent._id || parent.id;
+    if (parent.children && parent.children.length > 0) {
+      return {
+        label: parent.name,
+        options: parent.children.map(child => ({
+          label: child.name,
+          value: child._id || child.id,
+        })),
+      };
+    }
+    // Cha không có con → hiện cha luôn
+    return { label: parent.name, value: parentId };
+  });
 
   const handleDelete = async (id: string) => {
     try {
@@ -255,9 +280,8 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         onOpenChange={setModalVisible}
         onFinish={handleFinish}
         initialValues={getInitialValues()}
-        modalProps={{
-          destroyOnClose: true,
-        }}
+        form={form}
+        modalProps={{ destroyOnClose: true }}
         width={800}
       >
         <Space direction="vertical" style={{ width: '100%' }} size="large">
@@ -268,12 +292,18 @@ const ShowcaseProjectManagementPage: React.FC = () => {
               placeholder="VD: Văn phòng Techcombank"
               rules={[{ required: true, message: 'Vui lòng nhập tên công trình' }]}
             />
-            <ProFormSelect
+            <Form.Item
               name="categoryId"
               label="Danh mục"
-              options={categories.map(c => ({ label: c.name, value: c._id || (c as any).id }))}
               rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
-            />
+            >
+              <Select
+                placeholder="Vui lòng chọn"
+                options={categorySelectOptions}
+                showSearch
+                optionFilterProp="label"
+              />
+            </Form.Item>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
