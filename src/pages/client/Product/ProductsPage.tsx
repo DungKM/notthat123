@@ -186,8 +186,14 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
-        title="Sản phẩm"
-        description="Khám phá bộ sưu tập nội thất gỗ óc chó cao cấp của Hochi, từ sofa, bàn ăn đến trọn gói nội thất biệt thự."
+        title="Sản phẩm nội thất gỗ cao cấp - Mua nội thất Hà Nội"
+        description="Mua sản phẩm nội thất gỗ cao cấp tại Hà Nội: sofa, giường ngủ, tủ bếp, bàn ăn, kệ TV, tủ quần áo. Chất liệu gỗ óc chó, gỗ MDF. Giao lắp miễn phí. Nội Thất Hochi."
+        canonicalPath="/san-pham"
+        keywords="mua nội thất, nội thất gỗ cao cấp, sofa nội thất hochi, giường ngủ, tủ bếp, bàn ăn, kệ TV, nội thất hà nội, gỗ óc chó, gỗ MDF, đặt đồ theo yêu cầu"
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Sản phẩm', url: '/san-pham' },
+        ]}
       />
 
       {/* Hero Banner */}

@@ -1,0 +1,10 @@
+﻿User-agent: *
+Allow: /
+
+# Không cho crawl trang admin/nội bộ
+Disallow: /quan-tri/
+Disallow: /login
+Disallow: /checkout
+
+# Sitemap
+Sitemap: https://www.noithathochi.vn/sitemap.xml

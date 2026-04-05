@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 const SITE_NAME = 'Nội Thất Hochi';
-const SITE_URL = 'https://notthathochi.com'; // Thay bằng domain thực tế
+const SITE_URL = 'https://www.noithathochi.vn';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 const DEFAULT_DESCRIPTION =
   'Nội Thất Hochi - Xưởng sản xuất và thi công nội thất gỗ cao cấp tại Hà Nội. Thiết kế theo yêu cầu, giao lắp miễn phí. Hotline: 0326 908 884.';
@@ -9,21 +9,14 @@ const DEFAULT_KEYWORDS =
   'nội thất hochi, nội thất gỗ, thiết kế nội thất, thi công nội thất, phòng ngủ, phòng khách, tủ bếp, giường ngủ, nội thất hà nội, gỗ óc chó, gỗ MDF';
 
 export interface SEOProps {
-  // Bắt buộc với dynamic pages
   title: string;
-  // Optional - fallback về default
   description?: string;
   keywords?: string;
-  // URL của trang (không có trailing slash)
-  canonicalPath?: string; // VD: '/san-pham/ghe-sofa'
-  // Ảnh OG (tuyệt đối URL)
+  canonicalPath?: string;
   ogImage?: string;
   ogImageAlt?: string;
-  // Loại page: website | article | product | profile
   ogType?: 'website' | 'article' | 'product' | 'profile';
-  // Structured Data JSON-LD
   structuredData?: object | object[];
-  // Product specific
   productData?: {
     price?: number;
     currency?: string;
@@ -32,17 +25,15 @@ export interface SEOProps {
     sku?: string;
     image?: string;
   };
-  // Bài viết / blog
   articleData?: {
     publishedTime?: string;
     modifiedTime?: string;
     author?: string;
     section?: string;
   };
-  // Tắt index khi cần (admin, checkout...)
   noIndex?: boolean;
-  // Breadcrumb list cho Google
   breadcrumbs?: Array<{ name: string; url: string }>;
+  faqData?: Array<{ question: string; answer: string }>;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -58,9 +49,12 @@ const SEO: React.FC<SEOProps> = ({
   articleData,
   noIndex = false,
   breadcrumbs,
+  faqData,
 }) => {
   useEffect(() => {
-    const fullTitle = `${title} | ${SITE_NAME}`;
+    const fullTitle = title === 'Trang chủ'
+      ? `${SITE_NAME} - Xưởng Sản Xuất Nội Thất Gỗ Cao Cấp`
+      : `${title} | ${SITE_NAME}`;
     const metaDesc = description || DEFAULT_DESCRIPTION;
     const metaKW = keywords || DEFAULT_KEYWORDS;
     const canonical = canonicalPath ? `${SITE_URL}${canonicalPath}` : SITE_URL;
@@ -109,7 +103,10 @@ const SEO: React.FC<SEOProps> = ({
     setMeta('meta[name="description"]', 'content', metaDesc);
     setMeta('meta[name="keywords"]', 'content', metaKW);
     setMeta('meta[name="author"]', 'content', 'Nội Thất Hochi');
-    setMeta('meta[name="robots"]', 'content', noIndex ? 'noindex, nofollow' : 'index, follow');
+    setMeta('meta[name="robots"]', 'content', noIndex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+    setMeta('meta[name="geo.region"]', 'content', 'VN-HN');
+    setMeta('meta[name="geo.placename"]', 'content', 'Hà Nội');
+    setMeta('meta[name="format-detection"]', 'content', 'telephone=yes');
 
     // ── Canonical ───────────────────────────────────────────────────────────
     setLink('canonical', canonical);
@@ -131,6 +128,7 @@ const SEO: React.FC<SEOProps> = ({
     setMeta('meta[name="twitter:title"]', 'content', fullTitle);
     setMeta('meta[name="twitter:description"]', 'content', metaDesc);
     setMeta('meta[name="twitter:image"]', 'content', ogImg);
+    setMeta('meta[name="twitter:site"]', 'content', '@notthathochi');
 
     // ── Article Meta ────────────────────────────────────────────────────────
     if (articleData) {
@@ -140,35 +138,93 @@ const SEO: React.FC<SEOProps> = ({
       if (articleData.section) setMeta('meta[property="article:section"]', 'content', articleData.section);
     }
 
-    // ── Structured Data: Organization (mọi trang) ──────────────────────────
+    // ── Schema: WebSite (Sitelinks Searchbox) ───────────────────────────────
+    addJsonLd('ld-website', {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: SITE_NAME,
+      url: SITE_URL,
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${SITE_URL}/tim-kiem?q={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    });
+
+    // ── Schema: Organization / LocalBusiness ────────────────────────────────
     addJsonLd('ld-organization', {
       '@context': 'https://schema.org',
       '@type': 'HomeAndConstructionBusiness',
+      '@id': `${SITE_URL}/#organization`,
       name: 'Nội Thất Hochi',
+      alternateName: 'Hochi Furniture',
       url: SITE_URL,
-      logo: `${SITE_URL}/logo.png`,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/assets/images/image-logo.png`,
+        width: 200,
+        height: 60,
+      },
       image: ogImg,
-      description: DEFAULT_DESCRIPTION,
+      description: 'Xưởng sản xuất và thi công nội thất gỗ cao cấp tại Hà Nội. Thiết kế theo yêu cầu, giao lắp miễn phí nội thành.',
       telephone: '+84326908884',
+      email: 'hotro@noithathochi.vn',
       priceRange: '$$',
+      currenciesAccepted: 'VND',
+      paymentAccepted: 'Cash, Bank Transfer',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: 'Hà Nội', // Cập nhật địa chỉ thực tế
+        streetAddress: 'Hà Nội',
         addressLocality: 'Hà Nội',
+        addressRegion: 'Hà Nội',
+        postalCode: '100000',
         addressCountry: 'VN',
       },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 21.0285,
+        longitude: 105.8542,
+      },
+      hasMap: 'https://maps.google.com/?q=Nội+Thất+Hochi+Hà+Nội',
       openingHoursSpecification: {
         '@type': 'OpeningHoursSpecification',
         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         opens: '08:00',
         closes: '20:00',
       },
-      sameAs: [
-        'https://www.facebook.com/notthathochi', // Cập nhật link thực tế
+      contactPoint: [
+        {
+          '@type': 'ContactPoint',
+          telephone: '+84326908884',
+          contactType: 'customer service',
+          areaServed: 'VN',
+          availableLanguage: 'Vietnamese',
+          hoursAvailable: {
+            '@type': 'OpeningHoursSpecification',
+            opens: '08:00',
+            closes: '20:00',
+          },
+        },
       ],
+      sameAs: [
+        'https://www.facebook.com/notthathochi',
+        'https://www.youtube.com/@notthathochi',
+      ],
+      foundingDate: '2014',
+      numberOfEmployees: {
+        '@type': 'QuantitativeValue',
+        value: 50,
+      },
+      areaServed: {
+        '@type': 'State',
+        name: 'Việt Nam',
+      },
     });
 
-    // ── Structured Data: Product ────────────────────────────────────────────
+    // ── Schema: Product ────────────────────────────────────────────────────
     if (productData) {
       addJsonLd('ld-product', {
         '@context': 'https://schema.org',
@@ -181,6 +237,10 @@ const SEO: React.FC<SEOProps> = ({
           name: productData.brand || 'Nội Thất Hochi',
         },
         sku: productData.sku,
+        manufacturer: {
+          '@type': 'Organization',
+          name: 'Nội Thất Hochi',
+        },
         offers: {
           '@type': 'Offer',
           priceCurrency: productData.currency || 'VND',
@@ -193,19 +253,45 @@ const SEO: React.FC<SEOProps> = ({
             name: 'Nội Thất Hochi',
           },
           url: canonical,
+          priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+          itemCondition: 'https://schema.org/NewCondition',
+          hasMerchantReturnPolicy: {
+            '@type': 'MerchantReturnPolicy',
+            applicableCountry: 'VN',
+            returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+            merchantReturnDays: 7,
+          },
         },
       });
     } else {
       removeScript('ld-product');
     }
 
-    // ── Structured Data: Custom ─────────────────────────────────────────────
+    // ── Schema: FAQ ─────────────────────────────────────────────────────────
+    if (faqData && faqData.length > 0) {
+      addJsonLd('ld-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqData.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: f.answer,
+          },
+        })),
+      });
+    } else {
+      removeScript('ld-faq');
+    }
+
+    // ── Schema: Custom ─────────────────────────────────────────────────────
     if (structuredData) {
       const data = Array.isArray(structuredData) ? structuredData : [structuredData];
       data.forEach((d, i) => addJsonLd(`ld-custom-${i}`, d));
     }
 
-    // ── Structured Data: Breadcrumbs ────────────────────────────────────────
+    // ── Schema: Breadcrumbs ────────────────────────────────────────────────
     if (breadcrumbs && breadcrumbs.length > 0) {
       addJsonLd('ld-breadcrumb', {
         '@context': 'https://schema.org',
@@ -220,7 +306,9 @@ const SEO: React.FC<SEOProps> = ({
     } else {
       removeScript('ld-breadcrumb');
     }
-  }, [title, description, keywords, canonicalPath, ogImage, ogImageAlt, ogType, JSON.stringify(structuredData), JSON.stringify(productData), noIndex, JSON.stringify(breadcrumbs)]);
+  }, [title, description, keywords, canonicalPath, ogImage, ogImageAlt, ogType,
+    JSON.stringify(structuredData), JSON.stringify(productData), noIndex,
+    JSON.stringify(breadcrumbs), JSON.stringify(faqData)]);
 
   return null;
 };

@@ -97,8 +97,32 @@ const ContactPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title={t('contact.page_title')}
-        description="Liên hệ với Nội Thất Hochi để được tư vấn thiết kế và thi công nội thất gỗ óc chó cao cấp. Địa chỉ showroom tại Hà Nội, Quảng Ninh và Quảng Bình."
+        title="Liên hệ - Nội Thất Hochi"
+        description="Liên hệ với Nội Thất Hochi. Trụ sở: Toà nhà VIMECO, Phạm Hùng, Cầu Giấy, Hà Nội. Hotline: 0326 908 884. Tư vấn thiết kế nội thất miễn phí."
+        canonicalPath="/lien-he"
+        keywords="liên hệ nội thất hochi, hotline nội thất, tư vấn nội thất hà nội, showroom nội thất cầu giấy"
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Liên hệ', url: '/lien-he' },
+        ]}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'ContactPage',
+          name: 'Liên hệ Nội Thất Hochi',
+          description: 'Trang liên hệ và tư vấn nội thất',
+          url: 'https://www.noithathochi.vn/lien-he',
+          mainEntity: {
+            '@type': 'Organization',
+            name: 'Nội Thất Hochi',
+            telephone: '+84326908884',
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: 'Toà nhà VIMECO, Phạm Hùng, Cầu Giấy',
+              addressLocality: 'Hà Nội',
+              addressCountry: 'VN',
+            },
+          },
+        }}
       />
 
       {/* Page Header */}
@@ -171,7 +195,7 @@ const ContactPage: React.FC = () => {
                 </div> */}
                 <div className="flex items-center gap-3 text-lg">
                   <GlobalOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">Website: <a href="https://noithathochi.vn" className="text-teal-700 hover:underline">https://noithathochi.vn</a></span>
+                  <span className="font-bold">Website: <a href="https://www.noithathochi.vn" className="text-teal-700 hover:underline">https://www.noithathochi.vn</a></span>
                 </div>
               </div>
             </div>

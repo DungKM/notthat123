@@ -76,6 +76,7 @@ const SearchResultsPage: React.FC = () => {
       <SEO
         title={query ? `Kết quả tìm kiếm "${query}"` : 'Tìm kiếm'}
         description="Tìm kiếm sản phẩm và công trình nội thất Hochi"
+        noIndex={true}
       />
 
       {/* Hero / Search Bar */}

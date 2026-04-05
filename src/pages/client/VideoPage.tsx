@@ -46,8 +46,14 @@ const VideoPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title="Video"
-        description="Tổng hợp các video thực tế thi công nội thất gỗ óc chó tại các công trình tiêu biểu của Hochi."
+        title="Video thi công nội thất thực tế - Nội Thất Hochi"
+        description="Xem video thực tế thi công nội thất gỗ cao cấp của Nội Thất Hochi: biệt thự, căn hộ, penthouse. Xem kết quả rực rỡ từ những công trình thực tế."
+        canonicalPath="/video"
+        keywords="video nội thất, video thi công nội thất, youtube nội thất hochi, video thiết kế nội thất"
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Video', url: '/video' },
+        ]}
       />
 
       {/* Page Header */}

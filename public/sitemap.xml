@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Trang chủ -->
+  <url>
+    <loc>https://www.noithathochi.vn/</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://www.noithathochi.vn/"/>
+  </url>
+
+  <!-- Sản phẩm -->
+  <url>
+    <loc>https://www.noithathochi.vn/san-pham</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Công trình -->
+  <url>
+    <loc>https://www.noithathochi.vn/cong-trinh</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Giới thiệu -->
+  <url>
+    <loc>https://www.noithathochi.vn/gioi-thieu</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Vì sao chọn chúng tôi -->
+  <url>
+    <loc>https://www.noithathochi.vn/vi-sao-chon-chung-toi</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Liên hệ -->
+  <url>
+    <loc>https://www.noithathochi.vn/lien-he</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Video -->
+  <url>
+    <loc>https://www.noithathochi.vn/video</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Tuyển dụng -->
+  <url>
+    <loc>https://www.noithathochi.vn/tuyen-dung</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Đối tác -->
+  <url>
+    <loc>https://www.noithathochi.vn/doi-tac</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+</urlset>

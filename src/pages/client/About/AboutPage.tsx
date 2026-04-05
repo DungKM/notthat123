@@ -8,8 +8,14 @@ const AboutPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title="Về chúng tôi"
-        description="Nội Thất Hochi - Đơn vị tiên phong trong lĩnh vực thiết kế và thi công nội thất gỗ óc chó cao cấp tại Việt Nam với hơn 10 năm kinh nghiệm."
+        title="Về chúng tôi - Nội Thất Hochi"
+        description="Nội Thất Hochi - Hơn 10 năm kinh nghiệm thiết kế và thi công nội thất gỗ cao cấp tại Hà Nội. Xưởng sản xuất khép kín, thi công chuyên nghiệp, bảo hành dài hạn."
+        canonicalPath="/gioi-thieu"
+        keywords="về nội thất hochi, câu chuyện thương hiệu nội thất, xưởng nội thất hà nội, 10 năm kinh nghiệm nội thất"
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Về chúng tôi', url: '/gioi-thieu' },
+        ]}
       />
 
       {/* Hero */}

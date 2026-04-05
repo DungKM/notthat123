@@ -191,7 +191,29 @@ const ProductDetailPage: React.FC = () => {
         <div className="pt-40 pb-24 text-center text-red-400">Không tìm thấy sản phẩm!</div>
       ) : (
         <>
-          <SEO title={product.title} description={product.description} />
+          <SEO
+            title={product.title}
+            description={product.description}
+            canonicalPath={`/san-pham/${slug}`}
+            ogImage={product.images[0]}
+            ogImageAlt={product.title}
+            ogType="product"
+            keywords={`${product.title}, ${product.category}, nội thất hochi, mua nội thất, ${product.title} hà nội`}
+            productData={{
+              price: product.price,
+              currency: 'VND',
+              availability: product.stockQuantity > 0 ? 'InStock' : 'OutOfStock',
+              brand: 'Nội Thất Hochi',
+              sku: product.productCode,
+              image: product.images[0],
+            }}
+            breadcrumbs={[
+              { name: 'Trang chủ', url: '/' },
+              { name: 'Sản phẩm', url: '/san-pham' },
+              { name: product.category, url: '/san-pham' },
+              { name: product.title, url: `/san-pham/${slug}` },
+            ]}
+          />
 
           <main className="pt-22 pb-24">
             <Container className="max-w-7xl">

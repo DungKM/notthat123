@@ -70,7 +70,20 @@ const ProjectDetailPage: React.FC = () => {
 
   return (
     <div className="bg-white">
-      <SEO title={project.name} description={project.description || 'Chi tiết công trình Thiết kế Nội thất Hochi'} />
+      <SEO
+        title={project.name}
+        description={project.description || `Công trình ${project.name} - Thiết kế và thi công nội thất cao cấp bởi Nội Thất Hochi. Xem ảnh thực tế và thông tin chi tiết.`}
+        canonicalPath={`/cong-trinh/${slug}`}
+        ogImage={coverImage}
+        ogImageAlt={project.name}
+        keywords={`${project.name}, ${categoryName}, công trình nội thất hochi, thiết kế nội thất, thi công nội thất${project.location ? ', ' + project.location : ''}`}
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Công trình', url: '/cong-trinh' },
+          { name: categoryName, url: '/cong-trinh' },
+          { name: project.name, url: `/cong-trinh/${slug}` },
+        ]}
+      />
 
       <main className="pt-28 pb-20">
         <Container>

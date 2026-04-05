@@ -119,8 +119,14 @@ const ProjectsPage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <SEO
-        title="Công trình"
-        description="Xem các dự án thiết kế và thi công nội thất thực tế của Hochi tại các biệt thự, penthouse và căn hộ cao cấp."
+        title="Công trình thực tế - Thiết kế & Thi công Nội thất"
+        description="Khám phá các công trình thiết kế và thi công nội thất thực tế của Nội Thất Hochi: biệt thự, penthouse, căn hộ, phòng ngủ, phòng khách... Ảnh thực tế 100%."
+        canonicalPath="/cong-trinh"
+        keywords="công trình nội thất, dự án nội thất hochi, thiết kế nội thất biệt thự, thi công nội thất căn hộ, phòng ngủ, phòng khách, tủ bếp"
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Công trình', url: '/cong-trinh' },
+        ]}
       />
 
       {/* Hero Banner */}

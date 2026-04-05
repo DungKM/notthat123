@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Button from '@/src/features/showcase/components/ui/Button';
 import Badge from '@/src/features/showcase/components/ui/Badge';
@@ -97,8 +97,35 @@ const RecruitmentPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title="Tuyển dụng"
-        description="Gia nhập đội ngũ Nội Thất Hochi để cùng chúng tôi kiến tạo những không gian sống đẳng cấp và nghệ thuật."
+        title="Tuyển dụng - Việc làm Nội Thất Hochi"
+        description="Nội Thất Hochi tuyển dụng: kiến trúc sư, thợ mộc, nhân viên kinh doanh, thiết kế nội thất. Môi trường chuyên nghiệp, lương cao, thưởng xứng đáng."
+        canonicalPath="/tuyen-dung"
+        keywords="tuyển dụng nội thất, việc làm thiết kế nội thất, tuyển kiến trúc sư, tuyển thợ mộc, tìm việc nội thất hà nội"
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Tuyển dụng', url: '/tuyen-dung' },
+        ]}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'JobPosting',
+          title: 'Nhiều vị trí tuyển dụng',
+          description: 'Nội Thất Hochi tuyển dụng nhiều vị trí: kiến trúc sư, thợ mộc, nhân viên kinh doanh nội thất.',
+          hiringOrganization: {
+            '@type': 'Organization',
+            name: 'Nội Thất Hochi',
+            sameAs: 'https://www.noithathochi.vn',
+          },
+          jobLocation: {
+            '@type': 'Place',
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: 'Hà Nội',
+              addressCountry: 'VN',
+            },
+          },
+          employmentType: 'FULL_TIME',
+          datePosted: new Date().toISOString().split('T')[0],
+        }}
       />
 
       {/* Premium Hero Section */}
