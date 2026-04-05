@@ -98,3 +98,9 @@ export const useSettingService = () => useApi<any>('/settings');
 
 // ─── Stats ───
 export const useStatsService = () => useApi<any>('/stats');
+
+
+export const useProductCategoryService = () => useApi<any>('/product-categories');
+
+// ─── Production Categories (Hạng mục nội thất) ───
+export const useProductionCategoryService = () => useApi<any>('/production-categories');
