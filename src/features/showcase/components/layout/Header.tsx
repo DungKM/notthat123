@@ -32,6 +32,7 @@ const Header: React.FC = () => {
   const [megaMenuForceHide, setMegaMenuForceHide] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const megaMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeCongtrinh, setActiveCongtrinh] = useState<any>(null);
   const cartRef = useRef<HTMLDivElement | null>(null);
   const cartButtonRef = useRef<HTMLDivElement | null>(null);
   const cartDrawerRef = useRef<HTMLDivElement | null>(null);
@@ -353,30 +354,66 @@ const Header: React.FC = () => {
                   </div>
                 )}
 
-                {/* Submenu Công Trình - nền đen */}
+                {/* Submenu Công Trình - 2 cột hover */}
                 {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
                   <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
-                    <div className="bg-gray-950 py-3 min-w-[260px] overflow-hidden">
-                      <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Danh mục</p>
-                      {congTrinhCategories.map((cat) => (
-                        <a
-                          key={cat._id || cat.id}
-                          href={`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id}`}
-                          className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-200 hover:!text-white hover:bg-white/10 transition-colors group/item"
-                        >
-                          <span>{cat.name}</span>
-                          <ArrowRightOutlined className="text-[10px] text-gray-500 group-hover/item:text-white group-hover/item:translate-x-1 transition-all duration-200" />
-                        </a>
-                      ))}
-                      <div className="border-t border-white/10 mt-2 pt-2">
-                        <a
-                          href={ROUTES.CONG_TRINH}
-                          className="flex items-center justify-between px-5 py-2.5 text-[12px] font-bold !text-showcase-primary hover:!text-white hover:bg-white/10 transition-colors uppercase tracking-wide"
-                        >
-                          Xem tất cả
-                          <ArrowRightOutlined className="text-[10px]" />
-                        </a>
+                    <div
+                      className="bg-gray-950 overflow-hidden flex"
+                      style={{ minWidth: 240 }}
+                      onMouseLeave={() => setActiveCongtrinh(null)}
+                    >
+                      {/* Cột trái: danh mục cha */}
+                      <div className="flex flex-col py-3 min-w-[220px]">
+                        <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Danh mục</p>
+                        {congTrinhCategories.map((cat: any) => {
+                          const hasChildren = cat.children?.length > 0;
+                          const isActive = activeCongtrinh?.id === cat.id || activeCongtrinh?._id === cat._id;
+                          return (
+                            <div
+                              key={cat._id || cat.id}
+                              onMouseEnter={() => setActiveCongtrinh(hasChildren ? cat : null)}
+                              className={`flex items-center justify-between px-5 py-2.5 cursor-pointer transition-colors group/item ${isActive ? 'bg-white/10' : 'hover:bg-white/10'}`}
+                            >
+                              <a
+                                href={`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id || cat._id}`}
+                                className="text-[13px] font-medium !text-gray-200 hover:!text-white flex-1"
+                              >
+                                {cat.name}
+                              </a>
+                              {hasChildren
+                                ? <ArrowRightOutlined className="text-[10px] text-gray-500 group-hover/item:text-white transition-all duration-200" />
+                                : <ArrowRightOutlined className="text-[10px] text-gray-500 group-hover/item:text-white group-hover/item:translate-x-1 transition-all duration-200" />
+                              }
+                            </div>
+                          );
+                        })}
+                        <div className="border-t border-white/10 mt-2 pt-2">
+                          <a
+                            href={ROUTES.CONG_TRINH}
+                            className="flex items-center justify-between px-5 py-2.5 text-[12px] font-bold !text-showcase-primary hover:!text-white hover:bg-white/10 transition-colors uppercase tracking-wide"
+                          >
+                            Xem tất cả
+                            <ArrowRightOutlined className="text-[10px]" />
+                          </a>
+                        </div>
                       </div>
+
+                      {/* Cột phải: danh mục con (chỉ hiện khi hover vào cha có children) */}
+                      {activeCongtrinh?.children?.length > 0 && (
+                        <div className="border-l border-white/10 flex flex-col py-3 min-w-[200px] bg-gray-900">
+                          <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">{activeCongtrinh.name}</p>
+                          {activeCongtrinh.children.map((child: any) => (
+                            <a
+                              key={child._id || child.id}
+                              href={`${ROUTES.CONG_TRINH}?category=${child.slug || child.id || child._id}`}
+                              className="flex items-center justify-between px-5 py-2.5 text-[13px] font-medium !text-gray-300 hover:!text-white hover:bg-white/10 transition-colors group/child"
+                            >
+                              <span>{child.name}</span>
+                              <ArrowRightOutlined className="text-[10px] text-gray-600 group-hover/child:text-white group-hover/child:translate-x-1 transition-all duration-200" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
