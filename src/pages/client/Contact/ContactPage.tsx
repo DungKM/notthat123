@@ -187,7 +187,7 @@ const ContactPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3 text-lg">
                   <PhoneOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">{t('common.hotline')}: <span className="text-teal-700">0326.908.884</span></span>
+                  <span className="font-bold">{t('common.hotline')}: <span className="text-teal-700">0917.087.055</span></span>
                 </div>
                 {/* <div className="flex items-center gap-3 text-lg">
                   <MailOutlined className="text-[#C5A059]" />

@@ -4,7 +4,7 @@ const SITE_NAME = 'Nội Thất Hochi';
 const SITE_URL = 'https://www.noithathochi.vn';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 const DEFAULT_DESCRIPTION =
-  'Nội Thất Hochi - Xưởng sản xuất và thi công nội thất gỗ cao cấp tại Hà Nội. Thiết kế theo yêu cầu, giao lắp miễn phí. Hotline: 0326 908 884.';
+  'Công ty thiết kế thi công HOCHI là đơn vị chuyên thiết kế và thi công trọn gói các công trình nhà phố, thương mại... tại Việt Nam. Hotline: 0917 087 055.';
 const DEFAULT_KEYWORDS =
   'nội thất hochi, nội thất gỗ, thiết kế nội thất, thi công nội thất, phòng ngủ, phòng khách, tủ bếp, giường ngủ, nội thất hà nội, gỗ óc chó, gỗ MDF';
 
@@ -169,8 +169,8 @@ const SEO: React.FC<SEOProps> = ({
         height: 60,
       },
       image: ogImg,
-      description: 'Xưởng sản xuất và thi công nội thất gỗ cao cấp tại Hà Nội. Thiết kế theo yêu cầu, giao lắp miễn phí nội thành.',
-      telephone: '+84326908884',
+      description: 'Công ty thiết kế thi công HOCHI là đơn vị chuyên thiết kế và thi công trọn gói các công trình nhà phố, thương mại... tại Việt Nam.',
+      telephone: '+84917087055',
       email: 'hotro@noithathochi.vn',
       priceRange: '$$',
       currenciesAccepted: 'VND',
@@ -198,7 +198,7 @@ const SEO: React.FC<SEOProps> = ({
       contactPoint: [
         {
           '@type': 'ContactPoint',
-          telephone: '+84326908884',
+          telephone: '+84917087055',
           contactType: 'customer service',
           areaServed: 'VN',
           availableLanguage: 'Vietnamese',
