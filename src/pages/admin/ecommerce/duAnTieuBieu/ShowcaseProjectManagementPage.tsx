@@ -12,7 +12,7 @@ import {
 import { Button, Space, message, Popconfirm, Image, Tag, Form, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
-import { compressImageFile } from '@/src/utils/imageCompression';
+
 
 interface ShowcaseProject {
   id: string;
@@ -99,9 +99,8 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         const imageFiles = values.images.slice(0, 4); // Giới hạn tối đa 4 ảnh
         for (const fileItem of imageFiles) {
           if (fileItem.originFileObj) {
-            // Ảnh mới được chọn từ máy tính, tiến hành nén file
-            const compressed = await compressImageFile(fileItem.originFileObj);
-            formData.append('images', compressed);
+            // Ảnh mới được chọn từ máy tính, upload trực tiếp
+            formData.append('images', fileItem.originFileObj);
           } else if (isUpdate && (fileItem.uid || fileItem.id || fileItem._id)) {
             // Ảnh cũ đã có trên server → gửi ID để Backend biết giữ lại
             const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);

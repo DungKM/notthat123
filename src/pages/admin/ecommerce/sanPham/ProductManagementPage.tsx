@@ -13,7 +13,7 @@ import {
 } from '@ant-design/pro-components';
 import { useApi } from '@/src/api';
 import { message as antMessage } from 'antd';
-import { compressImageFile } from '@/src/utils/imageCompression';
+
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface ProductImage {
@@ -427,8 +427,7 @@ const ProductManagementPage: React.FC = () => {
           if (imageFiles.length > 0) {
             for (const fileItem of imageFiles.slice(0, 4)) {
               if (fileItem.originFileObj) {
-                const compressed = await compressImageFile(fileItem.originFileObj);
-                formData.append('images', compressed);
+                formData.append('images', fileItem.originFileObj);
               }
             }
             imageDescriptions.slice(0, imageFiles.length).forEach((desc) => {
@@ -484,8 +483,7 @@ const ProductManagementPage: React.FC = () => {
               idx++;
 
               if (fileItem.originFileObj) {
-                const compressed = await compressImageFile(fileItem.originFileObj);
-                formData.append('images', compressed);
+                formData.append('images', fileItem.originFileObj);
                 formData.append('imageDescriptions', desc);
               } else {
                 const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);

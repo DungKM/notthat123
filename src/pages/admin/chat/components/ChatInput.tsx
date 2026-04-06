@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Upload } from 'antd';
 import type { UploadProps } from 'antd';
 import { PictureOutlined, PaperClipOutlined, SendOutlined } from '@ant-design/icons';
-import { compressImageFile } from '@/src/utils/imageCompression';
+
 
 interface ChatInputProps {
   onSendMessage: (content: string, files?: File[]) => void;
@@ -95,10 +95,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
 
   const addFile = async (file: File) => {
     const isImg = file.type.startsWith('image/');
-    const processedFile = isImg ? await compressImageFile(file) : file;
-    const preview = isImg ? URL.createObjectURL(processedFile) : undefined;
+    const preview = isImg ? URL.createObjectURL(file) : undefined;
     const uid = Math.random().toString(36).substr(2, 9);
-    setAttachedFiles(prev => [...prev, { file: processedFile, preview, uid }]);
+    setAttachedFiles(prev => [...prev, { file, preview, uid }]);
     return false;
   };
 
