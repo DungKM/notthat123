@@ -12,6 +12,7 @@ import {
 import { Button, Space, message, Popconfirm, Image, Tag, Form, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
+import { compressImageFile } from '@/src/utils/imageCompression';
 
 interface ShowcaseProject {
   id: string;
@@ -96,10 +97,11 @@ const ShowcaseProjectManagementPage: React.FC = () => {
 
       if (values.images && values.images.length > 0) {
         const imageFiles = values.images.slice(0, 4); // Giới hạn tối đa 4 ảnh
-        imageFiles.forEach((fileItem: any) => {
+        for (const fileItem of imageFiles) {
           if (fileItem.originFileObj) {
-            // Ảnh mới được chọn từ máy tính
-            formData.append('images', fileItem.originFileObj);
+            // Ảnh mới được chọn từ máy tính, tiến hành nén file
+            const compressed = await compressImageFile(fileItem.originFileObj);
+            formData.append('images', compressed);
           } else if (isUpdate && (fileItem.uid || fileItem.id || fileItem._id)) {
             // Ảnh cũ đã có trên server → gửi ID để Backend biết giữ lại
             const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
@@ -107,7 +109,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
               formData.append('keepImageIds', imageId);
             }
           }
-        });
+        }
       }
 
       // In Axios, useApi.request accepts (method, url, payload, params)

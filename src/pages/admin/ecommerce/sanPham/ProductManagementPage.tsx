@@ -13,6 +13,7 @@ import {
 } from '@ant-design/pro-components';
 import { useApi } from '@/src/api';
 import { message as antMessage } from 'antd';
+import { compressImageFile } from '@/src/utils/imageCompression';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface ProductImage {
@@ -424,11 +425,12 @@ const ProductManagementPage: React.FC = () => {
           if (values.description) formData.append('description', values.description);
 
           if (imageFiles.length > 0) {
-            imageFiles.slice(0, 4).forEach((fileItem: any, idx: number) => {
+            for (const fileItem of imageFiles.slice(0, 4)) {
               if (fileItem.originFileObj) {
-                formData.append('images', fileItem.originFileObj);
+                const compressed = await compressImageFile(fileItem.originFileObj);
+                formData.append('images', compressed);
               }
-            });
+            }
             imageDescriptions.slice(0, imageFiles.length).forEach((desc) => {
               formData.append('imageDescriptions', desc || '');
             });
@@ -476,11 +478,14 @@ const ProductManagementPage: React.FC = () => {
           if (imageFiles.length > 0) {
             const existingMap: Record<string, string> = {};
 
-            imageFiles.slice(0, 4).forEach((fileItem: any, idx: number) => {
+            let idx = 0;
+            for (const fileItem of imageFiles.slice(0, 4)) {
               const desc = imageDescriptions[idx] || '';
+              idx++;
 
               if (fileItem.originFileObj) {
-                formData.append('images', fileItem.originFileObj);
+                const compressed = await compressImageFile(fileItem.originFileObj);
+                formData.append('images', compressed);
                 formData.append('imageDescriptions', desc);
               } else {
                 const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
@@ -489,7 +494,7 @@ const ProductManagementPage: React.FC = () => {
                   existingMap[imageId] = desc;
                 }
               }
-            });
+            }
 
             if (Object.keys(existingMap).length > 0) {
               formData.append('existingImageDescriptions', JSON.stringify(existingMap));

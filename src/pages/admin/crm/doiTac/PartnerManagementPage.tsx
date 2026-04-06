@@ -12,6 +12,7 @@ import {
 import { Button, Space, message, Popconfirm, Image } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { usePartnerService } from '@/src/api/services';
+import { compressImageFile } from '@/src/utils/imageCompression';
 
 interface PartnerItem {
   id: string;
@@ -50,10 +51,11 @@ const PartnerManagementPage: React.FC = () => {
 
       // Xử lý ảnh upload
       if (values.images && values.images.length > 0) {
-        values.images.forEach((fileItem: any) => {
+        for (const fileItem of values.images) {
           if (fileItem.originFileObj) {
             // Ảnh mới upload
-            formData.append('images', fileItem.originFileObj);
+            const compressed = await compressImageFile(fileItem.originFileObj);
+            formData.append('images', compressed);
           } else if (currentPartner) {
             // Ảnh cũ giữ lại (khi sửa)
             const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
@@ -61,7 +63,7 @@ const PartnerManagementPage: React.FC = () => {
               formData.append('keepImageIds', imageId);
             }
           }
-        });
+        }
       }
 
       if (currentPartner) {

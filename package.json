@@ -26,6 +26,7 @@
     "antd": "^5.29.3",
     "axios": "^1.13.6",
     "better-sqlite3": "^12.4.1",
+    "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.19",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
