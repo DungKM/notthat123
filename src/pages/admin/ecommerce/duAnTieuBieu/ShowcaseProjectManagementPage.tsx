@@ -16,7 +16,7 @@ import { useConstructionService, useConstructionCategoryService } from '@/src/ap
 interface ShowcaseProject {
   id: string;
   name: string;
-  categoryId: string;
+  categoryId: string | { id?: string; _id?: string; name: string };
   category?: { id: string; name: string };
   location: string;
   year: number;
@@ -150,12 +150,32 @@ const ShowcaseProjectManagementPage: React.FC = () => {
       valueType: 'select',
       search: false,
       valueEnum: categories.reduce((acc, cat) => {
-        acc[cat._id] = { text: cat.name };
+        const parentId = cat.id || cat._id;
+        if (parentId) acc[parentId] = { text: cat.name };
+        if (cat.children) {
+          cat.children.forEach(child => {
+            const childId = child.id || child._id;
+            if (childId) acc[childId] = { text: child.name };
+          });
+        }
         return acc;
       }, {} as any),
-      render: (_, record) => (
-        <Tag color="blue">{record.category?.name || categories.find(c => c._id === record.categoryId)?.name || 'Khác'}</Tag>
-      )
+      render: (_, record) => {
+        let catName = record.category?.name;
+        if (!catName && record.categoryId && typeof record.categoryId === 'object') {
+          catName = (record.categoryId as any).name;
+        }
+        if (!catName && typeof record.categoryId === 'string') {
+          for (const parent of categories) {
+            if ((parent.id || parent._id) === record.categoryId) { catName = parent.name; break; }
+            if (parent.children) {
+              const child = parent.children.find(c => (c.id || c._id) === record.categoryId);
+              if (child) { catName = child.name; break; }
+            }
+          }
+        }
+        return <Tag color="blue">{catName || 'Khác'}</Tag>;
+      }
     },
     {
       title: 'Địa điểm',
