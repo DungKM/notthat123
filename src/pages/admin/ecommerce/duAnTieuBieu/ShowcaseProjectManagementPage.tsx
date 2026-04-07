@@ -12,6 +12,7 @@ import {
 import { Button, Space, message, Popconfirm, Image, Tag, Form, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
+import { compressImageFile } from '@/src/utils/imageCompression';
 
 
 interface ShowcaseProject {
@@ -100,7 +101,8 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         for (const fileItem of imageFiles) {
           if (fileItem.originFileObj) {
             // Ảnh mới được chọn từ máy tính, upload trực tiếp
-            formData.append('images', fileItem.originFileObj);
+            const compressedFile = await compressImageFile(fileItem.originFileObj as File);
+            formData.append('images', compressedFile);
           } else if (isUpdate && (fileItem.uid || fileItem.id || fileItem._id)) {
             // Ảnh cũ đã có trên server → gửi ID để Backend biết giữ lại
             const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
@@ -337,7 +339,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
             name="description"
             label="Mô tả công trình"
             placeholder="Mô tả ngắn gọn về dự án..."
-            rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
+            rules={[{ message: 'Vui lòng nhập mô tả' }]}
             fieldProps={{ rows: 4 }}
           />
 

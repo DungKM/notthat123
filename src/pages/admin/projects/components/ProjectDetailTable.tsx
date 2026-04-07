@@ -18,6 +18,7 @@ import { getRootCategories, getAllChildCategories, getMinPrice } from "@/src/dat
 import type { ItemCategory, ItemVariant } from "@/src/data/itemCategories";
 import * as XLSX from "xlsx";
 import { Dropdown } from "antd";
+import { useProductionCategoryService } from "@/src/api/services";
 
 const { Text } = Typography;
 
@@ -112,10 +113,31 @@ const ItemNameAutoComplete: React.FC<{
 const SelectCategoryModal: React.FC<{
   open: boolean;
   onCancel: () => void;
-  onSelect: (category: ItemCategory) => void;
+  onSelect: (category: any) => void;
 }> = ({ open, onCancel, onSelect }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const rootCategories = getRootCategories();
+  const [rootCategories, setRootCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const svc = useProductionCategoryService();
+
+  React.useEffect(() => {
+    if (open && rootCategories.length === 0) {
+      const fetchCategories = async () => {
+        setLoading(true);
+        try {
+          const res = await svc.request<any>('GET', '/hierarchy');
+          const data = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+          const roots = data.filter((c: any) => c.type === 'category' || !c.parentId);
+          setRootCategories(roots);
+        } catch (e) {
+          message.error("Lỗi lấy danh sách danh mục");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCategories();
+    }
+  }, [open, rootCategories.length, svc]);
 
   const handleOk = () => {
     const selectedItem = rootCategories.find(c => c.id === selectedId);
@@ -152,6 +174,7 @@ const SelectCategoryModal: React.FC<{
           allowClear
           value={selectedId}
           onChange={setSelectedId}
+          loading={loading}
           filterOption={(input, option) =>
             String(option?.label ?? "").toLowerCase().includes(input.toLowerCase())
           }
@@ -518,7 +541,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       isCompanyProduct: true,
       note: "",
     };
-    onUpdate([...details, newRow], false);
+    onUpdate([...details, newRow], true, newRow, 'save');
     setCategoryModalOpen(false);
     message.success(`Đã thêm danh mục "${category.name}"`);
   };
@@ -628,7 +651,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
               type="primary"
               icon={<AppstoreOutlined />}
               onClick={() => setCategoryModalOpen(true)}
-              style={{ background: "#10b981", borderColor: "#10b981" }}
             >
               Chọn danh mục
             </Button>
@@ -684,7 +706,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           <ProTable.Summary fixed>
             {/* Dòng 1: Tổng số tiền sản phẩm */}
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 9 : 5}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16 }}>Tổng số tiền sản phẩm:</Text>
                   <Text strong style={{ fontSize: 16 }}>{formatCurrency(summaryData.totalCalculated)}</Text>
@@ -694,7 +716,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 
             {/* Dòng 2: DOANH THU */}
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 9 : 5}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16 }}>DOANH THU:</Text>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -723,7 +745,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             {/* Dòng 4: LỢI NHUẬN */}
             {isAdmin && (
               <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-                <ProTable.Summary.Cell index={0} colSpan={9}>
+                <ProTable.Summary.Cell index={0} colSpan={13}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                     <Text style={{ fontSize: 16 }}>LỢI NHUẬN:</Text>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

@@ -322,7 +322,7 @@ const CategoryFormModal: React.FC<{
         </Form.Item>
 
         {/* Mô tả (category & item) */}
-        {nodeType !== 'variant' && (
+        {nodeType !== 'variant' && !(mode === 'edit' && nodeType === 'category') && (
           <Form.Item name="description" label="Mô tả">
             <Input.TextArea rows={2} placeholder="Mô tả ngắn (tuỳ chọn)" />
           </Form.Item>
@@ -480,16 +480,16 @@ const ItemCategoryManagementPage: React.FC = () => {
           parentId: nodeType === 'category' ? null : (values.parentId ?? null),
         };
         if (values.description) payload.description = values.description;
-        if (values.size)        payload.size        = values.size;
-        if (values.unit)        payload.unit        = values.unit;
-        if (values.price != null) payload.price     = values.price;
+        if (values.size) payload.size = values.size;
+        if (values.unit) payload.unit = values.unit;
+        if (values.price != null) payload.price = values.price;
 
         await svc.create(payload);
       } else if (editRecord) {
         // PATCH: chỉ gửi price & size
         const patchPayload: Record<string, any> = {};
         if (values.price != null) patchPayload.price = values.price;
-        if (values.size)          patchPayload.size  = values.size;
+        if (values.size) patchPayload.size = values.size;
 
         await svc.patch(editRecord.id, patchPayload);
       }
@@ -603,7 +603,6 @@ const ItemCategoryManagementPage: React.FC = () => {
             <Button icon={<ReloadOutlined />} onClick={loadData} loading={loading} />
           </Tooltip>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate('category')}
-            style={{ background: '#059669', borderColor: '#059669' }}
           >
             Thêm danh mục
           </Button>
@@ -655,7 +654,7 @@ const ItemCategoryManagementPage: React.FC = () => {
                       style={{ padding: '40px 0' }}
                     >
                       {!searchText && (
-                        <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate('category')} style={{ background: '#059669' }}>
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate('category')}>
                           Thêm danh mục đầu tiên
                         </Button>
                       )}

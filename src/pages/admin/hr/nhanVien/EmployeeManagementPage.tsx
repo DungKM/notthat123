@@ -19,6 +19,7 @@ import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Stati
 import { useSalaryService, useSalaryActionService, useProjectService, useSettingService, useAttendanceService } from '@/src/api/services';
 import type { ActionType } from '@ant-design/pro-components';
 import dayjs from 'dayjs';
+import { compressImageFile } from '@/src/utils/imageCompression';
 import { HistoryOutlined, CreditCardOutlined, EyeOutlined, SettingOutlined } from '@ant-design/icons';
 
 
@@ -531,7 +532,9 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         if (values.note) {
           formData.append('note', values.note);
         }
-        formData.append('billImage', billFile);
+        
+        const compressedBillFile = await compressImageFile(billFile);
+        formData.append('billImage', compressedBillFile);
 
         // Bỏ set headers cứng, để axios wrapper tự fill boundary của form-data
         await salaryActionRequest('POST', '/pay', formData);

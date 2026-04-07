@@ -98,7 +98,11 @@ const ProjectDetailPage: React.FC = () => {
             }
           } else {
             if (isNew) {
-              await request('POST', `/${projectId}/details`, singleRowData);
+              if (singleRowData.type === 'group') {
+                await request('POST', `/${projectId}/categories`, { categoryId: singleRowData.categoryId });
+              } else {
+                await request('POST', `/${projectId}/details`, singleRowData);
+              }
               const res = await request('GET', `/${projectId}`);
               if (res.data) setProject(res.data);
             } else {

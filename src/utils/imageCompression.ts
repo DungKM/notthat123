@@ -18,7 +18,8 @@ export const compressImageFile = async (file: File): Promise<File> => {
     maxSizeMB: 2,           // Dung lượng mục tiêu tối đa 2MB
     maxWidthOrHeight: 1920, // Kích thước chiều cao/rộng tối đa là Full HD
     useWebWorker: true,     // Chạy đa luồng nền tránh đơ giao diện
-    initialQuality: 0.9,    // Initial chất lượng cực tốt
+    initialQuality: 0.75,   // Giảm chất lượng khởi điểm một lượng nhỏ để tăng tốc quá trình nén
+    maxIteration: 5,        // Giới hạn số lần thử nén để giảm thời gian xử lý
   };
 
   try {
