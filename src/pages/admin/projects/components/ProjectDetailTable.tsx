@@ -5,7 +5,7 @@ import {
   ProTable,
   EditableFormInstance,
 } from "@ant-design/pro-components";
-import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Upload, Checkbox, Dropdown } from "antd";
+import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Upload, Checkbox, Dropdown, AutoComplete } from "antd";
 import {
   DownloadOutlined,
   AppstoreOutlined,
@@ -106,6 +106,98 @@ const SelectCategoryModal: React.FC<{
         />
       </div>
     </Modal>
+  );
+};
+
+
+// ─── AutoComplete Component Cho Tên Hạng Mục ────────────────────────────────
+const CategoryItemAutoComplete: React.FC<{
+  record: any;
+  form: any;
+  config: any;
+  value?: string;
+  onChange?: (val: string) => void;
+}> = ({ record, form, config, value, onChange }) => {
+  const [options, setOptions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
+  const svc = useProductionCategoryService();
+
+  const fetchItems = async () => {
+    if (fetched || loading) return;
+
+    // Lấy parentId từ group hiện tại
+    const parentId = record?.parentCategoryId || record?.categoryId;
+    if (!parentId) return;
+
+    setLoading(true);
+    try {
+      const res = await svc.request<any>('GET', `?parentId=${parentId}&type=item&page=1&limit=50`);
+      const items = res?.data || [];
+
+      const newOptions: { label: React.ReactNode; value: string; rawData: any; searchStr: string }[] = [];
+      items.forEach((item: any) => {
+        newOptions.push({
+          label: <span style={{ fontWeight: 500 }}>{item.name}</span>,
+          value: item.name,
+          rawData: item,
+          searchStr: (item.name || "").toLowerCase()
+        });
+        // Nếu có biến thể (children)
+        if (item.children && item.children.length > 0) {
+          item.children.forEach((child: any) => {
+            newOptions.push({
+              label: <span style={{ paddingLeft: 16 }}>- {child.name}</span>,
+              value: child.name, // Khi chọn, giá trị text sẽ là tên của biến thể
+              rawData: child,
+              searchStr: (child.name || "").toLowerCase()
+            });
+          });
+        }
+      });
+      setOptions(newOptions);
+      setFetched(true);
+    } catch (error) {
+      console.error("Failed to fetch category items", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AutoComplete
+      value={value !== undefined ? value : config?.value}
+      onChange={(val) => {
+        if (onChange) onChange(val);
+        if (config?.onChange) config.onChange(val);
+        if (form && config?.recordKey) {
+          form.setFieldValue([config.recordKey, 'name'], val);
+        }
+      }}
+      options={options}
+      placeholder="Nhập tên hạng mục..."
+      onFocus={fetchItems}
+      onClick={fetchItems}
+      filterOption={(inputValue, option) =>
+        (option?.searchStr || "").includes(inputValue.toLowerCase())
+      }
+      onSelect={(val, option: any) => {
+        // Đảm bảo value name được update
+        if (onChange) onChange(val);
+        if (config?.onChange) config.onChange(val);
+        
+        const itemData = option?.rawData;
+        if (itemData && form && config?.recordKey) {
+          // Tự động điền các thông số liên quan khi chọn hạng mục / biến thể
+          form.setFieldValue([config.recordKey, 'name'], val);
+          if (itemData.size !== undefined) form.setFieldValue([config.recordKey, 'dimensions'], itemData.size);
+          if (itemData.material !== undefined) form.setFieldValue([config.recordKey, 'material'], itemData.material);
+          if (itemData.unit !== undefined) form.setFieldValue([config.recordKey, 'unit'], itemData.unit);
+          if (itemData.price !== undefined) form.setFieldValue([config.recordKey, 'price'], itemData.price);
+          if (itemData.costPrice !== undefined) form.setFieldValue([config.recordKey, 'costPrice'], itemData.costPrice);
+        }
+      }}
+    />
   );
 };
 
@@ -267,11 +359,11 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       title: nameColumnTitle || "Hạng mục",
       dataIndex: "name",
       width: "25%",
-      renderFormItem: (_, { record }) => {
+      renderFormItem: (_, config: any, form: any) => {
         // Nhóm header (group) không cho sửa tên trực tiếp
-        if (record?.type === 'group') return <Input disabled style={{ fontWeight: 'bold' }} />;
-        // Hạng mục thường → user tự nhập tên
-        return <Input placeholder="Nhập tên hạng mục..." />;
+        if (config.record?.type === 'group') return <Input disabled style={{ fontWeight: 'bold' }} />;
+        // Hạng mục thường/biến thể → fetch từ API qua AutoComplete
+        return <CategoryItemAutoComplete record={config.record} form={form} config={config} />;
       },
       render: (_, record) => {
         if (record.type === 'group') {
