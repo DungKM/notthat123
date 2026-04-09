@@ -210,7 +210,7 @@ const ProjectsPage: React.FC = () => {
                       </button>
 
                       {categories.map((cat) => {
-                        const catValue = cat.slug || cat._id || cat.id;
+                        const catValue = cat.id || cat._id || cat.slug;
                         const hasChildren = cat.children && cat.children.length > 0;
                         const isExpanded = expandedCategories.has(cat._id || cat.id);
                         const isParentActive = selectedCategoryId === catValue;
@@ -265,7 +265,7 @@ const ProjectsPage: React.FC = () => {
                             {hasChildren && isExpanded && (
                               <div className="mt-1 ml-3 space-y-1 border-l-2 border-gray-100 pl-2">
                                 {cat.children.map((child: any) => {
-                                  const childValue = child.slug || child._id || child.id;
+                                  const childValue = child._id || child.id || child.slug;
                                   return (
                                     <button
                                       key={child._id || child.id}

@@ -26,6 +26,66 @@ const ProjectDetailPage: React.FC = () => {
   const { request, patch } = useProjectService();
   const { addNotification } = useNotifications(user?.id);
 
+  const formatProjectResponse = (data: any): Project => {
+    if (!data) return data;
+    
+    let formattedDetails: any[] = [];
+    
+    // Nếu có danh mục (categories), nhóm các chi tiết vào theo danh mục
+    if (data.categories && Array.isArray(data.categories)) {
+      data.categories.forEach((cat: any) => {
+        // Thêm row group cha
+        formattedDetails.push({
+          id: cat._id || cat.categoryId, // Fallback on categoryId as object identifier
+          type: 'group',
+          categoryId: cat.categoryId,
+          name: cat.name,
+          quantity: 1,
+          price: 0,
+          amount: cat.totalAmount || 0,
+          costPrice: 0,
+          isCompanyProduct: true,
+        });
+
+        // Thêm các row items thuộc danh mục này
+        if (data.details && Array.isArray(data.details)) {
+          const items = data.details.filter((item: any) => item.categoryId === cat.categoryId);
+          items.forEach((item: any) => {
+            formattedDetails.push({
+              ...item,
+              id: item._id || item.id,
+              type: 'item', // Giữ nguyên type hoặc override nếu chưa có
+            });
+          });
+        }
+      });
+
+      // Thêm các item tự do (không thuộc danh mục nào - orphaned) nếu có
+      if (data.details && Array.isArray(data.details)) {
+        const orphaned = data.details.filter((item: any) => !data.categories.some((c: any) => c.categoryId === item.categoryId));
+        orphaned.forEach((item: any) => {
+          formattedDetails.push({
+            ...item,
+            id: item._id || item.id,
+            type: 'item',
+          });
+        });
+      }
+    } else if (data.details && Array.isArray(data.details)) {
+      // Fallback khi không có categories
+      formattedDetails = data.details.map((item: any) => ({
+        ...item,
+        id: item._id || item.id,
+        type: item.type || 'item',
+      }));
+    }
+
+    return {
+      ...data,
+      details: formattedDetails
+    };
+  };
+
   useEffect(() => {
     if (!id) return;
     const fetchProject = async () => {
@@ -33,7 +93,7 @@ const ProjectDetailPage: React.FC = () => {
         setLoading(true);
         const res = await request('GET', `/${id}`);
         if (res.data) {
-          setProject(res.data);
+          setProject(formatProjectResponse(res.data));
         } else {
           message.error('Không tìm thấy dự án');
           navigate('/quan-tri/cong-trinh');
@@ -150,7 +210,7 @@ const ProjectDetailPage: React.FC = () => {
             }
             // ✅ Refresh để lấy ID thật từ server (đây cũng là lúc UI được cập nhật)
             const res = await request('GET', `/${projectId}`);
-            if (res.data) setProject(res.data);
+            if (res.data) setProject(formatProjectResponse(res.data));
           } else {
             const payload = {
               name: singleRowData.name,
@@ -235,7 +295,7 @@ const ProjectDetailPage: React.FC = () => {
 
       // Refresh project to get the newly updated progress from server
       const res = await request('GET', `/${projectId}`);
-      if (res.data) setProject(res.data);
+      if (res.data) setProject(formatProjectResponse(res.data));
 
       return true;
     } catch (e) {
@@ -250,7 +310,7 @@ const ProjectDetailPage: React.FC = () => {
       await request('DELETE', `/${projectId}/progress/${taskId}`);
 
       const res = await request('GET', `/${projectId}`);
-      if (res.data) setProject(res.data);
+      if (res.data) setProject(formatProjectResponse(res.data));
       return true;
     } catch (e) {
       message.error('Lỗi khi xóa công việc');
