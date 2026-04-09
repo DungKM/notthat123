@@ -62,10 +62,10 @@ const StatisticsPage: React.FC = () => {
     currentAmount: number;
     companyDebt: number;
     workDays: number;
-    otHours: number;
     totalWorkHours: number;
     totalOTHours: number;
     netSalary: number;
+    otDays: number;
   } | null>(null);
   if (!user) return null;
 
@@ -118,7 +118,7 @@ const StatisticsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const totalDays = (myStats?.workDays || 0) + (myStats?.otHours || 0);
+  const totalDays = (myStats?.workDays || 0) + (myStats?.otDays || 0);
   const totalHours = (myStats?.totalWorkHours || 0) + (myStats?.totalOTHours || 0);
 
   const baseSalary = toSafeNumber(myStats?.currentAmount);
@@ -347,7 +347,7 @@ const StatisticsPage: React.FC = () => {
             <ProCard style={{ background: "#fff7e6" }} bordered>
               <Statistic
                 title="Tổng công tăng ca"
-                value={myStats?.otHours || 0}
+                value={myStats?.otDays || 0}
                 suffix={`công ≈ ${myStats?.totalOTHours || 0} tiếng`}
                 prefix={<FieldTimeOutlined style={{ color: "#fa8c16" }} />}
               />
