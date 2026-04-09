@@ -81,40 +81,101 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
-  const handleUpdateDetails = async (newDetails: any[], saveToServer = true, singleRowData?: any, action?: 'save' | 'delete') => {
-    if (!project) return;
-    setProject({ ...project, details: newDetails });
+  // ─── Map type flags sang string cho API ───
+  const resolveItemType = (row: any): 'external' | 'commercial' | 'company' => {
+    if (row.isExternalPurchase) return 'external';
+    if (row.isCommercialProduct) return 'commercial';
+    return 'company';
+  };
 
-    if (saveToServer) {
-      try {
-        if (singleRowData) {
-          const projectId = project.id || (project as any)._id;
-          const detailId = singleRowData.id || singleRowData._id;
-          const isNew = String(detailId).length !== 24;
+  // ─── Lấy categoryId của group cha gần nhất ───
+  const getParentCategoryId = (itemId: string, allDetails: any[]): string | undefined => {
+    let categoryId: string | undefined;
+    for (const d of allDetails) {
+      if (d.type === 'group') categoryId = d.categoryId;
+      if (d.id === itemId) return categoryId;
+    }
+    return categoryId;
+  };
 
-          if (action === 'delete') {
-            if (!isNew) {
+  const handleUpdateDetails = async (newDetails: any[], saveToServer = true, singleRowData?: any, action?: 'save' | 'delete'): Promise<boolean> => {
+    if (!project) return false;
+
+    // Không lưu server (ví dụ: checkbox thay đổi tạm thời) → update UI ngay
+    if (!saveToServer) {
+      setProject({ ...project, details: newDetails });
+      return true;
+    }
+
+    // Lưu server → gọi API trước, chỉ update UI khi thành công
+    try {
+      if (singleRowData) {
+        const projectId = project.id || (project as any)._id;
+        const detailId = singleRowData.id || singleRowData._id;
+        const isNew = String(detailId).length !== 24;
+
+        if (action === 'delete') {
+          if (!isNew) {
+            if (singleRowData.type === 'group') {
+              await request('DELETE', `/${projectId}/categories/${detailId}`);
+            } else {
               await request('DELETE', `/${projectId}/details/${detailId}`);
             }
-          } else {
-            if (isNew) {
-              if (singleRowData.type === 'group') {
-                await request('POST', `/${projectId}/categories`, { categoryId: singleRowData.categoryId });
-              } else {
-                await request('POST', `/${projectId}/details`, singleRowData);
-              }
-              const res = await request('GET', `/${projectId}`);
-              if (res.data) setProject(res.data);
-            } else {
-              await request('PATCH', `/${projectId}/details/${detailId}`, singleRowData);
-            }
           }
+          // ✅ Chỉ update UI sau khi DELETE thành công
+          setProject({ ...project, details: newDetails });
         } else {
-          await patch(project.id || (project as any)._id, { details: newDetails });
+          if (isNew) {
+            if (singleRowData.type === 'group') {
+              await request('POST', `/${projectId}/categories`, {
+                categoryId: singleRowData.categoryId,
+              });
+            } else {
+              const parentCategoryId = singleRowData.categoryId
+                || getParentCategoryId(singleRowData.id, newDetails);
+
+              const payload = {
+                name: singleRowData.name,
+                material: singleRowData.material,
+                unit: singleRowData.unit,
+                quantity: singleRowData.quantity,
+                price: singleRowData.price,
+                costPrice: singleRowData.costPrice,
+                categoryId: parentCategoryId,
+                type: resolveItemType(singleRowData),
+                note: singleRowData.note,
+                dimensions: singleRowData.dimensions,
+              };
+              await request('POST', `/${projectId}/details`, payload);
+            }
+            // ✅ Refresh để lấy ID thật từ server (đây cũng là lúc UI được cập nhật)
+            const res = await request('GET', `/${projectId}`);
+            if (res.data) setProject(res.data);
+          } else {
+            const payload = {
+              name: singleRowData.name,
+              material: singleRowData.material,
+              unit: singleRowData.unit,
+              quantity: singleRowData.quantity,
+              price: singleRowData.price,
+              costPrice: singleRowData.costPrice,
+              type: resolveItemType(singleRowData),
+              note: singleRowData.note,
+              dimensions: singleRowData.dimensions,
+            };
+            await request('PATCH', `/${projectId}/details/${detailId}`, payload);
+            // ✅ Chỉ update UI sau khi PATCH thành công
+            setProject({ ...project, details: newDetails });
+          }
         }
-      } catch (e) {
-        message.error('Lỗi khi cập nhật chi tiết');
+      } else {
+        await patch(project.id || (project as any)._id, { details: newDetails });
+        setProject({ ...project, details: newDetails });
       }
+      return true;
+    } catch (e) {
+      message.error('Lỗi khi cập nhật chi tiết');
+      return false;
     }
   };
 
@@ -148,8 +209,8 @@ const ProjectDetailPage: React.FC = () => {
         // Trích xuất string ID từ task.employee (có thể là string hoặc object từ server)
         const userId = task.employee
           ? (typeof task.employee === 'object'
-              ? task.employee.id || task.employee._id
-              : task.employee)
+            ? task.employee.id || task.employee._id
+            : task.employee)
           : undefined;
         // Task có MongoDB ObjectId (24 ký tự) là task đã có trên server → PATCH để cập nhật
         const isExisting = taskId && String(taskId).length === 24;
@@ -187,7 +248,7 @@ const ProjectDetailPage: React.FC = () => {
     const projectId = project.id || (project as any)._id;
     try {
       await request('DELETE', `/${projectId}/progress/${taskId}`);
-      
+
       const res = await request('GET', `/${projectId}`);
       if (res.data) setProject(res.data);
       return true;

@@ -5,19 +5,15 @@ import {
   ProTable,
   EditableFormInstance,
 } from "@ant-design/pro-components";
-import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Tag, Upload, Checkbox } from "antd";
+import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Upload, Checkbox, Dropdown } from "antd";
 import {
-  PlusOutlined,
   DownloadOutlined,
   AppstoreOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { ProjectDetail, Role } from "@/src/types";
 import { formatCurrency } from "@/src/utils/format";
-import { getRootCategories, getAllChildCategories, getMinPrice } from "@/src/data/itemCategories";
-import type { ItemCategory, ItemVariant } from "@/src/data/itemCategories";
 import * as XLSX from "xlsx";
-import { Dropdown } from "antd";
 import { useProductionCategoryService } from "@/src/api/services";
 
 const { Text } = Typography;
@@ -34,80 +30,6 @@ const numberToRoman = (num: number): string => {
   return result;
 };
 
-// ─── Component AutoComplete chọn Hạng Mục ────────────────────────────────────
-const ItemNameAutoComplete: React.FC<{
-  value?: string;
-  onChange?: (val: string) => void;
-  parentCategoryId?: string;
-  onAutofill?: (item: ItemCategory, variant?: ItemVariant) => void;
-  allChildren: ItemCategory[];
-}> = ({ value, onChange, parentCategoryId, onAutofill, allChildren }) => {
-  const [open, setOpen] = useState(false);
-
-  const availableItems = React.useMemo(() =>
-    allChildren.filter(c => c.parentId === parentCategoryId),
-    [allChildren, parentCategoryId]);
-
-  const filteredItems = React.useMemo(() => {
-    const valStr = (value || '').toLowerCase();
-    const isExactMatch = availableItems.some(i => i.name.toLowerCase() === valStr);
-    if (isExactMatch || !valStr) return availableItems;
-
-    return availableItems.filter(item =>
-      item.name.toLowerCase().includes(valStr) ||
-      item.variants?.some(v => v.label.toLowerCase().includes(valStr))
-    );
-  }, [availableItems, value]);
-
-  const menuItems = React.useMemo(() => {
-    return filteredItems.map(item => {
-      // Dùng children để tạo SubMenu cho biến thể
-      if (item.variants && item.variants.length > 0) {
-        return {
-          key: item.id,
-          label: item.name,
-          children: item.variants.map((v, idx) => ({
-            key: `${item.id}_${idx}`,
-            label: v.label,
-            onClick: () => {
-              onChange?.(item.name);
-              onAutofill?.(item, v);
-              setOpen(false);
-            }
-          }))
-        };
-      }
-      return {
-        key: item.id,
-        label: item.name,
-        onClick: () => {
-          onChange?.(item.name);
-          onAutofill?.(item);
-          setOpen(false);
-        }
-      };
-    });
-  }, [filteredItems, onChange, onAutofill]);
-
-  return (
-    <Dropdown
-      menu={{ items: menuItems.length > 0 ? menuItems : [{ key: 'empty', label: <span style={{ color: '#aaa', fontStyle: 'italic' }}>Không có dữ liệu</span>, disabled: true }] }}
-      open={open}
-      onOpenChange={setOpen}
-      trigger={['click']}
-    >
-      <Input
-        value={value}
-        onChange={(e) => {
-          onChange?.(e.target.value);
-          if (!open) setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        placeholder="Nhập tên hạng mục..."
-      />
-    </Dropdown>
-  );
-};
 
 // ─── Modal Chọn Danh Mục Gốc ────────────────────────────────────────────────
 const SelectCategoryModal: React.FC<{
@@ -140,7 +62,8 @@ const SelectCategoryModal: React.FC<{
   }, [open, rootCategories.length, svc]);
 
   const handleOk = () => {
-    const selectedItem = rootCategories.find(c => c.id === selectedId);
+    // Hỗ trợ cả id (frontend) và _id (MongoDB ObjectId từ server)
+    const selectedItem = rootCategories.find(c => (c.id || c._id) === selectedId);
     if (!selectedItem) {
       message.warning("Vui lòng chọn một danh mục");
       return;
@@ -178,7 +101,7 @@ const SelectCategoryModal: React.FC<{
           filterOption={(input, option) =>
             String(option?.label ?? "").toLowerCase().includes(input.toLowerCase())
           }
-          options={rootCategories.map(c => ({ value: c.id, label: c.name }))}
+          options={rootCategories.map(c => ({ value: c._id || c.id, label: c.name }))}
           size="large"
         />
       </div>
@@ -191,7 +114,7 @@ const SelectCategoryModal: React.FC<{
 interface ProjectDetailTableProps {
   projectId: string;
   details: ProjectDetail[];
-  onUpdate: (details: ProjectDetail[], saveToServer?: boolean, singleRowData?: ProjectDetail, action?: 'save' | 'delete') => void;
+  onUpdate: (details: ProjectDetail[], saveToServer?: boolean, singleRowData?: ProjectDetail, action?: 'save' | 'delete') => Promise<boolean> | void;
   role: Role;
   nameColumnTitle?: string;
 }
@@ -209,7 +132,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
   const editableFormRef = React.useRef<EditableFormInstance>(null);
 
   const isAdmin = role === Role.DIRECTOR || role === Role.ACCOUNTANT;
-  const allChildren = React.useMemo(() => getAllChildCategories(), []);
 
   // Compute STT mappings
   const indexMapping = React.useMemo(() => {
@@ -229,35 +151,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     return mapping;
   }, [details]);
 
-  const handleAutofill = (rowKey: React.Key, category: ItemCategory, variant?: ItemVariant) => {
-    const resolvedDesc = variant?.description || category.description || "";
-    const resolvedUnit = variant?.unit || category.unit || "Chiếc";
-    const resolvedPrice = variant?.price ?? category.price ?? 0;
-    const resolvedDim = variant?.dimensions || category.dimensions || "";
-    const displayName = category.name;
-
-    // Cập nhật giá trị trực tiếp cho Form đang edit của ProTable
-    editableFormRef.current?.setRowData?.(rowKey as string | number, {
-      material: resolvedDesc,
-      unit: resolvedUnit,
-      price: resolvedPrice,
-      dimensions: resolvedDim,
-    });
-
-    const currentRow = details.find(d => d.id === rowKey);
-    if (!currentRow) return;
-
-    const newData: ProjectDetail = {
-      ...currentRow,
-      name: displayName,
-      material: resolvedDesc,
-      unit: resolvedUnit,
-      dimensions: resolvedDim,
-      price: resolvedPrice,
-      amount: resolvedPrice * (currentRow.quantity || 1),
-    };
-    onUpdate(details.map(d => d.id === rowKey ? newData : d), false);
-  };
 
   const columns: ProColumns<ProjectDetail>[] = [
     {
@@ -375,12 +268,10 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       dataIndex: "name",
       width: "25%",
       renderFormItem: (_, { record }) => {
+        // Nhóm header (group) không cho sửa tên trực tiếp
         if (record?.type === 'group') return <Input disabled style={{ fontWeight: 'bold' }} />;
-        return <ItemNameAutoComplete
-          parentCategoryId={record?.parentCategoryId}
-          allChildren={allChildren}
-          onAutofill={(cat, v) => handleAutofill(record!.id!, cat, v)}
-        />;
+        // Hạng mục thường → user tự nhập tên
+        return <Input placeholder="Nhập tên hạng mục..." />;
       },
       render: (_, record) => {
         if (record.type === 'group') {
@@ -522,14 +413,16 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     };
   }, [details, manualTotal]);
 
-  // Khi chọn danh mục từ modal → tạo dòng danh mục mới
-  const handleCategorySelect = (category: ItemCategory) => {
+  // Khi chọn danh mục từ modal → gọi API trước, chỉ toast khi thành công
+  const handleCategorySelect = async (category: any) => {
     const newId = (Math.random() * 1000000).toFixed(0);
+    // Ưu tiên _id từ MongoDB, fallback về id (local/static data)
+    const realCategoryId = (category as any)._id || category.id;
     const newRow: ProjectDetail = {
       id: newId,
       projectId,
       type: 'group',
-      categoryId: category.id,
+      categoryId: realCategoryId,
       name: category.name,
       material: "",
       dimensions: "",
@@ -541,9 +434,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       isCompanyProduct: true,
       note: "",
     };
-    onUpdate([...details, newRow], true, newRow, 'save');
     setCategoryModalOpen(false);
-    message.success(`Đã thêm danh mục "${category.name}"`);
+    // ✅ Đợi API xong mới hiện toast — nếu fail, handleUpdateDetails sẽ hiện error
+    const success = await onUpdate([...details, newRow], true, newRow, 'save');
+    if (success) {
+      message.success(`Đã thêm danh mục "${category.name}"`);
+    }
   };
 
   const handleAddItemToGroup = (groupId: string) => {
@@ -561,6 +457,8 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       id: newId,
       projectId,
       type: 'item',
+      // ✅ Lưu categoryId của group cha để khi POST lên server biết nhóm vào đâu
+      categoryId: parentCategory.categoryId,
       parentCategoryId: parentCategory.categoryId,
       name: "",
       material: "",
