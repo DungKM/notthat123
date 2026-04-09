@@ -6,6 +6,7 @@ import Badge from '@/src/features/showcase/components/ui/Badge';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import { ArrowLeftOutlined, EnvironmentOutlined, CalendarOutlined, FullscreenOutlined } from '@ant-design/icons';
 import { useConstructionService } from '@/src/api/services';
+import { Image } from 'antd';
 
 const ProjectDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -102,16 +103,16 @@ const ProjectDetailPage: React.FC = () => {
               {/* Main content */}
               <article className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                 {/* Cover image */}
-                <div className="relative h-[260px] sm:h-[340px] md:h-[420px]">
-                  <img
+                <div className="relative h-[260px] sm:h-[340px] md:h-[420px] [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover">
+                  <Image
                     src={coverImage}
                     alt={project.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white">
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white pointer-events-none">
+                    <div className="flex flex-wrap items-center gap-3 mb-4 pointer-events-auto">
                       <Badge variant="gold">{categoryName}</Badge>
                       {project.year && (
                         <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
@@ -127,13 +128,13 @@ const ProjectDetailPage: React.FC = () => {
                       )}
                     </div>
                     <h1
-                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
+                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight pointer-events-auto"
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       {project.name}
                     </h1>
                     {project.location && (
-                      <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-100">
+                      <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-100 pointer-events-auto">
                         <EnvironmentOutlined className="mr-2 text-xs" />
                         {project.location}
                       </p>
@@ -164,22 +165,25 @@ const ProjectDetailPage: React.FC = () => {
                           {gallery.length + 1} hình ảnh
                         </span>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {gallery.map((image: any, index: number) => (
-                          <div
-                            key={image._id || image.id || index}
-                            className="relative aspect-4/3 rounded-2xl overflow-hidden group border border-gray-100 bg-gray-100"
-                          >
-                            <img
-                              src={image.url}
-                              alt={`${project.name} ${index + 2}`}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                              loading="lazy"
-                            />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                        ))}
-                      </div>
+                      <Image.PreviewGroup>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover">
+                          {gallery.map((image: any, index: number) => (
+                            <div
+                              key={image._id || image.id || index}
+                              className="relative aspect-4/3 rounded-2xl overflow-hidden group border border-gray-100 bg-gray-100 cursor-pointer"
+                            >
+                              <Image
+                                src={image.url}
+                                alt={`${project.name} ${index + 2}`}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                loading="lazy"
+                              />
+                              {/* Overlay được giữ nguyên hoặc dùng mask của antd, ở đây giữ nguyên để effect scale vẫn chạy mượt */}
+                              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            </div>
+                          ))}
+                        </div>
+                      </Image.PreviewGroup>
                     </section>
                   )}
                 </div>

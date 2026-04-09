@@ -18,6 +18,7 @@ import deliveryLogo from '@/src/statics/logo_giao_hang.png';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import toast from 'react-hot-toast';
 import { useProductService } from '@/src/api/services';
+import { Image } from 'antd';
 
 const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
   const image = product.images && product.images.length > 0
@@ -232,8 +233,8 @@ const ProductDetailPage: React.FC = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
                     {/* Gallery Section */}
                     <div className="lg:col-span-5 space-y-4">
-                      <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative border border-gray-100 group">
-                        <img
+                      <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative border border-gray-100 group [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover cursor-pointer">
+                        <Image
                           src={product.images[activeImgIndex] || product.images[0]}
                           alt={product.title}
                           className="w-full h-full object-cover"
@@ -503,15 +504,16 @@ const ProductDetailPage: React.FC = () => {
 
                     {/* Ảnh sản phẩm kèm mô tả */}
                     {product.imageDetails && product.imageDetails.length > 0 && (
-                      <div className="space-y-6">
-                        {product.imageDetails.map((img: any, i: number) => (
-                          <div key={i} className="flex flex-col items-center">
-                            <img
-                              src={img.url}
-                              alt={img.description || product.title}
-                              className="w-full max-w-4xl mx-auto block rounded"
-                              loading="lazy"
-                            />
+                      <Image.PreviewGroup>
+                        <div className="space-y-6 [&_.ant-image]:!w-full [&_.ant-image]:!max-w-4xl [&_.ant-image]:!mx-auto [&_.ant-image]:!block [&_.ant-image-img]:!w-full [&_.ant-image-img]:!block [&_.ant-image-img]:!rounded cursor-pointer">
+                          {product.imageDetails.map((img: any, i: number) => (
+                            <div key={i} className="flex flex-col items-center">
+                              <Image
+                                src={img.url}
+                                alt={img.description || product.title}
+                                className="w-full max-w-4xl mx-auto block rounded"
+                                loading="lazy"
+                              />
                             {img.description && (
                               <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
                                 {img.description}
@@ -520,6 +522,7 @@ const ProductDetailPage: React.FC = () => {
                           </div>
                         ))}
                       </div>
+                      </Image.PreviewGroup>
                     )}
                   </div>
                 </div>
