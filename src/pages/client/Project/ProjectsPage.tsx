@@ -293,71 +293,117 @@ const ProjectsPage: React.FC = () => {
 
             {/* Right Content */}
             <div>
-              <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
-                Hiển thị {projects.length} công trình {searchQuery && `cho "${searchQuery}"`}
-              </div>
+              {(() => {
+                const currentCategory = categories.find((cat: any) =>
+                  cat._id === selectedCategoryId || cat.id === selectedCategoryId || cat.slug === selectedCategoryId
+                );
+                const isParentCategory = currentCategory && currentCategory.children && currentCategory.children.length > 0;
 
-              {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-                </div>
-              ) : projects.length === 0 ? (
-                <div className="py-20 text-center text-gray-400">
-                  <p className="text-lg">Không tìm thấy công trình nào phù hợp.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-                  {projects.map((proj, i) => {
-                    const coverImage =
-                      proj.images && proj.images.length > 0
-                        ? proj.images[0].url
-                        : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
-                    return (
-                      <ProjectCard
-                        key={proj._id || proj.id || i}
-                        slug={proj.slug || String(proj._id || proj.id)}
-                        name={proj.name}
-                        image={coverImage}
-                      />
-                    );
-                  })}
-                </div>
-              )}
+                return (
+                  <>
+                    <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
+                      {isParentCategory
+                        ? `Danh mục con thuộc ${currentCategory.name}`
+                        : `Hiển thị ${projects.length} công trình ${searchQuery ? `cho "${searchQuery}"` : ''}`
+                      }
+                    </div>
 
-              {/* Pagination */}
-              {meta.totalPages > 1 && (
-                <div className="mt-24 flex flex-wrap justify-center items-center gap-2">
-                  {(() => {
-                    const { totalPages } = meta;
-                    let pages: (number | string)[] = [];
-                    if (totalPages <= 7) {
-                      pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-                    } else if (currentPage <= 3) {
-                      pages = [1, 2, 3, 4, '...', totalPages - 1, totalPages];
-                    } else if (currentPage >= totalPages - 2) {
-                      pages = [1, 2, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-                    } else {
-                      pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
-                    }
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                      </div>
+                    ) : isParentCategory ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                        {currentCategory.children.map((child: any) => {
+                          const childValue = child._id || child.id || child.slug;
+                          const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
+                          return (
+                            <button
+                              key={childValue}
+                              onClick={() => {
+                                handleCategorySelect(childValue);
+                                setExpandedCategories(prev => new Set(prev).add(currentCategory._id || currentCategory.id));
+                              }}
+                              className="group block text-left"
+                            >
+                              <div className="overflow-hidden bg-gray-100 rounded-xl relative h-full">
+                                <img
+                                  src={coverImage}
+                                  alt={child.name}
+                                  loading="lazy"
+                                  className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
+                                  <h3 className="text-white text-xl font-bold uppercase tracking-wider text-center drop-shadow-lg">
+                                    {child.name}
+                                  </h3>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : projects.length === 0 ? (
+                      <div className="py-20 text-center text-gray-400">
+                        <p className="text-lg">Không tìm thấy công trình nào phù hợp.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                        {projects.map((proj, i) => {
+                          const coverImage =
+                            proj.images && proj.images.length > 0
+                              ? proj.images[0].url
+                              : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
+                          return (
+                            <ProjectCard
+                              key={proj._id || proj.id || i}
+                              slug={proj.slug || String(proj._id || proj.id)}
+                              name={proj.name}
+                              image={coverImage}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
 
-                    return pages.map((p, index) => (
-                      <button
-                        key={`${p}-${index}`}
-                        onClick={() => typeof p === 'number' && setCurrentPage(p)}
-                        disabled={typeof p === 'string'}
-                        className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
-                          ? 'bg-showcase-primary text-white border-showcase-primary'
-                          : typeof p === 'string'
-                            ? 'bg-transparent border-transparent text-gray-500 cursor-default'
-                            : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
-                          }`}
-                      >
-                        {p}
-                      </button>
-                    ));
-                  })()}
-                </div>
-              )}
+                    {/* Pagination */}
+                    {!(currentCategory && currentCategory.children && currentCategory.children.length > 0) && meta.totalPages > 1 && (
+                      <div className="mt-24 flex flex-wrap justify-center items-center gap-2">
+                        {(() => {
+                          const { totalPages } = meta;
+                          let pages: (number | string)[] = [];
+                          if (totalPages <= 7) {
+                            pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+                          } else if (currentPage <= 3) {
+                            pages = [1, 2, 3, 4, '...', totalPages - 1, totalPages];
+                          } else if (currentPage >= totalPages - 2) {
+                            pages = [1, 2, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                          } else {
+                            pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+                          }
+
+                          return pages.map((p, index) => (
+                            <button
+                              key={`${p}-${index}`}
+                              onClick={() => typeof p === 'number' && setCurrentPage(p)}
+                              disabled={typeof p === 'string'}
+                              className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
+                                ? 'bg-showcase-primary text-white border-showcase-primary'
+                                : typeof p === 'string'
+                                  ? 'bg-transparent border-transparent text-gray-500 cursor-default'
+                                  : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
+                                }`}
+                            >
+                              {p}
+                            </button>
+                          ));
+                        })()}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </Container>
