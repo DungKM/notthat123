@@ -341,10 +341,10 @@ const Header: React.FC = () => {
                                     <a
                                       key={child.id || child._id}
                                       href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
-                                      className="flex items-center gap-3 px-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
+                                      className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                       onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                     >
-                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0 ">
+                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary">
                                       {child.name}
                                     </span>
                                     <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden">
@@ -432,10 +432,10 @@ const Header: React.FC = () => {
                                   <a
                                     key={child.id || child._id}
                                     href={`${ROUTES.CONG_TRINH}?category=${child.slug}`}
-                                    className="flex items-center gap-3 px-2 py-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
+                                    className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                   >
-                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0 ">
+                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary">
                                       {child.name}
                                     </span>
                                     <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden rounded">
