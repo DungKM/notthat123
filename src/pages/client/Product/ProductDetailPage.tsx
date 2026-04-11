@@ -283,7 +283,7 @@ const ProductDetailPage: React.FC = () => {
                       {/* Price */}
                       <div className="mb-4 pb-4 border-b border-gray-100 flex items-center gap-4">
                         <div className="text-xl font-bold text-[#cca32e]">
-                          {product.priceText}
+                          {product.price > 0 && quantity ? `${(product.price * (Number(quantity) || 1)).toLocaleString()} VND` : product.priceText}
                         </div>
                         <button
                           onClick={handleLike}
