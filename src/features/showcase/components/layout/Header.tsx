@@ -262,16 +262,25 @@ const Header: React.FC = () => {
                 </Link>
 
                 {link.submenu && (
-                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                    <div className="bg-white py-4 min-w-[240px] border border-gray-100 overflow-hidden">
+                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
+                    <div className="bg-[#f4f7f9] overflow-hidden border border-[#e5e9f0]" style={{ minWidth: 240 }}>
                       {link.submenu.map((sub) => (
                         <a
                           key={sub.title}
                           href={sub.href}
-                          className="flex items-center justify-between px-6 py-3 text-[13px] font-medium !text-gray-700 hover:text-showcase-primary hover:bg-gray-50 transition-colors"
+                          className="flex items-center justify-between px-6 py-3.5 text-[14px] font-bold border-b border-[#e5e9f0] last:border-0 transition-all duration-200"
+                          style={{ color: '#1f2937' }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#C5A059';
+                            (e.currentTarget as HTMLAnchorElement).style.color = '#ffffff';
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent';
+                            (e.currentTarget as HTMLAnchorElement).style.color = '#1f2937';
+                          }}
                         >
-                          {sub.title}
-                          <ArrowRightOutlined className="text-[10px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                          <span>{sub.title}</span>
+                          <ArrowRightOutlined className="text-[10px] transition-all duration-200" />
                         </a>
                       ))}
                     </div>

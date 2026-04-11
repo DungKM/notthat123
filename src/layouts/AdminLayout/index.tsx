@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Dropdown, Space, Tag, Badge, Grid, message } from 'antd';
@@ -18,6 +18,7 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thống Quản lý" }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [notifOpen, setNotifOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, hasMore, loadMore } = useNotifications(user?.id);
   const screens = Grid.useBreakpoint();
@@ -58,7 +59,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
     const noiBo = {
       path: '/quan-tri/noi-bo',
       name: 'Quản lý nội bộ',
-      icon: <TeamOutlined />,
       children: [
         { path: ROUTES.ADMIN_TONG_QUAN, name: 'Bảng thống kê', icon: <DashboardOutlined /> },
         { path: ROUTES.ADMIN_CONG_TRINH, name: 'Quản lý dự án', icon: <ProjectOutlined /> },
@@ -74,7 +74,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
     const sanPham = {
       path: '/quan-tri/san-pham-group',
       name: 'Quản lý bán hàng',
-      icon: <AppstoreOutlined />,
       children: [
         { path: ROUTES.ADMIN_DON_HANG, name: 'Quản lý đơn hàng', icon: <ShoppingCartOutlined /> },
         {
@@ -147,18 +146,45 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         title={title}
         logo={logo}
         menuDataRender={getMenuData}
-        menuItemRender={(item, dom) => (
-          <div onClick={() => {
-            if (!item.children) {
-              navigate(item.path || '/');
-              if (isMobile) {
-                setCollapsed(true);
-              }
-            }
-          }}>
-            {dom}
-          </div>
-        )}
+        menuItemRender={(item, dom) => {
+          const isActive = item.path && location.pathname === item.path;
+          const activeStyle: React.CSSProperties = { color: '#07c346', fontWeight: 600 };
+          return (
+            <div
+              onClick={() => {
+                if (!item.children) {
+                  navigate(item.path || '/');
+                  if (isMobile) setCollapsed(true);
+                }
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                ...(isActive ? activeStyle : {}),
+              }}
+            >
+              {item.icon && (
+                <span style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center', ...(isActive ? { color: '#07c346' } : { color: '#8c8c8c' }) }}>
+                  {item.icon as React.ReactNode}
+                </span>
+              )}
+              <span>{item.name}</span>
+            </div>
+          );
+        }}
+        subMenuItemRender={(item, dom) => {
+          // Kiểm tra xem có item con nào đang active không
+          const hasActiveChild = item.children?.some((child: any) =>
+            location.pathname === child.path ||
+            child.children?.some((sub: any) => location.pathname === sub.path)
+          );
+          return (
+            <div style={hasActiveChild ? { color: '#07c346', fontWeight: 600 } : undefined}>
+              {dom}
+            </div>
+          );
+        }}
         collapsed={collapsed}
         onCollapse={setCollapsed}
         layout="mix"
@@ -295,6 +321,29 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
             }
             .ant-badge .ant-badge-count {
               z-index: 99 !important;
+            }
+            /* ── Active menu item: chữ xanh lá đậm ── */
+            .ant-pro-sider-menu .ant-menu-item-selected,
+            .ant-menu-inline .ant-menu-item-selected,
+            .ant-menu-vertical .ant-menu-item-selected,
+            .ant-menu .ant-menu-item-selected {
+              background-color: transparent !important;
+              color: #13EC5B !important;
+              font-weight: 700 !important;
+            }
+            .ant-pro-sider-menu .ant-menu-item-selected .ant-menu-title-content,
+            .ant-menu-item-selected .ant-menu-title-content,
+            .ant-menu-item-selected span {
+              color: #13EC5B !important;
+              font-weight: 700 !important;
+            }
+            .ant-menu-item-selected .anticon {
+              color: #13EC5B !important;
+            }
+            /* Remove active bg */
+            .ant-menu-light .ant-menu-item-selected,
+            .ant-menu-light>.ant-menu .ant-menu-item-selected {
+              background-color: rgba(19, 236, 91, 0.08) !important;
             }
           `}</style>
           {children}

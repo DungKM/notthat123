@@ -42,13 +42,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTotalAmount(0);
       return;
     }
-    
+
     setCartItems((prevItems) => {
       const mappedItems: CartItem[] = data.items.map((it: any) => {
         const pId = it.productId?.id || it.productId?._id;
         const price = it.productId?.price || 0;
         const oldItem = prevItems.find((p) => p.id === pId);
-        
+
         return {
           id: pId,
           slug: it.productId?.slug || pId,
@@ -153,7 +153,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data && data.items) {
         const pId = id;
         const returnedItem = data.items.find((it: any) => (it.productId?.id || it.productId?._id) === pId);
-        
+
         if (returnedItem && returnedItem.quantity < quantity) {
           // Gắn cưỡng bức limit này vào productId gốc để updateCartStateFromAPI ghi nhận
           if (!returnedItem.productId) returnedItem.productId = {};
@@ -186,7 +186,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let finalQuantity = quantity;
     if (item.stockQuantity !== undefined && item.stockQuantity > 0 && finalQuantity > item.stockQuantity) {
       finalQuantity = item.stockQuantity;
-      
+
       // Khách bấm liên tục ở ngưỡng max => không thay đổi gì cả nên không cần gọi API (tránh re-render & fetch lại API làm mất timer)
       if (item.quantity === item.stockQuantity) return;
     }
