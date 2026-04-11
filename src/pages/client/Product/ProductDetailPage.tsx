@@ -261,14 +261,7 @@ const ProductDetailPage: React.FC = () => {
                               className="w-full h-full object-cover"
                               loading="lazy"
                             />
-                            {/* Mock Play icon on the last thumbnail */}
-                            {i === 3 && (
-                              <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                                <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
-                                  <div className="w-0 h-0 border-y-[5px] border-y-transparent border-l-[8px] border-l-white ml-0.5"></div>
-                                </div>
-                              </div>
-                            )}
+                            {/* Remove Mock Play icon */}
                           </div>
                         ))}
                       </div>
