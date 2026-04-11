@@ -365,14 +365,14 @@ const CategoryProjectManagementPage: React.FC = () => {
   return (
     <div style={{ padding: '0 0 40px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Quản lý danh mục công trình</h2>
           <p style={{ margin: '4px 0 0', color: 'rgba(0, 0, 0, 0.45)', fontSize: 14 }}>
             Kéo thả ☰ để sắp xếp thứ tự hiển thị — thay đổi được lưu tự động
           </p>
         </div>
-        <Space>
+        <Space style={{ flexWrap: 'wrap' }}>
           {savingOrder && <Spin size="small" />}
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
             Thêm danh mục
@@ -381,9 +381,9 @@ const CategoryProjectManagementPage: React.FC = () => {
       </div>
 
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
-        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden', minHeight: 200 }}>
+        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflowX: 'auto', overflowY: 'hidden', minHeight: 200, WebkitOverflowScrolling: 'touch' }}>
           {/* Table header */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
               <col style={{ width: 36 }} />
               <col style={{ width: 80 }} />
@@ -433,7 +433,7 @@ const CategoryProjectManagementPage: React.FC = () => {
                         {isExpanded && children.length > 0 && (
                           <tr>
                             <td colSpan={6} style={{ padding: 0 }}>
-                              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                              <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                                 <colgroup>
                                   <col style={{ width: 36 }} />
                                   <col style={{ width: 80 }} />

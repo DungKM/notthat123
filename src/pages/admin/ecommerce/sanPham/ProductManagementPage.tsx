@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Button, Popconfirm, Space, Tag, Image, Tooltip, message, Upload, Input } from 'antd';
+import React, { useRef, useState, useEffect } from 'react';
+import { Button, Popconfirm, Space, Tag, Image, Tooltip, message, Upload, Input, Select } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
@@ -59,6 +59,21 @@ const ProductManagementPage: React.FC = () => {
   const [editRecord, setEditRecord] = useState<ProductItem | null>(null);
   const [imageFiles, setImageFiles] = useState<any[]>([]);
   const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
+  const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>(undefined);
+  const [filterName, setFilterName] = useState<string>('');
+  const [productCategoryList, setProductCategoryList] = useState<CategoryItem[]>([]);
+
+  // Load danh mục sản phẩm
+  useEffect(() => {
+    getCategories({ limit: 200 }).then(res => {
+      if (Array.isArray(res)) setProductCategoryList(res);
+    }).catch(() => { });
+  }, []);
+
+  // Reload bảng khi đổi danh mục lọc
+  useEffect(() => {
+    actionRef.current?.reload();
+  }, [filterCategoryId]);
 
   // ─── Columns ─────────────────────────────────────────────────────────────
   const columns: ProColumns<ProductItem>[] = [
@@ -125,7 +140,7 @@ const ProductManagementPage: React.FC = () => {
     {
       title: 'Danh mục',
       dataIndex: ['categoryId', 'name'],
-      search: false,
+      hideInSearch: true,
       render: (_, record) => {
         const catName = typeof record.categoryId === 'object' ? record.categoryId?.name : undefined;
         return catName ? (
@@ -366,8 +381,51 @@ const ProductManagementPage: React.FC = () => {
         rowKey="id"
         headerTitle="Quản lý sản phẩm"
         toolBarRender={() => [
+          <Space key="filters" size="small" wrap>
+            <input
+              type="text"
+              placeholder="Tên sản phẩm..."
+              value={filterName}
+              onChange={e => setFilterName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') actionRef.current?.reload(); }}
+              style={{
+                padding: '5px 12px',
+                border: '1px solid #d9d9d9',
+                borderRadius: 6,
+                outline: 'none',
+                fontSize: 14,
+                height: 32,
+                width: '100%',
+                maxWidth: 200,
+              }}
+            />
+            <Select
+              allowClear
+              placeholder="Lọc danh mục"
+              showSearch
+              optionFilterProp="label"
+              style={{ width: '100%', maxWidth: 220, minWidth: 150 }}
+              onChange={(val) => setFilterCategoryId(val)}
+              options={productCategoryList.map(parent => {
+                const parentId = (parent as any)._id || parent.id;
+                if (parent.children && parent.children.length > 0) {
+                  return {
+                    label: parent.name,
+                    options: parent.children.map(child => ({
+                      label: child.name,
+                      value: (child as any)._id || child.id,
+                    })),
+                  };
+                }
+                return { label: parent.name, value: parentId };
+              })}
+            />
+            <Button type="primary" onClick={() => actionRef.current?.reload()}>
+              Tìm kiếm
+            </Button>
+          </Space>,
           <Button
-            key="button"
+            key="add"
             icon={<PlusOutlined />}
             onClick={() => {
               setImageFiles([]);
@@ -380,14 +438,14 @@ const ProductManagementPage: React.FC = () => {
           </Button>,
         ]}
         request={async (params) => {
-          const { current, pageSize, name, ...rest } = params;
+          const { current, pageSize } = params;
           try {
             const res = await (await import('@/src/api/axiosInstance')).default.get('/products', {
               params: {
                 page: current,
                 limit: pageSize,
-                search: name,
-                ...rest,
+                search: filterName.trim() || undefined,
+                categoryId: filterCategoryId || undefined,
               },
             }) as any;
             return {
@@ -400,7 +458,7 @@ const ProductManagementPage: React.FC = () => {
           }
         }}
         pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Tổng ${total} sản phẩm` }}
-        search={{ labelWidth: 'auto' }}
+        search={false}
         dateFormatter="string"
         scroll={{ x: 'max-content' }}
       />

@@ -52,10 +52,17 @@ const ShowcaseProjectManagementPage: React.FC = () => {
   const { getAll: getCategories } = useConstructionCategoryService();
 
   const [categories, setCategories] = useState<CategoryProjectItem[]>([]);
+  const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>(undefined);
+  const [filterName, setFilterName] = useState<string>('');
 
   useEffect(() => {
-    getCategories({ limit: 100 }).then(res => setCategories(res || []));
+    getCategories({ limit: 200 }).then(res => setCategories(res || []));
   }, [getCategories]);
+
+  // Reload bảng khi đổi danh mục lọc
+  useEffect(() => {
+    actionRef.current?.reload();
+  }, [filterCategoryId]);
 
   // Tạo options grouped: nếu cha có con → nhóm children, nếu không có con → hiện cha như leaf
   const categorySelectOptions = categories.map(parent => {
@@ -150,19 +157,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
     {
       title: 'Danh mục',
       dataIndex: 'categoryId',
-      valueType: 'select',
-      search: false,
-      valueEnum: categories.reduce((acc, cat) => {
-        const parentId = cat.id || cat._id;
-        if (parentId) acc[parentId] = { text: cat.name };
-        if (cat.children) {
-          cat.children.forEach(child => {
-            const childId = child.id || child._id;
-            if (childId) acc[childId] = { text: child.name };
-          });
-        }
-        return acc;
-      }, {} as any),
+      hideInSearch: true,
       render: (_, record) => {
         let catName = record.category?.name;
         if (!catName && record.categoryId && typeof record.categoryId === 'object') {
@@ -261,14 +256,14 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         headerTitle="Quản lý bài viết công trình (Showcase)"
         actionRef={actionRef}
         rowKey="id"
-        search={{ labelWidth: 'auto' }}
+        search={false}
         scroll={{ x: 'max-content' }}
 
         request={async (params) => {
-          const { current, pageSize, categoryId, name } = params;
+          const { current, pageSize } = params;
           const queryParams: any = { page: current, limit: pageSize };
-          if (categoryId) queryParams.categoryId = categoryId;
-          if (name) queryParams.search = name;
+          if (filterCategoryId) queryParams.categoryId = filterCategoryId;
+          if (filterName.trim()) queryParams.search = filterName.trim();
 
           try {
             const res = await constructionRequest('GET', '', null, queryParams);
@@ -282,8 +277,55 @@ const ShowcaseProjectManagementPage: React.FC = () => {
           }
         }}
         toolBarRender={() => [
+          // Ô tìm kiếm tên
+          <Space key="filters" size="small" wrap>
+            <input
+              type="text"
+              placeholder="Tên công trình..."
+              value={filterName}
+              onChange={e => setFilterName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') actionRef.current?.reload(); }}
+              style={{
+                padding: '5px 12px',
+                border: '1px solid #d9d9d9',
+                borderRadius: 6,
+                outline: 'none',
+                fontSize: 14,
+                height: 32,
+                width: '100%',
+                maxWidth: 200,
+              }}
+            />
+            <Select
+              allowClear
+              placeholder="Lọc danh mục"
+              showSearch
+              optionFilterProp="label"
+              style={{ width: '100%', maxWidth: 220, minWidth: 150 }}
+              onChange={(val) => setFilterCategoryId(val)}
+              options={categories.map(parent => {
+                const parentId = parent._id || parent.id;
+                if (parent.children && parent.children.length > 0) {
+                  return {
+                    label: parent.name,
+                    options: parent.children.map(child => ({
+                      label: child.name,
+                      value: child._id || child.id,
+                    })),
+                  };
+                }
+                return { label: parent.name, value: parentId };
+              })}
+            />
+            <Button
+              type="primary"
+              onClick={() => actionRef.current?.reload()}
+            >
+              Tìm kiếm
+            </Button>
+          </Space>,
           <Button
-            key="button"
+            key="add"
             icon={<PlusOutlined />}
             onClick={() => {
               setCurrentProject(null);
@@ -308,7 +350,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         width={800}
       >
         <Space direction="vertical" style={{ width: '100%' }} size="large">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ProFormText
               name="name"
               label="Tên bài viết / Công trình"
@@ -329,7 +371,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
             </Form.Item>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <ProFormText name="location" label="Địa điểm" placeholder="VD: Quận 1, TP.HCM" />
             <ProFormDigit name="year" label="Năm thực hiện" placeholder="VD: 2023" fieldProps={{ controls: false }} />
             <ProFormDigit name="area" label="Diện tích (m²)" placeholder="VD: 500" />
