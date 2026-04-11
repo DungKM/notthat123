@@ -326,20 +326,17 @@ const ProjectsPage: React.FC = () => {
                               }}
                               className="group block text-left"
                             >
-                              <div className="overflow-hidden bg-gray-100 rounded-xl relative h-full">
+                              <div className="overflow-hidden bg-gray-100 rounded-xl">
                                 <img
                                   src={coverImage}
                                   alt={child.name}
                                   loading="lazy"
                                   className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
-                                  <h3 className="text-white text-xl font-bold uppercase tracking-wider text-center drop-shadow-lg">
-                                    {child.name}
-                                  </h3>
-                                </div>
                               </div>
+                              <h3 className="mt-3 text-sm font-bold text-gray-800 uppercase tracking-wide group-hover:text-showcase-primary transition-colors">
+                                {child.name}
+                              </h3>
                             </button>
                           );
                         })}
