@@ -101,49 +101,50 @@ const ProjectDetailPage: React.FC = () => {
             {/* Top layout */}
             <div className="grid grid-cols-1 gap-12 xl:gap-16">
               {/* Main content */}
-              <article className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                {/* Cover image */}
-                <div className="relative h-[260px] sm:h-[340px] md:h-[420px] [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover">
+              <article className="bg-white shadow-sm border border-gray-100">
+                
+                {/* Tiêu đề & Thông tin - Đưa lên trên hoặc dưới ảnh. Theo yêu cầu sẽ để dưới ảnh. */}
+                <div className="relative w-full [&_.ant-image]:!flex [&_.ant-image]:!justify-center [&_.ant-image]:!w-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-auto [&_.ant-image-img]:!object-contain bg-gray-50">
                   <Image
                     src={coverImage}
                     alt={project.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white pointer-events-none">
-                    <div className="flex flex-wrap items-center gap-3 mb-4 pointer-events-auto">
-                      <Badge variant="gold">{categoryName}</Badge>
-                      {project.year && (
-                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
-                          <CalendarOutlined className="mr-1 text-[10px]" />
-                          {project.year}
-                        </span>
-                      )}
-                      {project.area && (
-                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">
-                          <FullscreenOutlined className="mr-1 text-[10px]" />
-                          {project.area} m²
-                        </span>
-                      )}
-                    </div>
-                    <h1
-                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight pointer-events-auto"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                    >
-                      {project.name}
-                    </h1>
-                    {project.location && (
-                      <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-100 pointer-events-auto">
-                        <EnvironmentOutlined className="mr-2 text-xs" />
-                        {project.location}
-                      </p>
+                </div>
+
+                <div className="p-6 sm:px-10 sm:pt-8 sm:pb-2">
+                  <div className="flex flex-wrap items-center gap-3 mb-4">
+                    <Badge variant="gold">{categoryName}</Badge>
+                    {project.year && (
+                      <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                        <CalendarOutlined className="mr-1 text-[10px]" />
+                        {project.year}
+                      </span>
+                    )}
+                    {project.area && (
+                      <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                        <FullscreenOutlined className="mr-1 text-[10px]" />
+                        {project.area} m²
+                      </span>
                     )}
                   </div>
+                  <h1
+                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    {project.name}
+                  </h1>
+                  {project.location && (
+                    <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-500">
+                      <EnvironmentOutlined className="mr-2 text-xs" />
+                      {project.location}
+                    </p>
+                  )}
                 </div>
 
                 {/* Body */}
-                <div className="p-6 sm:p-10 space-y-10">
+                <div className="p-6 sm:px-10 sm:pb-10 space-y-10">
                   {/* Excerpt */}
                   {project.description && (
                     <p className="text-base sm:text-lg text-gray-700 leading-relaxed border-l-4 border-showcase-primary pl-4 sm:pl-6 whitespace-pre-line">
@@ -170,7 +171,7 @@ const ProjectDetailPage: React.FC = () => {
                           {gallery.map((image: any, index: number) => (
                             <div
                               key={image._id || image.id || index}
-                              className="relative aspect-4/3 rounded-2xl overflow-hidden group border border-gray-100 bg-gray-100 cursor-pointer"
+                              className="relative aspect-4/3 overflow-hidden group border border-gray-100 bg-gray-100 cursor-pointer"
                             >
                               <Image
                                 src={image.url}

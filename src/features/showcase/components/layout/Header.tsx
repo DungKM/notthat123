@@ -29,8 +29,9 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const [showTopBar, setShowTopBar] = useState(true);
   const [activeMegaCategory, setActiveMegaCategory] = useState<any>(null);
+  const [activeMegaProjectCategory, setActiveMegaProjectCategory] = useState<any>(null);
   const [megaMenuForceHide, setMegaMenuForceHide] = useState(false);
-  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState<string | null>(null);
   const megaMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cartRef = useRef<HTMLDivElement | null>(null);
@@ -233,19 +234,19 @@ const Header: React.FC = () => {
             {navLinks.map((link) => (
               <div
                 key={link.title}
-                className={`${link.href === ROUTES.SAN_PHAM ? 'static' : 'relative'} group`}
+                className={`${link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH ? 'static' : 'relative'} group`}
                 onMouseEnter={() => {
-                  if (link.href === ROUTES.SAN_PHAM) {
+                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH) {
                     // Clear any pending close
                     if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
-                    if (!megaMenuForceHide) setMegaMenuOpen(true);
+                    if (!megaMenuForceHide) setMegaMenuOpen(link.href);
                   }
                 }}
                 onMouseLeave={(e) => {
                   setMegaMenuForceHide(false);
-                  if (link.href === ROUTES.SAN_PHAM) {
+                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH) {
                     // Delay close so cursor can move from nav item to panel
-                    megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(false), 80);
+                    megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(null), 300);
                   }
                 }}
               >
@@ -290,7 +291,7 @@ const Header: React.FC = () => {
                 {/* Submenu Sản Phẩm - MEGA MENU */}
                 {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
                   <div
-                    className={`absolute top-18 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
+                    className={`absolute top-full pt-4 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen === ROUTES.SAN_PHAM && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
                   >
                     <div
                       className="mx-auto w-full max-w-[1240px] px-4 xl:px-4 pointer-events-auto"
@@ -298,7 +299,7 @@ const Header: React.FC = () => {
                         if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
                       }}
                       onMouseLeave={() => {
-                        megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(false), 80);
+                        megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(null), 300);
                       }}
                     >
                       <div
@@ -313,10 +314,11 @@ const Header: React.FC = () => {
                               <div
                                 key={cat.id || cat._id}
                                 onMouseEnter={() => setActiveMegaCategory(cat)}
+                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.slug || cat.id || cat._id}`); }}
                                 className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
                                   }`}
                               >
-                                <span className={`font-bold text-[14px] flex-1 line-clamp-1 text-left transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                                <span className={`font-bold text-[14px] flex-1 text-left transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-800'}`}>
                                   {cat.name}
                                 </span>
                                 {/* Right Arrow Triangle */}
@@ -336,12 +338,12 @@ const Header: React.FC = () => {
                             return (
                               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
                                 {currentCat.children.map((child: any) => (
-                                  <a
-                                    key={child.id || child._id}
-                                    href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
-                                    className="flex items-center gap-3 px-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
-                                    onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(false); }}
-                                  >
+                                    <a
+                                      key={child.id || child._id}
+                                      href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                      className="flex items-center gap-3 px-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
+                                      onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
+                                    >
                                     <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0 ">
                                       {child.name}
                                     </span>
@@ -363,39 +365,91 @@ const Header: React.FC = () => {
                   </div>
                 )}
 
-                {/* Submenu Công Trình - 1 cột dropdown (chỉ hiển thị cha) */}
+                {/* Submenu Công Trình - MEGA MENU */}
                 {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
-                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
+                  <div
+                    className={`absolute top-full pt-4 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen === ROUTES.CONG_TRINH && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
+                  >
                     <div
-                      className="bg-gray-950 overflow-hidden flex"
-                      style={{ minWidth: 240 }}
+                      className="mx-auto w-full max-w-[1240px] px-4 xl:px-4 pointer-events-auto"
+                      onMouseEnter={() => {
+                        if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
+                      }}
+                      onMouseLeave={() => {
+                        megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(null), 300);
+                      }}
                     >
-                      <div className="flex flex-col py-3 w-full">
-                        <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Danh mục</p>
-                        {congTrinhCategories.map((cat: any) => {
-                          return (
-                            <div
-                              key={cat._id || cat.id}
-                              className="flex items-center justify-between px-5 py-2.5 transition-colors group/item hover:bg-white/10"
-                            >
-                              <a
-                                href={`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id || cat._id}`}
-                                className="text-[13px] font-medium !text-gray-200 hover:!text-white flex-1 block"
+                      <div
+                        className="bg-white rounded-b-xl overflow-hidden flex min-h-[450px] border border-gray-100 relative"
+                        onMouseLeave={() => setActiveMegaProjectCategory(null)}
+                      >
+                        {/* Left Sidebar - Parent Categories */}
+                        <div className="w-[200px] bg-[#f4f7f9] flex flex-col py-4 shrink-0 border-r border-[#e5e9f0]">
+                          {congTrinhCategories.map((cat: any, index: number) => {
+                            const isActive = activeMegaProjectCategory ? activeMegaProjectCategory.id === cat.id : index === 0;
+                            return (
+                              <div
+                                key={cat.id || cat._id}
+                                onMouseEnter={() => setActiveMegaProjectCategory(cat)}
+                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id || cat._id}`); }}
+                                className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
+                                  }`}
                               >
-                                {cat.name}
-                              </a>
-                              <ArrowRightOutlined className="text-[10px] text-gray-500 group-hover/item:text-white group-hover/item:translate-x-1 transition-all duration-200" />
-                            </div>
-                          );
-                        })}
-                        <div className="border-t border-white/10 mt-2 pt-2">
-                          <a
-                            href={ROUTES.CONG_TRINH}
-                            className="flex items-center justify-between px-5 py-2.5 text-[12px] font-bold !text-showcase-primary hover:!text-white hover:bg-white/10 transition-colors uppercase tracking-wide"
-                          >
-                            Xem tất cả
-                            <ArrowRightOutlined className="text-[10px]" />
-                          </a>
+                                <span className={`font-bold text-[14px] flex-1 text-left transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                                  {cat.name}
+                                </span>
+                                {/* Right Arrow Triangle */}
+                                <div className={`absolute top-1/2 -right-0 -translate-y-1/2 w-0 h-0 border-y-[10px] border-y-transparent border-l-[12px] border-l-showcase-primary translate-x-[11px] z-10 pointer-events-none transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Right Area - Child Categories */}
+                        <div className="flex-1 bg-[#fbfcfd] p-8 overflow-y-auto">
+                          {(() => {
+                            const currentCat = activeMegaProjectCategory || congTrinhCategories[0];
+                            if (!currentCat || !currentCat.children || currentCat.children.length === 0) {
+                              return (
+                                <div>
+                                  <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
+                                  <div className="mt-4">
+                                    <a
+                                      href={`${ROUTES.CONG_TRINH}?category=${currentCat.slug || currentCat.id || currentCat._id}`}
+                                      className="inline-flex items-center gap-2 text-[13px] font-bold text-showcase-primary hover:underline hover:text-[#C5A059]"
+                                      onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
+                                    >
+                                      Xem tất cả công trình {currentCat.name}
+                                      <ArrowRightOutlined className="text-[10px]" />
+                                    </a>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+                                {currentCat.children.map((child: any) => (
+                                  <a
+                                    key={child.id || child._id}
+                                    href={`${ROUTES.CONG_TRINH}?category=${child.slug}`}
+                                    className="flex items-center gap-3 px-2 py-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
+                                    onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
+                                  >
+                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary whitespace-nowrap min-w-0 ">
+                                      {child.name}
+                                    </span>
+                                    <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden rounded">
+                                      {child.representativeImage || child.image ? (
+                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain mix-blend-multiply" alt="" />
+                                      )}
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>
