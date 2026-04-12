@@ -184,8 +184,8 @@ const PersonalAdvancePage: React.FC<PersonalAdvancePageProps> = ({ currentUser }
               name="amount"
               min={0}
               fieldProps={{
-                formatter: (value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-                parser: (value) => value!.replace(/\$\s?|(,*)/g, ''),
+                formatter: (value: any) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+                parser: (value: any) => value!.replace(/\$\s?|(,*)/g, ''),
                 addonAfter: 'đ',
                 style: { width: '100%' },
               }}

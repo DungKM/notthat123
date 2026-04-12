@@ -264,7 +264,7 @@ const StatisticsPage: React.FC = () => {
       dataIndex: "createdAt",
       valueType: "dateTime",
       hideInSearch: true,
-      render: (_, record) => formatDateTime((record as any).createdAt || record.requestDate),
+      render: (_, record) => dayjs(record?.createdAt || record.requestDate).format("HH:mm DD/MM/YYYY"),
     },
     {
       title: "Số tiền",
@@ -539,7 +539,7 @@ const StatisticsPage: React.FC = () => {
               title: "Ngày thanh toán",
               dataIndex: "date",
               valueType: "date",
-              render: (_, record: any) => dayjs(record.date || record.paymentDate).format("DD/MM/YYYY"),
+              render: (_, record: any) => dayjs(record.date || record.paymentDate).format(" DD/MM/YYYY"),
             },
             {
               title: "Số tiền thanh toán",

@@ -11,4 +11,5 @@ export interface AdvanceRequest {
   approvedDate?: string;
   transferProof?: string;   // URL ảnh chứng từ
   note?: string;
+  createdAt?: string;
 }
