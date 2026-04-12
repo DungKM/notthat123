@@ -449,6 +449,7 @@ const ProjectDetailPage: React.FC = () => {
           >
             <ProjectDetailTable
               projectId={project.id}
+              project={project}
               details={project.details}
               onUpdate={handleUpdateDetails}
               role={user.role}

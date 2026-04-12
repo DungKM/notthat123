@@ -11,9 +11,9 @@ import {
   AppstoreOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { ProjectDetail, Role } from "@/src/types";
+import { ProjectDetail, Role, Project } from "@/src/types";
 import { formatCurrency } from "@/src/utils/format";
-import * as XLSX from "xlsx";
+import { exportProjectDetailToExcel } from "@/src/utils/excelExport";
 import { useProductionCategoryService } from "@/src/api/services";
 
 const { Text } = Typography;
@@ -214,6 +214,7 @@ const AmountDisplay: React.FC<{ recordKey: React.Key, form: any }> = ({ recordKe
 // ─── Main Table Component ─────────────────────────────────────────────────────
 interface ProjectDetailTableProps {
   projectId: string;
+  project?: Project; // Bổ sung thông tin project để lấy Tên chủ đầu tư, địa chỉ
   details: ProjectDetail[];
   onUpdate: (details: ProjectDetail[], saveToServer?: boolean, singleRowData?: ProjectDetail, action?: 'save' | 'delete') => Promise<boolean> | void;
   role: Role;
@@ -221,6 +222,7 @@ interface ProjectDetailTableProps {
 }
 const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
   projectId,
+  project,
   details,
   onUpdate,
   role,
@@ -586,56 +588,9 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     setEditableRowKeys([...editableKeys, newId]);
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
-      const detailRows = details.map((item) => {
-        const isGroup = item.type === 'group';
-        const row: Record<string, any> = {
-          STT: indexMapping[item.id!],
-          [nameColumnTitle || "Tên dự án"]: isGroup ? item.name.toUpperCase() : item.name,
-          "Chất liệu": isGroup ? "" : item.material,
-          "Kích thước": isGroup ? "" : item.size,
-          "Đơn vị": isGroup ? "" : item.unit,
-          "Số lượng": isGroup ? "" : item.quantity,
-          "Đơn giá (đ)": isGroup ? "" : item.price,
-          "Thành tiền (đ)": isGroup ? "" : (item.quantity * item.price),
-          "Ghi chú": item.note || "",
-        };
-
-        if (isAdmin) {
-          row["Giá vốn (đ)"] = isGroup ? "" : item.costPrice;
-        }
-
-        return row;
-      });
-
-      const summaryRows: Record<string, any>[] = [
-        {},
-        {
-          [nameColumnTitle || "Tên dự án"]: "TỔNG KẾT",
-        },
-        {
-          [nameColumnTitle || "Tên dự án"]: "Tổng tiền SP công ty",
-          "Thành tiền (đ)": summaryData.totalCompanyProduct,
-        },
-        {
-          [nameColumnTitle || "Tên dự án"]: "Tổng tiền SP thương mại",
-          "Thành tiền (đ)": summaryData.totalCommercialProduct,
-        },
-        {
-          [nameColumnTitle || "Tên dự án"]: "Tổng tiền bộ phận thương mại",
-          "Thành tiền (đ)": summaryData.totalExternalPurchase,
-        },
-      ];
-
-      const exportData = [...detailRows, ...summaryRows];
-
-      const ws = XLSX.utils.json_to_sheet(exportData);
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Chi tiết dự án");
-
-      XLSX.writeFile(wb, `Chi_tiet_du_an_${projectId}.xlsx`);
+      await exportProjectDetailToExcel(project, projectId, details, indexMapping);
       message.success("Xuất file Excel thành công");
     } catch (error) {
       console.error("Export error:", error);
@@ -664,7 +619,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             </Upload> */}
           </>
         )}
-        <Button icon={<DownloadOutlined />} onClick={handleExportExcel}>
+        <Button type="default" icon={<DownloadOutlined />} onClick={handleExportExcel}>
           Xuất Excel
         </Button>
       </Space>
@@ -729,6 +684,17 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16 }}>Tổng tiền bộ phận thương mại:</Text>
                   <Text strong style={{ fontSize: 16, color: '#fa8c16' }}>{formatCurrency(summaryData.totalExternalPurchase)}</Text>
+                </div>
+              </ProTable.Summary.Cell>
+            </ProTable.Summary.Row>
+
+            <ProTable.Summary.Row style={{ backgroundColor: "#ffff00", fontWeight: "bold" }}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
+                  <Text style={{ fontSize: 16, color: '#000' }}>TỔNG GIÁ CHƯA VAT (VNĐ):</Text>
+                  <Text strong style={{ fontSize: 16, color: '#000' }}>
+                    {formatCurrency(summaryData.totalCompanyProduct + summaryData.totalCommercialProduct + summaryData.totalExternalPurchase)}
+                  </Text>
                 </div>
               </ProTable.Summary.Cell>
             </ProTable.Summary.Row>
