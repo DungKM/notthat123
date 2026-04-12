@@ -206,8 +206,8 @@ const StatisticsPage: React.FC = () => {
             );
           }
         }
-        // Cùng ngày → chỉ hiển thị date, không có giờ phút
-        return <span>{dayjs(dateVal || createdAt).format('HH:mm DD/MM/YYYY')}</span>;
+        // Cùng ngày → hiển thị giờ phút thực tế bấm chấm công (dựa vào createdAt)
+        return <span>{dayjs(createdAt || dateVal).format('HH:mm DD/MM/YYYY')}</span>;
       },
     },
     {
