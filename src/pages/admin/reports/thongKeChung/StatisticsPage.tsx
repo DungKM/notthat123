@@ -199,7 +199,7 @@ const StatisticsPage: React.FC = () => {
             // Chấm công muộn: createdAt khác ngày date
             return (
               <span>
-                <span >{dayjs(createdAt).format('DD/MM/YYYY')}</span>
+                <span >{dayjs(createdAt).format('HH:mm DD/MM/YYYY')}</span>
                 <span style={{ color: '#8c8c8c', margin: '0 4px' }}>chấm công cho</span>
                 <strong>{dayjs(dateVal).format('DD/MM/YYYY')}</strong>
               </span>
@@ -207,7 +207,7 @@ const StatisticsPage: React.FC = () => {
           }
         }
         // Cùng ngày → chỉ hiển thị date, không có giờ phút
-        return <span>{dayjs(dateVal || createdAt).format('DD/MM/YYYY')}</span>;
+        return <span>{dayjs(dateVal || createdAt).format('HH:mm DD/MM/YYYY')}</span>;
       },
     },
     {

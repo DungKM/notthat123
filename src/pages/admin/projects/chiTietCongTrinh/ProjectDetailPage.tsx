@@ -37,14 +37,14 @@ const ProjectDetailPage: React.FC = () => {
         // Thêm row group cha
         formattedDetails.push({
           id: cat._id || cat.categoryId, // Fallback on categoryId as object identifier
-          type: 'group',
+          rowType: 'group',
           categoryId: cat.categoryId,
           name: cat.name,
           quantity: 1,
           price: 0,
           amount: cat.totalAmount || 0,
           costPrice: 0,
-          isCompanyProduct: true,
+          type: 'company',
         });
 
         // Thêm các row items thuộc danh mục này
@@ -54,7 +54,7 @@ const ProjectDetailPage: React.FC = () => {
             formattedDetails.push({
               ...item,
               id: item._id || item.id,
-              type: 'item', // Giữ nguyên type hoặc override nếu chưa có
+              rowType: 'item', // Giữ nguyên type của API, dùng rowType để render table
             });
           });
         }
@@ -67,7 +67,7 @@ const ProjectDetailPage: React.FC = () => {
           formattedDetails.push({
             ...item,
             id: item._id || item.id,
-            type: 'item',
+            rowType: 'item',
           });
         });
       }
@@ -76,7 +76,7 @@ const ProjectDetailPage: React.FC = () => {
       formattedDetails = data.details.map((item: any) => ({
         ...item,
         id: item._id || item.id,
-        type: item.type || 'item',
+        rowType: item.rowType || 'item',
       }));
     }
 
@@ -142,17 +142,13 @@ const ProjectDetailPage: React.FC = () => {
   };
 
   // ─── Map type flags sang string cho API ───
-  const resolveItemType = (row: any): 'external' | 'commercial' | 'company' => {
-    if (row.isExternalPurchase) return 'external';
-    if (row.isCommercialProduct) return 'commercial';
-    return 'company';
-  };
+  // Đã bỏ hàm resolveItemType vì dùng chung 1 trường type
 
   // ─── Lấy categoryId của group cha gần nhất ───
   const getParentCategoryId = (itemId: string, allDetails: any[]): string | undefined => {
     let categoryId: string | undefined;
     for (const d of allDetails) {
-      if (d.type === 'group') categoryId = d.categoryId;
+      if (d.rowType === 'group') categoryId = d.categoryId;
       if (d.id === itemId) return categoryId;
     }
     return categoryId;
@@ -176,17 +172,18 @@ const ProjectDetailPage: React.FC = () => {
 
         if (action === 'delete') {
           if (!isNew) {
-            if (singleRowData.type === 'group') {
+            if (singleRowData.rowType === 'group') {
               await request('DELETE', `/${projectId}/categories/${detailId}`);
             } else {
               await request('DELETE', `/${projectId}/details/${detailId}`);
             }
           }
-          // ✅ Chỉ update UI sau khi DELETE thành công
-          setProject({ ...project, details: newDetails });
+          // Refresh data từ server để bảo vệ tính nhất quán của các trường tổng
+          const res = await request('GET', `/${projectId}`);
+          if (res.data) setProject(formatProjectResponse(res.data));
         } else {
           if (isNew) {
-            if (singleRowData.type === 'group') {
+            if (singleRowData.rowType === 'group') {
               await request('POST', `/${projectId}/categories`, {
                 categoryId: singleRowData.categoryId,
               });
@@ -202,9 +199,8 @@ const ProjectDetailPage: React.FC = () => {
                 price: singleRowData.price,
                 amount: (singleRowData.quantity || 0) * (singleRowData.price || 0),
                 costPrice: singleRowData.costPrice,
-                isCompanyProduct: !!singleRowData.isCompanyProduct,
                 categoryId: parentCategoryId,
-                type: resolveItemType(singleRowData),
+                type: singleRowData.type || 'company',
                 size: singleRowData.size || "",
                 note: singleRowData.note,
               };
@@ -222,19 +218,20 @@ const ProjectDetailPage: React.FC = () => {
               price: singleRowData.price,
               amount: (singleRowData.quantity || 0) * (singleRowData.price || 0),
               costPrice: singleRowData.costPrice,
-              isCompanyProduct: !!singleRowData.isCompanyProduct,
-              type: resolveItemType(singleRowData),
+              type: singleRowData.type || 'company',
               size: singleRowData.size || "",
               note: singleRowData.note,
             };
             await request('PATCH', `/${projectId}/details/${detailId}`, payload);
-            // ✅ Chỉ update UI sau khi PATCH thành công
-            setProject({ ...project, details: newDetails });
+            // Refresh lại để server tính lại các trường tổng cộng (tổng thương mại, công ty...)
+            const res = await request('GET', `/${projectId}`);
+            if (res.data) setProject(formatProjectResponse(res.data));
           }
         }
       } else {
         await patch(project.id || (project as any)._id, { details: newDetails });
-        setProject({ ...project, details: newDetails });
+        const res = await request('GET', `/${project.id || (project as any)._id}`);
+        if (res.data) setProject(formatProjectResponse(res.data));
       }
       return true;
     } catch (e) {

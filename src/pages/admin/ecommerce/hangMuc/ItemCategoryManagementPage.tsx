@@ -76,24 +76,23 @@ const VariantRow: React.FC<{
     <td style={{ padding: '8px 16px', paddingLeft: 96 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span style={{ color: '#93c5fd', fontSize: 12 }}>└</span>
-        <Tag color="blue" style={{ margin: 0, fontSize: 12 }}>{variant.name}</Tag>
       </div>
-    </td>
-    <td style={{ padding: '8px 16px', color: '#6b7280', fontSize: 12, maxWidth: 200 }}>
-      <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {variant.description || <span style={{ color: '#d1d5db' }}>—</span>}
-      </span>
-    </td>
-    <td style={{ padding: '8px 16px', textAlign: 'center' }}>
-      {variant.size
-        ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 11 }}>{variant.size}</Tag>
-        : <span style={{ color: '#d1d5db' }}>—</span>}
     </td>
     <td style={{ padding: '8px 16px', color: '#4b5563', fontSize: 12 }}>
       {variant.material
         ? <span>{variant.material}</span>
         : <span style={{ color: '#d1d5db' }}>—</span>}
     </td>
+    <td style={{ padding: '8px 16px', textAlign: 'center' }}>
+      {variant.size
+        ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 11 }}>{variant.size}</Tag>
+        : <span style={{ color: '#d1d5db' }}>—</span>}
+    </td>
+    {/* <td style={{ padding: '8px 16px', color: '#6b7280', fontSize: 12, maxWidth: 200 }}>
+      <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {variant.description || <span style={{ color: '#d1d5db' }}>—</span>}
+      </span>
+    </td> */}
     <td style={{ padding: '8px 16px', textAlign: 'center' }}>
       {(variant.unit || parentUnit)
         ? <Tag style={{ margin: 0, fontSize: 12 }}>{variant.unit || parentUnit}</Tag>
@@ -186,13 +185,13 @@ const CategoryRow: React.FC<{
         </div>
       </td>
 
-      {/* Mô tả */}
-      <td style={{ padding: '12px 16px', color: '#6b7280', fontSize: 13, maxWidth: 220 }}>
-        <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {isItem && hasChildren
-            ? <span style={{ color: '#6366f1', fontStyle: 'italic', fontSize: 12 }}>Xem {childCount} biến thể bên dưới</span>
-            : (node.description || <span style={{ color: '#d1d5db' }}>—</span>)}
-        </span>
+      {/* Chất liệu */}
+      <td style={{ padding: '12px 16px', color: '#4b5563', fontSize: 13 }}>
+        {isItem && hasChildren
+          ? <span style={{ color: '#d1d5db' }}>—</span>
+          : node.material
+            ? <span>{node.material}</span>
+            : <span style={{ color: '#d1d5db' }}>—</span>}
       </td>
 
       {/* Kích thước */}
@@ -204,14 +203,14 @@ const CategoryRow: React.FC<{
             : <span style={{ color: '#d1d5db' }}>—</span>}
       </td>
 
-      {/* Chất liệu */}
-      <td style={{ padding: '12px 16px', color: '#4b5563', fontSize: 13 }}>
-        {isItem && hasChildren
-          ? <span style={{ color: '#d1d5db' }}>—</span>
-          : node.material
-            ? <span>{node.material}</span>
-            : <span style={{ color: '#d1d5db' }}>—</span>}
-      </td>
+      {/* Mô tả */}
+      {/* <td style={{ padding: '12px 16px', color: '#6b7280', fontSize: 13, maxWidth: 220 }}>
+        <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {isItem && hasChildren
+            ? <span style={{ color: '#6366f1', fontStyle: 'italic', fontSize: 12 }}>Xem {childCount} biến thể bên dưới</span>
+            : (node.description || <span style={{ color: '#d1d5db' }}>—</span>)}
+        </span>
+      </td> */}
 
       {/* Đơn vị */}
       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
@@ -224,7 +223,7 @@ const CategoryRow: React.FC<{
 
       {/* Đơn giá */}
       <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-        {isItem && hasChildren
+        {(isCategory || (isItem && hasChildren))
           ? <span style={{ color: '#d1d5db' }}>—</span>
           : node.price != null
             ? <span style={{ fontWeight: 600, color: '#d97706', fontSize: 13 }}>{fmtPrice(node.price)}</span>
@@ -321,43 +320,47 @@ const CategoryFormModal: React.FC<{
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         {/* Tên */}
-        <Form.Item
-          name="name"
-          label="Tên"
-          rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
-        >
-          <Input
-            placeholder={
-              nodeType === 'category' ? 'VD: Nội thất phòng khách...'
-                : nodeType === 'item' ? 'VD: Ghế Sofa, Bàn ăn...'
-                  : 'VD: Sofa nỉ 3 chỗ...'
-            }
-          />
-        </Form.Item>
-
-        {/* Mô tả (category & item) */}
-        {nodeType !== 'variant' && !(mode === 'edit' && nodeType === 'category') && (
-          <Form.Item name="description" label="Mô tả">
-            <Input.TextArea rows={2} placeholder="Mô tả ngắn (tuỳ chọn)" />
+        {/* Tên (Ẩn đối với biến thể) */}
+        {nodeType !== 'variant' && (
+          <Form.Item
+            name="name"
+            label="Tên"
+            rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
+          >
+            <Input
+              placeholder={
+                nodeType === 'category' ? 'VD: Nội thất phòng khách...'
+                  : 'VD: Ghế Sofa, Bàn ăn...'
+              }
+            />
           </Form.Item>
         )}
 
-        {/* Kích thước */}
-        {(nodeType === 'item' || nodeType === 'variant') && (
+        {/* Chất liệu (Chỉ biến thể) */}
+        {nodeType === 'variant' && (
+          <Form.Item name="material" label="Chất liệu" rules={nodeType === 'variant' ? [{ required: true, message: 'Vui lòng nhập chất liệu cho biến thể' }] : []}>
+            <Input placeholder="VD: Gỗ Sồi, Gỗ Công nghiệp, Nỉ..." />
+          </Form.Item>
+        )}
+
+        {/* Mô tả (category & item) */}
+        {/* {nodeType !== 'variant' && !(mode === 'edit' && nodeType === 'category') && (
+          <Form.Item name="description" label="Mô tả">
+            <Input.TextArea rows={2} placeholder="Mô tả ngắn (tuỳ chọn)" />
+          </Form.Item>
+        )} */}
+
+        {/* Kích thước (Chỉ biến thể) */}
+        {nodeType === 'variant' && (
           <Form.Item name="size" label="Kích thước (mm)">
             <Input placeholder="VD: 2400x900" addonAfter="mm" />
           </Form.Item>
         )}
 
-        {/* Chất liệu */}
-        {(nodeType === 'item' || nodeType === 'variant') && (
-          <Form.Item name="material" label="Chất liệu">
-            <Input placeholder="VD: Gỗ Sồi, Gỗ Công nghiệp, Nỉ..." />
-          </Form.Item>
-        )}
 
-        {/* Đơn vị */}
-        {(nodeType === 'item' || nodeType === 'variant') && (
+
+        {/* Đơn vị (Chỉ biến thể) */}
+        {nodeType === 'variant' && (
           <Form.Item name="unit" label="Đơn vị tính">
             <AutoComplete
               allowClear
@@ -370,8 +373,8 @@ const CategoryFormModal: React.FC<{
           </Form.Item>
         )}
 
-        {/* Đơn giá */}
-        {(nodeType === 'item' || nodeType === 'variant') && (
+        {/* Đơn giá (Chỉ biến thể) */}
+        {nodeType === 'variant' && (
           <Form.Item name="price" label="Đơn giá (VNĐ)">
             <InputNumber
               style={{ width: '100%' }}
@@ -383,7 +386,6 @@ const CategoryFormModal: React.FC<{
             />
           </Form.Item>
         )}
-
         {/* Parent (chỉ khi tạo mới item hoặc variant) */}
         {mode === 'create' && nodeType === 'item' && (
           <Form.Item name="parentId" label="Thuộc danh mục">
@@ -392,6 +394,7 @@ const CategoryFormModal: React.FC<{
             </Select>
           </Form.Item>
         )}
+
         {mode === 'create' && nodeType === 'variant' && (
           <Form.Item name="parentId" label="Thuộc hạng mục">
             <Select placeholder="Chọn hạng mục cha" allowClear>
@@ -496,7 +499,7 @@ const ItemCategoryManagementPage: React.FC = () => {
       if (modalMode === 'create') {
         // POST: gửi đầy đủ theo API spec
         const payload: Record<string, any> = {
-          name: values.name,
+          name: nodeType === 'variant' ? (values.material || 'Biến thể') : values.name,
           type: nodeType,
           parentId: nodeType === 'category' ? null : (values.parentId ?? null),
         };
@@ -513,6 +516,8 @@ const ItemCategoryManagementPage: React.FC = () => {
         if (values.price != null) patchPayload.price = values.price;
         if (values.size) patchPayload.size = values.size;
         if (values.material) patchPayload.material = values.material;
+
+        if (modalNodeType === 'variant' && values.material) patchPayload.name = values.material;
 
         await svc.patch(editRecord.id, patchPayload);
       }
@@ -620,7 +625,7 @@ const ItemCategoryManagementPage: React.FC = () => {
             Thêm danh mục
           </Button>
           <Button icon={<PlusOutlined />} onClick={() => openCreate('item')} style={{ borderColor: '#10b981', color: '#10b981' }}>
-            Thêm hạng mục/biến thể
+            Thêm hạng mục
           </Button>
         </Space>
       </div>
@@ -644,9 +649,9 @@ const ItemCategoryManagementPage: React.FC = () => {
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
               <col style={{ width: '23%' }} />
-              <col style={{ width: 'auto' }} />
               <col style={{ width: '13%' }} />
               <col style={{ width: '13%' }} />
+              {/* <col style={{ width: 'auto' }} /> */}
               <col style={{ width: '9%' }} />
               <col style={{ width: '13%' }} />
               <col style={{ width: 140 }} />
@@ -654,9 +659,9 @@ const ItemCategoryManagementPage: React.FC = () => {
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Tên</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Mô tả</th>
-                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Kích thước (mm)</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Chất liệu</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Kích thước (mm)</th>
+                {/* <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Mô tả</th> */}
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Đơn vị</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#d97706' }}>Đơn giá (VNĐ)</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#374151', paddingRight: 20 }}>Thao tác</th>

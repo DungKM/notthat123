@@ -10,6 +10,9 @@ import {
   DownloadOutlined,
   AppstoreOutlined,
   UploadOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { ProjectDetail, Role, Project } from "@/src/types";
 import { formatCurrency } from "@/src/utils/format";
@@ -232,6 +235,9 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
   const [manualTotal, setManualTotal] = useState<number | null>(null);
   const [manualProfit, setManualProfit] = useState<number | null>(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ProjectDetail | null>(null);
+  const [editForm] = Form.useForm();
   const editableFormRef = React.useRef<EditableFormInstance>(null);
 
   const isAdmin = role === Role.DIRECTOR || role === Role.ACCOUNTANT;
@@ -269,102 +275,93 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       dataIndex: "isExternalPurchase",
       align: "center",
       width: 80,
-      render: (_, record) => record.type === 'group' ? null : (
+      render: (_, record) => record.rowType === 'group' ? null : (
         <Checkbox
-          checked={record.isExternalPurchase}
+          checked={record.type === 'external'}
           onChange={(e) => {
             const checked = e.target.checked;
-            const newData = details.map(d => d.id === record.id ? {
-              ...d,
-              isExternalPurchase: checked,
-              isCommercialProduct: checked ? false : d.isCommercialProduct,
-              isCompanyProduct: checked ? false : d.isCompanyProduct
-            } : d);
-            onUpdate(newData, false);
+            const newType = checked ? 'external' : 'company';
+            const updatedRow = { ...record, type: newType };
+            const newData = details.map(d => d.id === record.id ? updatedRow : d);
+            onUpdate(newData, true, updatedRow, 'save');
           }}
         />
       ),
-      renderFormItem: (_, config: any, form: any) => (
-        <Checkbox
-          checked={config.value}
-          onChange={(e) => {
-            const checked = e.target.checked;
-            config.onChange?.(checked);
-            if (checked && form) {
-              form.setFieldValue([config.recordKey, 'isCommercialProduct'], false);
-              form.setFieldValue([config.recordKey, 'isCompanyProduct'], false);
-            }
-          }}
-        />
-      ),
+      renderFormItem: (_, config: any, form: any) => {
+        if (!config.recordKey || !form) return null;
+        const currentType = form.getFieldValue([config.recordKey, 'type']);
+        return (
+          <Checkbox
+            checked={currentType === 'external'}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              form.setFieldValue([config.recordKey, 'type'], checked ? 'external' : 'company');
+            }}
+          />
+        );
+      },
     },
     {
       title: "SP Thương mại",
       dataIndex: "isCommercialProduct",
       align: "center",
       width: 100,
-      render: (_, record) => record.type === 'group' ? null : (
+      render: (_, record) => record.rowType === 'group' ? null : (
         <Checkbox
-          checked={record.isCommercialProduct}
+          checked={record.type === 'commercial'}
           onChange={(e) => {
             const checked = e.target.checked;
-            const newData = details.map(d => d.id === record.id ? {
-              ...d,
-              isCommercialProduct: checked,
-              isExternalPurchase: checked ? false : d.isExternalPurchase,
-              isCompanyProduct: checked ? false : d.isCompanyProduct
-            } : d);
-            onUpdate(newData, false);
+            const newType = checked ? 'commercial' : 'company';
+            const updatedRow = { ...record, type: newType };
+            const newData = details.map(d => d.id === record.id ? updatedRow : d);
+            onUpdate(newData, true, updatedRow, 'save');
           }}
         />
       ),
-      renderFormItem: (_, config: any, form: any) => (
-        <Checkbox
-          checked={config.value}
-          onChange={(e) => {
-            const checked = e.target.checked;
-            config.onChange?.(checked);
-            if (checked && form) {
-              form.setFieldValue([config.recordKey, 'isExternalPurchase'], false);
-              form.setFieldValue([config.recordKey, 'isCompanyProduct'], false);
-            }
-          }}
-        />
-      ),
+      renderFormItem: (_, config: any, form: any) => {
+        if (!config.recordKey || !form) return null;
+        const currentType = form.getFieldValue([config.recordKey, 'type']);
+        return (
+          <Checkbox
+            checked={currentType === 'commercial'}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              form.setFieldValue([config.recordKey, 'type'], checked ? 'commercial' : 'company');
+            }}
+          />
+        );
+      },
     },
     {
       title: "SP Công ty",
       dataIndex: "isCompanyProduct",
       align: "center",
       width: 100,
-      render: (_, record) => record.type === 'group' ? null : (
+      render: (_, record) => record.rowType === 'group' ? null : (
         <Checkbox
-          checked={record.isCompanyProduct}
+          checked={record.type === 'company' || (!record.type)} // Default is company
           onChange={(e) => {
             const checked = e.target.checked;
-            const newData = details.map(d => d.id === record.id ? {
-              ...d,
-              isCompanyProduct: checked,
-              isExternalPurchase: checked ? false : d.isExternalPurchase,
-              isCommercialProduct: checked ? false : d.isCommercialProduct
-            } : d);
-            onUpdate(newData, false);
+            const newType = checked ? 'company' : 'external'; // fallback if unmarked
+            const updatedRow = { ...record, type: newType };
+            const newData = details.map(d => d.id === record.id ? updatedRow : d);
+            onUpdate(newData, true, updatedRow, 'save');
           }}
         />
       ),
-      renderFormItem: (_, config: any, form: any) => (
-        <Checkbox
-          checked={config.value}
-          onChange={(e) => {
-            const checked = e.target.checked;
-            config.onChange?.(checked);
-            if (checked && form) {
-              form.setFieldValue([config.recordKey, 'isExternalPurchase'], false);
-              form.setFieldValue([config.recordKey, 'isCommercialProduct'], false);
-            }
-          }}
-        />
-      ),
+      renderFormItem: (_, config: any, form: any) => {
+        if (!config.recordKey || !form) return null;
+        const currentType = form.getFieldValue([config.recordKey, 'type']);
+        return (
+          <Checkbox
+            checked={currentType === 'company' || (!currentType)}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              form.setFieldValue([config.recordKey, 'type'], checked ? 'company' : 'external');
+            }}
+          />
+        );
+      },
     },
     {
       title: nameColumnTitle || "Hạng mục",
@@ -372,12 +369,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       width: "25%",
       renderFormItem: (_, config: any, form: any) => {
         // Nhóm header (group) không cho sửa tên trực tiếp
-        if (config.record?.type === 'group') return <Input disabled style={{ fontWeight: 'bold' }} />;
+        if (config.record?.rowType === 'group') return <Input disabled style={{ fontWeight: 'bold' }} />;
         // Hạng mục thường/biến thể → fetch từ API qua AutoComplete
         return <CategoryItemAutoComplete record={config.record} form={form} config={config} />;
       },
       render: (_, record) => {
-        if (record.type === 'group') {
+        if (record.rowType === 'group') {
           return <span style={{ textTransform: 'uppercase' }}>{record.name}</span>;
         }
         return <span>{record.name}</span>;
@@ -387,22 +384,22 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       title: "Kích thước (DxRxC mm)",
       dataIndex: "size",
       width: 150,
-      render: (_, record) => record.type === 'group' ? null : <span>{record.size}</span>,
-      editable: (_, record) => record.type !== 'group',
+      render: (_, record) => record.rowType === 'group' ? null : <span>{record.size}</span>,
+      editable: (_, record) => record.rowType !== 'group',
     },
     {
       title: "Chất liệu",
       dataIndex: "material",
-      render: (_, record) => record.type === 'group' ? null : <span>{record.material}</span>,
-      editable: (_, record) => record.type !== 'group',
+      render: (_, record) => record.rowType === 'group' ? null : <span>{record.material}</span>,
+      editable: (_, record) => record.rowType !== 'group',
     },
     {
       title: "Đơn vị",
       dataIndex: "unit",
       width: 80,
       align: "center",
-      render: (_, record) => record.type === 'group' ? null : <span>{record.unit}</span>,
-      editable: (_, record) => record.type !== 'group',
+      render: (_, record) => record.rowType === 'group' ? null : <span>{record.unit}</span>,
+      editable: (_, record) => record.rowType !== 'group',
     },
     {
       title: "Số lượng",
@@ -410,16 +407,16 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       valueType: "digit",
       width: 80,
       align: "center",
-      render: (_, record) => record.type === 'group' ? null : <span>{record.quantity}</span>,
-      editable: (_, record) => record.type !== 'group',
+      render: (_, record) => record.rowType === 'group' ? null : <span>{record.quantity}</span>,
+      editable: (_, record) => record.rowType !== 'group',
     },
     {
       title: "Đơn giá (VND)",
       dataIndex: "price",
       valueType: "digit",
       align: "right",
-      render: (_, record) => record.type === 'group' ? null : <span>{formatCurrency(record.price)}</span>,
-      editable: (_, record) => record.type !== 'group',
+      render: (_, record) => record.rowType === 'group' ? null : <span>{formatCurrency(record.price)}</span>,
+      editable: (_, record) => record.rowType !== 'group',
       fieldProps: {
         formatter: (value: any) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
         parser: (value: any) => value.replace(/\$\s?|(,*)/g, ""),
@@ -430,19 +427,19 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       dataIndex: "amount",
       valueType: "digit",
       align: "right",
-      editable: (_, record) => record.type !== 'group',
+      editable: (_, record) => record.rowType !== 'group',
       renderFormItem: (_, config, form) => {
         if (!config.recordKey || !form) return null;
         return <AmountDisplay recordKey={config.recordKey} form={form} />;
       },
       render: (_, record) => {
-        if (record.type === 'group') {
+        if (record.rowType === 'group') {
           let subtotal = 0;
           let foundGroup = false;
           for (const d of details) {
             if (d.id === record.id) foundGroup = true;
-            else if (foundGroup && d.type === 'group') break;
-            else if (foundGroup && d.type === 'item') subtotal += (d.quantity * d.price || 0);
+            else if (foundGroup && d.rowType === 'group') break;
+            else if (foundGroup && d.rowType === 'item') subtotal += (d.quantity * d.price || 0);
           }
           return <strong>{formatCurrency(subtotal)}</strong>;
         }
@@ -460,8 +457,8 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       align: "right",
       hideInTable: !isAdmin,
       hideInForm: !isAdmin,
-      render: (_, record) => record.type === 'group' ? null : <span>{formatCurrency(record.costPrice || 0)}</span>,
-      editable: (_, record) => record.type !== 'group',
+      render: (_, record) => record.rowType === 'group' ? null : <span>{formatCurrency(record.costPrice || 0)}</span>,
+      editable: (_, record) => record.rowType !== 'group',
       fieldProps: {
         formatter: (value: any) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
         parser: (value: any) => value.replace(/\$\s?|(,*)/g, ""),
@@ -473,55 +470,52 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       width: 140,
       hideInTable: !isAdmin,
       render: (text, record, _, action) => {
-        if (record.type === 'group') {
-          return [
-            <Button type="link" size="small" key="add" onClick={() => handleAddItemToGroup(record.id!)}>Thêm dòng</Button>,
-            <Button type="link" size="small" danger key="delete" onClick={() => {
-              let toDelete = [record.id];
-              let foundGroup = false;
-              for (const d of details) {
-                if (d.id === record.id) foundGroup = true;
-                else if (foundGroup && d.type === 'group') break;
-                else if (foundGroup && d.type === 'item') toDelete.push(d.id);
-              }
-              const newDetails = details.filter(d => !toDelete?.includes(d.id));
-              onUpdate(newDetails, true, record, 'delete');
-              message.success("Đã xóa danh mục");
-            }}>Xóa</Button>
-          ];
+        if (record.rowType === 'group') {
+          return (
+            <Space>
+              <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAddItemToGroup(record.id!)} title="Thêm dòng" />
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => {
+                let toDelete = [record.id];
+                let foundGroup = false;
+                for (const d of details) {
+                  if (d.id === record.id) foundGroup = true;
+                  else if (foundGroup && d.rowType === 'group') break;
+                  else if (foundGroup && d.rowType === 'item') toDelete.push(d.id);
+                }
+                const newDetails = details.filter(d => !toDelete?.includes(d.id));
+                onUpdate(newDetails, true, record, 'delete');
+                message.success("Đã xóa danh mục");
+              }} title="Xóa" />
+            </Space>
+          );
         }
-        return [
-          <Button type="link" size="small" key="edit" onClick={() => action?.startEditable?.(record.id)}>Sửa</Button>,
-          <Button type="link" size="small" danger key="delete" onClick={() => {
-            onUpdate(details.filter((item) => item.id !== record.id), true, record, 'delete');
-            message.success("Đã xóa dòng");
-          }}>Xóa</Button>,
-        ];
+        return (
+          <Space>
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => {
+              setEditingRecord(record);
+              editForm.setFieldsValue(record);
+              setEditModalOpen(true);
+            }} title="Sửa" />
+            <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => {
+              onUpdate(details.filter((item) => item.id !== record.id), true, record, 'delete');
+              message.success("Đã xóa dòng");
+            }} title="Xóa" />
+          </Space>
+        );
       },
     },
   ];
 
   // Logic tổng kết
+  // Using direct variables from backend `project` response instead of recalculating
   const summaryData = useMemo(() => {
-    const totalCompanyProduct = details.reduce(
-      (acc, curr) => acc + (curr.type !== 'group' && curr.isCompanyProduct ? (curr.quantity * curr.price || 0) : 0),
-      0
-    );
-    const totalCommercialProduct = details.reduce(
-      (acc, curr) => acc + (curr.type !== 'group' && curr.isCommercialProduct ? (curr.quantity * curr.price || 0) : 0),
-      0
-    );
-    const totalExternalPurchase = details.reduce(
-      (acc, curr) => acc + (curr.type !== 'group' && curr.isExternalPurchase ? (curr.quantity * curr.price || 0) : 0),
-      0
-    );
-
     return {
-      totalCompanyProduct,
-      totalCommercialProduct,
-      totalExternalPurchase,
+      totalCompanyProduct: project?.companyProductsTotal || 0,
+      totalCommercialProduct: project?.commercialProductsTotal || 0,
+      totalExternalPurchase: project?.externalProductsTotal || 0,
+      totalAmount: project?.totalAmount || 0, // Dùng thay vì tự sum nếu được, nhưng fallback nếu cần
     };
-  }, [details]);
+  }, [project]);
 
   // Khi chọn danh mục từ modal → gọi API trước, chỉ toast khi thành công
   const handleCategorySelect = async (category: any) => {
@@ -531,7 +525,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     const newRow: ProjectDetail = {
       id: newId,
       projectId,
-      type: 'group',
+      rowType: 'group',
       categoryId: realCategoryId,
       name: category.name,
       material: "",
@@ -541,7 +535,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       price: 0,
       amount: 0,
       costPrice: 0,
-      isCompanyProduct: true,
+      type: 'company',
       note: "",
     };
     setCategoryModalOpen(false);
@@ -558,7 +552,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 
     const parentCategory = details[groupIndex];
     let insertIndex = groupIndex + 1;
-    while (insertIndex < details.length && details[insertIndex].type === 'item') {
+    while (insertIndex < details.length && details[insertIndex].rowType === 'item') {
       insertIndex++;
     }
 
@@ -566,7 +560,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     const newRow: ProjectDetail = {
       id: newId,
       projectId,
-      type: 'item',
+      rowType: 'item',
       // ✅ Lưu categoryId của group cha để khi POST lên server biết nhóm vào đâu
       categoryId: parentCategory.categoryId,
       parentCategoryId: parentCategory.categoryId,
@@ -578,7 +572,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       price: 0,
       amount: 0,
       costPrice: 0,
-      isCompanyProduct: true,
+      type: 'company',
       note: "",
     };
 
@@ -632,13 +626,14 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         recordCreatorProps={false}
         columns={columns}
         onRow={(record) => ({
-          style: record.type === 'group' ? { backgroundColor: '#d9d2a6', fontWeight: 'bold' } : {}
+          style: record.rowType === 'group' ? { backgroundColor: '#d9d2a6', fontWeight: 'bold' } : {}
         })}
         value={details}
         onChange={(newDetails) => onUpdate(newDetails as ProjectDetail[], false)}
         editable={{
           type: "multiple",
           editableKeys,
+          deletePopconfirmMessage: "Bạn có chắc chắn muốn xóa mục này?",
           onChange: setEditableRowKeys,
           onSave: async (rowKey, data) => {
             // Lấy lại dòng hiện tại để không bị mất cắc thuộc tính ẩn (type, categoryId, parentCategoryId...)
@@ -693,7 +688,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16, color: '#000' }}>TỔNG GIÁ CHƯA VAT (VNĐ):</Text>
                   <Text strong style={{ fontSize: 16, color: '#000' }}>
-                    {formatCurrency(summaryData.totalCompanyProduct + summaryData.totalCommercialProduct + summaryData.totalExternalPurchase)}
+                    {formatCurrency(summaryData.totalAmount)}
                   </Text>
                 </div>
               </ProTable.Summary.Cell>
@@ -736,6 +731,82 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         onCancel={() => setCategoryModalOpen(false)}
         onSelect={handleCategorySelect}
       />
+      {/* Edit Modal */}
+      <Modal
+        title="Chỉnh sửa chi tiết"
+        open={editModalOpen}
+        onCancel={() => {
+          setEditModalOpen(false);
+          setEditingRecord(null);
+          editForm.resetFields();
+        }}
+        onOk={async () => {
+          try {
+            const values = await editForm.validateFields();
+            if (editingRecord) {
+              const updatedRow = {
+                ...editingRecord,
+                ...values,
+                amount: (values.quantity || 0) * (values.price || 0)
+              };
+              const newDetails = details.map(d => d.id === editingRecord.id ? updatedRow : d);
+              await onUpdate(newDetails, true, updatedRow, 'save');
+              message.success("Cập nhật thành công");
+              setEditModalOpen(false);
+              setEditingRecord(null);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }}
+        okText="Lưu"
+        cancelText="Hủy"
+        width={600}
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="name" label="Hạng mục" rules={[{ required: true, message: 'Vui lòng nhập hạng mục' }]}>
+            <CategoryItemAutoComplete 
+               record={editingRecord} 
+               form={editForm} 
+               config={{ recordKey: 'name' }} 
+               value={editForm.getFieldValue('name')} 
+               onChange={(val) => editForm.setFieldValue('name', val)} 
+            />
+          </Form.Item>
+          <Space style={{ display: 'flex' }} size="large">
+            <Form.Item name="size" label="Kích thước (DxRxC mm)">
+              <Input />
+            </Form.Item>
+            <Form.Item name="material" label="Chất liệu" style={{ flex: 1 }}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="unit" label="Đơn vị">
+              <Input />
+            </Form.Item>
+          </Space>
+          <Space style={{ display: 'flex' }} size="large">
+            <Form.Item name="quantity" label="Số lượng">
+              <InputNumber style={{ width: '100%' }} min={0} />
+            </Form.Item>
+            <Form.Item name="price" label="Đơn giá (VND)">
+              <InputNumber
+                style={{ width: '100%' }}
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value: any) => value.replace(/\$\s?|(,*)/g, '')}
+              />
+            </Form.Item>
+            {isAdmin && (
+              <Form.Item name="costPrice" label="Giá vốn">
+                <InputNumber
+                  style={{ width: '100%' }}
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={(value: any) => value.replace(/\$\s?|(,*)/g, '')}
+                />
+              </Form.Item>
+            )}
+          </Space>
+        </Form>
+      </Modal>
     </div>
   );
 };

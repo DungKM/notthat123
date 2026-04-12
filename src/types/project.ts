@@ -30,7 +30,8 @@ export interface ProjectProgress {
 export interface ProjectDetail {
   id?: string;
   projectId?: string;
-  type?: 'group' | 'item'; // Loại dòng bảng (danh mục hay hạng mục)
+  type?: 'external' | 'commercial' | 'company' | string; // Phân loại hàng hóa từ API
+  rowType?: 'group' | 'item'; // Loại dòng bảng (danh mục hay hạng mục) trên UI
   categoryId?: string;     // Mã danh mục định danh từ ItemCategory
   parentCategoryId?: string; // Nếu là 'item', đây là ID của nhóm cha
   name: string;       // Tên hạng mục/vật tư
@@ -41,9 +42,6 @@ export interface ProjectDetail {
   price: number;      // Đơn giá bán
   amount: number;     // Thành tiền (quantity * price)
   costPrice?: number;
-  isCompanyProduct: boolean; // Hàng do công ty tự sản xuất
-  isExternalPurchase?: boolean; // Bộ phận mua ngoài
-  isCommercialProduct?: boolean; // Sản phẩm thương mại
   note: string;       // Ghi chú thêm
 }
 
@@ -58,7 +56,9 @@ export interface Project {
   status: 'Duyệt' | 'Chờ duyệt' | 'Từ chối' | 'pending' | 'approved' | 'reject'; // Trạng thái phê duyệt
   rejectReason?: string; // Lý do từ chối
   details: ProjectDetail[]; // Danh sách hạng mục
+  totalAmount: number; // Tổng tiền hiển thị
   companyProductsTotal: number; // Tổng tiền hàng công ty sản xuất
+  commercialProductsTotal: number; // Tổng tiền hàng thương mại
   externalProductsTotal: number; // Tổng tiền hàng ngoài
   revenue: number;    // Tổng doanh thu
   profit: number;     // Lợi nhuận
