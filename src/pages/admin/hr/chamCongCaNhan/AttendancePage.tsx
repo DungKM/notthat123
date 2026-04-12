@@ -249,7 +249,7 @@ const AttendancePage: React.FC = () => {
           name="workingDays"
           label="Số giờ hành chính làm được"
           min={0}
-          fieldProps={{ 
+          fieldProps={{
             precision: 2,
             onKeyDown: (e) => {
               if (e.ctrlKey || e.metaKey || e.key.length > 1) return;
@@ -263,7 +263,8 @@ const AttendancePage: React.FC = () => {
           name="otDays"
           label="Số giờ tăng ca"
           min={0}
-          fieldProps={{ 
+          max={10}
+          fieldProps={{
             precision: 2,
             onKeyDown: (e) => {
               if (e.ctrlKey || e.metaKey || e.key.length > 1) return;

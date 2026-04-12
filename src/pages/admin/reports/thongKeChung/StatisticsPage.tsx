@@ -647,7 +647,7 @@ const StatisticsPage: React.FC = () => {
           name="otDays"
           label="Số giờ tăng ca"
           min={0}
-          max={24}
+          max={10}
           fieldProps={{
             precision: 1,
             onKeyDown: (e) => {
