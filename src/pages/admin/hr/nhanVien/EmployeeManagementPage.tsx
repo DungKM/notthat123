@@ -15,7 +15,7 @@ import {
 const SafeUploadButton = RawProFormUploadButton as unknown as React.FC<any>;
 import { Employee, User, AttendanceRecord } from '@/src/types';
 import { MOCK_ATTENDANCE } from '@/src/mockData';
-import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col, Image } from 'antd';
+import { Tag, Button, Space, Typography, Modal, message, DatePicker, Card, Statistic, Row, Col, Image, Tabs } from 'antd';
 import { useSalaryService, useSalaryActionService, useProjectService, useSettingService, useAttendanceService } from '@/src/api/services';
 import type { ActionType } from '@ant-design/pro-components';
 import dayjs from 'dayjs';
@@ -34,7 +34,7 @@ interface RewardPenaltyRecord {
   employeeId: string;
   employeeName: string;
   position: string;
-  type: 'Thưởng' | 'Phạt';
+  type: 'Thưởng' | 'Phạt' | 'Tạm ứng';
   amount: number;
   projectId: string;
   projectName: string;
@@ -52,50 +52,6 @@ interface PaymentHistoryRecord {
   proof?: string;
 }
 
-const MOCK_PROJECT_OPTIONS = [
-  { label: 'Dự án 1 - Thi công nội thất Vinhomes Grand Park', value: 'p1' },
-  { label: 'Dự án 2 - Cải tạo văn phòng Quận 1', value: 'p2' },
-  { label: 'Dự án 3 - Showroom Thủ Đức', value: 'p3' },
-];
-
-const MOCK_REWARD_PENALTY: RewardPenaltyRecord[] = [
-  {
-    id: 'rp-1',
-    employeeId: '1',
-    employeeName: 'Nguyễn Văn A',
-    position: 'Bộ phận công trình',
-    type: 'Thưởng',
-    amount: 1000000,
-    projectId: 'p1',
-    projectName: 'Dự án 1 - Thi công nội thất Vinhomes Grand Park',
-    content: 'Hoàn thành dự án đúng tiến độ',
-    createdAt: '2024-03-01 09:00:00',
-  },
-  {
-    id: 'rp-2',
-    employeeId: '1',
-    employeeName: 'Nguyễn Văn A',
-    position: 'Bộ phận công trình',
-    type: 'Phạt',
-    amount: 300000,
-    projectId: 'p2',
-    projectName: 'Dự án 2 - Cải tạo văn phòng Quận 1',
-    content: 'Đi trễ nhiều lần khi triển khai công việc',
-    createdAt: '2024-03-05 14:00:00',
-  },
-  {
-    id: 'rp-3',
-    employeeId: '2',
-    employeeName: 'Trần Thị B',
-    position: 'Kế toán',
-    type: 'Thưởng',
-    amount: 500000,
-    projectId: 'p1',
-    projectName: 'Dự án 1 - Thi công nội thất Vinhomes Grand Park',
-    content: 'Hỗ trợ hồ sơ quyết toán nhanh và chính xác',
-    createdAt: '2024-03-02 10:30:00',
-  },
-];
 
 const roleLabels: Record<string, string> = {
   DIRECTOR: 'Giám đốc',
@@ -213,8 +169,8 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       render: (_, record) => (
         <Tag color={
           record.role === 'DIRECTOR' ? 'purple' :
-          record.role === 'ACCOUNTANT' ? 'blue' :
-          record.role === 'SITE_MANAGER' ? 'orange' : 'default'
+            record.role === 'ACCOUNTANT' ? 'blue' :
+              record.role === 'SITE_MANAGER' ? 'orange' : 'default'
         }>
           {roleLabels[record.role] || record.role || 'Nhân viên'}
         </Tag>
@@ -272,13 +228,37 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       hideInSearch: true,
       render: (_, record) => {
         const total = record.currentAmount ?? 0;
-
         return (
           <Text strong style={{ fontSize: 16, color: total >= 0 ? '#52c41a' : '#ff4d4f' }}>
-            {new Intl.NumberFormat('vi-VN', {
-              style: 'currency',
-              currency: 'VND',
-            }).format(total)}
+            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total)}
+          </Text>
+        );
+      },
+    },
+    {
+      title: 'Số tiền đang nợ đợt trước',
+      key: 'companyDebt',
+      hideInSearch: true,
+      render: (_, record: any) => {
+        const debt = record.companyDebt ?? 0;
+        return debt > 0 ? (
+          <Text strong style={{ fontSize: 15, color: '#ff4d4f' }}>
+            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(debt)}
+          </Text>
+        ) : (
+          <Text type="secondary">—</Text>
+        );
+      },
+    },
+    {
+      title: 'Tổng tiền phải thanh toán',
+      key: 'totalSalary',
+      hideInSearch: true,
+      render: (_, record: any) => {
+        const total = record.totalSalary ?? 0;
+        return (
+          <Text strong style={{ fontSize: 16, color: total >= 0 ? '#1890ff' : '#ff4d4f' }}>
+            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total)}
           </Text>
         );
       },
@@ -349,26 +329,29 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       title: 'Loại',
       dataIndex: 'type',
       hideInSearch: true,
-      render: (_, record) =>
-        record.type === 'Thưởng' ? (
-          <Tag color="green">Thưởng</Tag>
-        ) : (
-          <Tag color="red">Phạt</Tag>
-        ),
+      render: (_, record) => {
+        if (record.type === 'Thưởng') return <Tag color="green">Thưởng</Tag>;
+        if (record.type === 'Tạm ứng') return <Tag color="blue">Tạm ứng</Tag>;
+        return <Tag color="red">Phạt</Tag>;
+      },
     },
     {
       title: 'Số tiền',
       dataIndex: 'amount',
       hideInSearch: true,
-      render: (_, record) => (
-        <Text type={record.type === 'Thưởng' ? 'success' : 'danger'}>
-          {record.type === 'Thưởng' ? '+' : '-'}
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-          }).format(record.amount)}
-        </Text>
-      ),
+      render: (_, record) => {
+        const isPlus = record.type === 'Thưởng';
+        const isMinus = record.type === 'Phạt' || record.type === 'Tạm ứng';
+        return (
+          <Text type={isPlus ? 'success' : 'danger'}>
+            {isPlus ? '+' : isMinus ? '-' : ''}
+            {new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND',
+            }).format(record.amount)}
+          </Text>
+        );
+      },
     },
     {
       title: 'Dự án',
@@ -532,7 +515,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         if (values.note) {
           formData.append('note', values.note);
         }
-        
+
         const compressedBillFile = await compressImageFile(billFile);
         formData.append('billImage', compressedBillFile);
 
@@ -581,6 +564,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
               advance: r.advance || 0,
               totalSalary: r.netSalary || 0,
               currentAmount: r.currentAmount || 0,
+              companyDebt: r.companyDebt || 0,
             }));
             setEmployees(mapped);
             return { data: mapped, success: true, total: mapped.length };
@@ -648,7 +632,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
       </ModalForm>
 
       <Modal
-        title={`Lịch sử thưởng / phạt - ${selectedEmployee?.name ?? ''}`}
+        title={`Chi tiết nhân viên - ${selectedEmployee?.name ?? ''}`}
         open={detailVisible}
         onCancel={() => {
           setDetailVisible(false);
@@ -657,28 +641,41 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         footer={null}
         width={900}
       >
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
-          <ProTable<RewardPenaltyRecord>
-            loading={loadingHistory}
-            columns={detailColumns}
-            dataSource={selectedEmployeeHistory}
-            rowKey="id"
-            search={false}
-            pagination={{ pageSize: 5 }}
-            options={false}
-          />
-
-          <ProTable<PaymentHistoryRecord>
-            loading={loadingHistory}
-            columns={paymentHistoryColumns}
-            dataSource={selectedEmployeePaymentHistory}
-            rowKey="id"
-            search={false}
-            pagination={{ pageSize: 5 }}
-            options={false}
-            headerTitle="Lịch sử thanh toán lương"
-          />
-        </Space>
+        <Tabs
+          defaultActiveKey="adjustments"
+          items={[
+            {
+              key: 'adjustments',
+              label: 'Lịch sử thưởng / phạt / ứng',
+              children: (
+                <ProTable<RewardPenaltyRecord>
+                  loading={loadingHistory}
+                  columns={detailColumns}
+                  dataSource={selectedEmployeeHistory}
+                  rowKey="id"
+                  search={false}
+                  pagination={{ pageSize: 10 }}
+                  options={false}
+                />
+              ),
+            },
+            {
+              key: 'payments',
+              label: 'Lịch sử thanh toán lương',
+              children: (
+                <ProTable<PaymentHistoryRecord>
+                  loading={loadingHistory}
+                  columns={paymentHistoryColumns}
+                  dataSource={selectedEmployeePaymentHistory}
+                  rowKey="id"
+                  search={false}
+                  pagination={{ pageSize: 10 }}
+                  options={false}
+                />
+              ),
+            },
+          ]}
+        />
       </Modal>
 
       <ModalForm
@@ -695,6 +692,11 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
           name="employeeId"
           label="Nhân viên"
           options={employeeOptions}
+          showSearch
+          fieldProps={{
+            filterOption: (input: string, option: any) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+          }}
           rules={[{ required: true, message: 'Vui lòng chọn nhân viên' }]}
         />
 
