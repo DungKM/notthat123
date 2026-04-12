@@ -209,7 +209,7 @@ const Header: React.FC = () => {
     location.pathname.startsWith('/cong-trinh/') ||
     location.pathname.startsWith('/doi-tac/');
 
-  const isDarkHeader = isScrolled || isDetailLikePage;
+  const isDarkHeader = true; // Luôn dùng nền trắng làm mặc định thay vì trong suốt
 
   return (
     <>

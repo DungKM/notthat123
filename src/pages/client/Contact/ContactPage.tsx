@@ -79,7 +79,6 @@ const ContactPage: React.FC = () => {
           content: formData.message // Mapping to content if backend expects it
         });
         setFormData({ fullName: '', phone: '', email: '', address: '', message: '' });
-        toast.success('Gửi liên hệ thành công. Chúng tôi sẽ sớm liên lạc với bạn!');
       } catch (error) {
         console.error('Submit contact error:', error);
       }

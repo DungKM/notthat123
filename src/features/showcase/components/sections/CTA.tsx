@@ -141,22 +141,16 @@ const CTA: React.FC = () => {
                 />
                 {errors.phone && <p className="mt-1 text-[10px] text-red-400 uppercase tracking-wider">{errors.phone}</p>}
               </div>
-              <select
-                name="projectType"
-                value={formData.projectType}
-                onChange={handleChange}
-                className="w-full bg-white text-gray-500 px-4 py-3 rounded-md shadow-sm focus:ring-2 focus:ring-showcase-primary outline-none text-sm"
-              >
-                <option value="" disabled>{t('cta.form_select')}</option>
-                <option value={t('cta.form_villa')}>{t('cta.form_villa')}</option>
-                <option value={t('cta.form_apartment')}>{t('cta.form_apartment')}</option>
-                <option value={t('cta.form_townhouse')}>{t('cta.form_townhouse')}</option>
-                <option value="Văn phòng">Văn phòng</option>
-                <option value="Showroom / Cửa hàng">Showroom / Cửa hàng</option>
-                <option value="Khách sạn / Resort">Khách sạn / Resort</option>
-                <option value="Nhà hàng / Cafe">Nhà hàng / Cafe</option>
-                <option value="Khác">Khác</option>
-              </select>
+              <div>
+                <input
+                  type="text"
+                  name="projectType"
+                  value={formData.projectType}
+                  onChange={handleChange}
+                  placeholder={t('cta.form_select')}
+                  className="w-full bg-white text-gray-900 px-4 py-3 rounded-md focus:ring-2 focus:ring-showcase-primary outline-none text-sm transition-colors border border-transparent"
+                />
+              </div>
               <textarea
                 rows={3}
                 name="message"

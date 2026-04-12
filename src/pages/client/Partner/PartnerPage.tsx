@@ -4,6 +4,7 @@ import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
 import { useEffect } from "react";
 import { usePartnerService } from "@/src/api/services";
+import doiTacImg from "@/src/statics/doi_tac.jpg";
 
 const PartnerCardSkeleton = () => (
   <div className="relative h-[520px] bg-gray-100 rounded-2xl overflow-hidden border border-gray-100 border-b-[6px] border-b-gray-200 animate-pulse block">
@@ -70,10 +71,18 @@ const PartnerPage: React.FC = () => {
             >
               Đối tác
             </h2>
+            <div className="mb-16 w-full">
+              <img
+                src={doiTacImg}
+                alt="Đối tác đồng hành cùng HOCHI"
+                className="w-full h-auto object-cover"
+              />
+            </div>
             <p className="text-gray-500 leading-relaxed text-lg text-justify md:text-left">
               Chúng tôi tự hào hợp tác cùng các đối tác uy tín trong nhiều lĩnh vực, mang đến những sản phẩm và giải pháp chất lượng cao, đáp ứng các tiêu chuẩn khắt khe. Với định hướng phát triển bền vững, HOCHI luôn đề cao sự đồng hành lâu dài, cùng nhau kiến tạo giá trị và nâng tầm trải nghiệm cho khách hàng tại thị trường Việt Nam.
             </p>
           </div>
+
 
           {/* Grid of Partner Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -121,7 +130,7 @@ const PartnerPage: React.FC = () => {
           {/* Pagination / Load More Button Space if needed */}
           {(!meta || partners.length < meta.total) && (
             <div className="mt-16 flex justify-center">
-              <button 
+              <button
                 onClick={() => setLimit(prev => prev + 6)}
                 className="px-8 py-3 border border-orange-500 text-orange-500 font-bold rounded-full hover:bg-orange-500 hover:text-white transition-colors duration-300 flex items-center gap-2"
               >

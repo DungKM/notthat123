@@ -138,23 +138,27 @@ const CategoryItemAutoComplete: React.FC<{
       const res = await svc.request<any>('GET', `?parentId=${parentId}&type=item&page=1&limit=50`);
       const items = res?.data || [];
 
-      const newOptions: { label: React.ReactNode; value: string; rawData: any; searchStr: string }[] = [];
+      const newOptions: any[] = [];
       items.forEach((item: any) => {
-        newOptions.push({
-          label: <span style={{ fontWeight: 500 }}>{item.name}</span>,
-          value: item.name,
-          rawData: item,
-          searchStr: (item.name || "").toLowerCase()
-        });
-        // Nếu có biến thể (children)
-        if (item.children && item.children.length > 0) {
-          item.children.forEach((child: any) => {
-            newOptions.push({
-              label: <span style={{ paddingLeft: 16 }}>- {child.name}</span>,
-              value: child.name, // Khi chọn, giá trị text sẽ là tên của biến thể
-              rawData: child,
-              searchStr: (child.name || "").toLowerCase()
-            });
+        const hasChildren = item.children && item.children.length > 0;
+        
+        if (hasChildren) {
+          const childOptions = item.children.map((child: any) => ({
+            label: <span>{child.name}</span>,
+            value: child.name, // Khi chọn, giá trị text sẽ là tên của biến thể
+            rawData: child,
+            searchStr: `${child.name} ${(item.name || '')}`.toLowerCase()
+          }));
+          newOptions.push({
+            label: <span style={{ fontWeight: 'bold', color: '#888' }}>{item.name}</span>,
+            options: childOptions
+          });
+        } else {
+          newOptions.push({
+            label: <span style={{ fontWeight: 500 }}>{item.name}</span>,
+            value: item.name,
+            rawData: item,
+            searchStr: (item.name || "").toLowerCase()
           });
         }
       });
@@ -169,35 +173,54 @@ const CategoryItemAutoComplete: React.FC<{
 
   return (
     <AutoComplete
+      allowClear
       value={value !== undefined ? value : config?.value}
       onChange={(val) => {
         if (onChange) onChange(val);
         if (config?.onChange) config.onChange(val);
-        if (form && config?.recordKey) {
-          form.setFieldValue([config.recordKey, 'name'], val);
+        if (form) {
+          if (config?.isFlatForm) {
+            form.setFieldValue('name', val);
+          } else if (config?.recordKey) {
+            form.setFieldValue([config.recordKey, 'name'], val);
+          }
         }
       }}
       options={options}
       placeholder="Nhập tên hạng mục..."
       onFocus={fetchItems}
       onClick={fetchItems}
-      filterOption={(inputValue, option) =>
-        (option?.searchStr || "").includes(inputValue.toLowerCase())
-      }
+      filterOption={(inputValue, option) => {
+        const currentValue = value !== undefined ? value : config?.value;
+        // Nếu người dùng vừa click vào (chữ đang bằng đúng value đã chọn), hiển thị toàn bộ list
+        if (inputValue === currentValue) return true;
+        
+        return (option?.searchStr || "").includes(inputValue.toLowerCase());
+      }}
       onSelect={(val, option: any) => {
         // Đảm bảo value name được update
         if (onChange) onChange(val);
         if (config?.onChange) config.onChange(val);
 
         const itemData = option?.rawData;
-        if (itemData && form && config?.recordKey) {
-          // Tự động điền các thông số liên quan khi chọn hạng mục / biến thể
-          form.setFieldValue([config.recordKey, 'name'], val);
-          if (itemData.size !== undefined) form.setFieldValue([config.recordKey, 'size'], itemData.size);
-          if (itemData.material !== undefined) form.setFieldValue([config.recordKey, 'material'], itemData.material);
-          if (itemData.unit !== undefined) form.setFieldValue([config.recordKey, 'unit'], itemData.unit);
-          if (itemData.price !== undefined) form.setFieldValue([config.recordKey, 'price'], itemData.price);
-          if (itemData.costPrice !== undefined) form.setFieldValue([config.recordKey, 'costPrice'], itemData.costPrice);
+        if (itemData && form) {
+          if (config?.isFlatForm) {
+            form.setFieldsValue({
+              name: val,
+              ...(itemData.size !== undefined && { size: itemData.size }),
+              ...(itemData.material !== undefined && { material: itemData.material }),
+              ...(itemData.unit !== undefined && { unit: itemData.unit }),
+              ...(itemData.price !== undefined && { price: itemData.price }),
+              ...(itemData.costPrice !== undefined && { costPrice: itemData.costPrice }),
+            });
+          } else if (config?.recordKey) {
+            form.setFieldValue([config.recordKey, 'name'], val);
+            if (itemData.size !== undefined) form.setFieldValue([config.recordKey, 'size'], itemData.size);
+            if (itemData.material !== undefined) form.setFieldValue([config.recordKey, 'material'], itemData.material);
+            if (itemData.unit !== undefined) form.setFieldValue([config.recordKey, 'unit'], itemData.unit);
+            if (itemData.price !== undefined) form.setFieldValue([config.recordKey, 'price'], itemData.price);
+            if (itemData.costPrice !== undefined) form.setFieldValue([config.recordKey, 'costPrice'], itemData.costPrice);
+          }
         }
       }}
     />
@@ -768,7 +791,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             <CategoryItemAutoComplete 
                record={editingRecord} 
                form={editForm} 
-               config={{ recordKey: 'name' }} 
+               config={{ isFlatForm: true }} 
                value={editForm.getFieldValue('name')} 
                onChange={(val) => editForm.setFieldValue('name', val)} 
             />

@@ -188,10 +188,10 @@ const CategoryRow: React.FC<{
       {/* Chất liệu */}
       <td style={{ padding: '12px 16px', color: '#4b5563', fontSize: 13 }}>
         {isItem && hasChildren
-          ? <span style={{ color: '#d1d5db' }}>—</span>
+          ? <span style={{ color: '#d1d5db' }}></span>
           : node.material
             ? <span>{node.material}</span>
-            : <span style={{ color: '#d1d5db' }}>—</span>}
+            : <span style={{ color: '#d1d5db' }}></span>}
       </td>
 
       {/* Kích thước */}
@@ -511,13 +511,18 @@ const ItemCategoryManagementPage: React.FC = () => {
 
         await svc.create(payload);
       } else if (editRecord) {
-        // PATCH: chỉ gửi price & size
+        // PATCH: Gửi tất cả các trường có thể chỉnh sửa
         const patchPayload: Record<string, any> = {};
-        if (values.price != null) patchPayload.price = values.price;
-        if (values.size) patchPayload.size = values.size;
-        if (values.material) patchPayload.material = values.material;
+        if (values.price !== undefined) patchPayload.price = values.price;
+        if (values.size !== undefined) patchPayload.size = values.size;
+        if (values.material !== undefined) patchPayload.material = values.material;
+        if (values.unit !== undefined) patchPayload.unit = values.unit;
 
-        if (modalNodeType === 'variant' && values.material) patchPayload.name = values.material;
+        if (modalNodeType === 'variant' && values.material !== undefined) {
+          patchPayload.name = values.material; // Tên của biến thể được lấy từ chất liệu
+        } else if (values.name !== undefined) {
+          patchPayload.name = values.name;
+        }
 
         await svc.patch(editRecord.id, patchPayload);
       }

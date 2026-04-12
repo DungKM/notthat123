@@ -102,6 +102,7 @@ const ProjectDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 gap-12 xl:gap-16">
               {/* Main content */}
               <article className="bg-white shadow-sm border border-gray-100">
+                <Image.PreviewGroup>
                 
                 {/* Tiêu đề & Thông tin - Đưa lên trên hoặc dưới ảnh. Theo yêu cầu sẽ để dưới ảnh. */}
                 <div className="relative w-full [&_.ant-image]:!flex [&_.ant-image]:!justify-center [&_.ant-image]:!w-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-auto [&_.ant-image-img]:!object-contain bg-gray-50">
@@ -166,7 +167,6 @@ const ProjectDetailPage: React.FC = () => {
                           {gallery.length + 1} hình ảnh
                         </span>
                       </div>
-                      <Image.PreviewGroup>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover">
                           {gallery.map((image: any, index: number) => (
                             <div
@@ -184,10 +184,10 @@ const ProjectDetailPage: React.FC = () => {
                             </div>
                           ))}
                         </div>
-                      </Image.PreviewGroup>
                     </section>
                   )}
                 </div>
+                </Image.PreviewGroup>
               </article>
             </div>
 

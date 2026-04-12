@@ -189,6 +189,44 @@
     }
   }
 
+  /* Ant Design Image Preview Customizations (đưa nút sang sát ảnh và làm đậm hơn) */
+  .ant-image-preview-switch-left,
+  .ant-image-preview-switch-right {
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 56px !important;
+    height: 56px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s !important;
+  }
+
+  .ant-image-preview-switch-left:hover,
+  .ant-image-preview-switch-right:hover {
+    background: rgba(197, 160, 89, 0.9) !important;
+    /* showcase-primary */
+    /* transform: scale(1.1) !important; */
+  }
+
+  .ant-image-preview-switch-left .anticon,
+  .ant-image-preview-switch-right .anticon {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: white !important;
+  }
+
+  @media (min-width: 1024px) {
+    .ant-image-preview-switch-left {
+      inset-inline-start: 15vw !important;
+    }
+
+    .ant-image-preview-switch-right {
+      inset-inline-end: 15vw !important;
+    }
+  }
+
   @media (min-width: 769px) {
     .md-hidden {
       display: none !important;
