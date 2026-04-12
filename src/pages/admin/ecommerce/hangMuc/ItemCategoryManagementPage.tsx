@@ -6,7 +6,7 @@ import {
 import {
   EditOutlined, DeleteOutlined, PlusOutlined,
   CaretRightOutlined, CaretDownOutlined, FolderOutlined, FileOutlined,
-  SearchOutlined, InboxOutlined, BranchesOutlined, ReloadOutlined,
+  InboxOutlined, BranchesOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../../../auth/hooks/useAuth';
 import { useProductionCategoryService } from '../../../../api/services';
@@ -116,8 +116,7 @@ const CategoryRow: React.FC<{
   onToggle: () => void;
   onEdit: (n: ProductionNode) => void;
   onDelete: (id: string) => void;
-  onAddChild: (parentId: string, parentType: ProductionNode['type']) => void;
-}> = ({ node, depth, expanded, onToggle, onEdit, onDelete, onAddChild }) => {
+}> = ({ node, depth, expanded, onToggle, onEdit, onDelete }) => {
   const isCategory = node.type === 'category';
   const isItem = node.type === 'item';
   const hasChildren = (node.children?.length ?? 0) > 0;
@@ -191,7 +190,7 @@ const CategoryRow: React.FC<{
       {/* Kích thước */}
       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
         {isItem && hasChildren
-          ? <span style={{ color: '#d1d5db', fontSize: 12 }}>nhiều loại</span>
+          ? <span style={{ color: '#d1d5db' }}>—</span>
           : node.size
             ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 12 }}>{node.size}</Tag>
             : <span style={{ color: '#d1d5db' }}>—</span>}
@@ -199,13 +198,17 @@ const CategoryRow: React.FC<{
 
       {/* Đơn vị */}
       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-        {node.unit ? <Tag style={{ margin: 0 }}>{node.unit}</Tag> : <span style={{ color: '#d1d5db' }}>—</span>}
+        {isItem && hasChildren
+          ? <span style={{ color: '#d1d5db' }}>—</span>
+          : node.unit
+            ? <Tag style={{ margin: 0 }}>{node.unit}</Tag>
+            : <span style={{ color: '#d1d5db' }}>—</span>}
       </td>
 
       {/* Đơn giá */}
       <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-        {isItem && hasChildren && minPrice != null
-          ? <span style={{ color: '#d97706', fontSize: 12 }}>từ <b>{fmtPrice(minPrice)}</b></span>
+        {isItem && hasChildren
+          ? <span style={{ color: '#d1d5db' }}>—</span>
           : node.price != null
             ? <span style={{ fontWeight: 600, color: '#d97706', fontSize: 13 }}>{fmtPrice(node.price)}</span>
             : <span style={{ color: '#d1d5db' }}>—</span>}
@@ -214,17 +217,6 @@ const CategoryRow: React.FC<{
       {/* Thao tác */}
       <td style={{ padding: '12px 16px', textAlign: 'right' }}>
         <Space size={4}>
-          {(isCategory || isItem) && (
-            <Tooltip title={isCategory ? 'Thêm hạng mục' : 'Thêm biến thể'}>
-              <Button
-                type="text" size="small" icon={<PlusOutlined />}
-                style={{ color: '#10b981' }}
-                onClick={() => onAddChild(node.id, node.type)}
-              >
-                Thêm
-              </Button>
-            </Tooltip>
-          )}
           <Button type="text" size="small" icon={<EditOutlined />} style={{ color: '#3b82f6' }} onClick={() => onEdit(node)}>
             Sửa
           </Button>
@@ -568,10 +560,6 @@ const ItemCategoryManagementPage: React.FC = () => {
             onToggle={() => toggleExpand(node.id)}
             onEdit={openEdit}
             onDelete={handleDelete}
-            onAddChild={(parentId, parentType) => {
-              const childType: ProductionNode['type'] = parentType === 'category' ? 'item' : 'variant';
-              openCreate(childType, parentId);
-            }}
           />
         );
 
@@ -593,18 +581,11 @@ const ItemCategoryManagementPage: React.FC = () => {
           Quản lý danh mục và hạng mục bên trong. Hỗ trợ nhiều biến thể (loại) cho mỗi hạng mục.
         </div>
         <Space wrap>
-          <Input
-            placeholder="Tìm kiếm hạng mục..."
-            prefix={<SearchOutlined style={{ color: '#d1d5db' }} />}
-            value={searchText} onChange={e => setSearchText(e.target.value)}
-            allowClear style={{ width: 240 }}
-          />
-          <Tooltip title="Tải lại dữ liệu">
-            <Button icon={<ReloadOutlined />} onClick={loadData} loading={loading} />
-          </Tooltip>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate('category')}
-          >
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate('category')}>
             Thêm danh mục
+          </Button>
+          <Button icon={<PlusOutlined />} onClick={() => openCreate('item')} style={{ borderColor: '#10b981', color: '#10b981' }}>
+            Thêm hạng mục/biến thể
           </Button>
         </Space>
       </div>

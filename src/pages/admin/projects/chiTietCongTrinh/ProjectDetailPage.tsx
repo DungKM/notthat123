@@ -28,9 +28,9 @@ const ProjectDetailPage: React.FC = () => {
 
   const formatProjectResponse = (data: any): Project => {
     if (!data) return data;
-    
+
     let formattedDetails: any[] = [];
-    
+
     // Nếu có danh mục (categories), nhóm các chi tiết vào theo danh mục
     if (data.categories && Array.isArray(data.categories)) {
       data.categories.forEach((cat: any) => {
