@@ -10,4 +10,5 @@ export interface Employee {
   advance: number;
   totalSalary: number;
   currentAmount: number;
+  netSalary: number;
 }

@@ -5,7 +5,7 @@ import {
   ProTable,
   EditableFormInstance,
 } from "@ant-design/pro-components";
-import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Upload, Checkbox, Dropdown, AutoComplete } from "antd";
+import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Upload, Checkbox, Dropdown, AutoComplete, Form } from "antd";
 import {
   DownloadOutlined,
   AppstoreOutlined,
@@ -185,12 +185,12 @@ const CategoryItemAutoComplete: React.FC<{
         // Đảm bảo value name được update
         if (onChange) onChange(val);
         if (config?.onChange) config.onChange(val);
-        
+
         const itemData = option?.rawData;
         if (itemData && form && config?.recordKey) {
           // Tự động điền các thông số liên quan khi chọn hạng mục / biến thể
           form.setFieldValue([config.recordKey, 'name'], val);
-          if (itemData.size !== undefined) form.setFieldValue([config.recordKey, 'dimensions'], itemData.size);
+          if (itemData.size !== undefined) form.setFieldValue([config.recordKey, 'size'], itemData.size);
           if (itemData.material !== undefined) form.setFieldValue([config.recordKey, 'material'], itemData.material);
           if (itemData.unit !== undefined) form.setFieldValue([config.recordKey, 'unit'], itemData.unit);
           if (itemData.price !== undefined) form.setFieldValue([config.recordKey, 'price'], itemData.price);
@@ -199,6 +199,15 @@ const CategoryItemAutoComplete: React.FC<{
       }}
     />
   );
+};
+
+
+// ─── Component hiển thị Thành tiền trực tiếp khi đang Edit ────────────────────
+const AmountDisplay: React.FC<{ recordKey: React.Key, form: any }> = ({ recordKey, form }) => {
+  const quantity = Form.useWatch([recordKey, 'quantity'], form);
+  const price = Form.useWatch([recordKey, 'price'], form);
+  const total = (quantity || 0) * (price || 0);
+  return <span>{formatCurrency(total)}</span>;
 };
 
 
@@ -254,7 +263,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       render: (_, record) => <strong>{indexMapping[record.id!]}</strong>,
     },
     {
-      title: "Mua ngoài",
+      title: "Bộ phận thương mại",
       dataIndex: "isExternalPurchase",
       align: "center",
       width: 80,
@@ -374,9 +383,9 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     },
     {
       title: "Kích thước (DxRxC mm)",
-      dataIndex: "dimensions",
+      dataIndex: "size",
       width: 150,
-      render: (_, record) => record.type === 'group' ? null : <span>{record.dimensions}</span>,
+      render: (_, record) => record.type === 'group' ? null : <span>{record.size}</span>,
       editable: (_, record) => record.type !== 'group',
     },
     {
@@ -419,7 +428,11 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       dataIndex: "amount",
       valueType: "digit",
       align: "right",
-      editable: false,
+      editable: (_, record) => record.type !== 'group',
+      renderFormItem: (_, config, form) => {
+        if (!config.recordKey || !form) return null;
+        return <AmountDisplay recordKey={config.recordKey} form={form} />;
+      },
       render: (_, record) => {
         if (record.type === 'group') {
           let subtotal = 0;
@@ -488,22 +501,25 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 
   // Logic tổng kết
   const summaryData = useMemo(() => {
-    const totalCalculated = details.reduce(
-      (acc, curr) => acc + (curr.type !== 'group' ? (curr.quantity * curr.price || 0) : 0),
+    const totalCompanyProduct = details.reduce(
+      (acc, curr) => acc + (curr.type !== 'group' && curr.isCompanyProduct ? (curr.quantity * curr.price || 0) : 0),
       0
     );
-    const totalCost = details.reduce(
-      (acc, curr) => acc + (curr.type !== 'group' ? (Number(curr.costPrice) || 0) : 0),
-      0,
+    const totalCommercialProduct = details.reduce(
+      (acc, curr) => acc + (curr.type !== 'group' && curr.isCommercialProduct ? (curr.quantity * curr.price || 0) : 0),
+      0
     );
-    const profit = (manualTotal ?? totalCalculated) - totalCost;
+    const totalExternalPurchase = details.reduce(
+      (acc, curr) => acc + (curr.type !== 'group' && curr.isExternalPurchase ? (curr.quantity * curr.price || 0) : 0),
+      0
+    );
 
     return {
-      totalCalculated,
-      totalCost,
-      profit,
+      totalCompanyProduct,
+      totalCommercialProduct,
+      totalExternalPurchase,
     };
-  }, [details, manualTotal]);
+  }, [details]);
 
   // Khi chọn danh mục từ modal → gọi API trước, chỉ toast khi thành công
   const handleCategorySelect = async (category: any) => {
@@ -517,7 +533,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       categoryId: realCategoryId,
       name: category.name,
       material: "",
-      dimensions: "",
+      size: "",
       unit: "",
       quantity: 1,
       price: 0,
@@ -554,7 +570,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       parentCategoryId: parentCategory.categoryId,
       name: "",
       material: "",
-      dimensions: "",
+      size: "",
       unit: "Chiếc",
       quantity: 1,
       price: 0,
@@ -578,7 +594,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           STT: indexMapping[item.id!],
           [nameColumnTitle || "Tên dự án"]: isGroup ? item.name.toUpperCase() : item.name,
           "Chất liệu": isGroup ? "" : item.material,
-          "Kích thước": isGroup ? "" : item.dimensions,
+          "Kích thước": isGroup ? "" : item.size,
           "Đơn vị": isGroup ? "" : item.unit,
           "Số lượng": isGroup ? "" : item.quantity,
           "Đơn giá (đ)": isGroup ? "" : item.price,
@@ -599,21 +615,17 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           [nameColumnTitle || "Tên dự án"]: "TỔNG KẾT",
         },
         {
-          [nameColumnTitle || "Tên dự án"]: "Tổng số tiền sản phẩm",
-          "Thành tiền (đ)": summaryData.totalCalculated,
+          [nameColumnTitle || "Tên dự án"]: "Tổng tiền SP công ty",
+          "Thành tiền (đ)": summaryData.totalCompanyProduct,
         },
         {
-          [nameColumnTitle || "Tên dự án"]: "DOANH THU",
-          "Thành tiền (đ)": manualTotal ?? summaryData.totalCalculated,
+          [nameColumnTitle || "Tên dự án"]: "Tổng tiền SP thương mại",
+          "Thành tiền (đ)": summaryData.totalCommercialProduct,
         },
-        ...(isAdmin
-          ? [
-            {
-              [nameColumnTitle || "Tên dự án"]: "LỢI NHUẬN",
-              "Thành tiền (đ)": manualProfit ?? summaryData.profit,
-            },
-          ]
-          : []),
+        {
+          [nameColumnTitle || "Tên dự án"]: "Tổng tiền bộ phận thương mại",
+          "Thành tiền (đ)": summaryData.totalExternalPurchase,
+        },
       ];
 
       const exportData = [...detailRows, ...summaryRows];
@@ -645,11 +657,11 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
               Chọn danh mục
             </Button>
             {/* Nút Import Excel */}
-            <Upload showUploadList={false} beforeUpload={() => { message.info('Tính năng Import Excel đang được phát triển'); return false; }}>
+            {/* <Upload showUploadList={false} beforeUpload={() => { message.info('Tính năng Import Excel đang được phát triển'); return false; }}>
               <Button icon={<UploadOutlined />}>
                 Import Excel
               </Button>
-            </Upload>
+            </Upload> */}
           </>
         )}
         <Button icon={<DownloadOutlined />} onClick={handleExportExcel}>
@@ -694,72 +706,32 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         }}
         summary={() => (
           <ProTable.Summary fixed>
-            {/* Dòng 1: Tổng số tiền sản phẩm */}
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
               <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
-                  <Text style={{ fontSize: 16 }}>Tổng số tiền sản phẩm:</Text>
-                  <Text strong style={{ fontSize: 16 }}>{formatCurrency(summaryData.totalCalculated)}</Text>
+                  <Text style={{ fontSize: 16 }}>Tổng tiền SP công ty:</Text>
+                  <Text strong style={{ fontSize: 16, color: '#1677ff' }}>{formatCurrency(summaryData.totalCompanyProduct)}</Text>
                 </div>
               </ProTable.Summary.Cell>
             </ProTable.Summary.Row>
 
-            {/* Dòng 2: DOANH THU */}
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
               <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
-                  <Text style={{ fontSize: 16 }}>DOANH THU:</Text>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <InputNumber
-                      value={manualTotal ?? summaryData.totalCalculated}
-                      onChange={(val) => setManualTotal(val ? Number(val) : null)}
-                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                      parser={(value) => value!.replace(/\$\s?|(,*)/g, "") as unknown as number}
-                      style={{
-                        width: 200,
-                        fontWeight: "bold",
-                        fontSize: 16,
-                        color: "#d4380d",
-                      }}
-                      bordered={false}
-                      controls={false}
-                      disabled={!isAdmin}
-                      className="align-right-input editable-summary-input"
-                    />
-                    <Text>đ</Text>
-                  </div>
+                  <Text style={{ fontSize: 16 }}>Tổng tiền SP thương mại:</Text>
+                  <Text strong style={{ fontSize: 16, color: '#eb2f96' }}>{formatCurrency(summaryData.totalCommercialProduct)}</Text>
                 </div>
               </ProTable.Summary.Cell>
             </ProTable.Summary.Row>
 
-            {/* Dòng 4: LỢI NHUẬN */}
-            {isAdmin && (
-              <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-                <ProTable.Summary.Cell index={0} colSpan={13}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
-                    <Text style={{ fontSize: 16 }}>LỢI NHUẬN:</Text>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <InputNumber
-                        value={manualProfit ?? summaryData.profit}
-                        onChange={(val) => setManualProfit(val ? Number(val) : null)}
-                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                        parser={(value) => value!.replace(/\$\s?|(,*)/g, "") as unknown as number}
-                        style={{
-                          width: 200,
-                          fontWeight: "bold",
-                          fontSize: 16,
-                          color: "#d4380d",
-                        }}
-                        bordered={false}
-                        controls={false}
-                        className="align-right-input editable-summary-input"
-                      />
-                      <Text>đ</Text>
-                    </div>
-                  </div>
-                </ProTable.Summary.Cell>
-              </ProTable.Summary.Row>
-            )}
+            <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
+                  <Text style={{ fontSize: 16 }}>Tổng tiền bộ phận thương mại:</Text>
+                  <Text strong style={{ fontSize: 16, color: '#fa8c16' }}>{formatCurrency(summaryData.totalExternalPurchase)}</Text>
+                </div>
+              </ProTable.Summary.Cell>
+            </ProTable.Summary.Row>
           </ProTable.Summary>
         )}
       />

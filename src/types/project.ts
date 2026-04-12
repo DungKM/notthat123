@@ -36,7 +36,7 @@ export interface ProjectDetail {
   name: string;       // Tên hạng mục/vật tư
   material: string;   // Chất liệu
   unit: string;       // Đơn vị tính
-  dimensions?: string;// Kích thước
+  size?: string;      // Kích thước
   quantity: number;   // Số lượng
   price: number;      // Đơn giá bán
   amount: number;     // Thành tiền (quantity * price)

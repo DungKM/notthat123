@@ -565,6 +565,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
               totalSalary: r.netSalary || 0,
               currentAmount: r.currentAmount || 0,
               companyDebt: r.companyDebt || 0,
+              netSalary: r.netSalary || 0,
             }));
             setEmployees(mapped);
             return { data: mapped, success: true, total: mapped.length };
@@ -846,8 +847,8 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
         <Row gutter={16}>
           <Col span={12}>
             <Statistic
-              title="Số tiền đang có"
-              value={selectedEmployee?.currentAmount ?? 0}
+              title="Tổng tiền phải thanh toán "
+              value={selectedEmployee?.netSalary ?? 0}
               suffix="VND"
             />
           </Col>
@@ -862,7 +863,7 @@ const EmployeeManagementPage: React.FC<EmployeeManagementProps> = ({ currentUser
                 formatter: (val: any) => val ? String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '',
                 parser: (val: any) => val ? Number(val.replace(/\./g, '')) : 0,
               }}
-              initialValue={selectedEmployee?.currentAmount ?? 0}
+              initialValue={selectedEmployee?.netSalary ?? 0}
             />
           </Col>
         </Row>

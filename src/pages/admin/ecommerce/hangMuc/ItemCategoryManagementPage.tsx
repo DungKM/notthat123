@@ -19,6 +19,7 @@ export interface ProductionNode {
   name: string;
   description?: string;
   size?: string;
+  material?: string;
   unit?: string;
   price?: number;
   type: 'category' | 'item' | 'variant';
@@ -33,6 +34,7 @@ interface FormValues {
   name: string;
   description?: string;
   size?: string;
+  material?: string;
   unit?: string;
   price?: number;
   parentId?: string | null;
@@ -87,6 +89,11 @@ const VariantRow: React.FC<{
         ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 11 }}>{variant.size}</Tag>
         : <span style={{ color: '#d1d5db' }}>—</span>}
     </td>
+    <td style={{ padding: '8px 16px', color: '#4b5563', fontSize: 12 }}>
+      {variant.material
+        ? <span>{variant.material}</span>
+        : <span style={{ color: '#d1d5db' }}>—</span>}
+    </td>
     <td style={{ padding: '8px 16px', textAlign: 'center' }}>
       {(variant.unit || parentUnit)
         ? <Tag style={{ margin: 0, fontSize: 12 }}>{variant.unit || parentUnit}</Tag>
@@ -116,7 +123,8 @@ const CategoryRow: React.FC<{
   onToggle: () => void;
   onEdit: (n: ProductionNode) => void;
   onDelete: (id: string) => void;
-}> = ({ node, depth, expanded, onToggle, onEdit, onDelete }) => {
+  onAddChild: (id: string, type: ProductionNode['type']) => void;
+}> = ({ node, depth, expanded, onToggle, onEdit, onDelete, onAddChild }) => {
   const isCategory = node.type === 'category';
   const isItem = node.type === 'item';
   const hasChildren = (node.children?.length ?? 0) > 0;
@@ -196,6 +204,15 @@ const CategoryRow: React.FC<{
             : <span style={{ color: '#d1d5db' }}>—</span>}
       </td>
 
+      {/* Chất liệu */}
+      <td style={{ padding: '12px 16px', color: '#4b5563', fontSize: 13 }}>
+        {isItem && hasChildren
+          ? <span style={{ color: '#d1d5db' }}>—</span>
+          : node.material
+            ? <span>{node.material}</span>
+            : <span style={{ color: '#d1d5db' }}>—</span>}
+      </td>
+
       {/* Đơn vị */}
       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
         {isItem && hasChildren
@@ -217,6 +234,11 @@ const CategoryRow: React.FC<{
       {/* Thao tác */}
       <td style={{ padding: '12px 16px', textAlign: 'right' }}>
         <Space size={4}>
+          {isItem && (
+            <Tooltip title="Thêm biến thể">
+              <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(node.id, 'variant')} />
+            </Tooltip>
+          )}
           <Button type="text" size="small" icon={<EditOutlined />} style={{ color: '#3b82f6' }} onClick={() => onEdit(node)}>
             Sửa
           </Button>
@@ -327,6 +349,13 @@ const CategoryFormModal: React.FC<{
           </Form.Item>
         )}
 
+        {/* Chất liệu */}
+        {(nodeType === 'item' || nodeType === 'variant') && (
+          <Form.Item name="material" label="Chất liệu">
+            <Input placeholder="VD: Gỗ Sồi, Gỗ Công nghiệp, Nỉ..." />
+          </Form.Item>
+        )}
+
         {/* Đơn vị */}
         {(nodeType === 'item' || nodeType === 'variant') && (
           <Form.Item name="unit" label="Đơn vị tính">
@@ -407,11 +436,11 @@ const ItemCategoryManagementPage: React.FC = () => {
           ? response.data
           : [];
       setTreeData(data);
-      // Auto expand tất cả category
+      // Auto expand tất cả các cấp
       const ids = new Set<string>();
       const walkExpand = (nodes: ProductionNode[]) => {
         for (const n of nodes) {
-          if (n.type === 'category') ids.add(n.id);
+          ids.add(n.id);
           if (n.children?.length) walkExpand(n.children);
         }
       };
@@ -473,6 +502,7 @@ const ItemCategoryManagementPage: React.FC = () => {
         };
         if (values.description) payload.description = values.description;
         if (values.size) payload.size = values.size;
+        if (values.material) payload.material = values.material;
         if (values.unit) payload.unit = values.unit;
         if (values.price != null) payload.price = values.price;
 
@@ -482,6 +512,7 @@ const ItemCategoryManagementPage: React.FC = () => {
         const patchPayload: Record<string, any> = {};
         if (values.price != null) patchPayload.price = values.price;
         if (values.size) patchPayload.size = values.size;
+        if (values.material) patchPayload.material = values.material;
 
         await svc.patch(editRecord.id, patchPayload);
       }
@@ -560,6 +591,10 @@ const ItemCategoryManagementPage: React.FC = () => {
             onToggle={() => toggleExpand(node.id)}
             onEdit={openEdit}
             onDelete={handleDelete}
+            onAddChild={(id, type) => {
+              setExpandedIds(prev => new Set(prev).add(node.id));
+              openCreate(type, id);
+            }}
           />
         );
 
@@ -608,18 +643,20 @@ const ItemCategoryManagementPage: React.FC = () => {
         <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflowX: 'auto', minHeight: 200 }}>
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '27%' }} />
+              <col style={{ width: '23%' }} />
               <col style={{ width: 'auto' }} />
-              <col style={{ width: '15%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '14%' }} />
-              <col style={{ width: 180 }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '9%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: 140 }} />
             </colgroup>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Tên</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Mô tả</th>
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Kích thước (mm)</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Chất liệu</th>
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Đơn vị</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#d97706' }}>Đơn giá (VNĐ)</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#374151', paddingRight: 20 }}>Thao tác</th>
@@ -628,7 +665,7 @@ const ItemCategoryManagementPage: React.FC = () => {
             <tbody>
               {filtered.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <Empty
                       image={<InboxOutlined style={{ fontSize: 48, color: '#d1d5db' }} />}
                       description={searchText ? 'Không tìm thấy phù hợp' : 'Chưa có mục nào'}
@@ -649,7 +686,7 @@ const ItemCategoryManagementPage: React.FC = () => {
                 <React.Fragment key={root.id}>
                   {renderRows([root], 0)}
                   <tr>
-                    <td colSpan={6} style={{ height: 2, background: '#f3f4f6', padding: 0 }} />
+                    <td colSpan={7} style={{ height: 2, background: '#f3f4f6', padding: 0 }} />
                   </tr>
                 </React.Fragment>
               ))}
@@ -667,6 +704,7 @@ const ItemCategoryManagementPage: React.FC = () => {
           name: editRecord.name,
           description: editRecord.description,
           size: editRecord.size,
+          material: editRecord.material,
           unit: editRecord.unit,
           price: editRecord.price,
           parentId: editRecord.parentId,

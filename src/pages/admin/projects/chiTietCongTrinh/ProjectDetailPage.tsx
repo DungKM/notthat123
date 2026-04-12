@@ -200,11 +200,13 @@ const ProjectDetailPage: React.FC = () => {
                 unit: singleRowData.unit,
                 quantity: singleRowData.quantity,
                 price: singleRowData.price,
+                amount: (singleRowData.quantity || 0) * (singleRowData.price || 0),
                 costPrice: singleRowData.costPrice,
+                isCompanyProduct: !!singleRowData.isCompanyProduct,
                 categoryId: parentCategoryId,
                 type: resolveItemType(singleRowData),
+                size: singleRowData.size || "",
                 note: singleRowData.note,
-                dimensions: singleRowData.dimensions,
               };
               await request('POST', `/${projectId}/details`, payload);
             }
@@ -218,10 +220,12 @@ const ProjectDetailPage: React.FC = () => {
               unit: singleRowData.unit,
               quantity: singleRowData.quantity,
               price: singleRowData.price,
+              amount: (singleRowData.quantity || 0) * (singleRowData.price || 0),
               costPrice: singleRowData.costPrice,
+              isCompanyProduct: !!singleRowData.isCompanyProduct,
               type: resolveItemType(singleRowData),
+              size: singleRowData.size || "",
               note: singleRowData.note,
-              dimensions: singleRowData.dimensions,
             };
             await request('PATCH', `/${projectId}/details/${detailId}`, payload);
             // ✅ Chỉ update UI sau khi PATCH thành công
