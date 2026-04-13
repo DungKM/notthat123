@@ -157,9 +157,11 @@ const ProjectDetailPage: React.FC = () => {
   const handleUpdateDetails = async (newDetails: any[], saveToServer = true, singleRowData?: any, action?: 'save' | 'delete'): Promise<boolean> => {
     if (!project) return false;
 
-    // Không lưu server (ví dụ: checkbox thay đổi tạm thời) → update UI ngay
+    // Optimistic UI Update: Cập nhật state nội bộ ngay lập tức để UI không bị giật lag
+    // hoặc chớp nháy (nhảy checkbox) khi user click liên tục và API chưa phản hồi kịp.
+    setProject({ ...project, details: newDetails });
+
     if (!saveToServer) {
-      setProject({ ...project, details: newDetails });
       return true;
     }
 
@@ -442,7 +444,7 @@ const ProjectDetailPage: React.FC = () => {
         {/* Hiển thị phần chi tiết nội thất & hạch toán */}
         <Col span={24}>
           <ProCard
-            title={<Typography.Text strong style={{ fontSize: '18px' }}>Chi tiết nội thất & hạch toán</Typography.Text>}
+            title={<Typography.Text strong style={{ fontSize: '18px' }}>Chi tiết nội thất & hạch toán - {project.name}</Typography.Text>}
             bordered
             headerBordered
           >
@@ -452,7 +454,7 @@ const ProjectDetailPage: React.FC = () => {
               details={project.details}
               onUpdate={handleUpdateDetails}
               role={user.role}
-              nameColumnTitle={project.name}
+              nameColumnTitle="Tên hạng mục"
             />
           </ProCard>
         </Col>

@@ -223,10 +223,10 @@ const Header: React.FC = () => {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isDarkHeader ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-6'
           }`}
       >
-        <Container className="flex items-center justify-between xl:!max-w-[1400px]">
+        <Container className="flex items-center justify-between !max-w-[1920px] w-full xl:px-8 2xl:px-12">
           {/* Logo */}
-          <Link to="/" className="relative z-50 transition-transform hover:scale-105 mr-4 lg:mr-6 xl:mr-4 2xl:mr-8">
-            <div className="w-[100px] sm:w-[120px]">
+          <Link to="/" className="relative z-50 transition-transform hover:scale-105 mr-2 lg:mr-4 xl:mr-2 2xl:mr-8 flex-shrink-0">
+            <div className="w-[90px] sm:w-[120px]">
               <img
                 src="/assets/images/image-logo.png"
                 alt="Nội Thất Hochi"
@@ -236,7 +236,7 @@ const Header: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center xl:gap-x-3 2xl:gap-x-5">
+          <nav className="hidden xl:flex items-center xl:gap-x-1.5 2xl:gap-x-5">
             {navLinks.map((link) => (
               <div
                 key={link.title}
@@ -259,7 +259,7 @@ const Header: React.FC = () => {
                 <Link
                   to={link.href}
                   target={link.target}
-                  className={`text-[12px] 2xl:text-[13px] font-bold uppercase tracking-wide whitespace-nowrap transition-all duration-300 hover:text-showcase-primary flex items-center gap-1 ${isDarkHeader ? '!text-gray-800' : '!text-white'
+                  className={`text-[11px] xl:text-[11px] 2xl:text-[13px] font-bold uppercase tracking-wide whitespace-nowrap transition-all duration-300 hover:text-showcase-primary flex items-center gap-0.5 2xl:gap-1 px-1 2xl:px-0 ${isDarkHeader ? '!text-gray-800' : '!text-white'
                     }`}
                 >
                   {link.title}
@@ -558,7 +558,7 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 sm:gap-3 2xl:gap-4 ml-4 lg:ml-6 xl:ml-4 2xl:ml-8">
+          <div className="flex items-center gap-2 sm:gap-3 xl:gap-2 2xl:gap-4 ml-2 lg:ml-4 xl:ml-2 2xl:ml-8 flex-shrink-0">
             {/* Search Bar - Desktop */}
             <div ref={searchRef} className="relative hidden md:flex">
               <div className={`flex items-center bg-white rounded-full px-4 py-2 border transition-all  ${isDarkHeader ? 'border-gray-200' : 'border-white/20 border-gray-800'}`}>
@@ -574,9 +574,9 @@ const Header: React.FC = () => {
                       navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
                     }
                   }}
-                  className="bg-transparent outline-none text-[13px] w-[14vw] xl:w-[10vw] 2xl:w-[15vw] min-w-[100px] max-w-[250px] transition-all duration-300 focus:w-[20vw] text-gray-800 placeholder-gray-400"
+                  className="bg-transparent outline-none text-[12px] 2xl:text-[13px] w-[90px] xl:w-[100px] 2xl:w-[180px] transition-all duration-300 focus:w-[130px] xl:focus:w-[150px] 2xl:focus:w-[250px] text-gray-800 placeholder-gray-400"
                 />
-                <div className="ml-2 w-5 h-5 flex items-center justify-center flex-shrink-0">
+                <div className="ml-1 w-5 h-5 flex items-center justify-center flex-shrink-0">
                   {isSearching ? (
                     <LoadingOutlined className="text-gray-400 text-base" />
                   ) : (

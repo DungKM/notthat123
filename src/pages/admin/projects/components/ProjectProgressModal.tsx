@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, Select, Input, Space, Table, message, Typography, DatePicker } from "antd";
+import { Modal, Button, Select, Input, Space, Table, message, Typography, DatePicker, Popconfirm } from "antd";
 import {
   PlusOutlined,
   SaveOutlined,
@@ -434,45 +434,10 @@ const ProjectProgressModal: React.FC<Props> = ({
                     width: 100,
                     render: (_, record: any) => (
                       <Space size="small">
-                        {!record.isSaved && (
-                          <Button
-                            type="text"
-                            style={{ color: '#1890ff' }}
-                            icon={<SaveOutlined />}
-                            onClick={async () => {
-                              if (!record.work) {
-                                message.warning("Vui lòng nhập công việc");
-                                return;
-                              }
-                              let resolvedRecord = { ...record };
-                              let emp = resolvedRecord.employee as any;
-                              if (emp && typeof emp === "object") emp = emp.id || emp._id;
-                              if (emp && typeof emp === "string" && emp.length !== 24) {
-                                const matched = users?.find(u => u.name === emp);
-                                if (matched) emp = matched.id;
-                              }
-                              resolvedRecord.employee = emp;
-
-                              if (onSaveTasks) {
-                                const success = await onSaveTasks(currentStatus.status as string, [resolvedRecord]);
-                                if (success) {
-                                  message.success("Cập nhật công việc thành công");
-                                  setCurrentStatus({
-                                    ...currentStatus,
-                                    tasks: currentStatus.tasks.map((t) =>
-                                      t.id === record.id ? { ...t, isSaved: true, updatedAt: dayjs().toISOString() } : t
-                                    )
-                                  });
-                                }
-                              }
-                            }}
-                          />
-                        )}
-                        <Button
-                          type="text"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={async () => {
+                        {/* Bỏ nút lưu nhỏ theo yêu cầu */}
+                        <Popconfirm
+                          title="Bạn có chắc chắn muốn xóa công việc này không?"
+                          onConfirm={async () => {
                             const isNew = !record.id || String(record.id).length !== 24;
                             if (isNew) {
                               setCurrentStatus({
@@ -492,7 +457,15 @@ const ProjectProgressModal: React.FC<Props> = ({
                               }
                             }
                           }}
-                        />
+                          okText="Đồng ý"
+                          cancelText="Hủy"
+                        >
+                          <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                          />
+                        </Popconfirm>
                       </Space>
                     ),
                   }])

@@ -188,6 +188,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         collapsed={collapsed}
         onCollapse={setCollapsed}
         layout="mix"
+        contentWidth="Fluid"
         splitMenus={false}
         fixSiderbar
         fixedHeader

@@ -5,7 +5,7 @@ import {
   ProTable,
   EditableFormInstance,
 } from "@ant-design/pro-components";
-import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Upload, Checkbox, Dropdown, AutoComplete, Form } from "antd";
+import { Button, Space, Typography, message, InputNumber, Input, Modal, Select, Upload, Checkbox, Dropdown, AutoComplete, Form, Popconfirm } from "antd";
 import {
   DownloadOutlined,
   AppstoreOutlined,
@@ -141,7 +141,7 @@ const CategoryItemAutoComplete: React.FC<{
       const newOptions: any[] = [];
       items.forEach((item: any) => {
         const hasChildren = item.children && item.children.length > 0;
-        
+
         if (hasChildren) {
           const childOptions = item.children.map((child: any) => ({
             label: <span>{child.name}</span>,
@@ -191,10 +191,6 @@ const CategoryItemAutoComplete: React.FC<{
       onFocus={fetchItems}
       onClick={fetchItems}
       filterOption={(inputValue, option) => {
-        const currentValue = value !== undefined ? value : config?.value;
-        // Nếu người dùng vừa click vào (chữ đang bằng đúng value đã chọn), hiển thị toàn bộ list
-        if (inputValue === currentValue) return true;
-        
         return (option?.searchStr || "").includes(inputValue.toLowerCase());
       }}
       onSelect={(val, option: any) => {
@@ -273,7 +269,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     let itemIndex = 0;
     const mapping: Record<string, string> = {};
     details.forEach((row) => {
-      if (row.type === 'group') {
+      if (row.rowType === 'group') {
         groupIndex++;
         itemIndex = 0; // reset
         mapping[row.id!] = numberToRoman(groupIndex);
@@ -305,8 +301,8 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           checked={record.type === 'external'}
           onChange={(e) => {
             const checked = e.target.checked;
-            const newType = checked ? 'external' : 'company';
-            const updatedRow = { ...record, type: newType };
+            if (!checked) return; // Giống Radio button, không cho phép uncheck chính nó
+            const updatedRow = { ...record, type: 'external' };
             const newData = details.map(d => d.id === record.id ? updatedRow : d);
             onUpdate(newData, true, updatedRow, 'save');
           }}
@@ -320,7 +316,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             checked={currentType === 'external'}
             onChange={(e) => {
               const checked = e.target.checked;
-              form.setFieldValue([config.recordKey, 'type'], checked ? 'external' : 'company');
+              if (checked) form.setFieldValue([config.recordKey, 'type'], 'external');
             }}
           />
         );
@@ -336,8 +332,8 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           checked={record.type === 'commercial'}
           onChange={(e) => {
             const checked = e.target.checked;
-            const newType = checked ? 'commercial' : 'company';
-            const updatedRow = { ...record, type: newType };
+            if (!checked) return;
+            const updatedRow = { ...record, type: 'commercial' };
             const newData = details.map(d => d.id === record.id ? updatedRow : d);
             onUpdate(newData, true, updatedRow, 'save');
           }}
@@ -351,7 +347,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             checked={currentType === 'commercial'}
             onChange={(e) => {
               const checked = e.target.checked;
-              form.setFieldValue([config.recordKey, 'type'], checked ? 'commercial' : 'company');
+              if (checked) form.setFieldValue([config.recordKey, 'type'], 'commercial');
             }}
           />
         );
@@ -367,8 +363,8 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           checked={record.type === 'company' || (!record.type)} // Default is company
           onChange={(e) => {
             const checked = e.target.checked;
-            const newType = checked ? 'company' : 'external'; // fallback if unmarked
-            const updatedRow = { ...record, type: newType };
+            if (!checked) return;
+            const updatedRow = { ...record, type: 'company' };
             const newData = details.map(d => d.id === record.id ? updatedRow : d);
             onUpdate(newData, true, updatedRow, 'save');
           }}
@@ -382,7 +378,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             checked={currentType === 'company' || (!currentType)}
             onChange={(e) => {
               const checked = e.target.checked;
-              form.setFieldValue([config.recordKey, 'type'], checked ? 'company' : 'external');
+              if (checked) form.setFieldValue([config.recordKey, 'type'], 'company');
             }}
           />
         );
@@ -391,7 +387,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     {
       title: nameColumnTitle || "Hạng mục",
       dataIndex: "name",
-      width: "25%",
+      width: "15%",
       renderFormItem: (_, config: any, form: any) => {
         // Nhóm header (group) không cho sửa tên trực tiếp
         if (config.record?.rowType === 'group') return <Input disabled style={{ fontWeight: 'bold' }} />;
@@ -505,18 +501,25 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           return (
             <Space>
               <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAddItemToGroup(record.id!)} title="Thêm dòng" />
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => {
-                let toDelete = [record.id];
-                let foundGroup = false;
-                for (const d of details) {
-                  if (d.id === record.id) foundGroup = true;
-                  else if (foundGroup && d.rowType === 'group') break;
-                  else if (foundGroup && d.rowType === 'item') toDelete.push(d.id);
-                }
-                const newDetails = details.filter(d => !toDelete?.includes(d.id));
-                onUpdate(newDetails, true, record, 'delete');
-                message.success("Đã xóa danh mục");
-              }} title="Xóa" />
+              <Popconfirm
+                title={"Bạn có chắc chắn muốn xóa danh mục này và tất cả hạng mục bên trong không?"}
+                onConfirm={() => {
+                  let toDelete = [record.id];
+                  let foundGroup = false;
+                  for (const d of details) {
+                    if (d.id === record.id) foundGroup = true;
+                    else if (foundGroup && d.rowType === 'group') break;
+                    else if (foundGroup && d.rowType === 'item') toDelete.push(d.id);
+                  }
+                  const newDetails = details.filter(d => !toDelete?.includes(d.id));
+                  onUpdate(newDetails, true, record, 'delete');
+                  message.success("Đã xóa danh mục");
+                }}
+                okText="Đồng ý"
+                cancelText="Hủy"
+              >
+                <Button type="link" size="small" danger icon={<DeleteOutlined />} title="Xóa" />
+              </Popconfirm>
             </Space>
           );
         }
@@ -527,10 +530,17 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
               editForm.setFieldsValue(record);
               setEditModalOpen(true);
             }} title="Sửa" />
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => {
-              onUpdate(details.filter((item) => item.id !== record.id), true, record, 'delete');
-              message.success("Đã xóa dòng");
-            }} title="Xóa" />
+            <Popconfirm
+              title={"Bạn có chắc chắn muốn xóa dòng này không?"}
+              onConfirm={() => {
+                onUpdate(details.filter((item) => item.id !== record.id), true, record, 'delete');
+                message.success("Đã xóa dòng");
+              }}
+              okText="Đồng ý"
+              cancelText="Hủy"
+            >
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} title="Xóa" />
+            </Popconfirm>
           </Space>
         );
       },
@@ -654,11 +664,11 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
               Chọn danh mục
             </Button>
             {/* Nút Import Excel */}
-            {/* <Upload showUploadList={false} beforeUpload={() => { message.info('Tính năng Import Excel đang được phát triển'); return false; }}>
+            <Upload showUploadList={false} beforeUpload={() => { message.info('Tính năng Import Excel đang được phát triển'); return false; }}>
               <Button icon={<UploadOutlined />}>
                 Import Excel
               </Button>
-            </Upload> */}
+            </Upload>
           </>
         )}
         <Button type="default" icon={<DownloadOutlined />} onClick={handleExportExcel}>
@@ -673,6 +683,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         maxLength={100}
         recordCreatorProps={false}
         columns={columns}
+        rowClassName={(record) => record.rowType === 'group' ? 'group-row-custom' : ''}
         onRow={(record) => ({
           style: record.rowType === 'group' ? { backgroundColor: '#d9d2a6', fontWeight: 'bold' } : {}
         })}
@@ -766,6 +777,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           box-shadow: none;
         }
         
+        /* Giữ màu nâu khi hover vào dòng danh mục cha */
+        .project-detail-table .ant-table-tbody > tr.group-row-custom:hover > td,
+        .project-detail-table .ant-table-tbody > tr.group-row-custom > td.ant-table-cell-row-hover {
+          background-color: #d9d2a6 !important;
+        }
+
         /* Căn phải cho số */
         .align-right-input .ant-input-number-input {
           text-align: right !important;
@@ -827,12 +844,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       >
         <Form form={editForm} layout="vertical">
           <Form.Item name="name" label="Hạng mục" rules={[{ required: true, message: 'Vui lòng nhập hạng mục' }]}>
-            <CategoryItemAutoComplete 
-               record={editingRecord} 
-               form={editForm} 
-               config={{ isFlatForm: true }} 
-               value={editForm.getFieldValue('name')} 
-               onChange={(val) => editForm.setFieldValue('name', val)} 
+            <CategoryItemAutoComplete
+              record={editingRecord}
+              form={editForm}
+              config={{ isFlatForm: true }}
+              value={editForm.getFieldValue('name')}
+              onChange={(val) => editForm.setFieldValue('name', val)}
             />
           </Form.Item>
           <Space style={{ display: 'flex', width: '100%', gap: 12 }} size="small" align="start">

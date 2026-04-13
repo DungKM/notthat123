@@ -87,12 +87,12 @@ const VariantRow: React.FC<{
     <td style={{ padding: '8px 16px', textAlign: 'center' }}>
       {variant.size
         ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 11 }}>{variant.size}</Tag>
-        : <span style={{ color: '#d1d5db' }}>—</span>}
+        : null}
     </td>
     <td style={{ padding: '8px 16px', color: '#4b5563', fontSize: 12 }}>
       {variant.origin
         ? <span>{variant.origin}</span>
-        : <span style={{ color: '#d1d5db' }}>—</span>}
+        : null}
     </td>
     {/* <td style={{ padding: '8px 16px', color: '#6b7280', fontSize: 12, maxWidth: 200 }}>
       <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -202,10 +202,10 @@ const CategoryRow: React.FC<{
 
       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
         {isItem && hasChildren
-          ? <span style={{ color: '#d1d5db' }}>—</span>
+          ? null
           : node.size
             ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 12 }}>{node.size}</Tag>
-            : <span style={{ color: '#d1d5db' }}>—</span>}
+            : null}
       </td>
 
       {/* Sản xuất */}
@@ -229,19 +229,19 @@ const CategoryRow: React.FC<{
       {/* Đơn vị */}
       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
         {isItem && hasChildren
-          ? <span style={{ color: '#d1d5db' }}>—</span>
+          ? null
           : node.unit
             ? <Tag style={{ margin: 0 }}>{node.unit}</Tag>
-            : <span style={{ color: '#d1d5db' }}>—</span>}
+            : null}
       </td>
 
       {/* Đơn giá */}
       <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
         {(isCategory || (isItem && hasChildren))
-          ? <span style={{ color: '#d1d5db' }}>—</span>
-          : node.price != null
+          ? null
+          : node.price != null && node.price !== 0
             ? <span style={{ fontWeight: 600, color: '#d97706', fontSize: 13 }}>{fmtPrice(node.price)}</span>
-            : <span style={{ color: '#d1d5db' }}>—</span>}
+            : null}
       </td>
 
       {/* Thao tác */}
@@ -663,6 +663,13 @@ const ItemCategoryManagementPage: React.FC = () => {
           Quản lý danh mục và hạng mục bên trong. Hỗ trợ nhiều biến thể (loại) cho mỗi hạng mục.
         </div>
         <Space wrap>
+          <Input.Search
+            placeholder="Tìm kiếm hạng mục..."
+            allowClear
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            style={{ width: 250 }}
+          />
           <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate('category')}>
             Thêm danh mục
           </Button>

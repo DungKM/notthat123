@@ -186,15 +186,15 @@ export const exportProjectDetailToExcel = async (
   // Rows 7+: Items
   let totalVal = 0;
   details.forEach((item, index) => {
-    const isGroup = item.type === 'group';
+    const isGroup = item.rowType === 'group';
     let rowSubtotal = 0;
 
     if (isGroup) {
       let foundGroup = false;
       for (const d of details) {
         if (d.id === item.id) foundGroup = true;
-        else if (foundGroup && d.type === 'group') break;
-        else if (foundGroup && d.type === 'item') rowSubtotal += (d.quantity * d.price || 0);
+        else if (foundGroup && d.rowType === 'group') break;
+        else if (foundGroup && d.rowType === 'item') rowSubtotal += (d.quantity * d.price || 0);
       }
     } else {
       rowSubtotal = (item.quantity || 0) * (item.price || 0);
@@ -240,7 +240,8 @@ export const exportProjectDetailToExcel = async (
       }
 
       if (c === 7 && !isGroup) cell.numFmt = '#,##0.00';
-      if ((c === 8 || c === 9) && !isGroup) cell.numFmt = '#,##0';
+      if (c === 8 && !isGroup) cell.numFmt = '#,##0';
+      if (c === 9) cell.numFmt = '#,##0';
     }
 
     currentRow++;
