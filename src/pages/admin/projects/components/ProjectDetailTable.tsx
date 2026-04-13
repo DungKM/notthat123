@@ -417,6 +417,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
       editable: (_, record) => record.rowType !== 'group',
     },
     {
+      title: "Sản xuất",
+      dataIndex: "production",
+      render: (_, record) => record.rowType === 'group' ? null : <span>{record.production}</span>,
+      editable: (_, record) => record.rowType !== 'group',
+    },
+    {
       title: "Đơn vị",
       dataIndex: "unit",
       width: 80,
@@ -532,13 +538,30 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
   // Logic tổng kết
   // Using direct variables from backend `project` response instead of recalculating
   const summaryData = useMemo(() => {
+    let computedAmount = 0;
+    let computedCost = 0;
+
+    details.forEach(item => {
+      if (item.rowType !== 'group') {
+        const qty = item.quantity || 0;
+        const price = item.price || 0;
+        const costPrice = item.costPrice || 0;
+
+        computedAmount += qty * price;
+        computedCost += costPrice; // Giá vốn người dùng nhập là TỔNG giá vốn, không nhân với số lượng nữa
+      }
+    });
+
+    const profit = computedAmount - computedCost;
+
     return {
       totalCompanyProduct: project?.companyProductsTotal || 0,
       totalCommercialProduct: project?.commercialProductsTotal || 0,
       totalExternalPurchase: project?.externalProductsTotal || 0,
-      totalAmount: project?.totalAmount || 0, // Dùng thay vì tự sum nếu được, nhưng fallback nếu cần
+      totalAmount: computedAmount,
+      profit
     };
-  }, [project]);
+  }, [details, project]);
 
   // Khi chọn danh mục từ modal → gọi API trước, chỉ toast khi thành công
   const handleCategorySelect = async (category: any) => {
@@ -680,7 +703,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         summary={() => (
           <ProTable.Summary fixed>
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 14 : 12}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16 }}>Tổng tiền SP công ty:</Text>
                   <Text strong style={{ fontSize: 16, color: '#1677ff' }}>{formatCurrency(summaryData.totalCompanyProduct)}</Text>
@@ -688,8 +711,9 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
               </ProTable.Summary.Cell>
             </ProTable.Summary.Row>
 
+
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 14 : 12}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16 }}>Tổng tiền SP thương mại:</Text>
                   <Text strong style={{ fontSize: 16, color: '#eb2f96' }}>{formatCurrency(summaryData.totalCommercialProduct)}</Text>
@@ -698,7 +722,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             </ProTable.Summary.Row>
 
             <ProTable.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: "bold" }}>
-              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 14 : 12}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16 }}>Tổng tiền bộ phận thương mại:</Text>
                   <Text strong style={{ fontSize: 16, color: '#fa8c16' }}>{formatCurrency(summaryData.totalExternalPurchase)}</Text>
@@ -707,7 +731,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             </ProTable.Summary.Row>
 
             <ProTable.Summary.Row style={{ backgroundColor: "#ffff00", fontWeight: "bold" }}>
-              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 13 : 11}>
+              <ProTable.Summary.Cell index={0} colSpan={isAdmin ? 14 : 12}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
                   <Text style={{ fontSize: 16, color: '#000' }}>TỔNG GIÁ CHƯA VAT (VNĐ):</Text>
                   <Text strong style={{ fontSize: 16, color: '#000' }}>
@@ -716,6 +740,19 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                 </div>
               </ProTable.Summary.Cell>
             </ProTable.Summary.Row>
+
+            {isAdmin && (
+              <ProTable.Summary.Row style={{ backgroundColor: "#e6f7ff", fontWeight: "bold" }}>
+                <ProTable.Summary.Cell index={0} colSpan={14}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 24 }}>
+                    <Text style={{ fontSize: 16, color: '#096dd9' }}>LỢI NHUẬN (VNĐ):</Text>
+                    <Text strong style={{ fontSize: 16, color: '#096dd9' }}>
+                      {formatCurrency(summaryData.profit)}
+                    </Text>
+                  </div>
+                </ProTable.Summary.Cell>
+              </ProTable.Summary.Row>
+            )}
           </ProTable.Summary>
         )}
       />
@@ -796,14 +833,17 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                onChange={(val) => editForm.setFieldValue('name', val)} 
             />
           </Form.Item>
-          <Space style={{ display: 'flex' }} size="large">
-            <Form.Item name="size" label="Kích thước (DxRxC mm)">
+          <Space style={{ display: 'flex', width: '100%', gap: 12 }} size="small" align="start">
+            <Form.Item name="size" label="Kích thước (DxRxC mm)" style={{ flex: 2 }}>
               <Input />
             </Form.Item>
-            <Form.Item name="material" label="Chất liệu" style={{ flex: 1 }}>
+            <Form.Item name="material" label="Chất liệu" style={{ flex: 2 }}>
               <Input />
             </Form.Item>
-            <Form.Item name="unit" label="Đơn vị">
+            <Form.Item name="production" label="Sản xuất" style={{ flex: 2 }}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="unit" label="Đơn vị" style={{ flex: 1 }}>
               <Input />
             </Form.Item>
           </Space>

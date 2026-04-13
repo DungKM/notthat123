@@ -122,7 +122,7 @@ const CategoryRow: React.FC<{
   onToggle: () => void;
   onEdit: (n: ProductionNode) => void;
   onDelete: (id: string) => void;
-  onAddChild: (id: string, type: ProductionNode['type']) => void;
+  onAddChild: (id: string, type: ProductionNode['type'], name: string) => void;
 }> = ({ node, depth, expanded, onToggle, onEdit, onDelete, onAddChild }) => {
   const isCategory = node.type === 'category';
   const isItem = node.type === 'item';
@@ -235,12 +235,12 @@ const CategoryRow: React.FC<{
         <Space size={4}>
           {isCategory && (
             <Tooltip title="Thêm hạng mục">
-              <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(node.id, 'item')} />
+              <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(node.id, 'item', node.name)} />
             </Tooltip>
           )}
           {isItem && (
             <Tooltip title="Thêm biến thể">
-              <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(node.id, 'variant')} />
+              <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(node.id, 'variant', node.name)} />
             </Tooltip>
           )}
           <Button type="text" size="small" icon={<EditOutlined />} style={{ color: '#3b82f6' }} onClick={() => onEdit(node)}>
@@ -272,7 +272,8 @@ const CategoryFormModal: React.FC<{
   onCancel: () => void;
   onFinish: (values: FormValues) => Promise<void>;
   defaultParentId?: string | null;
-}> = ({ open, mode, nodeType, initialValues, categoryOptions, itemOptions, onCancel, onFinish, defaultParentId }) => {
+  parentName?: string | null;
+}> = ({ open, mode, nodeType, initialValues, categoryOptions, itemOptions, onCancel, onFinish, defaultParentId, parentName }) => {
   const [form] = Form.useForm<FormValues>();
   const [submitting, setSubmitting] = useState(false);
 
@@ -311,7 +312,14 @@ const CategoryFormModal: React.FC<{
       title={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {mode === 'create' ? <PlusOutlined style={{ color: '#10b981' }} /> : <EditOutlined style={{ color: '#3b82f6' }} />}
-          <span>{mode === 'create' ? `Thêm ${titleMap[nodeType]}` : `Chỉnh sửa ${titleMap[nodeType]}`}</span>
+          <span>
+            {mode === 'create'
+              ? (parentName
+                  ? `Thêm ${titleMap[nodeType]} của ${parentName}`
+                  : `Thêm ${titleMap[nodeType]}`)
+              : `Chỉnh sửa ${titleMap[nodeType]}`
+            }
+          </span>
         </div>
       }
       open={open}
@@ -391,9 +399,9 @@ const CategoryFormModal: React.FC<{
             />
           </Form.Item>
         )}
-        {/* Parent (chỉ khi tạo mới item hoặc variant) */}
+        {/* Thuộc danh mục — ẩn nếu đã có defaultParentId */}
         {mode === 'create' && nodeType === 'item' && (
-          <Form.Item name="parentId" label="Thuộc danh mục">
+          <Form.Item name="parentId" label="Thuộc danh mục" hidden={!!defaultParentId}>
             <Select placeholder="Chọn danh mục cha" allowClear>
               {categoryOptions.map(c => <Option key={c.id} value={c.id}>{c.name}</Option>)}
             </Select>
@@ -401,7 +409,7 @@ const CategoryFormModal: React.FC<{
         )}
 
         {mode === 'create' && nodeType === 'variant' && (
-          <Form.Item name="parentId" label="Thuộc hạng mục">
+          <Form.Item name="parentId" label="Thuộc hạng mục" hidden={!!defaultParentId}>
             <Select placeholder="Chọn hạng mục cha" allowClear>
               {itemOptions.map(i => <Option key={i.id} value={i.id}>{i.name}</Option>)}
             </Select>
@@ -431,6 +439,7 @@ const ItemCategoryManagementPage: React.FC = () => {
   const [modalNodeType, setModalNodeType] = useState<ProductionNode['type']>('category');
   const [editRecord, setEditRecord] = useState<ProductionNode | null>(null);
   const [defaultParentId, setDefaultParentId] = useState<string | null>(null);
+  const [defaultParentName, setDefaultParentName] = useState<string | null>(null);
 
   // ─── Load hierarchy ─────────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
@@ -471,11 +480,12 @@ const ItemCategoryManagementPage: React.FC = () => {
   });
 
   // ─── Open modals ────────────────────────────────────────────────────────────
-  const openCreate = (type: ProductionNode['type'] = 'category', parentId?: string) => {
+  const openCreate = (type: ProductionNode['type'] = 'category', parentId?: string, parentName?: string) => {
     setModalMode('create');
     setModalNodeType(type);
     setEditRecord(null);
     setDefaultParentId(parentId ?? null);
+    setDefaultParentName(parentName ?? null);
     setModalOpen(true);
   };
 
@@ -484,6 +494,7 @@ const ItemCategoryManagementPage: React.FC = () => {
     setModalNodeType(node.type);
     setEditRecord(node);
     setDefaultParentId(null);
+    setDefaultParentName(null);
     setModalOpen(true);
   };
 
@@ -606,9 +617,9 @@ const ItemCategoryManagementPage: React.FC = () => {
             onToggle={() => toggleExpand(node.id)}
             onEdit={openEdit}
             onDelete={handleDelete}
-            onAddChild={(id, type) => {
+            onAddChild={(id, type, name) => {
               setExpandedIds(prev => new Set(prev).add(node.id));
-              openCreate(type, id);
+              openCreate(type, id, name);
             }}
           />
         );
@@ -724,6 +735,7 @@ const ItemCategoryManagementPage: React.FC = () => {
         categoryOptions={getAllByType('category')}
         itemOptions={getAllByType('item')}
         defaultParentId={defaultParentId}
+        parentName={defaultParentName}
         onCancel={() => { setModalOpen(false); setEditRecord(null); }}
         onFinish={handleSubmit}
       />
