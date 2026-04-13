@@ -194,6 +194,7 @@ const ProjectDetailPage: React.FC = () => {
               const payload = {
                 name: singleRowData.name,
                 material: singleRowData.material,
+                origin: singleRowData.origin,
                 unit: singleRowData.unit,
                 quantity: singleRowData.quantity,
                 price: singleRowData.price,
@@ -213,6 +214,7 @@ const ProjectDetailPage: React.FC = () => {
             const payload = {
               name: singleRowData.name,
               material: singleRowData.material,
+              origin: singleRowData.origin,
               unit: singleRowData.unit,
               quantity: singleRowData.quantity,
               price: singleRowData.price,

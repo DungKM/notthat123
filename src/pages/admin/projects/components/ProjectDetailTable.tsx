@@ -842,7 +842,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             <Form.Item name="material" label="Chất liệu" style={{ flex: 2 }}>
               <Input />
             </Form.Item>
-            <Form.Item name="production" label="Sản xuất" style={{ flex: 2 }}>
+            <Form.Item name="origin" label="Sản xuất" style={{ flex: 2 }}>
               <Input />
             </Form.Item>
             <Form.Item name="unit" label="Đơn vị" style={{ flex: 1 }}>
