@@ -79,6 +79,7 @@ const AppRouter: React.FC = () => {
             <Route path={ROUTES.DANH_SACH_SAN_PHAM} element={<ProductsPage />} />
             <Route path={ROUTES.CHI_TIET_SAN_PHAM} element={<ProductDetailPage />} />
             <Route path={ROUTES.CONG_TRINH} element={<ProjectsPage />} />
+            <Route path={ROUTES.THIET_KE_KIEN_TRUC} element={<ProjectsPage />} />
             <Route path={ROUTES.CHI_TIET_CONG_TRINH} element={<ProjectDetailClientPage />} />
             <Route path={ROUTES.GIOI_THIEU} element={<AboutPage />} />
             <Route path={ROUTES.VI_SAO_CHON_CHUNG_TOI} element={<WhyChooseUsPage />} />

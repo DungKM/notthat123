@@ -30,6 +30,7 @@ const Header: React.FC = () => {
   const [showTopBar, setShowTopBar] = useState(true);
   const [activeMegaCategory, setActiveMegaCategory] = useState<any>(null);
   const [activeMegaProjectCategory, setActiveMegaProjectCategory] = useState<any>(null);
+  const [activeMegaArchCategory, setActiveMegaArchCategory] = useState<any>(null);
   const [megaMenuForceHide, setMegaMenuForceHide] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState<string | null>(null);
   const megaMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -196,6 +197,11 @@ const Header: React.FC = () => {
       href: ROUTES.CONG_TRINH,
 
     },
+    {
+      title: t('nav.architecture'),
+      href: ROUTES.THIET_KE_KIEN_TRUC,
+
+    },
     { title: t('nav.partners'), href: ROUTES.DOI_TAC },
     { title: t('nav.videos'), href: ROUTES.VIDEO },
     { title: t('nav.contact'), href: ROUTES.LIEN_HE },
@@ -234,9 +240,9 @@ const Header: React.FC = () => {
             {navLinks.map((link) => (
               <div
                 key={link.title}
-                className={`${link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH ? 'static' : 'relative'} group`}
+                className={`${link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC ? 'static' : 'relative'} group`}
                 onMouseEnter={() => {
-                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH) {
+                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) {
                     // Clear any pending close
                     if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
                     if (!megaMenuForceHide) setMegaMenuOpen(link.href);
@@ -244,7 +250,7 @@ const Header: React.FC = () => {
                 }}
                 onMouseLeave={(e) => {
                   setMegaMenuForceHide(false);
-                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH) {
+                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) {
                     // Delay close so cursor can move from nav item to panel
                     megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(null), 300);
                   }
@@ -259,6 +265,7 @@ const Header: React.FC = () => {
                   {link.title}
                   {link.submenu && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
                   {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
+                  {link.href === ROUTES.THIET_KE_KIEN_TRUC && congTrinhCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
                   {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
                 </Link>
 
@@ -432,6 +439,97 @@ const Header: React.FC = () => {
                                   <a
                                     key={child.id || child._id}
                                     href={`${ROUTES.CONG_TRINH}?category=${child.slug}`}
+                                    className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
+                                    onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
+                                  >
+                                    <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary">
+                                      {child.name}
+                                    </span>
+                                    <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden rounded">
+                                      {child.representativeImage || child.image ? (
+                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain mix-blend-multiply" alt="" />
+                                      )}
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Submenu Thiết Kế Kiến Trúc - MEGA MENU */}
+                {link.href === ROUTES.THIET_KE_KIEN_TRUC && congTrinhCategories.length > 0 && (
+                  <div
+                    className={`absolute top-full pt-4 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen === ROUTES.THIET_KE_KIEN_TRUC && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
+                  >
+                    <div
+                      className="mx-auto w-full max-w-[1240px] px-4 xl:px-4 pointer-events-auto"
+                      onMouseEnter={() => {
+                        if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
+                      }}
+                      onMouseLeave={() => {
+                        megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(null), 300);
+                      }}
+                    >
+                      <div
+                        className="bg-white rounded-b-xl overflow-hidden flex min-h-[450px] border border-gray-100 relative"
+                        onMouseLeave={() => setActiveMegaArchCategory(null)}
+                      >
+                        {/* Left Sidebar - Parent Categories */}
+                        <div className="w-[200px] bg-[#f4f7f9] flex flex-col py-4 shrink-0 border-r border-[#e5e9f0]">
+                          {congTrinhCategories.map((cat: any, index: number) => {
+                            const isActive = activeMegaArchCategory ? activeMegaArchCategory.id === cat.id : index === 0;
+                            return (
+                              <div
+                                key={cat.id || cat._id}
+                                onMouseEnter={() => setActiveMegaArchCategory(cat)}
+                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat.slug || cat.id || cat._id}`); }}
+                                className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
+                                  }`}
+                              >
+                                <span className={`font-bold text-[14px] flex-1 text-left transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                                  {cat.name}
+                                </span>
+                                {/* Right Arrow Triangle */}
+                                <div className={`absolute top-1/2 -right-0 -translate-y-1/2 w-0 h-0 border-y-[10px] border-y-transparent border-l-[12px] border-l-showcase-primary translate-x-[11px] z-10 pointer-events-none transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Right Area - Child Categories */}
+                        <div className="flex-1 bg-[#fbfcfd] p-8 overflow-y-auto">
+                          {(() => {
+                            const currentCat = activeMegaArchCategory || congTrinhCategories[0];
+                            if (!currentCat || !currentCat.children || currentCat.children.length === 0) {
+                              return (
+                                <div>
+                                  <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
+                                  <div className="mt-4">
+                                    <a
+                                      href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${currentCat?.slug || currentCat?.id || currentCat?._id}`}
+                                      className="inline-flex items-center gap-2 text-[13px] font-bold text-showcase-primary hover:underline hover:text-[#C5A059]"
+                                      onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
+                                    >
+                                      Xem tất cả {currentCat?.name}
+                                      <ArrowRightOutlined className="text-[10px]" />
+                                    </a>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+                                {currentCat.children.map((child: any) => (
+                                  <a
+                                    key={child.id || child._id}
+                                    href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${child.slug}`}
                                     className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                   >
@@ -1103,6 +1201,23 @@ const Header: React.FC = () => {
                           <a
                             key={cat._id || cat.id}
                             href={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
+                            className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-sm font-medium transition-colors mb-1"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <span>{cat.name}</span>
+                            <ArrowRightOutlined className="text-[10px] text-gray-500" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Danh mục Thiết Kế Kiến Trúc trên mobile */}
+                    {link.href === ROUTES.THIET_KE_KIEN_TRUC && congTrinhCategories.length > 0 && (
+                      <div className="pb-4 pl-4 space-y-1">
+                        {congTrinhCategories.map((cat) => (
+                          <a
+                            key={cat._id || cat.id}
+                            href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat._id || cat.id}`}
                             className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-sm font-medium transition-colors mb-1"
                             onClick={() => setIsMenuOpen(false)}
                           >

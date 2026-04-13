@@ -90,7 +90,7 @@ const ProjectDetailPage: React.FC = () => {
         <Container>
           {/* BREADCRUMB */}
           <div className="text-[13px] !text-gray-500 mb-6 font-medium">
-            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Home</Link>
+            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
             <span className="mx-2">/</span>
             <Link to="/cong-trinh" className="hover:text-showcase-primary !text-gray-500">Công trình</Link>
             <span className="mx-2">/</span>
@@ -103,70 +103,70 @@ const ProjectDetailPage: React.FC = () => {
               {/* Main content */}
               <article className="bg-white shadow-sm border border-gray-100">
                 <Image.PreviewGroup>
-                
-                {/* Tiêu đề & Thông tin - Đưa lên trên hoặc dưới ảnh. Theo yêu cầu sẽ để dưới ảnh. */}
-                <div className="relative w-full [&_.ant-image]:!flex [&_.ant-image]:!justify-center [&_.ant-image]:!w-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-auto [&_.ant-image-img]:!object-contain bg-gray-50">
-                  <Image
-                    src={coverImage}
-                    alt={project.name}
-                    className="w-full h-auto object-contain"
-                    loading="lazy"
-                  />
-                </div>
 
-                <div className="p-6 sm:px-10 sm:pt-8 sm:pb-2">
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <Badge variant="gold">{categoryName}</Badge>
-                    {project.year && (
-                      <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                        <CalendarOutlined className="mr-1 text-[10px]" />
-                        {project.year}
-                      </span>
-                    )}
-                    {project.area && (
-                      <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                        <FullscreenOutlined className="mr-1 text-[10px]" />
-                        {project.area} m²
-                      </span>
+                  {/* Tiêu đề & Thông tin - Đưa lên trên hoặc dưới ảnh. Theo yêu cầu sẽ để dưới ảnh. */}
+                  <div className="relative w-full [&_.ant-image]:!flex [&_.ant-image]:!justify-center [&_.ant-image]:!w-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-auto [&_.ant-image-img]:!object-contain bg-gray-50">
+                    <Image
+                      src={coverImage}
+                      alt={project.name}
+                      className="w-full h-auto object-contain"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div className="p-6 sm:px-10 sm:pt-8 sm:pb-2">
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <Badge variant="gold">{categoryName}</Badge>
+                      {project.year && (
+                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                          <CalendarOutlined className="mr-1 text-[10px]" />
+                          {project.year}
+                        </span>
+                      )}
+                      {project.area && (
+                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                          <FullscreenOutlined className="mr-1 text-[10px]" />
+                          {project.area} m²
+                        </span>
+                      )}
+                    </div>
+                    <h1
+                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {project.name}
+                    </h1>
+                    {project.location && (
+                      <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-500">
+                        <EnvironmentOutlined className="mr-2 text-xs" />
+                        {project.location}
+                      </p>
                     )}
                   </div>
-                  <h1
-                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900"
-                    style={{ fontFamily: "'Inter', sans-serif" }}
-                  >
-                    {project.name}
-                  </h1>
-                  {project.location && (
-                    <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-500">
-                      <EnvironmentOutlined className="mr-2 text-xs" />
-                      {project.location}
-                    </p>
-                  )}
-                </div>
 
-                {/* Body */}
-                <div className="p-6 sm:px-10 sm:pb-10 space-y-10">
-                  {/* Excerpt */}
-                  {project.description && (
-                    <p className="text-base sm:text-lg text-gray-700 leading-relaxed border-l-4 border-showcase-primary pl-4 sm:pl-6 whitespace-pre-line">
-                      {project.description}
-                    </p>
-                  )}
+                  {/* Body */}
+                  <div className="p-6 sm:px-10 sm:pb-10 space-y-10">
+                    {/* Excerpt */}
+                    {project.description && (
+                      <p className="text-base sm:text-lg text-gray-700 leading-relaxed border-l-4 border-showcase-primary pl-4 sm:pl-6 whitespace-pre-line">
+                        {project.description}
+                      </p>
+                    )}
 
-                  {/* Gallery */}
-                  {gallery && gallery.length > 0 && (
-                    <section className="space-y-4 pt-6">
-                      <div className="flex items-center justify-between">
-                        <h2
-                          className="text-lg sm:text-xl font-bold uppercase tracking-[0.25em] text-teal-950"
-                          style={{ fontFamily: "'Inter', sans-serif" }}
-                        >
-                          GALLERY CÔNG TRÌNH
-                        </h2>
-                        <span className="text-xs text-gray-400 font-medium">
-                          {gallery.length + 1} hình ảnh
-                        </span>
-                      </div>
+                    {/* Gallery */}
+                    {gallery && gallery.length > 0 && (
+                      <section className="space-y-4 pt-6">
+                        <div className="flex items-center justify-between">
+                          <h2
+                            className="text-lg sm:text-xl font-bold uppercase tracking-[0.25em] text-teal-950"
+                            style={{ fontFamily: "'Inter', sans-serif" }}
+                          >
+                            GALLERY CÔNG TRÌNH
+                          </h2>
+                          <span className="text-xs text-gray-400 font-medium">
+                            {gallery.length + 1} hình ảnh
+                          </span>
+                        </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover">
                           {gallery.map((image: any, index: number) => (
                             <div
@@ -184,9 +184,9 @@ const ProjectDetailPage: React.FC = () => {
                             </div>
                           ))}
                         </div>
-                    </section>
-                  )}
-                </div>
+                      </section>
+                    )}
+                  </div>
                 </Image.PreviewGroup>
               </article>
             </div>

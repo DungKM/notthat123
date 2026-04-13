@@ -275,7 +275,7 @@ const CategoryManagementPage: React.FC = () => {
   // ─── Delete ──────────────────────────────────────────────────────────────
   const handleDelete = async (id: string) => {
     await remove(id);
-    loadData();
+    await loadData();
   };
 
   // ─── Edit ────────────────────────────────────────────────────────────────

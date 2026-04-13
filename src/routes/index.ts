@@ -15,6 +15,7 @@ export const ROUTES = {
   DANH_SACH_SAN_PHAM: '/san-pham/danh-sach',
   CHI_TIET_SAN_PHAM: '/san-pham/:slug',
   CONG_TRINH: '/cong-trinh',
+  THIET_KE_KIEN_TRUC: '/thiet-ke-kien-truc',
   CHI_TIET_CONG_TRINH: '/cong-trinh/:slug',
   GIOI_THIEU: '/gioi-thieu',
   VI_SAO_CHON_CHUNG_TOI: '/vi-sao-chon-chung-toi',

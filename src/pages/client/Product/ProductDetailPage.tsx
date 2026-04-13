@@ -220,7 +220,7 @@ const ProductDetailPage: React.FC = () => {
             <Container className="max-w-7xl">
               {/* BREADCRUMB */}
               <div className="text-[13px] !text-gray-500 mb-6 font-medium">
-                <Link to="/" className="hover:text-showcase-primary !text-gray-500">Home</Link>
+                <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
                 <span className="mx-2">/</span>
                 <Link to="/san-pham" className="hover:text-showcase-primary !text-gray-500">Sản phẩm</Link>
                 <span className="mx-2">/</span>
@@ -395,9 +395,9 @@ const ProductDetailPage: React.FC = () => {
                       </div>
 
                       {stockWarning && (
-                          <div className="text-red-500 text-[13px] font-medium -mt-5 mb-5 block">
-                            {stockWarning}
-                          </div>
+                        <div className="text-red-500 text-[13px] font-medium -mt-5 mb-5 block">
+                          {stockWarning}
+                        </div>
                       )}
 
                       {/* Policy Box */}
@@ -507,14 +507,14 @@ const ProductDetailPage: React.FC = () => {
                                 className="w-full max-w-4xl mx-auto block rounded"
                                 loading="lazy"
                               />
-                            {img.description && (
-                              <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
-                                {img.description}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                              {img.description && (
+                                <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
+                                  {img.description}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </Image.PreviewGroup>
                     )}
                   </div>

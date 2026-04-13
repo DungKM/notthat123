@@ -33,7 +33,7 @@ const PartnerDetailPage: React.FC = () => {
         <Container>
           {/* BREADCRUMB */}
           <div className="text-[13px] !text-gray-500 mb-6 font-medium">
-            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Home</Link>
+            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
             <span className="mx-2">/</span>
             <Link to="/doi-tac" className="hover:text-showcase-primary !text-gray-500">Đối tác</Link>
             <span className="mx-2">/</span>

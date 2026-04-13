@@ -233,6 +233,11 @@ const CategoryRow: React.FC<{
       {/* Thao tác */}
       <td style={{ padding: '12px 16px', textAlign: 'right' }}>
         <Space size={4}>
+          {isCategory && (
+            <Tooltip title="Thêm hạng mục">
+              <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(node.id, 'item')} />
+            </Tooltip>
+          )}
           {isItem && (
             <Tooltip title="Thêm biến thể">
               <Button type="text" size="small" icon={<PlusOutlined />} style={{ color: '#10b981' }} onClick={() => onAddChild(node.id, 'variant')} />
@@ -629,9 +634,6 @@ const ItemCategoryManagementPage: React.FC = () => {
           <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate('category')}>
             Thêm danh mục
           </Button>
-          <Button icon={<PlusOutlined />} onClick={() => openCreate('item')} style={{ borderColor: '#10b981', color: '#10b981' }}>
-            Thêm hạng mục
-          </Button>
         </Space>
       </div>
 
@@ -653,13 +655,12 @@ const ItemCategoryManagementPage: React.FC = () => {
         <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflowX: 'auto', minHeight: 200 }}>
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '23%' }} />
-              <col style={{ width: '13%' }} />
-              <col style={{ width: '13%' }} />
-              {/* <col style={{ width: 'auto' }} /> */}
-              <col style={{ width: '9%' }} />
-              <col style={{ width: '13%' }} />
-              <col style={{ width: 140 }} />
+              <col style={{ width: '28%' }} />
+              <col style={{ width: '16%' }} />
+              <col style={{ width: '14%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: '14%' }} />
+              <col style={{ width: '18%' }} />
             </colgroup>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
