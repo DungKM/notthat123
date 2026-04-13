@@ -36,7 +36,7 @@ export interface ProjectDetail {
   parentCategoryId?: string; // Nếu là 'item', đây là ID của nhóm cha
   name: string;       // Tên hạng mục/vật tư
   material: string;   // Chất liệu
-  production?: string; // Nơi sản xuất / Xưởng
+  origin?: string; // Nơi sản xuất / Xưởng
   unit: string;       // Đơn vị tính
   size?: string;      // Kích thước
   quantity: number;   // Số lượng

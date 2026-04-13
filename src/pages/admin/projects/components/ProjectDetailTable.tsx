@@ -209,6 +209,7 @@ const CategoryItemAutoComplete: React.FC<{
               name: val,
               ...(itemData.size !== undefined && { size: itemData.size }),
               ...(itemData.material !== undefined && { material: itemData.material }),
+              ...(itemData.origin !== undefined && { origin: itemData.origin }),
               ...(itemData.unit !== undefined && { unit: itemData.unit }),
               ...(itemData.price !== undefined && { price: itemData.price }),
               ...(itemData.costPrice !== undefined && { costPrice: itemData.costPrice }),
@@ -217,6 +218,7 @@ const CategoryItemAutoComplete: React.FC<{
             form.setFieldValue([config.recordKey, 'name'], val);
             if (itemData.size !== undefined) form.setFieldValue([config.recordKey, 'size'], itemData.size);
             if (itemData.material !== undefined) form.setFieldValue([config.recordKey, 'material'], itemData.material);
+            if (itemData.origin !== undefined) form.setFieldValue([config.recordKey, 'origin'], itemData.origin);
             if (itemData.unit !== undefined) form.setFieldValue([config.recordKey, 'unit'], itemData.unit);
             if (itemData.price !== undefined) form.setFieldValue([config.recordKey, 'price'], itemData.price);
             if (itemData.costPrice !== undefined) form.setFieldValue([config.recordKey, 'costPrice'], itemData.costPrice);
@@ -418,8 +420,8 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     },
     {
       title: "Sản xuất",
-      dataIndex: "production",
-      render: (_, record) => record.rowType === 'group' ? null : <span>{record.production}</span>,
+      dataIndex: "origin",
+      render: (_, record) => record.rowType === 'group' ? null : <span>{record.origin}</span>,
       editable: (_, record) => record.rowType !== 'group',
     },
     {

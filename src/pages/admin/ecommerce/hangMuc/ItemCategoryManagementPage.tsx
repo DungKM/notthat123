@@ -17,9 +17,9 @@ const { Option } = Select;
 export interface ProductionNode {
   id: string;
   name: string;
-  description?: string;
   size?: string;
   material?: string;
+  origin?: string;
   unit?: string;
   price?: number;
   type: 'category' | 'item' | 'variant';
@@ -35,6 +35,7 @@ interface FormValues {
   description?: string;
   size?: string;
   material?: string;
+  origin?: string;
   unit?: string;
   price?: number;
   parentId?: string | null;
@@ -86,6 +87,11 @@ const VariantRow: React.FC<{
     <td style={{ padding: '8px 16px', textAlign: 'center' }}>
       {variant.size
         ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 11 }}>{variant.size}</Tag>
+        : <span style={{ color: '#d1d5db' }}>—</span>}
+    </td>
+    <td style={{ padding: '8px 16px', color: '#4b5563', fontSize: 12 }}>
+      {variant.origin
+        ? <span>{variant.origin}</span>
         : <span style={{ color: '#d1d5db' }}>—</span>}
     </td>
     {/* <td style={{ padding: '8px 16px', color: '#6b7280', fontSize: 12, maxWidth: 200 }}>
@@ -194,13 +200,21 @@ const CategoryRow: React.FC<{
             : <span style={{ color: '#d1d5db' }}></span>}
       </td>
 
-      {/* Kích thước */}
       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
         {isItem && hasChildren
           ? <span style={{ color: '#d1d5db' }}>—</span>
           : node.size
             ? <Tag color="geekblue" style={{ margin: 0, fontFamily: 'monospace', fontSize: 12 }}>{node.size}</Tag>
             : <span style={{ color: '#d1d5db' }}>—</span>}
+      </td>
+
+      {/* Sản xuất */}
+      <td style={{ padding: '12px 16px', color: '#4b5563', fontSize: 13 }}>
+        {isItem && hasChildren
+          ? <span style={{ color: '#d1d5db' }}></span>
+          : node.origin
+            ? <span>{node.origin}</span>
+            : <span style={{ color: '#d1d5db' }}></span>}
       </td>
 
       {/* Mô tả */}
@@ -315,8 +329,8 @@ const CategoryFormModal: React.FC<{
           <span>
             {mode === 'create'
               ? (parentName
-                  ? `Thêm ${titleMap[nodeType]} của ${parentName}`
-                  : `Thêm ${titleMap[nodeType]}`)
+                ? `Thêm ${titleMap[nodeType]} của ${parentName}`
+                : `Thêm ${titleMap[nodeType]}`)
               : `Chỉnh sửa ${titleMap[nodeType]}`
             }
           </span>
@@ -370,7 +384,12 @@ const CategoryFormModal: React.FC<{
           </Form.Item>
         )}
 
-
+        {/* Sản xuất (Chỉ biến thể) */}
+        {nodeType === 'variant' && (
+          <Form.Item name="origin" label="Sản xuất">
+            <Input placeholder="VD: Việt Nam, An Cường..." />
+          </Form.Item>
+        )}
 
         {/* Đơn vị (Chỉ biến thể) */}
         {nodeType === 'variant' && (
@@ -522,6 +541,7 @@ const ItemCategoryManagementPage: React.FC = () => {
         if (values.description) payload.description = values.description;
         if (values.size) payload.size = values.size;
         if (values.material) payload.material = values.material;
+        if (values.origin) payload.origin = values.origin;
         if (values.unit) payload.unit = values.unit;
         if (values.price != null) payload.price = values.price;
 
@@ -532,6 +552,7 @@ const ItemCategoryManagementPage: React.FC = () => {
         if (values.price !== undefined) patchPayload.price = values.price;
         if (values.size !== undefined) patchPayload.size = values.size;
         if (values.material !== undefined) patchPayload.material = values.material;
+        if (values.origin !== undefined) patchPayload.origin = values.origin;
         if (values.unit !== undefined) patchPayload.unit = values.unit;
 
         if (modalNodeType === 'variant' && values.material !== undefined) {
@@ -666,19 +687,20 @@ const ItemCategoryManagementPage: React.FC = () => {
         <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflowX: 'auto', minHeight: 200 }}>
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '28%' }} />
-              <col style={{ width: '16%' }} />
+              <col style={{ width: '24%' }} />
               <col style={{ width: '14%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '12%' }} />
               <col style={{ width: '10%' }} />
               <col style={{ width: '14%' }} />
-              <col style={{ width: '18%' }} />
+              <col style={{ width: '14%' }} />
             </colgroup>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Tên</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Chất liệu</th>
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Kích thước (mm)</th>
-                {/* <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Mô tả</th> */}
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: 13, color: '#374151' }}>Sản xuất</th>
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#374151' }}>Đơn vị</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#d97706' }}>Đơn giá (VNĐ)</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: 13, color: '#374151', paddingRight: 20 }}>Thao tác</th>
@@ -727,6 +749,7 @@ const ItemCategoryManagementPage: React.FC = () => {
           description: editRecord.description,
           size: editRecord.size,
           material: editRecord.material,
+          origin: editRecord.origin,
           unit: editRecord.unit,
           price: editRecord.price,
           parentId: editRecord.parentId,
