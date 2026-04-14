@@ -373,7 +373,7 @@ const ProjectsPage: React.FC = () => {
                           const coverImage =
                             proj.images && proj.images.length > 0
                               ? proj.images[0].url
-                              : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
+                              : proj.image;
                           return (
                             <ProjectCard
                               key={proj._id || proj.id || i}

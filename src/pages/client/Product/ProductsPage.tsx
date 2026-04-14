@@ -30,7 +30,7 @@ const FilterSection = ({ title, defaultOpen = true, children }: { title: string,
 };
 
 const ProductsPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialSlug = searchParams.get('slug') || searchParams.get('category');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -76,10 +76,19 @@ const ProductsPage: React.FC = () => {
   const { request: productRequest } = useProductService();
   const { request: searchRequest } = useApi<any>('/search');
 
-  // Đồng bộ URL search -> selectedCategories khi URL thay đổi
+  // Đồng bộ URL search và danh mục khi URL thay đổi
   useEffect(() => {
-    const searchParam = searchParams.get('search') || searchParams.get('category');
-    setSelectedCategories(searchParam ? [searchParam] : []);
+    const searchParam = searchParams.get('search');
+    const categoryParam = searchParams.get('category') || searchParams.get('slug');
+    
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    } else {
+      setSearchQuery('');
+      setDebouncedSearch('');
+    }
+    
+    setSelectedCategories(categoryParam ? [categoryParam] : []);
     setCurrentPage(1);
   }, [searchParams]);
 
@@ -103,10 +112,18 @@ const ProductsPage: React.FC = () => {
 
   // Toggle Selection
   const toggleCategory = (catId: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(catId) ? [] : [catId]
-    );
-    setCurrentPage(1);
+    const newParams = new URLSearchParams(searchParams);
+    const isSelected = selectedCategories.includes(catId);
+    
+    if (isSelected) {
+      newParams.delete('category');
+    } else {
+      newParams.set('category', catId);
+    }
+    newParams.delete('slug'); // Xóa params cũ nếu có
+    
+    // Giữ nguyên tham số search nếu đang có
+    setSearchParams(newParams);
   };
 
   const toggleRadio = (item: string, current: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
@@ -137,31 +154,24 @@ const ProductsPage: React.FC = () => {
   const { data: productData, isFetching: loading } = useQuery({
     queryKey: productQueryKey,
     queryFn: async () => {
-      if (debouncedSearch) {
-        const res = await searchRequest('GET', '', null, { keyword: debouncedSearch, limit: 50 });
-        let products: any[] = res?.data?.products || [];
-        if (selectedCategories.length > 0) {
-          products = products.filter((p: any) =>
-            selectedCategories.includes(p.categorySlug) ||
-            selectedCategories.includes(p.slug) ||
-            selectedCategories.includes(p.categoryId?.slug)
-          );
-        }
-        return { products, meta: { page: 1, limit: products.length, total: products.length, totalPages: 1 } };
-      } else {
-        const query: any = { page: currentPage, limit: 12 };
-        if (selectedCategories.length > 0) query.search = selectedCategories.join(',');
-        if (debouncedPrice[0] > MIN_PRICE) query.minPrice = debouncedPrice[0];
-        if (debouncedPrice[1] < MAX_PRICE) query.maxPrice = debouncedPrice[1];
-        if (selectedColors) query.style = selectedColors;
-        if (selectedMaterials) query.material = selectedMaterials;
-        if (sortBy) query.sort = sortBy;
+      const query: any = { page: currentPage, limit: 12 };
+      
+      // Lọc theo danh mục dùng trường categoryId
+      if (selectedCategories.length > 0) query.categoryId = selectedCategories.join(',');
+      
+      // Tìm kiếm bằng văn bản (có thể kết hợp với categoryId)
+      if (debouncedSearch) query.search = debouncedSearch;
 
-        const res = await productRequest('GET', '', null, query);
-        return { products: res.data || [], meta: res.meta || { page: 1, limit: 12, total: 0, totalPages: 1 } };
-      }
+      if (debouncedPrice[0] > MIN_PRICE) query.minPrice = debouncedPrice[0];
+      if (debouncedPrice[1] < MAX_PRICE) query.maxPrice = debouncedPrice[1];
+      if (selectedColors) query.style = selectedColors;
+      if (selectedMaterials) query.material = selectedMaterials;
+      if (sortBy) query.sort = sortBy;
+
+      const res = await productRequest('GET', '', null, query);
+      return { products: res.data || [], meta: res.meta || { page: 1, limit: 12, total: 0, totalPages: 1 } };
     },
-    staleTime: 2 * 60 * 1000, // Cache sản phẩm 2 phút
+    staleTime: 0, // Tắt cache để luôn gọi API mới khi thay đổi param
     placeholderData: (prev) => prev, // Giữ data cũ khi đang load trang mới (không flicker)
   });
 
