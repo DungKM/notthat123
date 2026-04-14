@@ -362,7 +362,7 @@ const CategoryExplorerPage = () => {
                       >
                         <div className="aspect-[4/3] w-full overflow-hidden relative bg-gray-50 flex-shrink-0">
                           <img
-                            src={MOCK_PRODUCT_PLACEHOLDER}
+                            src={child.image || MOCK_PRODUCT_PLACEHOLDER}
                             alt={child.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 mix-blend-multiply"
                           />
