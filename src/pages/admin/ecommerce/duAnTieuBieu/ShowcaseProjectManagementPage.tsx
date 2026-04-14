@@ -250,6 +250,19 @@ const ShowcaseProjectManagementPage: React.FC = () => {
     };
   };
 
+  useEffect(() => {
+    if (modalVisible) {
+      if (currentProject) {
+        form.setFieldsValue(getInitialValues());
+      } else {
+        form.resetFields();
+      }
+    } else {
+      // Delay resetting to prevent visual flickering while modal is closing
+      setTimeout(() => form.resetFields(), 200);
+    }
+  }, [modalVisible, currentProject, form]);
+
   return (
     <>
       <ProTable<ShowcaseProject>
@@ -329,6 +342,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
             icon={<PlusOutlined />}
             onClick={() => {
               setCurrentProject(null);
+              form.resetFields();
               setModalVisible(true);
             }}
             type="primary"
@@ -342,9 +356,16 @@ const ShowcaseProjectManagementPage: React.FC = () => {
       <ModalForm
         title={currentProject ? 'Sửa bài viết công trình' : 'Thêm bài viết công trình mới'}
         open={modalVisible}
-        onOpenChange={setModalVisible}
+        onOpenChange={(visible) => {
+          if (!visible) {
+            setModalVisible(false);
+            // Delay reset to avoid flickering during close animation
+            setTimeout(() => form.resetFields(), 300);
+          } else {
+            setModalVisible(true);
+          }
+        }}
         onFinish={handleFinish}
-        initialValues={getInitialValues()}
         form={form}
         modalProps={{ destroyOnClose: true }}
         width={800}

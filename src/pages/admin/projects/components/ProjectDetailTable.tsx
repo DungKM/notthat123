@@ -227,9 +227,10 @@ const CategoryItemAutoComplete: React.FC<{
 
 
 // ─── Component hiển thị Thành tiền trực tiếp khi đang Edit ────────────────────
-const AmountDisplay: React.FC<{ recordKey: React.Key, form: any }> = ({ recordKey, form }) => {
-  const quantity = Form.useWatch([recordKey, 'quantity'], form);
-  const price = Form.useWatch([recordKey, 'price'], form);
+const AmountDisplay: React.FC<{ recordKey: any, form: any }> = ({ recordKey, form }) => {
+  const keyPath = Array.isArray(recordKey) ? recordKey : [recordKey];
+  const quantity = Form.useWatch([...keyPath, 'quantity'], form);
+  const price = Form.useWatch([...keyPath, 'price'], form);
   const total = (quantity || 0) * (price || 0);
   return <span>{formatCurrency(total)}</span>;
 };

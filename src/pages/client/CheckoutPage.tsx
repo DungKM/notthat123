@@ -33,12 +33,26 @@ const CheckoutPage: React.FC = () => {
     address: '',
     note: '',
     deliveryTime: 'business_hours',
-    paymentMethod: 'cash',
+    paymentMethod: 'bank_transfer_100',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
   const [minQtyWarnings, setMinQtyWarnings] = useState<Record<string, boolean>>({});
+  const [paymentSettings, setPaymentSettings] = useState({
+    qrImage: ""
+  });
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('paymentSettings');
+      if (stored) {
+        setPaymentSettings(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     let { name, value } = e.target;
@@ -98,7 +112,8 @@ const CheckoutPage: React.FC = () => {
         phone: customer.phone,
         email: customer.email || 'guest@hochi.vn',
         address: customer.address,
-        deliveryTime: customer.deliveryTime
+        deliveryTime: customer.deliveryTime,
+        paymentMethod: customer.paymentMethod
       });
 
       toast.success('Tạo đơn hàng thành công! Cảm ơn bạn đã tin tưởng Nội Thất Hochi.');
@@ -267,18 +282,39 @@ const CheckoutPage: React.FC = () => {
                 <div className="space-y-4 p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${customer.paymentMethod === 'cash'
-                        ? 'border-showcase-primary bg-showcase-light/10'
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${customer.paymentMethod === 'bank_transfer_100'
+                        ? 'border-showcase-primary bg-showcase-light/10 shadow-sm'
                         : 'border-gray-100 hover:border-gray-200'
                         }`}
                     >
                       <input
                         type="radio"
                         name="paymentMethod"
-                        checked={customer.paymentMethod === 'cash'}
-                        onChange={() => setCustomer({ ...customer, paymentMethod: 'cash' })}
+                        checked={customer.paymentMethod === 'bank_transfer_100'}
+                        onChange={() => setCustomer({ ...customer, paymentMethod: 'bank_transfer_100' })}
+                        className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
                       />
-                      <span className="font-semibold text-teal-950">{t('checkout.payment_cash')}</span>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-teal-950">{t('checkout.payment_transfer_100', 'Chuyển khoản 100%')}</span>
+                      </div>
+                    </label>
+
+                    <label
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${customer.paymentMethod === 'bank_transfer_50'
+                        ? 'border-showcase-primary bg-showcase-light/10 shadow-sm'
+                        : 'border-gray-100 hover:border-gray-200'
+                        }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        checked={customer.paymentMethod === 'bank_transfer_50'}
+                        onChange={() => setCustomer({ ...customer, paymentMethod: 'bank_transfer_50' })}
+                        className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-teal-950">{t('checkout.payment_transfer_50', 'Chuyển khoản 50%')}</span>
+                      </div>
                     </label>
                   </div>
 
@@ -451,6 +487,47 @@ const CheckoutPage: React.FC = () => {
                             <span className="text-[10px] text-gray-400 italic">{t('checkout.tax_note')}</span>
                           </div>
                         </div>
+                        {customer.paymentMethod === 'bank_transfer_50' && (
+                          <div className="mt-4 rounded-xl bg-amber-50/50 p-4 border border-amber-100 space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium text-amber-800">Thanh toán trước (50%)</span>
+                              <span className="font-bold text-amber-900">
+                                {(totalAmount / 2).toLocaleString('vi-VN')} {t('common.vnd')}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm pt-2 border-t border-amber-200/50">
+                              <span className="font-medium text-rose-800">Số tiền còn lại (50%)</span>
+                              <span className="font-bold text-rose-900">
+                                {(totalAmount / 2).toLocaleString('vi-VN')} {t('common.vnd')}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {customer.paymentMethod.startsWith('bank_transfer') && (
+                          <div className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm">
+                            <h3 className="text-[13px] font-bold text-teal-950 uppercase tracking-wider mb-4">Quét mã QR để thanh toán</h3>
+                            {paymentSettings.qrImage ? (
+                              <div className="relative p-2 bg-white rounded-xl border-2 border-dashed border-showcase-primary/30 mx-auto">
+                                <img
+                                  src={paymentSettings.qrImage}
+                                  alt="QR Code Thanh Toán"
+                                  className="w-48 h-48 object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="text-center p-4 bg-gray-100 text-gray-500 rounded-xl w-full max-w-[200px] border border-dashed border-gray-300 text-sm">
+                                Chưa tải ảnh QR
+                              </div>
+                            )}
+                            <div className="mt-4 text-center space-y-1.5 bg-white p-3 rounded-lg border border-gray-100 w-full shadow-sm">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-medium text-gray-600">Số tiền chuyển:</span>
+                                <span className="font-black text-red-600 text-[15px]">{(customer.paymentMethod === 'bank_transfer_50' ? totalAmount / 2 : totalAmount).toLocaleString('vi-VN')} đ</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <button

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Button, Tag, Popconfirm, message, Modal, Descriptions, Space, Select } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Tag, Popconfirm, message, Modal, Descriptions, Space, Select, Upload } from 'antd';
+import { EyeOutlined, EditOutlined, DeleteOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, ModalForm, ProFormText, ProFormSelect, ProFormTextArea } from '@ant-design/pro-components';
 import { useOrderService } from '@/src/api/services';
@@ -47,6 +47,9 @@ const OrderManagementPage: React.FC = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<OrderItem | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const defaultPaymentSettings = JSON.parse(localStorage.getItem('paymentSettings') || '{"qrImage": ""}');
+  const [qrBase64, setQrBase64] = useState<string>(defaultPaymentSettings.qrImage || '');
 
   // Xem chi tiết đơn hàng
   // Xem chi tiết đơn hàng
@@ -266,6 +269,16 @@ const OrderManagementPage: React.FC = () => {
         headerTitle="Quản lý đơn hàng"
         search={{ labelWidth: 'auto' }}
         pagination={{ pageSize: 10 }}
+        toolBarRender={() => [
+          <Button
+            key="setting"
+            icon={<SettingOutlined />}
+            type="primary"
+            onClick={() => setQrModalOpen(true)}
+          >
+            Cấu hình thanh toán
+          </Button>,
+        ]}
         scroll={{ x: 'max-content' }}
         request={async (params) => {
           try {
@@ -352,6 +365,55 @@ const OrderManagementPage: React.FC = () => {
             { label: 'Ngoài giờ hành chính (Sau 17:00)', value: 'outside_business_hours' },
           ]}
         />
+      </ModalForm>
+
+      <ModalForm
+        title="Cấu hình thông tin thanh toán chuyển khoản"
+        open={qrModalOpen}
+        onOpenChange={(open) => {
+          setQrModalOpen(open);
+          if (open) {
+            setQrBase64(JSON.parse(localStorage.getItem('paymentSettings') || '{"qrImage": ""}').qrImage || '');
+          }
+        }}
+        onFinish={async () => {
+          localStorage.setItem('paymentSettings', JSON.stringify({ qrImage: qrBase64 }));
+          message.success('Đã lưu cấu hình thanh toán. Thông tin mới sẽ áp dụng ngoài trang Khách.');
+          setQrModalOpen(false);
+          return true;
+        }}
+        modalProps={{ destroyOnClose: true }}
+      >
+        <div style={{ padding: '16px', background: '#e6f7ff', borderRadius: '8px', marginBottom: '16px', border: '1px solid #91d5ff' }}>
+          <p style={{ margin: 0, fontSize: '13px', color: '#0050b3' }}>
+            💡 Cấu hình thanh toán này sẽ hiển thị bên ngoài trang thanh toán ở website.<br/>
+            - Vui lòng tải lên (upload) ảnh mã QR tĩnh của bạn tại đây để khách hàng tự quét.
+          </p>
+        </div>
+        
+        <div style={{ textAlign: 'center', padding: '10px 0 20px' }}>
+          <Upload
+            accept="image/*"
+            listType="picture-card"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              const reader = new FileReader();
+              reader.onload = (e) => setQrBase64(e.target?.result as string);
+              reader.readAsDataURL(file);
+              return false; // Ngăn chặn tự động upload
+            }}
+          >
+            {qrBase64 ? (
+              <img src={qrBase64} alt="qr" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
+            ) : (
+              <div>
+                <UploadOutlined style={{ fontSize: '24px', color: '#999' }} />
+                <div style={{ marginTop: 8, color: '#666' }}>Tải ảnh lên</div>
+              </div>
+            )}
+          </Upload>
+          {!qrBase64 && <div style={{ color: '#ff4d4f', fontSize: '13px', marginTop: '12px' }}>Chưa có ảnh QR nào được tải lên</div>}
+        </div>
       </ModalForm>
     </>
   );
