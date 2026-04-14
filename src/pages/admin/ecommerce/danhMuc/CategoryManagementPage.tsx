@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Button, Popconfirm, Space, Tag, message as antMessage, Spin, Tooltip,
+  Button, Popconfirm, Space, Tag, message as antMessage, Spin, Tooltip, Upload, Image,
 } from 'antd';
+import type { UploadFile } from 'antd';
 import {
   EditOutlined, DeleteOutlined, PlusOutlined, HolderOutlined, CaretRightOutlined, CaretDownOutlined,
 } from '@ant-design/icons';
 import {
-  ModalForm, ProFormText, ProFormTextArea, ProFormSelect,
+  ModalForm, ProFormText, ProFormTextArea, ProFormSelect, ProFormDependency,
 } from '@ant-design/pro-components';
 
 import {
@@ -40,6 +41,7 @@ interface CategoryItem {
   parentSlug?: string | null;
   description?: string;
   priority?: number;
+  image?: string;
   createdAt?: string;
   children?: CategoryItem[];
 }
@@ -145,6 +147,7 @@ const CategoryManagementPage: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editRecord, setEditRecord] = useState<CategoryItem | null>(null);
+  const [imageFile, setImageFile] = useState<UploadFile | null>(null);
 
   // Scope: đang kéo trong danh mục gốc hay trong children của parent nào
   const [dragScope, setDragScope] = useState<'root' | string>('root');
@@ -285,7 +288,7 @@ const CategoryManagementPage: React.FC = () => {
   };
 
   // ─── Form fields ─────────────────────────────────────────────────────────
-  const renderFormFields = () => (
+  const renderFormFields = (currentImage?: string) => (
     <>
       <div style={{ padding: '12px 16px', marginBottom: 20, backgroundColor: '#fff2f0', border: '1px solid #ffccc7', borderRadius: 8, color: '#cf1322', fontSize: 13, lineHeight: '1.6' }}>
         <strong style={{ display: 'block', marginBottom: 4, fontSize: 14 }}> Hướng dẫn tạo danh mục:</strong>
@@ -308,6 +311,46 @@ const CategoryManagementPage: React.FC = () => {
         showSearch
       />
       <ProFormTextArea name="description" label="Mô tả danh mục" />
+
+      {/* Ảnh đại diện — chỉ hiện khi chọn danh mục cha (tạo danh mục con) */}
+      <ProFormDependency name={['parentSlug']}>
+        {({ parentSlug }) => {
+          if (!parentSlug) return null;
+          return (
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Ảnh đại diện cho danh mục con</label>
+              {currentImage && !imageFile && (
+                <div style={{ marginBottom: 8 }}>
+                  <Image src={currentImage} width={120} height={80} style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #d9d9d9' }} />
+                  <p style={{ fontSize: 12, color: '#8c8c8c', margin: '4px 0 0' }}>Ảnh hiện tại (chọn ảnh mới để thay thế)</p>
+                </div>
+              )}
+              <Upload
+                maxCount={1}
+                accept="image/*"
+                beforeUpload={(file) => {
+                  const previewFile = file as any;
+                  previewFile.url = URL.createObjectURL(file);
+                  previewFile.status = 'done';
+                  setImageFile(previewFile);
+                  return false;
+                }}
+                onRemove={() => setImageFile(null)}
+                fileList={imageFile ? [imageFile] : []}
+                listType="picture-card"
+                showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}
+              >
+                {imageFile ? null : (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8, fontSize: 12 }}>Chọn ảnh</div>
+                  </div>
+                )}
+              </Upload>
+            </div>
+          );
+        }}
+      </ProFormDependency>
     </>
   );
 
@@ -460,10 +503,22 @@ const CategoryManagementPage: React.FC = () => {
       <ModalForm<Partial<CategoryItem>>
         title="Thêm danh mục"
         open={createOpen}
-        modalProps={{ destroyOnClose: true, onCancel: () => setCreateOpen(false) }}
+        modalProps={{ destroyOnClose: true, onCancel: () => { setCreateOpen(false); setImageFile(null); } }}
         onFinish={async (values) => {
-          await create(values);
+          const formData = new FormData();
+          formData.append('name', values.name || '');
+          if (values.parentSlug) formData.append('parentSlug', values.parentSlug);
+          if (values.description) formData.append('description', values.description);
+          if (imageFile) formData.append('image', imageFile as any);
+
+          if (imageFile) {
+            await api.post('/categories', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            antMessage.success('Tạo danh mục thành công!');
+          } else {
+            await create(values);
+          }
           setCreateOpen(false);
+          setImageFile(null);
           loadData();
           return true;
         }}
@@ -477,7 +532,7 @@ const CategoryManagementPage: React.FC = () => {
         open={editOpen}
         modalProps={{
           destroyOnClose: true,
-          onCancel: () => { setEditOpen(false); setEditRecord(null); }
+          onCancel: () => { setEditOpen(false); setEditRecord(null); setImageFile(null); }
         }}
         initialValues={{
           name: editRecord?.name,
@@ -486,14 +541,26 @@ const CategoryManagementPage: React.FC = () => {
         }}
         onFinish={async (values) => {
           if (!editRecord) return false;
-          await patch(editRecord.id, values);
+          const formData = new FormData();
+          formData.append('name', values.name || '');
+          if (values.parentSlug) formData.append('parentSlug', values.parentSlug);
+          if (values.description) formData.append('description', values.description);
+          if (imageFile) formData.append('image', imageFile as any);
+
+          if (imageFile) {
+            await api.patch(`/categories/${editRecord.id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            antMessage.success('Cập nhật danh mục thành công!');
+          } else {
+            await patch(editRecord.id, values);
+          }
           setEditOpen(false);
           setEditRecord(null);
+          setImageFile(null);
           loadData();
           return true;
         }}
       >
-        {renderFormFields()}
+        {renderFormFields(editRecord?.image)}
       </ModalForm>
     </div>
   );

@@ -372,8 +372,8 @@ const Header: React.FC = () => {
                                       {child.name}
                                     </span>
                                     <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                                      {child.representativeImage ? (
-                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                      {child.image ? (
+                                        <img src={child.image} alt={child.name} className="w-full h-full object-contain mix-blend-multiply" />
                                       ) : (
                                         <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain" alt="" />
                                       )}
@@ -554,8 +554,8 @@ const Header: React.FC = () => {
                                       {child.name}
                                     </span>
                                     <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center overflow-hidden rounded">
-                                      {child.representativeImage || child.image ? (
-                                        <img src={child.representativeImage || child.image} alt={child.name} className="w-full h-full object-cover" />
+                                      {child.image ? (
+                                        <img src={child.image} alt={child.name} className="w-full h-full object-cover" />
                                       ) : (
                                         <img src="/assets/images/image-logo.png" className="w-10 h-8 object-contain mix-blend-multiply" alt="" />
                                       )}

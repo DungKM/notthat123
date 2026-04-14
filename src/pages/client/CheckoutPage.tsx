@@ -56,7 +56,7 @@ const CheckoutPage: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     let { name, value } = e.target;
-    
+
     if (name === 'fullName') {
       // Nhập họ tên không ký tự đặc biệt và số
       value = value.replace(/[^\p{L}\s]/gu, '');
@@ -433,7 +433,7 @@ const CheckoutPage: React.FC = () => {
                                     +
                                   </button>
                                 </div>
-                                
+
                                 {minQtyWarnings[item.id] && (
                                   <p className="mt-1.5 text-[11px] text-amber-600 font-medium">Số lượng đặt hàng tối thiểu 1</p>
                                 )}
@@ -503,7 +503,7 @@ const CheckoutPage: React.FC = () => {
                             </div>
                           </div>
                         )}
-                        
+
                         {customer.paymentMethod.startsWith('bank_transfer') && (
                           <div className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm">
                             <h3 className="text-[13px] font-bold text-teal-950 uppercase tracking-wider mb-4">Quét mã QR để thanh toán</h3>
