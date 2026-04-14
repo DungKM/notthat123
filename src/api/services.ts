@@ -104,3 +104,7 @@ export const useProductCategoryService = () => useApi<any>('/product-categories'
 
 // ─── Production Categories (Hạng mục nội thất) ───
 export const useProductionCategoryService = () => useApi<any>('/production-categories');
+
+// ─── Architectures (Thiết kế kiến trúc) ───
+export const useArchitectureService = () => useApi<any>('/architectures');
+export const useArchitectureCategoryService = () => useApi<any>('/architectures/categories');

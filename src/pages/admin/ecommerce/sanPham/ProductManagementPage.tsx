@@ -457,7 +457,12 @@ const ProductManagementPage: React.FC = () => {
             return { data: [], success: false, total: 0 };
           }
         }}
-        pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Tổng ${total} sản phẩm` }}
+        pagination={{
+          defaultPageSize: 10,
+          showSizeChanger: true,
+          pageSizeOptions: ['10', '20', '50', '100'],
+          showTotal: (total) => `Tổng ${total} bài viết`,
+        }}
         search={false}
         dateFormatter="string"
         scroll={{ x: 'max-content' }}

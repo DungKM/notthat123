@@ -11,11 +11,10 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Space, message, Popconfirm, Image, Tag, Form, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
+import { useArchitectureService, useArchitectureCategoryService } from '@/src/api/services';
 import { compressImageFile } from '@/src/utils/imageCompression';
 
-
-interface ShowcaseProject {
+interface Architecture {
   id: string;
   name: string;
   categoryId: string | { id?: string; _id?: string; name: string };
@@ -35,23 +34,23 @@ interface CategoryChild {
   slug: string;
 }
 
-interface CategoryProjectItem {
+interface CategoryItem {
   _id: string;
   id?: string;
   name: string;
   children?: CategoryChild[];
 }
 
-const ShowcaseProjectManagementPage: React.FC = () => {
+const ArchitectureManagementPage: React.FC = () => {
   const actionRef = useRef<ActionType | undefined>(undefined);
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentProject, setCurrentProject] = useState<ShowcaseProject | null>(null);
+  const [currentItem, setCurrentItem] = useState<Architecture | null>(null);
   const [form] = Form.useForm();
 
-  const { request: constructionRequest } = useConstructionService();
-  const { getAll: getCategories } = useConstructionCategoryService();
+  const { request: architectureRequest } = useArchitectureService();
+  const { getAll: getCategories } = useArchitectureCategoryService();
 
-  const [categories, setCategories] = useState<CategoryProjectItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>(undefined);
   const [filterName, setFilterName] = useState<string>('');
 
@@ -59,12 +58,10 @@ const ShowcaseProjectManagementPage: React.FC = () => {
     getCategories({ limit: 200 }).then(res => setCategories(res || []));
   }, [getCategories]);
 
-  // Reload bảng khi đổi danh mục lọc
   useEffect(() => {
     actionRef.current?.reload();
   }, [filterCategoryId]);
 
-  // Tạo options grouped: nếu cha có con → nhóm children, nếu không có con → hiện cha như leaf
   const categorySelectOptions = categories.map(parent => {
     const parentId = parent._id || parent.id;
     if (parent.children && parent.children.length > 0) {
@@ -76,14 +73,13 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         })),
       };
     }
-    // Cha không có con → hiện cha luôn
     return { label: parent.name, value: parentId };
   });
 
   const handleDelete = async (id: string) => {
     try {
-      await constructionRequest('DELETE', `/${id}`);
-      message.success('Đã xóa bài viết công trình');
+      await architectureRequest('DELETE', `/${id}`);
+      message.success('Đã xóa thiết kế kiến trúc');
       actionRef.current?.reload();
     } catch (err) {
       // Error handled by useApi
@@ -100,18 +96,15 @@ const ShowcaseProjectManagementPage: React.FC = () => {
       if (values.area) formData.append('area', values.area.toString());
       if (values.description) formData.append('description', values.description);
 
-      // Xử lý ảnh — tối đa 4 ảnh
-      const isUpdate = !!currentProject;
+      const isUpdate = !!currentItem;
 
       if (values.images && values.images.length > 0) {
-        const imageFiles = values.images.slice(0, 4); // Giới hạn tối đa 4 ảnh
+        const imageFiles = values.images.slice(0, 4);
         for (const fileItem of imageFiles) {
           if (fileItem.originFileObj) {
-            // Ảnh mới được chọn từ máy tính, upload trực tiếp
             const compressedFile = await compressImageFile(fileItem.originFileObj as File);
             formData.append('images', compressedFile);
           } else if (isUpdate && (fileItem.uid || fileItem.id || fileItem._id)) {
-            // Ảnh cũ đã có trên server → gửi ID để Backend biết giữ lại
             const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
             if (imageId) {
               formData.append('keepImageIds', imageId);
@@ -120,14 +113,12 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         }
       }
 
-      // In Axios, useApi.request accepts (method, url, payload, params)
-      // We pass the formData as payload.
       if (isUpdate) {
-        await constructionRequest('PATCH', `/${currentProject.id || (currentProject as any)._id}`, formData);
-        message.success('Cập nhật thành công');
+        await architectureRequest('PATCH', `/${currentItem.id || (currentItem as any)._id}`, formData);
+        message.success('Cập nhật thiết kế kiến trúc thành công');
       } else {
-        await constructionRequest('POST', '', formData);
-        message.success('Tạo bài viết mới thành công');
+        await architectureRequest('POST', '', formData);
+        message.success('Tạo thiết kế kiến trúc mới thành công');
       }
 
       setModalVisible(false);
@@ -138,7 +129,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
     }
   };
 
-  const columns: ProColumns<ShowcaseProject>[] = [
+  const columns: ProColumns<Architecture>[] = [
     {
       title: 'Ảnh',
       dataIndex: 'images',
@@ -149,7 +140,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
       },
     },
     {
-      title: 'Tên công trình',
+      title: 'Tên thiết kế',
       dataIndex: 'name',
       copyable: true,
       ellipsis: true,
@@ -172,7 +163,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
             }
           }
         }
-        return <Tag color="blue">{catName || 'Khác'}</Tag>;
+        return <Tag color="purple">{catName || 'Khác'}</Tag>;
       }
     },
     {
@@ -198,18 +189,17 @@ const ShowcaseProjectManagementPage: React.FC = () => {
           icon={<EditOutlined />}
           key="edit"
           onClick={async () => {
-            const hide = message.loading('Đang tải dữ liệu công trình...', 0);
+            const hide = message.loading('Đang tải dữ liệu...', 0);
             try {
-              const res = await constructionRequest('GET', `/${record.id || (record as any)._id}`);
+              const res = await architectureRequest('GET', `/${record.id || (record as any)._id}`);
               if (res?.data) {
-                setCurrentProject(res.data);
+                setCurrentItem(res.data);
                 setModalVisible(true);
               } else {
-                message.error('Dữ liệu công trình trống');
+                message.error('Dữ liệu trống');
               }
             } catch (error) {
-              console.error(error);
-              message.error('Không thể tải chi tiết công trình');
+              message.error('Không thể tải chi tiết');
             } finally {
               hide();
             }
@@ -217,11 +207,14 @@ const ShowcaseProjectManagementPage: React.FC = () => {
         >
           Sửa
         </Button>,
-        <Popconfirm title="Xoá bài viết này?"
+        <Popconfirm
+          title="Xoá thiết kế này?"
           description="Hành động này không thể hoàn tác."
           okText="Xóa"
           cancelText="Hủy"
-          okButtonProps={{ danger: true }} onConfirm={() => handleDelete(record.id)}>
+          okButtonProps={{ danger: true }}
+          onConfirm={() => handleDelete(record.id)}
+        >
           <Button type="link" size="large" danger icon={<DeleteOutlined />} />
         </Popconfirm>,
       ],
@@ -229,22 +222,21 @@ const ShowcaseProjectManagementPage: React.FC = () => {
   ];
 
   const getInitialValues = () => {
-    if (!currentProject) return {};
+    if (!currentItem) return {};
     return {
-      ...currentProject,
-      categoryId: typeof currentProject.categoryId === 'object' && currentProject.categoryId !== null
-        ? (currentProject.categoryId as any)._id || (currentProject.categoryId as any).id
-        : currentProject.categoryId,
-      // Hiển thị ảnh cũ trong trường upload edit nếu có API load ảnh
-      images: currentProject.images?.map((img: any, i: number) => {
+      ...currentItem,
+      categoryId: typeof currentItem.categoryId === 'object' && currentItem.categoryId !== null
+        ? (currentItem.categoryId as any)._id || (currentItem.categoryId as any).id
+        : currentItem.categoryId,
+      images: currentItem.images?.map((img: any, i: number) => {
         const urlStr = typeof img === 'string' ? img : img.url;
         return {
           uid: img._id || img.id || `-img-${i}`,
           name: urlStr.split('/').pop() || `image-${i}`,
           status: 'done',
           url: urlStr,
-          thumbUrl: urlStr, // Bắt buộc để fallback hiển thị thumbnail
-          type: 'image/png', // <--- Ép Ant Design nhận dạng đây là file ảnh!
+          thumbUrl: urlStr,
+          type: 'image/png',
         };
       }) || []
     };
@@ -252,41 +244,38 @@ const ShowcaseProjectManagementPage: React.FC = () => {
 
   useEffect(() => {
     if (modalVisible) {
-      if (currentProject) {
+      if (currentItem) {
         form.setFieldsValue(getInitialValues());
       } else {
         form.resetFields();
       }
     } else {
-      // Delay resetting to prevent visual flickering while modal is closing
       setTimeout(() => form.resetFields(), 200);
     }
-  }, [modalVisible, currentProject, form]);
+  }, [modalVisible, currentItem, form]);
 
   return (
     <>
-      <ProTable<ShowcaseProject>
-        headerTitle="Quản lý bài viết công trình (Showcase)"
+      <ProTable<Architecture>
+        headerTitle="Quản lý bài viết thiết kế kiến trúc"
         actionRef={actionRef}
         rowKey="id"
         search={false}
-        scroll={{ x: 'max-content' }}
         pagination={{
           defaultPageSize: 10,
           showSizeChanger: true,
           pageSizeOptions: ['10', '20', '50', '100'],
-          showTotal: (total) => `Tổng ${total} bài viết`,
+          showTotal: (total) => `Tổng ${total} thiết kế`,
         }}
 
-
+        scroll={{ x: 'max-content' }}
         request={async (params) => {
           const { current, pageSize } = params;
           const queryParams: any = { page: current, limit: pageSize };
           if (filterCategoryId) queryParams.categoryId = filterCategoryId;
           if (filterName.trim()) queryParams.search = filterName.trim();
-
           try {
-            const res = await constructionRequest('GET', '', null, queryParams);
+            const res = await architectureRequest('GET', '', null, queryParams);
             return {
               data: res.data || [],
               success: true,
@@ -297,11 +286,10 @@ const ShowcaseProjectManagementPage: React.FC = () => {
           }
         }}
         toolBarRender={() => [
-          // Ô tìm kiếm tên
           <Space key="filters" size="small" wrap>
             <input
               type="text"
-              placeholder="Tên công trình..."
+              placeholder="Tên thiết kế..."
               value={filterName}
               onChange={e => setFilterName(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') actionRef.current?.reload(); }}
@@ -337,10 +325,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
                 return { label: parent.name, value: parentId };
               })}
             />
-            <Button
-              type="primary"
-              onClick={() => actionRef.current?.reload()}
-            >
+            <Button type="primary" onClick={() => actionRef.current?.reload()}>
               Tìm kiếm
             </Button>
           </Space>,
@@ -348,25 +333,24 @@ const ShowcaseProjectManagementPage: React.FC = () => {
             key="add"
             icon={<PlusOutlined />}
             onClick={() => {
-              setCurrentProject(null);
+              setCurrentItem(null);
               form.resetFields();
               setModalVisible(true);
             }}
             type="primary"
           >
-            Thêm bài viết
+            Thêm thiết kế
           </Button>,
         ]}
         columns={columns}
       />
 
       <ModalForm
-        title={currentProject ? 'Sửa bài viết công trình' : 'Thêm bài viết công trình mới'}
+        title={currentItem ? 'Sửa thiết kế kiến trúc' : 'Thêm thiết kế kiến trúc mới'}
         open={modalVisible}
         onOpenChange={(visible) => {
           if (!visible) {
             setModalVisible(false);
-            // Delay reset to avoid flickering during close animation
             setTimeout(() => form.resetFields(), 300);
           } else {
             setModalVisible(true);
@@ -381,9 +365,9 @@ const ShowcaseProjectManagementPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ProFormText
               name="name"
-              label="Tên bài viết / Công trình"
-              placeholder="VD: Văn phòng Techcombank"
-              rules={[{ required: true, message: 'Vui lòng nhập tên công trình' }]}
+              label="Tên thiết kế / Công trình"
+              placeholder="VD: Biệt thự Vinhomes"
+              rules={[{ required: true, message: 'Vui lòng nhập tên thiết kế' }]}
             />
             <Form.Item
               name="categoryId"
@@ -407,13 +391,12 @@ const ShowcaseProjectManagementPage: React.FC = () => {
 
           <ProFormTextArea
             name="description"
-            label="Mô tả công trình"
+            label="Mô tả thiết kế"
             placeholder="Mô tả ngắn gọn về dự án..."
-            rules={[{ message: 'Vui lòng nhập mô tả' }]}
             fieldProps={{ rows: 4 }}
           />
 
-          {/* @ts-ignore - type mismatch from ProComponents */}
+          {/* @ts-ignore */}
           <ProFormUploadButton
             name="images"
             label="Hình ảnh (Tối đa 4 ảnh)"
@@ -421,11 +404,11 @@ const ShowcaseProjectManagementPage: React.FC = () => {
             max={4}
             fieldProps={{
               multiple: true,
-              accept: 'image/*', // Giúp Ant Design nhận diện đây là ảnh và tự động tạo thumbnail base64 khi chọn file
+              accept: 'image/*',
               listType: 'picture-card',
-              beforeUpload: () => false, // Ngăn form tự động upload
+              beforeUpload: () => false,
             }}
-            extra="Hỗ trợ tải lên nhiều ảnh. Ảnh đầu tiên được chọn sẽ làm ảnh bìa (thumbnail)."
+            extra="Hỗ trợ tải lên nhiều ảnh. Ảnh đầu tiên sẽ làm ảnh bìa (thumbnail)."
           />
         </Space>
       </ModalForm>
@@ -433,4 +416,4 @@ const ShowcaseProjectManagementPage: React.FC = () => {
   );
 };
 
-export default ShowcaseProjectManagementPage;
+export default ArchitectureManagementPage;

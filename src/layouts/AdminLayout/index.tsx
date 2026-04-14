@@ -94,6 +94,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
             { path: ROUTES.ADMIN_DANH_MUC_CONG_TRINH, name: 'Quản lý danh mục', icon: <TagsOutlined /> },
           ]
         },
+        {
+          path: '/quan-tri/san-pham-group/kien-truc',
+          name: 'Kiến trúc',
+          icon: <FileTextOutlined />,
+          children: [
+            { path: ROUTES.ADMIN_KIEN_TRUC, name: 'Bài viết kiến trúc', icon: <FileTextOutlined /> },
+            { path: ROUTES.ADMIN_KIEN_TRUC_DANH_MUC, name: 'Quản lý danh mục', icon: <TagsOutlined /> },
+          ]
+        },
         { path: ROUTES.ADMIN_QUAN_LY_DOI_TAC, name: 'Quản lý đối tác', icon: <ProjectOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },
         { path: ROUTES.ADMIN_QUAN_LY_LIEN_HE, name: 'Quản lý liên hệ', icon: <MessageOutlined /> },

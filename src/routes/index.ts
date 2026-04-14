@@ -56,4 +56,6 @@ export const ROUTES = {
   ADMIN_DANH_GIA: '/quan-tri/danh-gia',
   ADMIN_DANH_MUC_TIEN_DO: '/quan-tri/danh-muc-tien-do-du-an',
   ADMIN_HANG_MUC: '/quan-tri/hang-muc',
+  ADMIN_KIEN_TRUC: '/quan-tri/quan-ly-kien-truc',
+  ADMIN_KIEN_TRUC_DANH_MUC: '/quan-tri/quan-ly-kien-truc-danh-muc',
 };

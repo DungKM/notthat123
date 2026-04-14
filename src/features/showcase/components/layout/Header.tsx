@@ -16,7 +16,7 @@ import {
 import Container from '../ui/Container';
 import { useCart } from '../../context/CartContext';
 import { useTranslation } from 'react-i18next';
-import { useConstructionCategoryService, useCategoryService } from '@/src/api/services';
+import { useConstructionCategoryService, useCategoryService, useArchitectureCategoryService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
 import toast from 'react-hot-toast';
 
@@ -71,6 +71,15 @@ const Header: React.FC = () => {
     } catch { return []; }
   });
 
+  // ─── Danh mục kiến trúc ───
+  const { getAll: getArchitectureCategories } = useArchitectureCategoryService();
+  const [architectureCategories, setArchitectureCategories] = React.useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('HOCHI_ARCHITECTURE_CATS');
+      return cached ? JSON.parse(cached) : [];
+    } catch { return []; }
+  });
+
   React.useEffect(() => {
     getCongTrinhCategories({ limit: 20 })
       .then((res) => {
@@ -85,6 +94,14 @@ const Header: React.FC = () => {
         const data = res || [];
         setProductCategories(data);
         localStorage.setItem('HOCHI_PRODUCT_CATS', JSON.stringify(data));
+      })
+      .catch(() => { });
+
+    getArchitectureCategories({ limit: 20 })
+      .then((res) => {
+        const data = res || [];
+        setArchitectureCategories(data);
+        localStorage.setItem('HOCHI_ARCHITECTURE_CATS', JSON.stringify(data));
       })
       .catch(() => { });
   }, []);
@@ -345,12 +362,12 @@ const Header: React.FC = () => {
                             return (
                               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
                                 {currentCat.children.map((child: any) => (
-                                    <a
-                                      key={child.id || child._id}
-                                      href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
-                                      className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
-                                      onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
-                                    >
+                                  <a
+                                    key={child.id || child._id}
+                                    href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                    className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
+                                    onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
+                                  >
                                     <span className="flex-1 font-bold text-[13px] text-gray-700 group-hover/sub:text-showcase-primary">
                                       {child.name}
                                     </span>
@@ -464,7 +481,7 @@ const Header: React.FC = () => {
                 )}
 
                 {/* Submenu Thiết Kế Kiến Trúc - MEGA MENU */}
-                {link.href === ROUTES.THIET_KE_KIEN_TRUC && congTrinhCategories.length > 0 && (
+                {link.href === ROUTES.THIET_KE_KIEN_TRUC && architectureCategories.length > 0 && (
                   <div
                     className={`absolute top-full pt-4 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen === ROUTES.THIET_KE_KIEN_TRUC && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
                   >
@@ -483,7 +500,7 @@ const Header: React.FC = () => {
                       >
                         {/* Left Sidebar - Parent Categories */}
                         <div className="w-[200px] bg-[#f4f7f9] flex flex-col py-4 shrink-0 border-r border-[#e5e9f0]">
-                          {congTrinhCategories.map((cat: any, index: number) => {
+                          {architectureCategories.map((cat: any, index: number) => {
                             const isActive = activeMegaArchCategory ? activeMegaArchCategory.id === cat.id : index === 0;
                             return (
                               <div
@@ -506,7 +523,7 @@ const Header: React.FC = () => {
                         {/* Right Area - Child Categories */}
                         <div className="flex-1 bg-[#fbfcfd] p-8 overflow-y-auto">
                           {(() => {
-                            const currentCat = activeMegaArchCategory || congTrinhCategories[0];
+                            const currentCat = activeMegaArchCategory || architectureCategories[0];
                             if (!currentCat || !currentCat.children || currentCat.children.length === 0) {
                               return (
                                 <div>

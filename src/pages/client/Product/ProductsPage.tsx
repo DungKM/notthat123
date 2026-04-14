@@ -80,14 +80,14 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     const searchParam = searchParams.get('search');
     const categoryParam = searchParams.get('category') || searchParams.get('slug');
-    
+
     if (searchParam) {
       setSearchQuery(searchParam);
     } else {
       setSearchQuery('');
       setDebouncedSearch('');
     }
-    
+
     setSelectedCategories(categoryParam ? [categoryParam] : []);
     setCurrentPage(1);
   }, [searchParams]);
@@ -114,14 +114,14 @@ const ProductsPage: React.FC = () => {
   const toggleCategory = (catId: string) => {
     const newParams = new URLSearchParams(searchParams);
     const isSelected = selectedCategories.includes(catId);
-    
+
     if (isSelected) {
       newParams.delete('category');
     } else {
       newParams.set('category', catId);
     }
     newParams.delete('slug'); // Xóa params cũ nếu có
-    
+
     // Giữ nguyên tham số search nếu đang có
     setSearchParams(newParams);
   };
@@ -155,10 +155,10 @@ const ProductsPage: React.FC = () => {
     queryKey: productQueryKey,
     queryFn: async () => {
       const query: any = { page: currentPage, limit: 12 };
-      
+
       // Lọc theo danh mục dùng trường categoryId
       if (selectedCategories.length > 0) query.categoryId = selectedCategories.join(',');
-      
+
       // Tìm kiếm bằng văn bản (có thể kết hợp với categoryId)
       if (debouncedSearch) query.search = debouncedSearch;
 

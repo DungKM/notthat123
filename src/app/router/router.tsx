@@ -19,6 +19,7 @@ const ProductsPage = lazy(() => import('@/src/pages/client/Product/ProductsPage'
 const ProductDetailPage = lazy(() => import('@/src/pages/client/Product/ProductDetailPage'));
 const ProjectsPage = lazy(() => import('@/src/pages/client/Project/ProjectsPage'));
 const ProjectDetailClientPage = lazy(() => import('@/src/pages/client/Project/ProjectDetailPage'));
+const ArchitecturePage = lazy(() => import('@/src/pages/client/Architecture/ArchitecturePage'));
 const AboutPage = lazy(() => import('@/src/pages/client/About/AboutPage'));
 const WhyChooseUsPage = lazy(() => import('@/src/pages/client/About/WhyChooseUsPage'));
 const ContactPage = lazy(() => import('@/src/pages/client/Contact/ContactPage'));
@@ -52,6 +53,8 @@ const CategoryProjectManagementPage = lazy(() => import('@/src/pages/admin/ecomm
 const ContactManagementPage = lazy(() => import('@/src/pages/admin/crm/lienHe/ContactManagementPage'));
 const ChatPage = lazy(() => import('@/src/pages/admin/chat/ChatPage')); // Không đổi
 const ShowcaseProjectManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/duAnTieuBieu/ShowcaseProjectManagementPage'));
+const ArchitectureManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/kienTruc/ArchitectureManagementPage'));
+const ArchitectureCategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/kienTruc/ArchitectureCategoryManagementPage'));
 const PartnerManagementPage = lazy(() => import('@/src/pages/admin/crm/doiTac/PartnerManagementPage'));
 const VideoManagementPage = lazy(() => import('@/src/pages/admin/marketing/VideoManagementPage')); // Không đổi
 const ReviewManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/danhGia/ReviewManagementPage'));
@@ -79,7 +82,7 @@ const AppRouter: React.FC = () => {
             <Route path={ROUTES.DANH_SACH_SAN_PHAM} element={<ProductsPage />} />
             <Route path={ROUTES.CHI_TIET_SAN_PHAM} element={<ProductDetailPage />} />
             <Route path={ROUTES.CONG_TRINH} element={<ProjectsPage />} />
-            <Route path={ROUTES.THIET_KE_KIEN_TRUC} element={<ProjectsPage />} />
+            <Route path={ROUTES.THIET_KE_KIEN_TRUC} element={<ArchitecturePage />} />
             <Route path={ROUTES.CHI_TIET_CONG_TRINH} element={<ProjectDetailClientPage />} />
             <Route path={ROUTES.GIOI_THIEU} element={<AboutPage />} />
             <Route path={ROUTES.VI_SAO_CHON_CHUNG_TOI} element={<WhyChooseUsPage />} />
@@ -233,6 +236,22 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
                 <ShowcaseProjectManagementPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_KIEN_TRUC}
+            element={
+              <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
+                <ArchitectureManagementPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_KIEN_TRUC_DANH_MUC}
+            element={
+              <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
+                <ArchitectureCategoryManagementPage />
               </ProtectedAdminRoute>
             }
           />
