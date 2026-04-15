@@ -292,7 +292,7 @@ const ProductManagementPage: React.FC = () => {
         min={0}
       />
       <div style={{ marginBottom: 24 }}>
-        <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Hình ảnh (Tối đa 50 ảnh)</label>
+        <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Hình ảnh (Tối đa 4 ảnh)</label>
         <Upload
           listType="picture-card"
           fileList={imageFiles}
@@ -300,7 +300,7 @@ const ProductManagementPage: React.FC = () => {
           accept="image/*"
           multiple
           onChange={({ fileList }) => {
-            const limited = fileList.slice(0, 50);
+            const limited = fileList.slice(0, 4);
             setImageFiles(limited);
             // Ensure descriptions array matches
             setImageDescriptions(prev => {
@@ -341,7 +341,7 @@ const ProductManagementPage: React.FC = () => {
             );
           }}
         >
-          {imageFiles.length >= 50 ? null : (
+          {imageFiles.length >= 4 ? null : (
             <div>
               <PlusOutlined />
               <div style={{ marginTop: 4, fontSize: 12 }}>Thêm ảnh</div>
@@ -489,7 +489,7 @@ const ProductManagementPage: React.FC = () => {
           if (values.description) formData.append('description', values.description);
 
           if (imageFiles.length > 0) {
-            for (const fileItem of imageFiles.slice(0, 50)) {
+            for (const fileItem of imageFiles.slice(0, 4)) {
               if (fileItem.originFileObj) {
                 const compressedFile = await compressImageFile(fileItem.originFileObj as File);
                 formData.append('images', compressedFile);
@@ -543,7 +543,7 @@ const ProductManagementPage: React.FC = () => {
             const existingMap: Record<string, string> = {};
 
             let idx = 0;
-            for (const fileItem of imageFiles.slice(0, 50)) {
+            for (const fileItem of imageFiles.slice(0, 4)) {
               const desc = imageDescriptions[idx] || '';
               idx++;
 

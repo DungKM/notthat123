@@ -99,7 +99,7 @@ const ArchitectureManagementPage: React.FC = () => {
       const isUpdate = !!currentItem;
 
       if (values.images && values.images.length > 0) {
-        const imageFiles = values.images.slice(0, 50);
+        const imageFiles = values.images.slice(0, 4);
         for (const fileItem of imageFiles) {
           if (fileItem.originFileObj) {
             const compressedFile = await compressImageFile(fileItem.originFileObj as File);
@@ -399,9 +399,18 @@ const ArchitectureManagementPage: React.FC = () => {
           {/* @ts-ignore */}
           <ProFormUploadButton
             name="images"
-            label="Hình ảnh (Tối đa 50 ảnh)"
+            label="Hình ảnh (Tối đa 4 ảnh)"
             title="Thêm ảnh"
-            max={50}
+            max={4}
+            formItemProps={{
+              getValueFromEvent: (e: any) => {
+                let fileList = Array.isArray(e) ? e : e?.fileList;
+                if (fileList && fileList.length > 4) {
+                  return fileList.slice(0, 4);
+                }
+                return fileList;
+              }
+            }}
             fieldProps={{
               multiple: true,
               accept: 'image/*',

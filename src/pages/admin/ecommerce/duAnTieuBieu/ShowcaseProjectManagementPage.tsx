@@ -104,7 +104,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
       const isUpdate = !!currentProject;
 
       if (values.images && values.images.length > 0) {
-        const imageFiles = values.images.slice(0, 50); // Giới hạn tối đa 50 ảnh
+        const imageFiles = values.images.slice(0, 4); // Giới hạn tối đa 4 ảnh
         for (const fileItem of imageFiles) {
           if (fileItem.originFileObj) {
             // Ảnh mới được chọn từ máy tính, upload trực tiếp
@@ -416,9 +416,18 @@ const ShowcaseProjectManagementPage: React.FC = () => {
           {/* @ts-ignore - type mismatch from ProComponents */}
           <ProFormUploadButton
             name="images"
-            label="Hình ảnh (Tối đa 50 ảnh)"
+            label="Hình ảnh (Tối đa 4 ảnh)"
             title="Thêm ảnh"
-            max={50}
+            max={4}
+            formItemProps={{
+              getValueFromEvent: (e: any) => {
+                let fileList = Array.isArray(e) ? e : e?.fileList;
+                if (fileList && fileList.length > 4) {
+                  return fileList.slice(0, 4);
+                }
+                return fileList;
+              }
+            }}
             fieldProps={{
               multiple: true,
               accept: 'image/*', // Giúp Ant Design nhận diện đây là ảnh và tự động tạo thumbnail base64 khi chọn file
