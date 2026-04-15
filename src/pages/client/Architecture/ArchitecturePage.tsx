@@ -130,11 +130,7 @@ const ArchitecturePage: React.FC = () => {
   const handleCategorySelect = (catValue: string) => {
     setSelectedCategorySlug(catValue);
     setCurrentPage(1);
-    if (catValue) {
-      setSearchParams({ category: catValue });
-    } else {
-      setSearchParams({});
-    }
+    // Removed setSearchParams to avoid modifying the URL
   };
 
   return (

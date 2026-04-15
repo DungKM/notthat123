@@ -20,6 +20,7 @@ const ProductDetailPage = lazy(() => import('@/src/pages/client/Product/ProductD
 const ProjectsPage = lazy(() => import('@/src/pages/client/Project/ProjectsPage'));
 const ProjectDetailClientPage = lazy(() => import('@/src/pages/client/Project/ProjectDetailPage'));
 const ArchitecturePage = lazy(() => import('@/src/pages/client/Architecture/ArchitecturePage'));
+const ArchitectureDetailPage = lazy(() => import('@/src/pages/client/Architecture/ArchitectureDetailPage'));
 const AboutPage = lazy(() => import('@/src/pages/client/About/AboutPage'));
 const WhyChooseUsPage = lazy(() => import('@/src/pages/client/About/WhyChooseUsPage'));
 const ContactPage = lazy(() => import('@/src/pages/client/Contact/ContactPage'));
@@ -83,6 +84,7 @@ const AppRouter: React.FC = () => {
             <Route path={ROUTES.CHI_TIET_SAN_PHAM} element={<ProductDetailPage />} />
             <Route path={ROUTES.CONG_TRINH} element={<ProjectsPage />} />
             <Route path={ROUTES.THIET_KE_KIEN_TRUC} element={<ArchitecturePage />} />
+            <Route path={ROUTES.CHI_TIET_KIEN_TRUC} element={<ArchitectureDetailPage />} />
             <Route path={ROUTES.CHI_TIET_CONG_TRINH} element={<ProjectDetailClientPage />} />
             <Route path={ROUTES.GIOI_THIEU} element={<AboutPage />} />
             <Route path={ROUTES.VI_SAO_CHON_CHUNG_TOI} element={<WhyChooseUsPage />} />

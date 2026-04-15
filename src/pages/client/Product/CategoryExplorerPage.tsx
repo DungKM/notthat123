@@ -172,6 +172,12 @@ const CategoryExplorerPage = () => {
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Danh mục</label>
                 <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => navigate(ROUTES.DANH_SACH_SAN_PHAM)}
+                    className="w-full text-left flex justify-between items-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-50"
+                  >
+                    Tất cả
+                  </button>
                   {parentCategories.map(cat => {
                     const catId = cat.id || cat._id;
                     const isActive = activeParentId === catId && !isInSearchMode;
