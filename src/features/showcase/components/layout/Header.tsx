@@ -206,7 +206,7 @@ const Header: React.FC = () => {
     },
     {
       title: t('nav.products'),
-      href: ROUTES.SAN_PHAM,
+      href: ROUTES.DANH_SACH_SAN_PHAM,
 
     },
     {
@@ -257,9 +257,9 @@ const Header: React.FC = () => {
             {navLinks.map((link) => (
               <div
                 key={link.title}
-                className={`${link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC ? 'static' : 'relative'} group`}
+                className={`${link.href === ROUTES.DANH_SACH_SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC ? 'static' : 'relative'} group`}
                 onMouseEnter={() => {
-                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) {
+                  if (link.href === ROUTES.DANH_SACH_SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) {
                     // Clear any pending close
                     if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
                     if (!megaMenuForceHide) setMegaMenuOpen(link.href);
@@ -267,7 +267,7 @@ const Header: React.FC = () => {
                 }}
                 onMouseLeave={(e) => {
                   setMegaMenuForceHide(false);
-                  if (link.href === ROUTES.SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) {
+                  if (link.href === ROUTES.DANH_SACH_SAN_PHAM || link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) {
                     // Delay close so cursor can move from nav item to panel
                     megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(null), 300);
                   }
@@ -283,7 +283,7 @@ const Header: React.FC = () => {
                   {link.submenu && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
                   {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
                   {link.href === ROUTES.THIET_KE_KIEN_TRUC && congTrinhCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
-                  {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
+                  {link.href === ROUTES.DANH_SACH_SAN_PHAM && productCategories.length > 0 && <DownOutlined className="text-[8px] transition-transform group-hover:rotate-180" />}
                 </Link>
 
                 {link.submenu && (
@@ -313,9 +313,9 @@ const Header: React.FC = () => {
                 )}
 
                 {/* Submenu Sản Phẩm - MEGA MENU */}
-                {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
+                {link.href === ROUTES.DANH_SACH_SAN_PHAM && productCategories.length > 0 && (
                   <div
-                    className={`absolute top-full pt-4 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen === ROUTES.SAN_PHAM && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
+                    className={`absolute top-full pt-4 left-0 right-0 z-20 pointer-events-none transition-all duration-300 ${(megaMenuOpen === ROUTES.DANH_SACH_SAN_PHAM && !megaMenuForceHide) ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-3'}`}
                   >
                     <div
                       className="mx-auto w-full max-w-[1240px] px-4 xl:px-4 pointer-events-auto"
