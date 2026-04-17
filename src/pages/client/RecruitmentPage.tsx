@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Button from '@/src/features/showcase/components/ui/Button';
 import Badge from '@/src/features/showcase/components/ui/Badge';
@@ -15,7 +15,20 @@ import { useApplicationService } from '@/src/api/services';
 import toast from 'react-hot-toast';
 
 const RecruitmentPage: React.FC = () => {
-  const { create: submitApplication, loading } = useApplicationService();
+  const { create: submitApplication, loading, request: appRequest } = useApplicationService();
+  const [recruitmentInfo, setRecruitmentInfo] = React.useState<{
+    title?: string;
+    content?: string;
+    position?: string;
+    required?: string[];
+    isActive?: boolean;
+  } | null>(null);
+
+  React.useEffect(() => {
+    appRequest('GET', '/info')
+      .then((res: any) => { if (res?.data) setRecruitmentInfo(res.data); })
+      .catch(() => {});
+  }, []);
   const [formData, setFormData] = useState({
     position: '', // default empty
     fullName: '',
@@ -149,6 +162,41 @@ const RecruitmentPage: React.FC = () => {
         </Container>
       </section>
 
+      {/* Recruitment Info Section — trước Tại sao chọn Hochi */}
+      {recruitmentInfo?.isActive && (
+        <section className="py-20 bg-white border-b border-gray-100">
+          <Container>
+            <div className="max-w-4xl mx-auto text-center space-y-6">
+              <Badge variant="gold" className="uppercase tracking-[0.2em]">CƠ HỘI NGHỀ NGHIỆP</Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-teal-950 uppercase leading-snug" style={{ fontFamily: "'Inter', sans-serif" }}>
+                {recruitmentInfo.title}
+              </h2>
+              <div className="w-20 h-1 bg-showcase-primary mx-auto" />
+              {recruitmentInfo.content && (
+                <p className="text-gray-500 leading-relaxed text-lg max-w-2xl mx-auto">
+                  {recruitmentInfo.content}
+                </p>
+              )}
+              {recruitmentInfo.position && (
+                <p className="inline-block bg-showcase-primary/10 text-showcase-primary font-semibold px-5 py-2 rounded-full text-sm">
+                  {recruitmentInfo.position}
+                </p>
+              )}
+              {recruitmentInfo.required && recruitmentInfo.required.length > 0 && (
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-left">
+                  {recruitmentInfo.required.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                      <CheckCircleFilled className="text-showcase-primary mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-600 text-sm leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </Container>
+        </section>
+      )}
+
       {/* Benefits Section */}
       <section className="py-24 bg-gray-50 border-b border-gray-100">
         <Container>
@@ -191,15 +239,15 @@ const RecruitmentPage: React.FC = () => {
 
               <div className="prose prose-gray">
                 <p className="text-gray-600 leading-relaxed text-lg">
-                  Chúng tôi tìm kiếm những cá nhân đam mê thiết kế và nội thất cao cấp, khao khát kiến tạo những không gian sống mang dấu ấn riêng và giá trị thẩm mỹ khác biệt.
+                  {recruitmentInfo?.content || 'Chúng tôi tìm kiếm những cá nhân đam mê thiết kế và nội thất cao cấp, khao khát kiến tạo những không gian sống mang dấu ấn riêng và giá trị thẩm mỹ khác biệt.'}
                 </p>
                 <ul className="space-y-4 mt-8">
-                  {[
+                  {(recruitmentInfo?.required || [
                     'Quy trình làm việc chuyên nghiệp, minh bạch và chuẩn mực.',
                     'Sử dụng vật liệu cao cấp, được tuyển chọn theo tiêu chuẩn chất lượng khắt khe.',
                     'Tham gia các dự án biệt thự, penthouse đẳng cấp trên toàn quốc.',
                     'Môi trường phát triển toàn diện về tư duy thiết kế và kỹ năng nghề nghiệp.'
-                  ].map((item, i) => (
+                  ]).map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-gray-500">
                       <CheckCircleFilled className="text-showcase-primary" /> {item}
                     </li>

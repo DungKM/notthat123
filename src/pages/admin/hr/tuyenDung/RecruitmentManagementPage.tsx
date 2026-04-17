@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
-import { Select, Tag, message, Typography, Space, Dropdown, Button, Popconfirm } from 'antd';
-import { DeleteOutlined, DownOutlined } from '@ant-design/icons';
+import React, { useRef, useState } from 'react';
+import { Select, Tag, message, Typography, Space, Dropdown, Button, Popconfirm, Switch } from 'antd';
+import { DeleteOutlined, DownOutlined, SettingOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ProTable } from '@ant-design/pro-components';
+import { ProTable, ModalForm, ProFormText, ProFormTextArea, ProFormSwitch } from '@ant-design/pro-components';
+import type { ProFormInstance } from '@ant-design/pro-components';
 import { useApplicationService } from '@/src/api/services';
 
 interface ApplicationItem {
@@ -28,7 +29,9 @@ const STATUS_OPTIONS = [
 
 const RecruitmentManagementPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
-  const { request, update, remove } = useApplicationService();
+  const { request, remove } = useApplicationService();
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const infoFormRef = useRef<ProFormInstance>();
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
@@ -164,8 +167,18 @@ const RecruitmentManagementPage: React.FC = () => {
         columns={columns}
         actionRef={actionRef}
         rowKey={(record) => record._id || record.id}
-        search={false} // API /applications doesn't support complex search by default unless implemented, turning off for simplicity
+        search={false}
         scroll={{ x: 'max-content' }}
+        toolBarRender={() => [
+          <Button
+            key="config"
+            icon={<SettingOutlined />}
+            type="primary"
+            onClick={() => setInfoModalOpen(true)}
+          >
+            Cấu hình thông tin tuyển dụng
+          </Button>,
+        ]}
         request={async (params) => {
           try {
             const apiParams = {
@@ -173,7 +186,7 @@ const RecruitmentManagementPage: React.FC = () => {
               limit: params.pageSize || 10,
             };
             const response = await request('GET', '', null, apiParams);
-            
+
             return {
               data: response.data || [],
               success: true,
@@ -195,8 +208,92 @@ const RecruitmentManagementPage: React.FC = () => {
         dateFormatter="string"
         headerTitle="Danh sách ứng viên"
       />
+
+      {/* Modal cấu hình thông tin tuyển dụng */}
+      <ModalForm
+        title="Cấu hình thông tin tuyển dụng"
+        open={infoModalOpen}
+        formRef={infoFormRef}
+        width={640}
+        modalProps={{ destroyOnClose: true }}
+        onOpenChange={async (open) => {
+          setInfoModalOpen(open);
+          if (open) {
+            try {
+              const res: any = await request('GET', '/info');
+              if (res?.data) {
+                infoFormRef.current?.setFieldsValue({
+                  title: res.data.title || '',
+                  content: res.data.content || '',
+                  position: res.data.position || '',
+                  required: Array.isArray(res.data.required)
+                    ? res.data.required.join('\n')
+                    : res.data.required || '',
+                  isActive: res.data.isActive ?? true,
+                });
+              }
+            } catch {
+              // Chưa có dữ liệu
+            }
+          }
+        }}
+        onFinish={async (values) => {
+          try {
+            const payload = {
+              title: values.title,
+              content: values.content,
+              position: values.position,
+              required: (values.required as string)
+                .split('\n')
+                .map((s: string) => s.trim())
+                .filter(Boolean),
+              isActive: values.isActive ?? true,
+            };
+            await request('PATCH', '/info', payload);
+            message.success('Cập nhật thông tin tuyển dụng thành công!');
+            setInfoModalOpen(false);
+            return true;
+          } catch {
+            message.error('Cập nhật thất bại, vui lòng thử lại.');
+            return false;
+          }
+        }}
+      >
+        <div style={{ padding: '12px 16px', background: '#f0f9ff', borderRadius: 8, marginBottom: 16, border: '1px solid #bae6fd', fontSize: 13, color: '#0369a1' }}>
+          Thông tin này sẽ hiển thị trên trang tuyển dụng ngoài website khi bật <b>Hiển thị</b>.
+        </div>
+
+        <ProFormSwitch
+          name="isActive"
+          label="Hiển thị trang tuyển dụng"
+          fieldProps={{ checkedChildren: 'Hiện', unCheckedChildren: 'Ẩn' }}
+        />
+        <ProFormText
+          name="title"
+          label="Tiêu đề"
+          placeholder="VD: GIA NHẬP ĐỘI NGŨ HOCHI"
+          rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}
+        />
+        <ProFormText
+          name="position"
+          label="Vị trí ứng tuyển"
+          placeholder="VD: Kiến trúc sư nội thất"
+        />
+        <ProFormTextArea
+          name="content"
+          label="Mô tả chung"
+          placeholder="Mô tả ngắn về cơ hội nghề nghiệp..."
+          fieldProps={{ rows: 3 }}
+        />
+        <ProFormTextArea
+          name="required"
+          label="Danh sách yêu cầu / quyền lợi"
+          placeholder={"Mỗi dòng là một mục, ví dụ:\nQuy trình làm việc chuyên nghiệp.\nSử dụng vật liệu cao cấp."}
+          fieldProps={{ rows: 6 }}
+          extra="Mỗi dòng tương ứng một mục hiển thị (nhấn Enter để xuống dòng)."
+        />
+      </ModalForm>
     </div>
   );
 };
-
-export default RecruitmentManagementPage;
+export default RecruitmentManagementPage;

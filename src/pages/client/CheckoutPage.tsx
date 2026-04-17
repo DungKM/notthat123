@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import { useCart } from '@/src/features/showcase/context/CartContext';
-import { useOrderService } from '@/src/api/services';
+import { useOrderService, useSettingService } from '@/src/api/services';
 import api from '@/src/api/axiosInstance';
 import SEO from '@/src/components/common/SEO';
 
@@ -25,6 +25,7 @@ const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
   const { cartItems, totalAmount, updateQuantity, removeFromCart, clearCart } = useCart();
   const navigate = useNavigate();
+  const { request: requestSetting } = useSettingService();
 
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -39,19 +40,21 @@ const CheckoutPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
   const [minQtyWarnings, setMinQtyWarnings] = useState<Record<string, boolean>>({});
-  const [paymentSettings, setPaymentSettings] = useState({
-    qrImage: ""
-  });
+  const [shopInfo, setShopInfo] = useState<{
+    bankName?: string;
+    accountNumber?: string;
+    accountHolder?: string;
+    qrCodeUrl?: string;
+  } | null>(null);
 
   React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem('paymentSettings');
-      if (stored) {
-        setPaymentSettings(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    requestSetting('GET', '/shop-info')
+      .then((res: any) => {
+        if (res?.data) setShopInfo(res.data);
+      })
+      .catch(() => {
+        // Không hiển thị lỗi nếu chưa cấu hình
+      });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -507,10 +510,10 @@ const CheckoutPage: React.FC = () => {
                         {customer.paymentMethod.startsWith('bank_transfer') && (
                           <div className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm">
                             <h3 className="text-[13px] font-bold text-teal-950 uppercase tracking-wider mb-4">Quét mã QR để thanh toán</h3>
-                            {paymentSettings.qrImage ? (
+                            {shopInfo?.qrCodeUrl ? (
                               <div className="relative p-2 bg-white rounded-xl border-2 border-dashed border-showcase-primary/30 mx-auto">
                                 <img
-                                  src={paymentSettings.qrImage}
+                                  src={shopInfo.qrCodeUrl}
                                   alt="QR Code Thanh Toán"
                                   className="w-48 h-48 object-contain"
                                 />
@@ -520,8 +523,26 @@ const CheckoutPage: React.FC = () => {
                                 Chưa tải ảnh QR
                               </div>
                             )}
-                            <div className="mt-4 text-center space-y-1.5 bg-white p-3 rounded-lg border border-gray-100 w-full shadow-sm">
-                              <div className="flex justify-between items-center">
+                            <div className="mt-4 text-center space-y-2 bg-white p-3 rounded-lg border border-gray-100 w-full shadow-sm">
+                              {shopInfo?.bankName && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs font-medium text-gray-600">Ngân hàng:</span>
+                                  <span className="font-bold text-teal-950 text-sm">{shopInfo.bankName}</span>
+                                </div>
+                              )}
+                              {shopInfo?.accountNumber && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs font-medium text-gray-600">Số tài khoản:</span>
+                                  <span className="font-bold text-teal-950 text-sm tracking-wider">{shopInfo.accountNumber}</span>
+                                </div>
+                              )}
+                              {shopInfo?.accountHolder && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs font-medium text-gray-600">Chủ tài khoản:</span>
+                                  <span className="font-bold text-teal-950 text-sm">{shopInfo.accountHolder}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                                 <span className="text-xs font-medium text-gray-600">Số tiền chuyển:</span>
                                 <span className="font-black text-red-600 text-[15px]">{(customer.paymentMethod === 'bank_transfer_50' ? totalAmount / 2 : totalAmount).toLocaleString('vi-VN')} đ</span>
                               </div>

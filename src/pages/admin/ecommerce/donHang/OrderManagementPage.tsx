@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { Button, Tag, Popconfirm, message, Modal, Descriptions, Space, Select, Upload } from 'antd';
+import { Button, Tag, Popconfirm, message, Modal, Descriptions, Space, Select, Upload, Image } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, ModalForm, ProFormText, ProFormSelect, ProFormTextArea } from '@ant-design/pro-components';
-import { useOrderService } from '@/src/api/services';
+import type { ProFormInstance } from '@ant-design/pro-components';
+import { useOrderService, useSettingService } from '@/src/api/services';
 
 interface OrderItemProduct {
   productId: string;
@@ -44,12 +45,21 @@ const deliveryTimeMap: Record<string, string> = {
 const OrderManagementPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const { request } = useOrderService();
+  const { request: requestSetting } = useSettingService();
+  const shopFormRef = useRef<ProFormInstance>();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<OrderItem | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [qrModalOpen, setQrModalOpen] = useState(false);
-  const defaultPaymentSettings = JSON.parse(localStorage.getItem('paymentSettings') || '{"qrImage": ""}');
-  const [qrBase64, setQrBase64] = useState<string>(defaultPaymentSettings.qrImage || '');
+  const [qrBase64, setQrBase64] = useState<string>('');
+  const [qrFile, setQrFile] = useState<File | null>(null);
+  const [currentShopInfo, setCurrentShopInfo] = useState<{
+    bankName?: string;
+    accountNumber?: string;
+    accountHolder?: string;
+    qrCodeUrl?: string;
+  } | null>(null);
+  const [shopInfoLoading, setShopInfoLoading] = useState(false);
 
   // Xem chi tiết đơn hàng
   // Xem chi tiết đơn hàng
@@ -370,49 +380,173 @@ const OrderManagementPage: React.FC = () => {
       <ModalForm
         title="Cấu hình thông tin thanh toán chuyển khoản"
         open={qrModalOpen}
-        onOpenChange={(open) => {
+        formRef={shopFormRef}
+        onOpenChange={async (open) => {
           setQrModalOpen(open);
           if (open) {
-            setQrBase64(JSON.parse(localStorage.getItem('paymentSettings') || '{"qrImage": ""}').qrImage || '');
+            setShopInfoLoading(true);
+            try {
+              const res: any = await requestSetting('GET', '/shop-info');
+              if (res?.data) {
+                setCurrentShopInfo(res.data);
+                setQrBase64(res.data.qrCodeUrl || '');
+                // Fill form sau khi fetch xong
+                shopFormRef.current?.setFieldsValue({
+                  bankName: res.data.bankName || '',
+                  accountNumber: res.data.accountNumber || '',
+                  accountHolder: res.data.accountHolder || '',
+                });
+              }
+            } catch {
+              // Chưa có dữ liệu
+            } finally {
+              setShopInfoLoading(false);
+            }
+          } else {
+            setQrFile(null);
           }
         }}
-        onFinish={async () => {
-          localStorage.setItem('paymentSettings', JSON.stringify({ qrImage: qrBase64 }));
-          message.success('Đã lưu cấu hình thanh toán. Thông tin mới sẽ áp dụng ngoài trang Khách.');
-          setQrModalOpen(false);
-          return true;
+        onFinish={async (values) => {
+          try {
+            const formData = new FormData();
+            formData.append('bankName', values.bankName || '');
+            formData.append('accountNumber', values.accountNumber || '');
+            formData.append('accountHolder', values.accountHolder || '');
+            if (qrFile) {
+              formData.append('image', qrFile);
+            }
+
+            await requestSetting('PATCH', '/shop-info', formData, undefined, {
+              'Content-Type': 'multipart/form-data',
+            });
+            message.success('Đã cấu hình thông tin cửa hàng thành công.');
+            setQrModalOpen(false);
+            return true;
+          } catch (err) {
+            message.error('Cấu hình thất bại, vui lòng thử lại.');
+            return false;
+          }
         }}
         modalProps={{ destroyOnClose: true }}
       >
         <div style={{ padding: '16px', background: '#e6f7ff', borderRadius: '8px', marginBottom: '16px', border: '1px solid #91d5ff' }}>
           <p style={{ margin: 0, fontSize: '13px', color: '#0050b3' }}>
-            💡 Cấu hình thanh toán này sẽ hiển thị bên ngoài trang thanh toán ở website.<br/>
-            - Vui lòng tải lên (upload) ảnh mã QR tĩnh của bạn tại đây để khách hàng tự quét.
+            Cập nhật các thông tin thanh toán của cửa hàng bên dưới, dữ liệu sẽ được hiển thị cho khách hàng.
           </p>
         </div>
-        
+
+        <ProFormText
+          name="bankName"
+          label="Tên ngân hàng"
+          placeholder="VD: Vietcombank, TPBank"
+          rules={[{ required: true, message: 'Vui lòng nhập tên ngân hàng' }]}
+        />
+        <ProFormText
+          name="accountNumber"
+          label="Số tài khoản"
+          placeholder="VD: 123456789"
+          rules={[{ required: true, message: 'Vui lòng nhập số tài khoản' }]}
+        />
+        <ProFormText
+          name="accountHolder"
+          label="Tên chủ tài khoản"
+          placeholder="VD: NGUYEN VAN A"
+          rules={[{ required: true, message: 'Vui lòng nhập tên chủ tài khoản' }]}
+        />
+
+        {/* ── QR Upload Section ── */}
         <div style={{ textAlign: 'center', padding: '10px 0 20px' }}>
-          <Upload
-            accept="image/*"
-            listType="picture-card"
-            showUploadList={false}
-            beforeUpload={(file) => {
-              const reader = new FileReader();
-              reader.onload = (e) => setQrBase64(e.target?.result as string);
-              reader.readAsDataURL(file);
-              return false; // Ngăn chặn tự động upload
-            }}
-          >
-            {qrBase64 ? (
-              <img src={qrBase64} alt="qr" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
-            ) : (
+          {qrBase64 ? (
+            // Khi đã có ảnh: hiện preview + overlay, KHÔNG wrap bởi Upload
+            <div style={{ display: 'inline-block' }}>
+              <div
+                className="qr-preview-box"
+                style={{ position: 'relative', width: 128, height: 128, borderRadius: 8, overflow: 'hidden', border: '1px solid #d9d9d9', cursor: 'default' }}
+              >
+                <Image
+                  src={qrBase64}
+                  width={128}
+                  height={128}
+                  style={{ objectFit: 'contain' }}
+                  preview={{ mask: false }}
+                />
+                {/* Hover overlay — hoàn toàn bên ngoài Upload */}
+                <div
+                  className="qr-hover-overlay"
+                  style={{
+                    position: 'absolute', inset: 0,
+                    background: 'rgba(0,0,0,0.55)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
+                    opacity: 0, transition: 'opacity 0.2s',
+                    borderRadius: 8,
+                  }}
+                >
+                  {/* Icon Xem — dùng Image preview của Ant bên dưới */}
+                  <EyeOutlined
+                    style={{ fontSize: 24, color: '#fff', cursor: 'pointer' }}
+                    title="Xem ảnh"
+                    onClick={() => {
+                      document.querySelector<HTMLElement>('.qr-preview-box .ant-image-img')?.click();
+                    }}
+                  />
+                  <DeleteOutlined
+                    style={{ fontSize: 24, color: '#ff4d4f', cursor: 'pointer' }}
+                    title="Xóa ảnh"
+                    onClick={() => { setQrBase64(''); setQrFile(null); }}
+                  />
+                </div>
+                <style>{`.qr-preview-box:hover .qr-hover-overlay { opacity: 1 !important; }`}</style>
+              </div>
+
+              {/* Nút Thay ảnh — input file ẩn, độc lập với preview */}
+              <div style={{ marginTop: 10 }}>
+                <input
+                  id="qr-file-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => setQrBase64(ev.target?.result as string);
+                    reader.readAsDataURL(file);
+                    setQrFile(file);
+                    e.target.value = '';
+                  }}
+                />
+                <Button
+                  icon={<UploadOutlined />}
+                  size="small"
+                  onClick={() => document.getElementById('qr-file-input')?.click()}
+                >
+                  Thay ảnh
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Khi chưa có ảnh: hiện Upload box bình thường
+            <Upload
+              accept="image/*"
+              listType="picture-card"
+              showUploadList={false}
+              beforeUpload={(file) => {
+                const reader = new FileReader();
+                reader.onload = (e) => setQrBase64(e.target?.result as string);
+                reader.readAsDataURL(file);
+                setQrFile(file);
+                return false;
+              }}
+            >
               <div>
                 <UploadOutlined style={{ fontSize: '24px', color: '#999' }} />
-                <div style={{ marginTop: 8, color: '#666' }}>Tải ảnh lên</div>
+                <div style={{ marginTop: 8, color: '#666' }}>Tải QR Code lên</div>
               </div>
-            )}
-          </Upload>
-          {!qrBase64 && <div style={{ color: '#ff4d4f', fontSize: '13px', marginTop: '12px' }}>Chưa có ảnh QR nào được tải lên</div>}
+            </Upload>
+          )}
+          {!qrBase64 && (
+            <div style={{ color: '#ff4d4f', fontSize: '13px', marginTop: '12px' }}>Chưa có mã QR nào được tải lên</div>
+          )}
         </div>
       </ModalForm>
     </>

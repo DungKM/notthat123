@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Button, Popconfirm, Space, message as antMessage, Spin, Upload, Image,
+  Button, Popconfirm, Space, message as antMessage, Spin, Upload, Image, Input,
 } from 'antd';
 import type { UploadFile } from 'antd';
 import {
@@ -126,15 +126,18 @@ const ArchitectureCategoryManagementPage: React.FC = () => {
   const [editRecord, setEditRecord] = useState<CategoryItem | null>(null);
   const [imageFile, setImageFile] = useState<UploadFile | null>(null);
   const [dragScope, setDragScope] = useState<'root' | string>('root');
+  const [searchText, setSearchText] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (search?: string) => {
     setLoading(true);
     try {
-      const list = await getAll({ limit: 200 });
+      const params: any = { limit: 200 };
+      if (search) params.search = search;
+      const list = await getAll(params);
       if (Array.isArray(list)) {
         const mapped = list.map((i: any) => ({ ...i, id: i.id || i._id }));
         setRootItems(mapped);
@@ -300,6 +303,15 @@ const ArchitectureCategoryManagementPage: React.FC = () => {
           </p>
         </div>
         <Space style={{ flexWrap: 'wrap' }}>
+          <Input.Search
+            placeholder="Tìm kiếm danh mục..."
+            allowClear
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            onSearch={val => loadData(val)}
+            onClear={() => loadData('')}
+            style={{ width: 240 }}
+          />
           {savingOrder && <Spin size="small" />}
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
             Thêm danh mục
