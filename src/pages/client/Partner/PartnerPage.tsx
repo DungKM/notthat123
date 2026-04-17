@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
@@ -18,6 +18,7 @@ const PartnerCardSkeleton = () => (
 const PartnerPage: React.FC = () => {
   const { list: partners, getAll, meta, loading } = usePartnerService();
   const [limit, setLimit] = React.useState(6);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getAll({ limit });
@@ -71,7 +72,17 @@ const PartnerPage: React.FC = () => {
             >
               Đối tác
             </h2>
-            <div className="mb-16 w-full">
+            <div 
+              className="mb-16 w-full cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => {
+                if (listRef.current) {
+                  const yOffset = -100; // Trừ khoảng hở header
+                  const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                  window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+              }}
+              title="Nhấn để xem danh sách đối tác chi tiết"
+            >
               <img
                 src={doiTacImg}
                 alt="Đối tác đồng hành cùng HOCHI"
@@ -85,7 +96,7 @@ const PartnerPage: React.FC = () => {
 
 
           {/* Grid of Partner Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div ref={listRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {loading ? (
               Array.from({ length: 6 }).map((_, idx) => <PartnerCardSkeleton key={idx} />)
             ) : partners.map((partner, index) => (

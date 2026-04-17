@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
@@ -60,12 +60,27 @@ const ProjectsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Đồng bộ category khi url thay đổi (từ menu)
   useEffect(() => {
     if (categoryParam !== selectedCategorySlug) {
       setSelectedCategorySlug(categoryParam);
       setCurrentPage(1);
+    }
+  }, [categoryParam]);
+
+  // Tự động cuộn trên mobile khi chọn từ menu
+  useEffect(() => {
+    if (window.innerWidth < 1024 && categoryParam) {
+      const timer = setTimeout(() => {
+        if (listRef.current) {
+          const yOffset = -80; // Trừ khoảng hở header
+          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 600); // Đợi thêm chút để API load và đẩy layout xuống
+      return () => clearTimeout(timer);
     }
   }, [categoryParam]);
 
@@ -131,7 +146,15 @@ const ProjectsPage: React.FC = () => {
   const handleCategorySelect = (catValue: string) => {
     setSelectedCategorySlug(catValue);
     setCurrentPage(1);
-    // Removed setSearchParams to avoid modifying the URL
+
+    setTimeout(() => {
+      if (window.innerWidth < 1024 && listRef.current) {
+        const yOffset = -80; // Trừ khoảng hở header
+        const element = listRef.current;
+        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
@@ -310,7 +333,7 @@ const ProjectsPage: React.FC = () => {
             </aside>
 
             {/* Right Content */}
-            <div>
+            <div ref={listRef}>
               {(() => {
                 const currentCategory = categories.find((cat: any) =>
                   cat.slug === selectedCategorySlug || cat._id === selectedCategorySlug || cat.id === selectedCategorySlug

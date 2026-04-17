@@ -4,7 +4,7 @@ import Container from '@/src/features/showcase/components/ui/Container';
 import SEO from '@/src/components/common/SEO';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
-import { ArrowLeftOutlined, EnvironmentOutlined, CalendarOutlined, FullscreenOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ArrowRightOutlined, EnvironmentOutlined, CalendarOutlined, FullscreenOutlined } from '@ant-design/icons';
 import { useArchitectureService } from '@/src/api/services';
 import { Image } from 'antd';
 
@@ -15,6 +15,7 @@ const ArchitectureDetailPage: React.FC = () => {
   const [project, setProject] = useState<any>(null);
   const [relatedProjects, setRelatedProjects] = useState<any[]>([]);
   const [error, setError] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
@@ -66,8 +67,23 @@ const ArchitectureDetailPage: React.FC = () => {
   }
 
   const categoryName = project.categoryId?.name || 'Thiết kế kiến trúc';
-  const coverImage = project.images && project.images.length > 0 ? project.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
-  const gallery = project.images && project.images.length > 1 ? project.images.slice(1) : [];
+  const allImages = project.images && project.images.length > 0 ? project.images : [{ url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80' }];
+  const currentImage = allImages[currentImageIndex].url;
+  const coverImage = allImages[0].url;
+  
+  const gallery = project.images && project.images.length > 0 ? project.images : [];
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
 
   return (
     <div className="bg-white">
@@ -104,14 +120,38 @@ const ArchitectureDetailPage: React.FC = () => {
               <article className="bg-white shadow-sm border border-gray-100">
                 <Image.PreviewGroup>
 
-                  {/* Tiêu đề & Thông tin */}
-                  <div className="relative w-full [&_.ant-image]:!flex [&_.ant-image]:!justify-center [&_.ant-image]:!w-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-auto [&_.ant-image-img]:!object-contain bg-gray-50">
-                    <Image
-                      src={coverImage}
-                      alt={project.name}
-                      className="w-full h-auto object-contain"
-                      loading="lazy"
-                    />
+                  {/* Slider Ảnh */}
+                  <div className="p-4 sm:p-6 lg:p-8 bg-gray-50/50 border-b border-gray-100 rounded-t-xl">
+                    <div className="relative w-full max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-md group border border-gray-200">
+                      <div className="w-full aspect-[4/3] md:aspect-[16/9] relative flex items-center justify-center bg-gray-100 [&_.ant-image]:!flex [&_.ant-image]:!justify-center [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover">
+                        <Image
+                          src={currentImage}
+                          alt={project.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      
+                      {allImages.length > 1 && (
+                        <>
+                          <button
+                            onClick={prevImage}
+                            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <ArrowLeftOutlined />
+                          </button>
+                          <button
+                            onClick={nextImage}
+                            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <ArrowRightOutlined />
+                          </button>
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium tracking-widest shadow-sm">
+                            {currentImageIndex + 1} / {allImages.length}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   <div className="p-6 sm:px-10 sm:pt-8 sm:pb-2">
