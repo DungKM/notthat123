@@ -158,11 +158,10 @@ const CategoryProjectManagementPage: React.FC = () => {
   );
 
   // ─── Load ────────────────────────────────────────────────────────────────
-  const loadData = useCallback(async (search?: string) => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const params: any = { limit: 200 };
-      if (search) params.search = search;
       const list = await getAll(params);
       if (Array.isArray(list)) {
         const mapped = list.map((i: any) => ({
@@ -179,6 +178,30 @@ const CategoryProjectManagementPage: React.FC = () => {
   }, [getAll]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // ─── Frontend Search Filter ──────────────────────────────────────────────
+  const filteredRootItems = React.useMemo(() => {
+    if (!searchText.trim()) return rootItems;
+    const lowerSearch = searchText.trim().toLowerCase();
+
+    return rootItems.map(root => {
+      const rootMatches = root.name.toLowerCase().includes(lowerSearch);
+      const matchingChildren = (root.children || []).filter(child =>
+        child.name.toLowerCase().includes(lowerSearch)
+      );
+
+      if (!rootMatches && matchingChildren.length === 0) {
+        return null;
+      }
+
+      const childrenToKeep = rootMatches ? (root.children || []) : matchingChildren;
+
+      return {
+        ...root,
+        children: childrenToKeep
+      };
+    }).filter(Boolean) as CategoryProjectItem[];
+  }, [rootItems, searchText]);
 
   // ─── Toggle expand ───────────────────────────────────────────────────────
   const toggleExpand = (id: string) => {
@@ -381,8 +404,6 @@ const CategoryProjectManagementPage: React.FC = () => {
             allowClear
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            onSearch={val => loadData(val)}
-            onClear={() => loadData('')}
             style={{ width: 240 }}
           />
           {savingOrder && <Spin size="small" />}
@@ -422,10 +443,10 @@ const CategoryProjectManagementPage: React.FC = () => {
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext items={rootItems.map(r => r.id)} strategy={verticalListSortingStrategy}>
+              <SortableContext items={filteredRootItems.map(r => r.id)} strategy={verticalListSortingStrategy}>
                 <tbody>
-                  {rootItems.map(root => {
-                    const isExpanded = expandedIds.has(root.id);
+                  {filteredRootItems.map(root => {
+                    const isExpanded = expandedIds.has(root.id) || !!searchText.trim();
                     const children = root.children || [];
 
                     return (
