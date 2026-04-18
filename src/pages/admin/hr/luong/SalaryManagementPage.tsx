@@ -69,22 +69,22 @@ const SalaryManagementPage: React.FC = () => {
     {
       title: 'Lương cơ bản',
       dataIndex: ['userId', 'baseSalary'],
-      render: (_, r) => <span style={{ color: '#1890ff', fontWeight: 600 }}>{fmt(r.userId?.baseSalary)}</span>,
+      render: (_, r) => <span style={{ color: '#1890ff', fontWeight: 600, whiteSpace: 'nowrap' }}>{fmt(r.userId?.baseSalary)}</span>,
     },
     {
       title: 'Thưởng',
       dataIndex: 'bonus',
-      render: (_, r) => <span style={{ color: '#52c41a' }}>{fmt(r.bonus)}</span>,
+      render: (_, r) => <span style={{ color: '#52c41a', whiteSpace: 'nowrap' }}>{fmt(r.bonus)}</span>,
     },
     {
       title: 'Phạt',
       dataIndex: 'penalty',
-      render: (_, r) => <span style={{ color: 'red' }}>{fmt(r.penalty)}</span>,
+      render: (_, r) => <span style={{ color: 'red', whiteSpace: 'nowrap' }}>{fmt(r.penalty)}</span>,
     },
     {
       title: 'Tạm ứng',
       dataIndex: 'advance',
-      render: (_, r) => <span>{fmt(r.advance)}</span>,
+      render: (_, r) => <span style={{ whiteSpace: 'nowrap' }}>{fmt(r.advance)}</span>,
     },
     {
       title: 'Ngày công',
@@ -100,7 +100,7 @@ const SalaryManagementPage: React.FC = () => {
       title: 'Số tiền đang có',
       dataIndex: 'nextSalary',
       render: (_, r) => (
-        <span style={{ fontWeight: 700, fontSize: 15, color: '#13c55a' }}>{fmt(r.netSalary)}</span>
+        <span style={{ fontWeight: 700, fontSize: 15, color: '#13c55a', whiteSpace: 'nowrap' }}>{fmt(r.netSalary)}</span>
       ),
     },
   ];
@@ -112,7 +112,7 @@ const SalaryManagementPage: React.FC = () => {
         headerTitle="Bảng lương nhân sự"
         rowKey={(r) => r.userId?.id || Math.random().toString()}
         search={false}
-        scroll={{ x: 900 }}
+        scroll={{ x: 'max-content' }}
         columns={columns}
         toolbar={{
           actions: [

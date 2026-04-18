@@ -27,7 +27,7 @@ const RecruitmentPage: React.FC = () => {
   React.useEffect(() => {
     appRequest('GET', '/info')
       .then((res: any) => { if (res?.data) setRecruitmentInfo(res.data); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
   const [formData, setFormData] = useState({
     position: '', // default empty
@@ -44,7 +44,7 @@ const RecruitmentPage: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     let { name, value } = e.target;
-    
+
     if (name === 'fullName') {
       value = value.replace(/[^\p{L}\s]/gu, '');
     }
@@ -192,6 +192,17 @@ const RecruitmentPage: React.FC = () => {
                   ))}
                 </ul>
               )}
+
+              <div className="mt-10 pt-4">
+                <button
+                  onClick={() => {
+                    document.getElementById('recruitment-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="bg-[#cca32e] cursor-pointer   text-white font-bold uppercase tracking-widest px-10 py-4 rounded-full hover:bg-teal-950 transition-colors shadow-lg hover:shadow-xl"
+                >
+                  Ứng tuyển ngay
+                </button>
+              </div>
             </div>
           </Container>
         </section>
@@ -225,7 +236,7 @@ const RecruitmentPage: React.FC = () => {
       </section>
 
       {/* Form Section */}
-      <section className="py-24 relative overflow-hidden">
+      <section id="recruitment-form" className="py-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-showcase-light opacity-50 -z-10 skew-x-12 transform translate-x-1/2"></div>
         <Container>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">

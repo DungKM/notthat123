@@ -97,6 +97,7 @@ const ArchitectureManagementPage: React.FC = () => {
       if (values.description) formData.append('description', values.description);
 
       const isUpdate = !!currentItem;
+      let keepImageCount = 0;
 
       if (values.images && values.images.length > 0) {
         const imageFiles = values.images.slice(0, 4);
@@ -108,9 +109,14 @@ const ArchitectureManagementPage: React.FC = () => {
             const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
             if (imageId) {
               formData.append('keepImageIds', imageId);
+              keepImageCount++;
             }
           }
         }
+      }
+
+      if (isUpdate && keepImageCount === 0) {
+        formData.append('keepImageIds', '[]');
       }
 
       if (isUpdate) {

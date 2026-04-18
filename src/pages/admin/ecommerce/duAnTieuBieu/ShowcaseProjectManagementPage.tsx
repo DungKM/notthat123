@@ -102,6 +102,7 @@ const ShowcaseProjectManagementPage: React.FC = () => {
 
       // Xử lý ảnh — tối đa 4 ảnh
       const isUpdate = !!currentProject;
+      let keepImageCount = 0;
 
       if (values.images && values.images.length > 0) {
         const imageFiles = values.images.slice(0, 4); // Giới hạn tối đa 4 ảnh
@@ -115,9 +116,14 @@ const ShowcaseProjectManagementPage: React.FC = () => {
             const imageId = fileItem.uid?.startsWith('-') ? null : (fileItem.uid || fileItem.id || fileItem._id);
             if (imageId) {
               formData.append('keepImageIds', imageId);
+              keepImageCount++;
             }
           }
         }
+      }
+
+      if (isUpdate && keepImageCount === 0) {
+        formData.append('keepImageIds', '[]');
       }
 
       // In Axios, useApi.request accepts (method, url, payload, params)

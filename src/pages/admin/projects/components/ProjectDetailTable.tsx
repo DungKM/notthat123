@@ -18,6 +18,7 @@ import { ProjectDetail, Role, Project } from "@/src/types";
 import { formatCurrency } from "@/src/utils/format";
 import { exportProjectDetailToExcel } from "@/src/utils/excelExport";
 import { useProductionCategoryService } from "@/src/api/services";
+import api from "@/src/api/axiosInstance";
 
 const { Text } = Typography;
 
@@ -255,6 +256,10 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 }) => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [manualTotal, setManualTotal] = useState<number | null>(null);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [manualProfit, setManualProfit] = useState<number | null>(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -641,6 +646,39 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     setEditableRowKeys([...editableKeys, newId]);
   };
 
+  const handleOpenImportModal = () => {
+    setImportModalOpen(true);
+    setSelectedGroupId(null);
+    setFileList([]);
+  };
+
+  const handleUploadFiles = async () => {
+    if (!selectedGroupId) {
+      message.error("Vui lòng chọn hạng mục để đính kèm file!");
+      return;
+    }
+    if (fileList.length === 0) {
+      message.error("Vui lòng tải lên ít nhất một file!");
+      return;
+    }
+    const formData = new FormData();
+    fileList.forEach(file => {
+      formData.append('files', file.originFileObj || file);
+    });
+
+    setUploading(true);
+    try {
+      await api.post(`/projects/${projectId}/details/${selectedGroupId}/attachments`, formData);
+      message.success("Tải file đính kèm thành công!");
+      setImportModalOpen(false);
+      setFileList([]);
+    } catch (e: any) {
+      message.error(e.message || "Có lỗi xảy ra khi upload file");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleExportExcel = async () => {
     try {
       await exportProjectDetailToExcel(project, projectId, details, indexMapping);
@@ -664,12 +702,10 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
             >
               Chọn danh mục
             </Button>
-            {/* Nút Import Excel */}
-            <Upload showUploadList={false} beforeUpload={() => { message.info('Tính năng Import Excel đang được phát triển'); return false; }}>
-              <Button icon={<UploadOutlined />}>
-                Import Excel
-              </Button>
-            </Upload>
+            {/* Nút Import Excel Đính Kèm */}
+            <Button icon={<UploadOutlined />} onClick={handleOpenImportModal}>
+              Import File Hạng Mục
+            </Button>
           </>
         )}
         <Button type="default" icon={<DownloadOutlined />} onClick={handleExportExcel}>
@@ -770,6 +806,46 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
           </ProTable.Summary>
         )}
       />
+
+      <Modal
+        title="Tải file đính kèm (Excel, PDF...) vào Hạng mục"
+        open={importModalOpen}
+        onCancel={() => setImportModalOpen(false)}
+        okText="Tải lên"
+        cancelText="Hủy"
+        onOk={handleUploadFiles}
+        confirmLoading={uploading}
+        zIndex={1050}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 8, fontWeight: 500 }}>Chọn hạng mục (đã lưu): <span style={{color: 'red'}}>*</span></div>
+          <Select
+            style={{ width: "100%" }}
+            placeholder="— Bấm để chọn hạng mục —"
+            value={selectedGroupId}
+            onChange={setSelectedGroupId}
+            options={details
+              .filter(d => d.rowType === 'group' && d.id && String(d.id).length > 10)
+              .map(d => ({ value: d.id, label: d.name }))}
+            notFoundContent="Chưa có hạng mục nào được lưu. Bạn cần thêm danh mục và bấm Lưu nhé."
+          />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 8, fontWeight: 500 }}>Danh sách file đính kèm: <span style={{color: 'red'}}>*</span></div>
+          <Upload
+            beforeUpload={() => false}
+            multiple
+            maxCount={5}
+            fileList={fileList}
+            onChange={(info) => setFileList(info.fileList)}
+            listType="text"
+          >
+            <Button icon={<UploadOutlined />}>Bấm hoặc kéo file vào đây</Button>
+          </Upload>
+          <div style={{ marginTop: 8, fontSize: 13, color: '#666' }}>Hỗ trợ upload nhiều file cùng lúc. Tối đa 5 file/lần.</div>
+        </div>
+      </Modal>
+
       <style>{`
         .project-detail-table .ant-pro-table-list-toolbar {
           display: none;

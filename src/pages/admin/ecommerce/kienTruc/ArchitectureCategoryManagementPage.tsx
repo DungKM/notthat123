@@ -38,7 +38,7 @@ interface CategoryItem {
   _id?: string;
   name: string;
   slug: string;
-  parentSlug?: string | null;
+  parentId?: string | null;
   description?: string;
   priority?: number;
   image?: string;
@@ -235,21 +235,21 @@ const ArchitectureCategoryManagementPage: React.FC = () => {
       </div>
       <ProFormText name="name" label="Tên danh mục" rules={[{ required: true, message: 'Nhập tên danh mục' }]} />
       <ProFormSelect
-        name="parentSlug"
+        name="parentId"
         label="Danh mục cha"
         tooltip="Chỉ chọn nếu muốn tạo danh mục con"
         request={async () => {
           const list = await getAll({ limit: 100 });
           if (!Array.isArray(list)) return [];
-          return list.map(i => ({ label: i.name, value: i.slug }));
+          return list.map(i => ({ label: i.name, value: i.id || i._id }));
         }}
         placeholder="Không chọn (Tạo danh mục gốc)"
         showSearch
       />
       <ProFormTextArea name="description" label="Mô tả danh mục" />
-      <ProFormDependency name={['parentSlug']}>
-        {({ parentSlug }) => {
-          if (!parentSlug) return null;
+      <ProFormDependency name={['parentId']}>
+        {({ parentId }) => {
+          if (!parentId) return null;
           return (
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Ảnh đại diện cho danh mục</label>
@@ -405,7 +405,7 @@ const ArchitectureCategoryManagementPage: React.FC = () => {
         onFinish={async (values) => {
           const formData = new FormData();
           formData.append('name', values.name || '');
-          if (values.parentSlug) formData.append('parentSlug', values.parentSlug);
+          if (values.parentId) formData.append('parentId', values.parentId);
           if (values.description) formData.append('description', values.description);
           if (imageFile) formData.append('image', imageFile as any);
           await api.post('/architectures/categories', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -424,12 +424,12 @@ const ArchitectureCategoryManagementPage: React.FC = () => {
         title={`Sửa: ${editRecord?.name ?? ''}`}
         open={editOpen}
         modalProps={{ destroyOnClose: true, onCancel: () => { setEditOpen(false); setEditRecord(null); setImageFile(null); } }}
-        initialValues={{ name: editRecord?.name, parentSlug: editRecord?.parentSlug, description: editRecord?.description }}
+        initialValues={{ name: editRecord?.name, parentId: editRecord?.parentId, description: editRecord?.description }}
         onFinish={async (values) => {
           if (!editRecord) return false;
           const formData = new FormData();
           formData.append('name', values.name || '');
-          if (values.parentSlug) formData.append('parentSlug', values.parentSlug);
+          if (values.parentId) formData.append('parentId', values.parentId);
           if (values.description) formData.append('description', values.description);
           if (imageFile) formData.append('image', imageFile as any);
           await api.patch(`/architectures/categories/${editRecord.id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });

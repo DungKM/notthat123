@@ -38,7 +38,7 @@ interface CategoryProjectItem {
   _id?: string;
   name: string;
   slug: string;
-  parentSlug?: string | null;
+  parentId?: string | null;
   description?: string;
   priority?: number;
   image?: string;
@@ -302,13 +302,13 @@ const CategoryProjectManagementPage: React.FC = () => {
       </div>
       <ProFormText name="name" label="Tên danh mục" rules={[{ required: true, message: 'Nhập tên danh mục' }]} />
       <ProFormSelect
-        name="parentSlug"
+        name="parentId"
         label="Danh mục cha"
         tooltip="Chỉ chọn nếu muốn tạo danh mục con"
         request={async () => {
           const list = await getAll({ limit: 100 });
           if (!Array.isArray(list)) return [];
-          return list.map(i => ({ label: i.name, value: i.slug }));
+          return list.map(i => ({ label: i.name, value: i.id || i._id }));
         }}
         placeholder="Không chọn (Tạo danh mục gốc)"
         showSearch
@@ -316,9 +316,9 @@ const CategoryProjectManagementPage: React.FC = () => {
       <ProFormTextArea name="description" label="Mô tả danh mục" />
 
       {/* Ảnh đại diện — chỉ hiện khi chọn danh mục cha (tạo danh mục con) */}
-      <ProFormDependency name={['parentSlug']}>
-        {({ parentSlug }) => {
-          if (!parentSlug) return null;
+      <ProFormDependency name={['parentId']}>
+        {({ parentId }) => {
+          if (!parentId) return null;
           return (
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Ảnh đại diện cho danh mục</label>
@@ -517,7 +517,7 @@ const CategoryProjectManagementPage: React.FC = () => {
         onFinish={async (values) => {
           const formData = new FormData();
           formData.append('name', values.name || '');
-          if (values.parentSlug) formData.append('parentSlug', values.parentSlug);
+          if (values.parentId) formData.append('parentId', values.parentId);
           if (values.description) formData.append('description', values.description);
           if (imageFile) formData.append('image', imageFile as any);
 
@@ -544,14 +544,14 @@ const CategoryProjectManagementPage: React.FC = () => {
         }}
         initialValues={{
           name: editRecord?.name,
-          parentSlug: editRecord?.parentSlug,
+          parentId: editRecord?.parentId,
           description: editRecord?.description,
         }}
         onFinish={async (values) => {
           if (!editRecord) return false;
           const formData = new FormData();
           formData.append('name', values.name || '');
-          if (values.parentSlug) formData.append('parentSlug', values.parentSlug);
+          if (values.parentId) formData.append('parentId', values.parentId);
           if (values.description) formData.append('description', values.description);
           if (imageFile) formData.append('image', imageFile as any);
 

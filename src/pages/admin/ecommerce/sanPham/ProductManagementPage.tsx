@@ -539,6 +539,8 @@ const ProductManagementPage: React.FC = () => {
           if (values.material) formData.append('material', values.material);
           if (values.description) formData.append('description', values.description);
 
+          let keepImageCount = 0;
+
           if (imageFiles.length > 0) {
             const existingMap: Record<string, string> = {};
 
@@ -556,6 +558,7 @@ const ProductManagementPage: React.FC = () => {
                 if (imageId) {
                   formData.append('keepImageIds', imageId);
                   existingMap[imageId] = desc;
+                  keepImageCount++;
                 }
               }
             }
@@ -563,6 +566,10 @@ const ProductManagementPage: React.FC = () => {
             if (Object.keys(existingMap).length > 0) {
               formData.append('existingImageDescriptions', JSON.stringify(existingMap));
             }
+          }
+
+          if (keepImageCount === 0) {
+            formData.append('keepImageIds', '[]');
           }
 
           await request('PATCH', `/${editRecord.id}`, formData);
