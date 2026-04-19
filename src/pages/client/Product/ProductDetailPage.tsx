@@ -21,7 +21,8 @@ import deliveryLogo from '@/src/statics/logo_giao_hang.png';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import toast from 'react-hot-toast';
 import { useProductService } from '@/src/api/services';
-import { Image, Modal, Form, Input } from 'antd';
+import { Image } from 'antd';
+import InterestModal from '@/src/components/common/InterestModal';
 
 const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
   const image = product.images && product.images.length > 0
@@ -66,13 +67,6 @@ const ProductDetailPage: React.FC = () => {
   const [activeImgIndex, setActiveImgIndex] = React.useState(0);
 
   const [isInterestModalOpen, setIsInterestModalOpen] = React.useState(false);
-  const [interestForm] = Form.useForm();
-
-  const handleInterestSubmit = async (values: any) => {
-    toast.success('Ghi nhận thông tin thành công. Chúng tôi sẽ sớm liên hệ!');
-    setIsInterestModalOpen(false);
-    interestForm.resetFields();
-  };
 
   const { data: apiProduct, loading, getBySlug, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
   const { list: newProducts, getAll: getNewProducts } = useProductService();
@@ -557,55 +551,14 @@ const ProductDetailPage: React.FC = () => {
             </Container>
           </main>
 
-          <Modal
-            title={
-              <div className="text-center font-bold text-lg text-gray-800">
-                Đăng ký nhận tư vấn
-              </div>
-            }
-            open={isInterestModalOpen}
-            onCancel={() => setIsInterestModalOpen(false)}
-            footer={null}
-            destroyOnClose
-          >
-            <p className="text-center text-gray-500 mb-6 text-sm">
-              Vui lòng để lại thông tin, chúng tôi sẽ liên hệ tư vấn chi tiết về sản phẩm <strong className="text-gray-800">{product.title}</strong> cho bạn.
-              <br />
-              <span className="text-red-500 font-medium italic mt-2 inline-block">* Lưu ý: Quá trình tư vấn là hoàn toàn miễn phí!</span>
-            </p>
-            <Form
-              form={interestForm}
-              layout="vertical"
-              onFinish={handleInterestSubmit}
-            >
-              <Form.Item
-                name="name"
-                rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
-              >
-                <Input prefix={<UserOutlined className="text-gray-400" />} placeholder="Họ và tên *" size="large" />
-              </Form.Item>
-              <Form.Item
-                name="phone"
-                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
-              >
-                <Input prefix={<PhoneOutlined className="text-gray-400" />} placeholder="Số điện thoại *" size="large" />
-              </Form.Item>
-              <Form.Item
-                name="email"
-                rules={[{ type: 'email', message: 'Email không hợp lệ' }]}
-              >
-                <Input prefix={<MailOutlined className="text-gray-400" />} placeholder="Email (Tùy chọn)" size="large" />
-              </Form.Item>
-              <Form.Item className="mb-0 mt-6">
-                <button
-                  type="submit"
-                  className="w-full bg-[#cca32e] text-white font-bold py-3 rounded hover:bg-[#b08c27] transition-colors"
-                >
-                  Gửi thông tin
-                </button>
-              </Form.Item>
-            </Form>
-          </Modal>
+          <InterestModal
+            isOpen={isInterestModalOpen}
+            onClose={() => setIsInterestModalOpen(false)}
+            entityName={product.title}
+            entityTypeText="sản phẩm"
+            entityId={String(apiProduct?.id || '')}
+            entityType="Product"
+          />
 
         </>
       )}

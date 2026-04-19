@@ -108,3 +108,5 @@ export const useProductionCategoryService = () => useApi<any>('/production-categ
 // ─── Architectures (Thiết kế kiến trúc) ───
 export const useArchitectureService = () => useApi<any>('/architectures');
 export const useArchitectureCategoryService = () => useApi<any>('/architectures/categories');
+
+export const useInterestesService = () => useApi<any>('/interests');

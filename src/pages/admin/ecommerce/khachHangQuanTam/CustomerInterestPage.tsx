@@ -1,77 +1,93 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { Tag, Space, Button, Tooltip, message } from 'antd';
-import { CheckOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Tag, Button, Tooltip, message, Popconfirm, Modal, Form, Select, Input, Descriptions, Space } from 'antd';
+import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useInterestesService } from '@/src/api/services';
 
 interface CustomerInterest {
   id: string;
-  name: string;
+  fullName: string;
   phone: string;
   email: string;
-  type: 'Sản phẩm' | 'Kiến trúc' | 'Nội thất';
-  targetName: string;
+  entityType: string;
+  entityId: { name: string; slug: string; id: string } | string;
   createdAt: string;
-  status: 'Chưa liên hệ' | 'Đã liên hệ';
+  status: string;
+  note?: string;
 }
 
-const mockData: CustomerInterest[] = [
-  {
-    id: '1',
-    name: 'Nguyễn Văn A',
-    phone: '0901234567',
-    email: 'nguyenvana@example.com',
-    type: 'Sản phẩm',
-    targetName: 'Sofa Da Cao Cấp Ý',
-    createdAt: dayjs().subtract(2, 'hour').toISOString(),
-    status: 'Chưa liên hệ',
-  },
-  {
-    id: '2',
-    name: 'Trần Thị B',
-    phone: '0987654321',
-    email: 'tranthib@example.com',
-    type: 'Kiến trúc',
-    targetName: 'Biệt Thự Vườn Tân Cổ Điển',
-    createdAt: dayjs().subtract(1, 'day').toISOString(),
-    status: 'Đã liên hệ',
-  },
-  {
-    id: '3',
-    name: 'Lê Văn C',
-    phone: '0912345678',
-    email: '',
-    type: 'Nội thất',
-    targetName: 'Penthouse Landmark 81',
-    createdAt: dayjs().subtract(3, 'day').toISOString(),
-    status: 'Chưa liên hệ',
-  },
-  {
-    id: '4',
-    name: 'Phạm Thị D',
-    phone: '0934567890',
-    email: 'phamthid@example.com',
-    type: 'Sản phẩm',
-    targetName: 'Bàn Ăn Gỗ Sồi Nguyên Khối',
-    createdAt: dayjs().subtract(5, 'hour').toISOString(),
-    status: 'Chưa liên hệ',
-  },
-];
+const typeMap: Record<string, string> = {
+  'Product': 'Sản phẩm',
+  'Architecture': 'Kiến trúc',
+  'Construction': 'Công trình',
+  'Production': 'Nội thất',
+};
 
 const typeColors: Record<string, string> = {
-  'Sản phẩm': 'blue',
-  'Kiến trúc': 'magenta',
-  'Nội thất': 'cyan',
+  'Product': 'blue',
+  'Architecture': 'magenta',
+  'Construction': 'cyan',
+  'Production': 'cyan',
 };
 
 const CustomerInterestPage: React.FC = () => {
   const actionRef = useRef<ActionType>();
+  const { request, patch, remove, getById } = useInterestesService();
+
+  // Detail Modal State
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [detailData, setDetailData] = useState<any>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  // Update Status Modal State
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [currentRecord, setCurrentRecord] = useState<CustomerInterest | null>(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateForm] = Form.useForm();
+
+  // Actions
+  const handleViewDetail = async (id: string) => {
+    setDetailModalOpen(true);
+    setLoadingDetail(true);
+    try {
+      const data = await getById(id);
+      setDetailData(data);
+    } catch (e) {
+      setDetailModalOpen(false);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(id);
+      actionRef.current?.reload();
+    } catch (e) {
+      // already handled in useApi
+    }
+  };
+
+  const handleUpdateStatus = async (values: any) => {
+    if (!currentRecord) return;
+    setUpdateLoading(true);
+    try {
+      await patch(currentRecord.id, { status: values.status, note: values.note });
+      setUpdateModalOpen(false);
+      actionRef.current?.reload();
+    } catch (e) {
+      // already handled in useApi
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   const columns: ProColumns<CustomerInterest>[] = [
     {
       title: 'Tên khách hàng',
-      dataIndex: 'name',
+      dataIndex: 'fullName',
       render: (dom) => <strong>{dom}</strong>,
     },
     {
@@ -85,22 +101,30 @@ const CustomerInterestPage: React.FC = () => {
     },
     {
       title: 'Loại quan tâm',
-      dataIndex: 'type',
+      dataIndex: 'entityType',
       filters: true,
       onFilter: true,
       valueEnum: {
-        'Sản phẩm': { text: 'Sản phẩm' },
-        'Kiến trúc': { text: 'Kiến trúc' },
-        'Nội thất': { text: 'Nội thất' },
+        'Product': { text: 'Sản phẩm' },
+        'Architecture': { text: 'Kiến trúc' },
+        'Construction': { text: 'Công trình' },
+        'Production': { text: 'Nội thất' },
       },
-      render: (_, record) => (
-        <Tag color={typeColors[record.type]}>{record.type}</Tag>
-      ),
+      render: (_, record) => {
+        const typeName = typeMap[record.entityType] || record.entityType;
+        return <Tag color={typeColors[record.entityType] || 'default'}>{typeName}</Tag>;
+      },
     },
     {
       title: 'Tên (Sản phẩm/Bài viết)',
-      dataIndex: 'targetName',
+      dataIndex: 'entityId',
       ellipsis: true,
+      render: (_, record) => {
+        if (typeof record.entityId === 'object' && record.entityId !== null) {
+          return record.entityId.name;
+        }
+        return '---';
+      }
     },
     {
       title: 'Trạng thái',
@@ -108,45 +132,59 @@ const CustomerInterestPage: React.FC = () => {
       filters: true,
       onFilter: true,
       valueEnum: {
-        'Chưa liên hệ': { text: 'Chưa liên hệ', status: 'Error' },
+        'Chờ xử lý': { text: 'Chờ xử lý', status: 'Warning' },
         'Đã liên hệ': { text: 'Đã liên hệ', status: 'Success' },
+        'Đã hủy': { text: 'Đã hủy', status: 'Error' },
       },
-      render: (_, record) => (
-        <Tag color={record.status === 'Chưa liên hệ' ? 'error' : 'success'}>
-          {record.status}
-        </Tag>
-      ),
+      render: (_, record) => {
+        let color = 'default';
+        if (record.status === 'Chờ xử lý') color = 'warning';
+        else if (record.status === 'Đã liên hệ') color = 'success';
+        else if (record.status === 'Đã hủy') color = 'error';
+        return <Tag color={color}>{record.status}</Tag>;
+      },
     },
     {
       title: 'Ngày gửi',
       dataIndex: 'createdAt',
       valueType: 'dateTime',
       sorter: (a, b) => dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
+      search: false,
     },
     {
       title: 'Thao tác',
       valueType: 'option',
       key: 'option',
-      width: 100,
+      width: 150,
       align: 'center',
       render: (text, record, _, action) => [
-        <Tooltip 
-          key="contact" 
-          title={record.status === 'Chưa liên hệ' ? 'Đánh dấu đã liên hệ' : 'Đã xử lý xong'}
-        >
+        <Tooltip key="view" title="Xem chi tiết">
+          <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(record.id)} />
+        </Tooltip>,
+        <Tooltip key="edit" title="Cập nhật trạng thái">
           <Button
             type="text"
-            icon={record.status === 'Chưa liên hệ' ? <CheckOutlined /> : <CheckCircleOutlined />}
-            style={{ color: record.status === 'Chưa liên hệ' ? '#1890ff' : '#52c41a' }}
+            icon={<EditOutlined />}
             onClick={() => {
-              if (record.status === 'Chưa liên hệ') {
-                message.success(`Đã cập nhật trạng thái liên hệ cho ${record.name}`);
-              } else {
-                message.info('Khách hàng này đã được liên hệ!');
-              }
+              setCurrentRecord(record);
+              updateForm.setFieldsValue({ status: record.status, note: record.note || '' });
+              setUpdateModalOpen(true);
             }}
           />
-        </Tooltip>
+        </Tooltip>,
+        <Popconfirm
+          key="delete"
+          title="Xóa thông tin?"
+          description="Bạn có chắc muốn xóa thông tin khách hàng ?"
+          onConfirm={() => handleDelete(record.id)}
+          okText="Xóa"
+          cancelText="Hủy"
+          okButtonProps={{ danger: true }}
+        >
+          <Tooltip title="Xóa">
+            <Button type="text" danger icon={<DeleteOutlined />} />
+          </Tooltip>
+        </Popconfirm>
       ],
     },
   ];
@@ -158,29 +196,35 @@ const CustomerInterestPage: React.FC = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
-          // Fake delay to simulate network request
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          
-          let data = [...mockData];
-          
-          if (params.name) {
-            data = data.filter(item => item.name.toLowerCase().includes((params.name as string).toLowerCase()));
+          const apiParams: any = {
+            page: params.current || 1,
+            limit: params.pageSize || 10,
+          };
+
+          if (params.fullName) {
+            apiParams.search = params.fullName;
           }
           if (params.phone) {
-            data = data.filter(item => item.phone.includes(params.phone as string));
+            apiParams.search = params.phone;
           }
-          if (filter.type) {
-            data = data.filter(item => filter.type?.includes(item.type));
+
+          if (filter.entityType) {
+            apiParams.entityType = Array.isArray(filter.entityType) ? filter.entityType.join(',') : filter.entityType;
           }
           if (filter.status) {
-            data = data.filter(item => filter.status?.includes(item.status));
+            apiParams.status = Array.isArray(filter.status) ? filter.status.join(',') : filter.status;
           }
-          
-          return {
-            data: data,
-            success: true,
-            total: data.length,
-          };
+
+          try {
+            const res: any = await request('GET', '', undefined, apiParams);
+            return {
+              data: res?.data || [],
+              success: true,
+              total: res?.meta?.total || 0,
+            };
+          } catch (e) {
+            return { data: [], success: false, total: 0 };
+          }
         }}
         rowKey="id"
         search={{
@@ -197,6 +241,98 @@ const CustomerInterestPage: React.FC = () => {
         dateFormatter="string"
         headerTitle="Danh sách Khách hàng quan tâm"
       />
+
+      {/* Chi tiết Modal */}
+      <Modal
+        title={
+          <div className="font-bold text-lg text-gray-800">
+            Chi tiết Thông tin Quan tâm
+          </div>
+        }
+        open={detailModalOpen}
+        onCancel={() => setDetailModalOpen(false)}
+        footer={[
+          <Button key="close" onClick={() => setDetailModalOpen(false)}>Đóng</Button>
+        ]}
+        width={700}
+        destroyOnClose
+      >
+        {loadingDetail ? (
+          <div className="py-10 text-center text-gray-500">Đang tải dữ liệu...</div>
+        ) : detailData ? (
+          <Descriptions bordered column={1} className="mt-4">
+            <Descriptions.Item label="Họ và tên">{detailData.fullName || detailData.name}</Descriptions.Item>
+            <Descriptions.Item label="Số điện thoại">{detailData.phone}</Descriptions.Item>
+            <Descriptions.Item label="Email">{detailData.email || 'Không có'}</Descriptions.Item>
+            <Descriptions.Item label="Loại quan tâm">
+              <Tag color={typeColors[detailData.entityType] || 'default'}>
+                {typeMap[detailData.entityType] || detailData.entityType}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Sản phẩm/Bài viết">
+              <span className="font-medium">
+                {typeof detailData.entityId === 'object' && detailData.entityId ? detailData.entityId.name : detailData.entityId}
+              </span>
+            </Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">
+              <Tag color={detailData.status === 'Chờ xử lý' ? 'warning' : detailData.status === 'Đã liên hệ' ? 'success' : 'error'}>
+                {detailData.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Ghi chú">
+              {detailData.note ? <span className="whitespace-pre-wrap">{detailData.note}</span> : <span className="text-gray-400 italic">Không có</span>}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày gửi">
+              {dayjs(detailData.createdAt).format('DD/MM/YYYY HH:mm')}
+            </Descriptions.Item>
+          </Descriptions>
+        ) : (
+          <div className="py-10 text-center text-red-500">Không tải được dữ liệu chi tiết</div>
+        )}
+      </Modal>
+
+      {/* Cập nhật Trạng thái Modal */}
+      <Modal
+        title={
+          <div className="font-bold text-lg text-gray-800">
+            Cập nhật Trạng thái
+          </div>
+        }
+        open={updateModalOpen}
+        onCancel={() => setUpdateModalOpen(false)}
+        onOk={() => updateForm.submit()}
+        confirmLoading={updateLoading}
+        destroyOnClose
+      >
+        <Form
+          form={updateForm}
+          layout="vertical"
+          onFinish={handleUpdateStatus}
+          className="mt-4"
+        >
+          <Form.Item
+            name="status"
+            label="Trạng thái"
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+          >
+            <Select size="large">
+              <Select.Option value="Chờ xử lý">Chờ xử lý</Select.Option>
+              <Select.Option value="Đã liên hệ">Đã liên hệ</Select.Option>
+              <Select.Option value="Đã hủy">Đã hủy</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="note"
+            label="Ghi chú thêm"
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="Ghi chú tình trạng liên hệ (ví dụ: Khách hẹn gọi lại vào sáng mai...)"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
     </div>
   );
 };
