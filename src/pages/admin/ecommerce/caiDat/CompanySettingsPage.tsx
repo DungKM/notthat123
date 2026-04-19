@@ -15,10 +15,15 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 
+interface Phone {
+  number: string;
+  label: string;
+}
+
 interface Branch {
   name: string;
   address: string;
-  phone: string;
+  phones: Phone[];
   email: string;
 }
 
@@ -31,7 +36,7 @@ interface SocialLinks {
   website: string;
 }
 
-const defaultBranch = (): Branch => ({ name: '', address: '', phone: '', email: '' });
+const defaultBranch = (): Branch => ({ name: '', address: '', phones: [{ number: '', label: 'Hotline' }], email: '' });
 const defaultSocial = (): SocialLinks => ({ facebook: '', zalo: '', youtube: '', instagram: '', tiktok: '', website: '' });
 
 const CompanySettingsPage: React.FC = () => {
@@ -41,8 +46,8 @@ const CompanySettingsPage: React.FC = () => {
   const [logoUrl, setLogoUrl] = useState<string>('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [branches, setBranches] = useState<Branch[]>([
-    { name: 'Chi nhánh Q1', address: '123 Nguyễn Huệ', phone: '0909123456', email: '' },
-    { name: 'Chi nhánh Thủ Đức', address: '456 Võ Văn Ngân', phone: '0909987654', email: '' },
+    { name: 'Chi nhánh Q1', address: '123 Nguyễn Huệ', phones: [{ number: '0909123456', label: 'Hotline' }], email: '' },
+    { name: 'Chi nhánh Thủ Đức', address: '456 Võ Văn Ngân', phones: [{ number: '0909987654', label: 'Hotline' }], email: '' },
   ]);
   const [social, setSocial] = useState<SocialLinks>({
     facebook: 'https://facebook.com/tuduong',
@@ -73,7 +78,7 @@ const CompanySettingsPage: React.FC = () => {
         setBranches(data.branches.map((b: any) => ({
           name: b.name || '',
           address: b.address || '',
-          phone: b.phone || '',
+          phones: Array.isArray(b.phones) && b.phones.length > 0 ? b.phones : [{ number: b.phone || '', label: 'Hotline' }],
           email: b.email || '',
         })));
       }
@@ -98,11 +103,26 @@ const CompanySettingsPage: React.FC = () => {
   useEffect(() => { fetchCompanyInfo(); }, []);
 
   // Branch helpers
-  const updateBranch = (idx: number, field: keyof Branch, value: string) => {
+  const updateBranch = (idx: number, field: keyof Branch, value: any) => {
     setBranches(prev => prev.map((b, i) => i === idx ? { ...b, [field]: value } : b));
   };
   const addBranch = () => setBranches(prev => [...prev, defaultBranch()]);
   const removeBranch = (idx: number) => setBranches(prev => prev.filter((_, i) => i !== idx));
+
+  const updateBranchPhone = (bIdx: number, pIdx: number, field: keyof Phone, value: string) => {
+    setBranches(prev => prev.map((b, i) => {
+      if (i !== bIdx) return b;
+      const newPhones = [...(b.phones || [])];
+      newPhones[pIdx] = { ...newPhones[pIdx], [field]: value };
+      return { ...b, phones: newPhones };
+    }));
+  };
+  const addBranchPhone = (bIdx: number) => {
+    setBranches(prev => prev.map((b, i) => i === bIdx ? { ...b, phones: [...(b.phones || []), { number: '', label: '' }] } : b));
+  };
+  const removeBranchPhone = (bIdx: number, pIdx: number) => {
+    setBranches(prev => prev.map((b, i) => i === bIdx ? { ...b, phones: (b.phones || []).filter((_, pi) => pi !== pIdx) } : b));
+  };
 
   const handleSave = async () => {
     try { await form.validateFields(); } catch { return; }
@@ -223,14 +243,32 @@ const CompanySettingsPage: React.FC = () => {
                     </Form.Item>
                   </Col>
                   <Col xs={24} sm={12}>
-                    <Form.Item label="Số điện thoại" style={{ marginBottom: 10 }}>
-                      <Input
-                        placeholder="VD: 0901 234 567"
-                        prefix={<PhoneOutlined />}
-                        value={branch.phone}
-                        onChange={e => updateBranch(idx, 'phone', e.target.value)}
-                      />
-                    </Form.Item>
+                    <div style={{ marginBottom: 8, fontSize: 13, fontWeight: 500 }}>Số điện thoại</div>
+                    {(branch.phones || []).map((phoneItem, pIdx) => (
+                      <Row gutter={8} key={pIdx} style={{ marginBottom: 8 }}>
+                        <Col span={8}>
+                          <Input 
+                            placeholder="Nhãn (vd: Hotline)" 
+                            value={phoneItem.label}
+                            onChange={(e) => updateBranchPhone(idx, pIdx, 'label', e.target.value)}
+                          />
+                        </Col>
+                        <Col span={12}>
+                          <Input 
+                            placeholder="Số điện thoại" 
+                            prefix={<PhoneOutlined />}
+                            value={phoneItem.number}
+                            onChange={(e) => updateBranchPhone(idx, pIdx, 'number', e.target.value)}
+                          />
+                        </Col>
+                        <Col span={4}>
+                          {branch.phones && branch.phones.length > 1 && (
+                            <Button type="text" danger icon={<DeleteOutlined />} onClick={() => removeBranchPhone(idx, pIdx)} />
+                          )}
+                        </Col>
+                      </Row>
+                    ))}
+                    <Button type="dashed" size="small" icon={<PlusOutlined />} onClick={() => addBranchPhone(idx)}>Thêm SĐT</Button>
                   </Col>
                   <Col xs={24} sm={12}>
                     <Form.Item label="Địa chỉ" style={{ marginBottom: 10 }}>
@@ -258,7 +296,7 @@ const CompanySettingsPage: React.FC = () => {
           </Card>
 
           {/* ── Mạng xã hội ── */}
-          <Card size="small" title="🌐 Mạng xã hội & Liên kết" style={{ marginBottom: 16 }}>
+          <Card size="small" title=" Mạng xã hội & Liên kết" style={{ marginBottom: 16 }}>
             <Row gutter={12}>
               <Col xs={24} sm={12}>
                 <Form.Item label="Website" style={{ marginBottom: 12 }}>

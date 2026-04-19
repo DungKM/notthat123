@@ -12,10 +12,12 @@ import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
 import { useContactService } from '@/src/api/services';
 import toast from 'react-hot-toast';
+import { useCompanyInfoQuery } from '@/src/hooks/useCompanyInfoQuery';
 
 const ContactPage: React.FC = () => {
   const { t } = useTranslation();
   const { create, loading } = useContactService();
+  const { data: companyInfo } = useCompanyInfoQuery();
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -146,56 +148,52 @@ const ContactPage: React.FC = () => {
             {/* Info Column */}
             <div className="space-y-12">
               <div className="space-y-4">
-                <h2 className="text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>Nội Thất HOCHI</h2>
+                <h2 className="text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {companyInfo?.name || "Nội Thất HOCHI"}
+                </h2>
                 <div className="w-20 h-1 bg-[#C5A059]"></div>
               </div>
 
               <div className="space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shrink-0">
-                    <EnvironmentOutlined className="text-xl" />
+                {(companyInfo?.branches || []).map((branch: any, idx: number) => (
+                  <div className="flex items-center gap-4" key={idx}>
+                    <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shrink-0">
+                      <EnvironmentOutlined className="text-xl" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 leading-snug m-0">{branch.name}: {branch.address}</h4>
+                      {(branch.phones && branch.phones.length > 0) && (
+                        <div className="text-sm text-gray-500 mt-1">
+                          {branch.phones.map((p: any, pIdx: number) => (
+                            <span key={pIdx} className="mr-3">
+                              <PhoneOutlined className="mr-1" /> {p.number} {p.label ? `(${p.label})` : ''}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {branch.email && (
+                        <div className="text-sm text-gray-500 mt-1">
+                          <MailOutlined className="mr-1" /> {branch.email}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 leading-snug m-0">Trụ sở chính: Toà nhà VIMECO, Phạm Hùng, Cầu Giấy, Hà Nội</h4>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shrink-0">
-                    <EnvironmentOutlined className="text-xl" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 leading-snug m-0">Văn phòng giao dịch: Ngõ 21 Tả Thanh Oai, Đại Thanh, Hà Nội</h4>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-teal-900 border border-gray-100 shrink-0">
-                    <EnvironmentOutlined className="text-xl" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 leading-snug m-0">Xưởng sản xuất: Ngõ 41 Tả Thanh Oai, Đại Thanh, Hà Nội</h4>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="pt-8 space-y-4 border-t border-gray-100">
-                <div className="flex items-center gap-3 text-lg">
-                  <PhoneOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">Mr Lương: <span className="text-teal-700">0326.908.884</span></span>
-                </div>
-                <div className="flex items-center gap-3 text-lg">
-                  <PhoneOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">{t('common.hotline')}: <span className="text-teal-700">0917.087.055</span></span>
-                </div>
-                {/* <div className="flex items-center gap-3 text-lg">
-                  <MailOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">Email: <span className="text-teal-700">NOITHAT102.VN@GMAIL.COM</span></span>
-                </div> */}
-                <div className="flex items-center gap-3 text-lg">
-                  <GlobalOutlined className="text-[#C5A059]" />
-                  <span className="font-bold">Website: <a href="https://www.noithathochi.vn" className="text-teal-700 hover:underline">https://www.noithathochi.vn</a></span>
-                </div>
+                {companyInfo?.socialLinks?.website && (
+                  <div className="flex items-center gap-3 text-lg">
+                    <GlobalOutlined className="text-[#C5A059]" />
+                    <span className="font-bold">Website: <a href={companyInfo.socialLinks.website} target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline">{companyInfo.socialLinks.website}</a></span>
+                  </div>
+                )}
+                {companyInfo?.email && (
+                  <div className="flex items-center gap-3 text-lg">
+                    <MailOutlined className="text-[#C5A059]" />
+                    <span className="font-bold">Email: <span className="text-teal-700">{companyInfo.email}</span></span>
+                  </div>
+                )}
               </div>
             </div>
 
