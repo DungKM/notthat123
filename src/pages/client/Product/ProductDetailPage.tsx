@@ -398,12 +398,15 @@ const ProductDetailPage: React.FC = () => {
                           <PhoneFilled className="text-[16px]" />
                           Gọi tư vấn
                         </a>
-                        <button
-                          onClick={() => setIsInterestModalOpen(true)}
-                          className="h-10 px-6 bg-transparent border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
-                        >
-                          Quan tâm
-                        </button>
+                        <div className="relative flex">
+                          <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
+                          <button
+                            onClick={() => setIsInterestModalOpen(true)}
+                            className="relative h-10 px-6 bg-white border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
+                          >
+                            Quan tâm
+                          </button>
+                        </div>
                       </div>
 
                       {stockWarning && (

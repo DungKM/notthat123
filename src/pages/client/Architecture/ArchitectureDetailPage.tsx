@@ -174,26 +174,30 @@ const ArchitectureDetailPage: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <h1
-                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                    >
-                      {project.name}
-                    </h1>
-                    {project.location && (
-                      <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-500">
-                        <EnvironmentOutlined className="mr-2 text-xs" />
-                        {project.location}
-                      </p>
-                    )}
-
-                    <div className="mt-6">
-                      <button
-                        onClick={() => setIsInterestModalOpen(true)}
-                        className="h-10 px-8 bg-transparent border-2 border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide cursor-pointer inline-flex items-center uppercase"
-                      >
-                        Quan tâm
-                      </button>
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mt-2">
+                      <div className="flex-1">
+                        <h1
+                          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900"
+                          style={{ fontFamily: "'Inter', sans-serif" }}
+                        >
+                          {project.name}
+                        </h1>
+                        {project.location && (
+                          <p className="mt-3 flex items-center text-xs sm:text-sm text-gray-500">
+                            <EnvironmentOutlined className="mr-2 text-xs" />
+                            {project.location}
+                          </p>
+                        )}
+                      </div>
+                      <div className="shrink-0 mt-2 sm:mt-1 relative flex">
+                        <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
+                        <button
+                          onClick={() => setIsInterestModalOpen(true)}
+                          className="relative h-10 px-8 bg-white border-2 border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide cursor-pointer inline-flex items-center uppercase"
+                        >
+                          Quan tâm
+                        </button>
+                      </div>
                     </div>
                   </div>
 
