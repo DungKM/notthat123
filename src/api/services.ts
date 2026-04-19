@@ -110,3 +110,5 @@ export const useArchitectureService = () => useApi<any>('/architectures');
 export const useArchitectureCategoryService = () => useApi<any>('/architectures/categories');
 
 export const useInterestesService = () => useApi<any>('/interests');
+
+export const useCompanyInfoService = () => useApi<any>('/company-info');

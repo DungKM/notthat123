@@ -159,11 +159,11 @@ const CustomerInterestPage: React.FC = () => {
       align: 'center',
       render: (text, record, _, action) => [
         <Tooltip key="view" title="Xem chi tiết">
-          <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(record.id)} />
+          <Button type="link" icon={<EyeOutlined />} onClick={() => handleViewDetail(record.id)} />
         </Tooltip>,
         <Tooltip key="edit" title="Cập nhật trạng thái">
           <Button
-            type="text"
+            type="link"
             icon={<EditOutlined />}
             onClick={() => {
               setCurrentRecord(record);

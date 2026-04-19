@@ -1133,38 +1133,43 @@ const Header: React.FC = () => {
               <div className="space-y-1">
                 {navLinks.map((link) => (
                   <div key={link.title} className="border-b border-gray-50 last:border-0">
-                    <div className="flex items-center justify-between py-4">
-                      <Link
-                        to={link.href}
-                        target={link.target}
-                        className="text-lg font-bold !text-gray-900 uppercase tracking-tight"
-                        onClick={() => setIsMenuOpen(false)}
+                    {/* Row tiêu đề menu */}
+                    {(link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC || link.href === ROUTES.DANH_SACH_SAN_PHAM) ? (
+                      // Mục có danh mục con: click vào hàng → toggle, không navigate
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-between py-4"
+                        onClick={() => {
+                          const key = link.href;
+                          setExpandedCategories(prev => {
+                            const next = new Set(prev);
+                            if (next.has(key)) next.delete(key);
+                            else next.add(key);
+                            return next;
+                          });
+                        }}
                       >
-                        {link.title}
-                      </Link>
-                      {/* Toggle button cho các mục có danh mục con */}
-                      {(link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) && (
-                        <button
-                          type="button"
-                          className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 transition-colors"
-                          onClick={() => {
-                            const key = link.href;
-                            setExpandedCategories(prev => {
-                              const next = new Set(prev);
-                              if (next.has(key)) next.delete(key);
-                              else next.add(key);
-                              return next;
-                            });
-                          }}
-                        >
-                          <DownOutlined
-                            className={`text-[10px] text-gray-500 transition-transform duration-200 ${
-                              expandedCategories.has(link.href) ? 'rotate-180' : ''
+                        <span className="text-lg font-bold text-gray-900 uppercase tracking-tight">
+                          {link.title}
+                        </span>
+                        <DownOutlined
+                          className={`text-[12px] text-gray-500 transition-transform duration-200 ${expandedCategories.has(link.href) ? 'rotate-180' : ''
                             }`}
-                          />
-                        </button>
-                      )}
-                    </div>
+                        />
+                      </button>
+                    ) : (
+                      // Mục thường: click → navigate và đóng menu
+                      <div className="flex items-center justify-between py-4">
+                        <Link
+                          to={link.href}
+                          target={link.target}
+                          className="text-lg font-bold !text-gray-900 uppercase tracking-tight"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {link.title}
+                        </Link>
+                      </div>
+                    )}
                     {link.submenu && (
                       <div className="pb-4 pl-4 space-y-3">
                         {link.submenu.map((sub) => (
@@ -1180,7 +1185,7 @@ const Header: React.FC = () => {
                       </div>
                     )}
                     {/* Danh mục Sản Phẩm trên mobile - Accordion */}
-                    {link.href === ROUTES.SAN_PHAM && productCategories.length > 0 && (
+                    {link.href === ROUTES.DANH_SACH_SAN_PHAM && productCategories.length > 0 && expandedCategories.has(ROUTES.DANH_SACH_SAN_PHAM) && (
                       <div className="pb-4 pl-4 space-y-1">
                         {productCategories.map((cat: any) => {
                           const catId = String(cat.id || cat._id);

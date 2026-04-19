@@ -121,8 +121,8 @@ const PaymentMethodsTab: React.FC<{ requestSetting: any }> = ({ requestSetting }
         columns={[
           { title: 'Tên phương thức', dataIndex: 'name', render: (val) => <strong>{val}</strong> },
           { title: 'Mô tả', dataIndex: 'description' },
-          { 
-            title: 'Kích hoạt', 
+          {
+            title: 'Kích hoạt',
             dataIndex: 'isActive',
             align: 'center',
             width: 100,
@@ -139,7 +139,7 @@ const PaymentMethodsTab: React.FC<{ requestSetting: any }> = ({ requestSetting }
                   form.setFieldsValue({ name: record.name, description: record.description });
                   setEditModalOpen(true);
                 }} />
-                <Popconfirm title="Xóa phương thức này?" onConfirm={() => handleDelete(record.id)} okText="Xóa" cancelText="Hủy" okButtonProps={{danger: true}}>
+                <Popconfirm title="Xóa phương thức này?" onConfirm={() => handleDelete(record.id)} okText="Xóa" cancelText="Hủy" okButtonProps={{ danger: true }}>
                   <Button type="text" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
               </Space>
@@ -329,7 +329,7 @@ const OrderManagementPage: React.FC = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<OrderItem | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('');
-  
+
   // Drawer state replacing separated modals
   const [settingsDrawerOpen, setSettingsDrawerOpen] = useState(false);
 
@@ -481,6 +481,7 @@ const OrderManagementPage: React.FC = () => {
       title: 'Thao tác',
       valueType: 'option',
       width: 150,
+      align: 'center',
       render: (_, record) => (
         <Space>
           <Button
