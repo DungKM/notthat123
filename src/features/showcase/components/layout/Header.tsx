@@ -1138,10 +1138,32 @@ const Header: React.FC = () => {
                         to={link.href}
                         target={link.target}
                         className="text-lg font-bold !text-gray-900 uppercase tracking-tight"
-                        onClick={() => !link.submenu && setIsMenuOpen(false)}
+                        onClick={() => setIsMenuOpen(false)}
                       >
                         {link.title}
                       </Link>
+                      {/* Toggle button cho các mục có danh mục con */}
+                      {(link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC) && (
+                        <button
+                          type="button"
+                          className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 transition-colors"
+                          onClick={() => {
+                            const key = link.href;
+                            setExpandedCategories(prev => {
+                              const next = new Set(prev);
+                              if (next.has(key)) next.delete(key);
+                              else next.add(key);
+                              return next;
+                            });
+                          }}
+                        >
+                          <DownOutlined
+                            className={`text-[10px] text-gray-500 transition-transform duration-200 ${
+                              expandedCategories.has(link.href) ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </button>
+                      )}
                     </div>
                     {link.submenu && (
                       <div className="pb-4 pl-4 space-y-3">
@@ -1211,8 +1233,8 @@ const Header: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Danh mục Công Trình trên mobile */}
-                    {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && (
+                    {/* Danh mục Công Trình trên mobile - Accordion */}
+                    {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && expandedCategories.has(ROUTES.CONG_TRINH) && (
                       <div className="pb-4 pl-4 space-y-1">
                         {congTrinhCategories.map((cat) => (
                           <a
@@ -1228,10 +1250,10 @@ const Header: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Danh mục Thiết Kế Kiến Trúc trên mobile */}
-                    {link.href === ROUTES.THIET_KE_KIEN_TRUC && congTrinhCategories.length > 0 && (
+                    {/* Danh mục Thiết Kế Kiến Trúc trên mobile - Accordion */}
+                    {link.href === ROUTES.THIET_KE_KIEN_TRUC && architectureCategories.length > 0 && expandedCategories.has(ROUTES.THIET_KE_KIEN_TRUC) && (
                       <div className="pb-4 pl-4 space-y-1">
-                        {congTrinhCategories.map((cat) => (
+                        {architectureCategories.map((cat) => (
                           <a
                             key={cat._id || cat.id}
                             href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat._id || cat.id}`}

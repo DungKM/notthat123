@@ -276,20 +276,20 @@ const ProductsPage: React.FC = () => {
                       onChange={() => { setSelectedCategories([]); setCurrentPage(1); }}
                     />
                     {(apiCategories || []).map((cat: any) => (
-                      <React.Fragment key={cat.id || cat.slug}>
+                      <React.Fragment key={cat.id || cat._id}>
                         <CheckboxItem
                           label={cat.name}
                           count={cat.productCount}
-                          checked={selectedCategories.includes(cat.slug)}
-                          onChange={() => toggleCategory(cat.slug)}
+                          checked={selectedCategories.includes(cat.id || cat._id)}
+                          onChange={() => toggleCategory(cat.id || cat._id)}
                         />
                         {cat.children && cat.children.length > 0 && cat.children.map((child: any) => (
-                          <div key={child.id || child.slug} className="ml-5 mt-1 border-l-[1.5px] pl-4 border-gray-100">
+                          <div key={child.id || child._id} className="ml-5 mt-1 border-l-[1.5px] pl-4 border-gray-100">
                             <CheckboxItem
                               label={child.name}
                               count={child.productCount}
-                              checked={selectedCategories.includes(child.slug)}
-                              onChange={() => toggleCategory(child.slug)}
+                              checked={selectedCategories.includes(child.id || child._id)}
+                              onChange={() => toggleCategory(child.id || child._id)}
                               isSub
                             />
                           </div>

@@ -55,7 +55,7 @@ const ProjectsPage: React.FC = () => {
   const loading = searchQuery.trim() ? searchLoading : constructionLoading;
 
   const [categories, setCategories] = useState<any[]>([]);
-  const [selectedCategorySlug, setSelectedCategorySlug] = useState<string>(categoryParam);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(categoryParam);
   const [projects, setProjects] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
@@ -64,8 +64,8 @@ const ProjectsPage: React.FC = () => {
 
   // Đồng bộ category khi url thay đổi (từ menu)
   useEffect(() => {
-    if (categoryParam !== selectedCategorySlug) {
-      setSelectedCategorySlug(categoryParam);
+    if (categoryParam !== selectedCategoryId) {
+      setSelectedCategoryId(categoryParam);
       setCurrentPage(1);
     }
   }, [categoryParam]);
@@ -93,27 +93,8 @@ const ProjectsPage: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        let qCategoryId = selectedCategorySlug;
-        if (selectedCategorySlug && categories.length > 0) {
-          let foundMatch = false;
-          for (const cat of categories) {
-            if (cat.slug === selectedCategorySlug || cat.id === selectedCategorySlug || cat._id === selectedCategorySlug) {
-              qCategoryId = cat.id || cat._id;
-              foundMatch = true;
-              break;
-            }
-            if (cat.children && cat.children.length > 0) {
-              for (const child of cat.children) {
-                if (child.slug === selectedCategorySlug || child.id === selectedCategorySlug || child._id === selectedCategorySlug) {
-                  qCategoryId = child.id || child._id;
-                  foundMatch = true;
-                  break;
-                }
-              }
-            }
-            if (foundMatch) break;
-          }
-        }
+        // Dùng trực tiếp ID - không cần resolve slug nữa, tránh trùng tên
+        const qCategoryId = selectedCategoryId || '';
 
         if (searchQuery.trim()) {
           // Dùng /search API khi có keyword (giống header)
@@ -122,7 +103,7 @@ const ProjectsPage: React.FC = () => {
           // Lọc thêm theo category nếu đang chọn
           if (qCategoryId) {
             constructions = constructions.filter(
-              (c: any) => (c.categoryId === qCategoryId || c.category?._id === qCategoryId || c.category?.id === qCategoryId || c.category?.slug === selectedCategorySlug)
+              (c: any) => (c.categoryId === qCategoryId || c.category?._id === qCategoryId || c.category?.id === qCategoryId)
             );
           }
           setProjects(constructions);
@@ -141,15 +122,15 @@ const ProjectsPage: React.FC = () => {
     };
     const timeoutId = setTimeout(fetchProjects, 400);
     return () => clearTimeout(timeoutId);
-  }, [selectedCategorySlug, searchQuery, currentPage, constructionRequest, searchRequest, categories]);
+  }, [selectedCategoryId, searchQuery, currentPage, constructionRequest, searchRequest, categories]);
 
-  const handleCategorySelect = (catValue: string) => {
-    setSelectedCategorySlug(catValue);
+  const handleCategorySelect = (catId: string) => {
+    setSelectedCategoryId(catId);
     setCurrentPage(1);
 
     setTimeout(() => {
       if (window.innerWidth < 1024 && listRef.current) {
-        const yOffset = -80; // Trừ khoảng hở header
+        const yOffset = -80;
         const element = listRef.current;
         const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
@@ -242,7 +223,7 @@ const ProjectsPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCategorySelect('')}
-                        className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategorySlug
+                        className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
                           ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                           : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                           }`}
@@ -251,13 +232,12 @@ const ProjectsPage: React.FC = () => {
                       </button>
 
                       {categories.map((cat) => {
-                        const catValue = cat.slug || cat.id || cat._id;
                         const catId = cat.id || cat._id;
                         const hasChildren = cat.children && cat.children.length > 0;
                         const isExpanded = expandedCategories.has(catId);
-                        const isParentActive = selectedCategorySlug === catValue || selectedCategorySlug === catId;
+                        const isParentActive = selectedCategoryId === catId;
                         const isChildActive = hasChildren && cat.children.some(
-                          (child: any) => (child.slug || child._id || child.id) === selectedCategorySlug
+                          (child: any) => (child.id || child._id) === selectedCategoryId
                         );
 
                         return (
@@ -267,11 +247,7 @@ const ProjectsPage: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => {
-                                  if (!hasChildren) {
-                                    handleCategorySelect(catValue);
-                                  } else {
-                                    handleCategorySelect(catValue);
-                                  }
+                                  handleCategorySelect(catId);
                                 }}
                                 className={`flex-1 text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${isParentActive || isChildActive
                                   ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
@@ -306,13 +282,13 @@ const ProjectsPage: React.FC = () => {
                             {hasChildren && isExpanded && (
                               <div className="mt-1 ml-3 space-y-1 border-l-2 border-gray-100 pl-2">
                                 {cat.children.map((child: any) => {
-                                  const childValue = child.slug || child._id || child.id;
+                                  const childId = child.id || child._id;
                                   return (
                                     <button
-                                      key={child._id || child.id}
+                                      key={childId}
                                       type="button"
-                                      onClick={() => handleCategorySelect(childValue)}
-                                      className={`w-full text-left px-3 py-1.5 rounded-lg border text-xs transition-all ${selectedCategorySlug === childValue || selectedCategorySlug === (child._id || child.id)
+                                      onClick={() => handleCategorySelect(childId)}
+                                      className={`w-full text-left px-3 py-1.5 rounded-lg border text-xs transition-all ${selectedCategoryId === childId
                                         ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm font-semibold'
                                         : 'bg-white text-gray-600 border-gray-100 hover:border-showcase-primary/30 hover:bg-gray-50 font-medium'
                                         }`}
@@ -336,7 +312,7 @@ const ProjectsPage: React.FC = () => {
             <div ref={listRef}>
               {(() => {
                 const currentCategory = categories.find((cat: any) =>
-                  cat.slug === selectedCategorySlug || cat._id === selectedCategorySlug || cat.id === selectedCategorySlug
+                  cat._id === selectedCategoryId || cat.id === selectedCategoryId
                 );
                 const isParentCategory = currentCategory && currentCategory.children && currentCategory.children.length > 0;
 
@@ -356,7 +332,7 @@ const ProjectsPage: React.FC = () => {
                     ) : isParentCategory ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
                         {currentCategory.children.map((child: any) => {
-                          const childValue = child.slug || child._id || child.id;
+                          const childValue = child.id || child._id;
                           const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
                           return (
                             <button
