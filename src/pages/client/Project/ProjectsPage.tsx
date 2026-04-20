@@ -141,13 +141,13 @@ const ProjectsPage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <SEO
-        title="Công trình thực tế - Thiết kế & Thi công Nội thất"
+        title="Thiết kế nội thất thực tế - Thiết kế & Thi công Nội thất"
         description="Khám phá các công trình thiết kế và thi công nội thất thực tế của Nội Thất Hochi: biệt thự, penthouse, căn hộ, phòng ngủ, phòng khách... Ảnh thực tế 100%."
         canonicalPath="/cong-trinh"
         keywords="công trình nội thất, dự án nội thất hochi, thiết kế nội thất biệt thự, thi công nội thất căn hộ, phòng ngủ, phòng khách, tủ bếp"
         breadcrumbs={[
           { name: 'Trang chủ', url: '/' },
-          { name: 'Công trình', url: '/cong-trinh' },
+          { name: 'Thiết kế nội thất', url: '/cong-trinh' },
         ]}
       />
 
@@ -164,7 +164,7 @@ const ProjectsPage: React.FC = () => {
         </div>
         <Container className="relative z-10 text-center text-white">
           <Badge variant="gold">KIẾN TẠO KHÔNG GIAN</Badge>
-          <h1 className="text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>CÔNG TRÌNH THỰC TẾ</h1>
+          <h1 className="text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>THIẾT KẾ NỘI THẤT</h1>
         </Container>
       </section>
 

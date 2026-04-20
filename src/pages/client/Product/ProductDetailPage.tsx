@@ -398,7 +398,7 @@ const ProductDetailPage: React.FC = () => {
                           <PhoneFilled className="text-[16px]" />
                           Gọi tư vấn
                         </a>
-                        <div className="relative flex">
+                        <div className="relative inline-flex self-start">
                           <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
                           <button
                             onClick={() => setIsInterestModalOpen(true)}

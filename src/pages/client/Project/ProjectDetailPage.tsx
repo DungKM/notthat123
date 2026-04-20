@@ -70,7 +70,7 @@ const ProjectDetailPage: React.FC = () => {
     );
   }
 
-  const categoryName = project.categoryId?.name || 'Công trình';
+  const categoryName = project.categoryId?.name || 'Thiết kế nội thất';
   const allImages = project.images && project.images.length > 0 ? project.images : [{ url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80' }];
   const currentImage = allImages[currentImageIndex].url;
   const coverImage = allImages[0].url;
@@ -93,14 +93,14 @@ const ProjectDetailPage: React.FC = () => {
     <div className="bg-white">
       <SEO
         title={project.name}
-        description={project.description || `Công trình ${project.name} - Thiết kế và thi công nội thất cao cấp bởi Nội Thất Hochi. Xem ảnh thực tế và thông tin chi tiết.`}
+        description={project.description || `Thiết kế nội thất ${project.name} - Thiết kế và thi công nội thất cao cấp bởi Nội Thất Hochi. Xem ảnh thực tế và thông tin chi tiết.`}
         canonicalPath={`/cong-trinh/${slug}`}
         ogImage={coverImage}
         ogImageAlt={project.name}
         keywords={`${project.name}, ${categoryName}, công trình nội thất hochi, thiết kế nội thất, thi công nội thất${project.location ? ', ' + project.location : ''}`}
         breadcrumbs={[
           { name: 'Trang chủ', url: '/' },
-          { name: 'Công trình', url: '/cong-trinh' },
+          { name: 'Thiết kế nội thất', url: '/cong-trinh' },
           { name: categoryName, url: '/cong-trinh' },
           { name: project.name, url: `/cong-trinh/${slug}` },
         ]}
@@ -112,7 +112,7 @@ const ProjectDetailPage: React.FC = () => {
           <div className="text-[13px] !text-gray-500 mb-6 font-medium">
             <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
             <span className="mx-2">/</span>
-            <Link to="/cong-trinh" className="hover:text-showcase-primary !text-gray-500">Công trình</Link>
+            <Link to="/cong-trinh" className="hover:text-showcase-primary !text-gray-500">Thiết kế nội thất</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900">{project.name}</span>
           </div>
@@ -189,7 +189,7 @@ const ProjectDetailPage: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <div className="shrink-0 mt-2 sm:mt-1 relative flex">
+                      <div className="shrink-0 mt-2 sm:mt-1 relative inline-flex self-start">
                         <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
                         <button
                           onClick={() => setIsInterestModalOpen(true)}
@@ -264,7 +264,7 @@ const ProjectDetailPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {relatedProjects.map((p) => {
-                    const pCatName = p.categoryId?.name || 'Công trình';
+                    const pCatName = p.categoryId?.name || 'Thiết kế nội thất';
                     const pCover = p.images && p.images.length > 0 ? p.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
                     return (
                       <ProductCard

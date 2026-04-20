@@ -173,9 +173,11 @@ const RecruitmentPage: React.FC = () => {
               </h2>
               <div className="w-20 h-1 bg-showcase-primary mx-auto" />
               {recruitmentInfo.content && (
-                <p className="text-gray-500 leading-relaxed text-lg max-w-2xl mx-auto">
-                  {recruitmentInfo.content}
-                </p>
+                <div className="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-100 max-w-3xl mx-auto text-left shadow-sm">
+                  <p className="text-gray-600 leading-relaxed text-base md:text-lg whitespace-pre-wrap">
+                    {recruitmentInfo.content}
+                  </p>
+                </div>
               )}
               {recruitmentInfo.position && (
                 <p className="inline-block bg-showcase-primary/10 text-showcase-primary font-semibold px-5 py-2 rounded-full text-sm">
@@ -249,7 +251,7 @@ const RecruitmentPage: React.FC = () => {
               </div>
 
               <div className="prose prose-gray">
-                <p className="text-gray-600 leading-relaxed text-lg">
+                <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap">
                   {recruitmentInfo?.content || 'Chúng tôi tìm kiếm những cá nhân đam mê thiết kế và nội thất cao cấp, khao khát kiến tạo những không gian sống mang dấu ấn riêng và giá trị thẩm mỹ khác biệt.'}
                 </p>
                 <ul className="space-y-4 mt-8">

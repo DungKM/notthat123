@@ -189,7 +189,7 @@ const ArchitectureDetailPage: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <div className="shrink-0 mt-2 sm:mt-1 relative flex">
+                      <div className="shrink-0 mt-2 sm:mt-1 relative inline-flex self-start">
                         <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
                         <button
                           onClick={() => setIsInterestModalOpen(true)}
