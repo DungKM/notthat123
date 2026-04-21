@@ -365,7 +365,7 @@ const ArchitecturePage: React.FC = () => {
                           return (
                             <ArchitectureCard
                               key={item._id || item.id || i}
-                              slug={item.slug || String(item._id || item.id)}
+                              slug={`${item.slug || String(item._id || item.id)}?id=${item._id || item.id}`}
                               name={item.name}
                               image={coverImage}
                             />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Button from '@/src/features/showcase/components/ui/Button';
 import Badge from '@/src/features/showcase/components/ui/Badge';
@@ -32,7 +32,7 @@ const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
     ? `${product.price.toLocaleString()}đ`
     : 'Liên hệ';
   return (
-    <Link to={`/san-pham/${product.slug || product.id}`}
+    <Link to={`/san-pham/${product.slug || product.id}?id=${product.id}`}
       className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
       <div className="relative overflow-hidden bg-gray-50">
         <img src={image} alt={product.name}
@@ -61,6 +61,9 @@ const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>(); // Lấy slug thật từ URL
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const idFromUrl = searchParams.get('id');
+
   const { addToCart, setIsCartOpen } = useCart();
   const [quantity, setQuantity] = React.useState<number | string>(1);
   const [stockWarning, setStockWarning] = React.useState<string | null>(null);
@@ -68,7 +71,7 @@ const ProductDetailPage: React.FC = () => {
 
   const [isInterestModalOpen, setIsInterestModalOpen] = React.useState(false);
 
-  const { data: apiProduct, loading, getBySlug, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
+  const { data: apiProduct, loading, getBySlug, getById, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
   const { list: newProducts, getAll: getNewProducts } = useProductService();
 
   const [isLiked, setIsLiked] = React.useState(false);
@@ -123,19 +126,29 @@ const ProductDetailPage: React.FC = () => {
 
   React.useEffect(() => {
     setActiveImgIndex(0);
-    if (slug) {
-      getBySlug(slug).then((res) => {
+    const fetchProduct = async () => {
+      let res;
+      if (idFromUrl) {
+        res = await getById(idFromUrl);
+      } else if (slug) {
+        res = await getBySlug(slug);
+      }
+      
+      if (res) {
         // Fetch products cùng category làm gợi ý nếu có categoryId
         if (res?.categoryId?.id) {
           getRelated({ categoryId: res.categoryId.id, limit: 5 });
         } else {
           getRelated({ limit: 5 });
         }
-      });
+      }
+      
       // Gọi API lấy dữ liệu Sản Phẩm Mới (sắp xếp theo newest)
       getNewProducts({ sort: 'newest', limit: 5 });
-    }
-  }, [slug]);
+    };
+
+    fetchProduct();
+  }, [slug, idFromUrl]);
 
   // Map API data sang View Model
   const product = apiProduct ? {
@@ -300,6 +313,16 @@ const ProductDetailPage: React.FC = () => {
                           {isLiked ? <HeartFilled /> : <HeartOutlined />}
                           {likeCount > 0 && <span className="text-lg font-medium tracking-tight mb-0.5">{likeCount}</span>}
                         </button>
+
+                        <div className="relative inline-flex ml-auto self-center">
+                          <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
+                          <button
+                            onClick={() => setIsInterestModalOpen(true)}
+                            className="relative h-9 px-6 bg-white border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
+                          >
+                            Quan tâm
+                          </button>
+                        </div>
                       </div>
 
                       {/* Stock Status */}
@@ -398,15 +421,6 @@ const ProductDetailPage: React.FC = () => {
                           <PhoneFilled className="text-[16px]" />
                           Gọi tư vấn
                         </a>
-                        <div className="relative inline-flex self-start">
-                          <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
-                          <button
-                            onClick={() => setIsInterestModalOpen(true)}
-                            className="relative h-10 px-6 bg-white border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
-                          >
-                            Quan tâm
-                          </button>
-                        </div>
                       </div>
 
                       {stockWarning && (
@@ -452,7 +466,7 @@ const ProductDetailPage: React.FC = () => {
 
                   <div className="flex flex-col">
                     {(newProducts || []).slice(0, 5).map((rp: any, i: number) => (
-                      <a href={`/san-pham/${rp.slug || rp.id}`} key={i} className={`flex gap-3 group bg-white py-4 ${i !== 0 ? 'border-t border-gray-100' : ''}`}>
+                      <a href={`/san-pham/${rp.slug || rp.id}?id=${rp.id}`} key={i} className={`flex gap-3 group bg-white py-4 ${i !== 0 ? 'border-t border-gray-100' : ''}`}>
                         <div className="w-[75px] h-[75px] shrink-0 overflow-hidden bg-gray-50 border border-transparent group-hover:border-[#c49a0e] transition-colors rounded">
                           <img
                             src={rp.images?.[0]?.url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=200'}

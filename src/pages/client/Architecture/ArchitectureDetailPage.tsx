@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import SEO from '@/src/components/common/SEO';
 import Badge from '@/src/features/showcase/components/ui/Badge';
@@ -12,6 +12,8 @@ import toast from 'react-hot-toast';
 
 const ArchitectureDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const idFromUrl = searchParams.get('id');
   const { request, loading } = useArchitectureService();
 
   const [project, setProject] = useState<any>(null);
@@ -28,7 +30,8 @@ const ArchitectureDetailPage: React.FC = () => {
 
     const fetchDetail = async () => {
       try {
-        const res = await request('GET', `/${slug}`);
+        const fetchId = idFromUrl || slug;
+        const res = await request('GET', `/${fetchId}`);
         if (res?.data) {
           setProject(res.data);
           // Fetch related projects by category
@@ -269,7 +272,7 @@ const ArchitectureDetailPage: React.FC = () => {
                       <ProductCard
                         key={p._id || p.id}
                         basePath="/thiet-ke-kien-truc"
-                        slug={p.slug || String(p._id || p.id)}
+                        slug={`${p.slug || String(p._id || p.id)}?id=${p._id || p.id}`}
                         title={p.name}
                         category={pCatName}
                         image={pCover}

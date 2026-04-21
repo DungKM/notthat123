@@ -65,7 +65,7 @@ const PartnerPage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 w-full mb-12">
               {loading ? (
                 <div className="flex justify-center w-full py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 "></div>
+          k        <div className="animate-spin rounded-full h-8 w-8 border-b-2 "></div>
                 </div>
               ) : partners.map((partner) => {
                 const isSelected = selectedPartnerId === partner.id;

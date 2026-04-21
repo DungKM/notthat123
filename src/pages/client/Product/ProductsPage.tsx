@@ -465,7 +465,7 @@ const ProductsPage: React.FC = () => {
                     <ProductCard
                       key={product.id || i}
                       basePath="/san-pham"
-                      slug={product.slug || product.id}
+                      slug={`${product.slug || product.id}?id=${product.id}`}
                       title={product.name}
                       category={product.categoryId?.name}
                       price={product.price && product.price > 0 ? `${product.price.toLocaleString()} VNĐ` : 'Liên hệ'}

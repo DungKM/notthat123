@@ -372,7 +372,7 @@ const ProjectsPage: React.FC = () => {
                           return (
                             <ProjectCard
                               key={proj._id || proj.id || i}
-                              slug={proj.slug || String(proj._id || proj.id)}
+                              slug={`${proj.slug || String(proj._id || proj.id)}?id=${proj._id || proj.id}`}
                               name={proj.name}
                               image={coverImage}
                             />

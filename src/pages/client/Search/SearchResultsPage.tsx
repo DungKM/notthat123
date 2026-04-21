@@ -190,7 +190,7 @@ const SearchResultsPage: React.FC = () => {
                   {results.products.map((item: any) => (
                     <Link
                       key={item.id || item._id}
-                      to={`/san-pham/${item.slug}`}
+                      to={`/san-pham/${item.slug}?id=${item.id || item._id}`}
                       className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg hover:border-amber-200 transition-all duration-300 flex flex-col"
                     >
                       <div className="aspect-square w-full overflow-hidden bg-gray-50">
@@ -236,7 +236,7 @@ const SearchResultsPage: React.FC = () => {
                   {results.constructions.map((item: any) => (
                     <Link
                       key={item.id || item._id}
-                      to={`/cong-trinh/${item.slug}`}
+                      to={`/cong-trinh/${item.slug}?id=${item.id || item._id}`}
                       className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-300 flex flex-col"
                     >
                       <div className="aspect-video w-full overflow-hidden bg-gray-50">
