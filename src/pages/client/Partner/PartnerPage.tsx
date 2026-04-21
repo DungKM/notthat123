@@ -1,47 +1,16 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
 import { usePartnerService } from "@/src/api/services";
-import agriImg from "@/src/statics/doi_tac/agri.jpg";
-import bidvImg from "@/src/statics/doi_tac/bidv.png";
-import mbImg from "@/src/statics/doi_tac/mb.png";
-import tchImg from "@/src/statics/doi_tac/tch.jpg";
-import tpImg from "@/src/statics/doi_tac/tp.png";
-import vcbImg from "@/src/statics/doi_tac/vcb.png";
-import viettinImg from "@/src/statics/doi_tac/viettin.png";
-
-const PARTNER_LOGOS = [
-  { src: vcbImg, alt: "Vietcombank" },
-  { src: bidvImg, alt: "BIDV" },
-  { src: viettinImg, alt: "VietinBank" },
-  { src: agriImg, alt: "Agribank" },
-  { src: mbImg, alt: "MB Bank" },
-  { src: tpImg, alt: "TPBank" },
-  { src: tchImg, alt: "TCH" },
-];
-
-
-
-const PartnerCardSkeleton = () => (
-  <div className="relative h-[520px] bg-gray-100 rounded-2xl overflow-hidden border border-gray-100 border-b-[6px] border-b-gray-200 animate-pulse block">
-    <div className="absolute bottom-0 left-0 right-0 bg-white p-8 flex flex-col min-h-[140px]">
-      <div className="w-16 h-5 bg-gray-200 rounded mb-3"></div>
-      <div className="w-3/4 h-6 bg-gray-200 rounded mb-2"></div>
-    </div>
-  </div>
-);
 
 const PartnerPage: React.FC = () => {
-  const { list: partners, getAll, meta, loading } = usePartnerService();
-  const [limit, setLimit] = React.useState(6);
-  const listRef = useRef<HTMLDivElement>(null);
+  const { list: partners, getAll, loading } = usePartnerService();
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string | number | null>(null);
 
   useEffect(() => {
-    getAll({ limit });
-  }, [getAll, limit]);
-
-
+    // Tải tất cả đối tác để hiển thị
+    getAll({ limit: 100 });
+  }, [getAll]);
 
   return (
     <div className="bg-white">
@@ -78,88 +47,125 @@ const PartnerPage: React.FC = () => {
         </Container>
       </section>
 
-
-
       {/* Main Content Section */}
-      <section className="py-24 bg-gray-50/50">
+      <section className="py-24 bg-gray-50/50 min-h-screen">
         <Container>
-          <div className="mb-16 max-w-5xl mx-auto text-center">
+          <div className="mb-16 max-w-4xl mx-auto text-center">
             <h2
-              className="text-3xl md:text-4xl font-bold text-teal-950 mb-12 uppercase tracking-wider"
+              className="text-3xl md:text-4xl font-bold text-teal-950 mb-8 uppercase tracking-wider"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               Đối Tác Đồng Hành
             </h2>
-            <div
-              className="mb-16 flex flex-wrap items-center justify-center gap-8 md:gap-12 lg:gap-16 w-full cursor-pointer"
-              onClick={() => {
-                if (listRef.current) {
-                  const yOffset = -100;
-                  const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                  window.scrollTo({ top: y, behavior: "smooth" });
-                }
-              }}
-              title="Nhấn để xem danh sách đối tác chi tiết"
-            >
-              {PARTNER_LOGOS.map((logo, idx) => (
-                <div key={idx} className="flex items-center justify-center transition-transform hover:scale-110 duration-300">
-                  <img src={logo.src} alt={logo.alt} className="w-auto h-14 md:h-16 lg:h-20 object-contain" />
-                </div>
-              ))}
-            </div>
-            <p className="text-gray-500 leading-relaxed text-lg text-center max-w-4xl mx-auto">
+            <p className="text-gray-500 leading-relaxed text-lg text-center mx-auto mb-16">
               Chúng tôi tự hào hợp tác cùng các đối tác uy tín trong nhiều lĩnh vực, mang đến những sản phẩm và giải pháp chất lượng cao, đáp ứng các tiêu chuẩn khắt khe. Với định hướng phát triển bền vững, HOCHI luôn đề cao sự đồng hành lâu dài, cùng nhau kiến tạo giá trị và nâng tầm trải nghiệm cho khách hàng tại thị trường Việt Nam.
             </p>
-          </div>
 
-          {/* Grid of Partner Cards */}
-          <div ref={listRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {loading
-              ? Array.from({ length: 6 }).map((_, idx) => <PartnerCardSkeleton key={idx} />)
-              : partners.map((partner, index) => (
-                <Link
-                  to={`/doi-tac/${partner.slug}`}
-                  key={index}
-                  className="group relative h-[520px] bg-white rounded-2xl overflow-hidden border border-gray-100 border-b-[6px] border-b-orange-500 transition-all duration-500 block"
-                >
-                  <div className="absolute inset-0 w-full h-full overflow-hidden">
-                    <img
-                      src={
-                        partner.images?.[0]?.url ||
-                        "https://images.unsplash.com/photo-1600880292203-757bb62b4baf"
-                      }
-                      alt={partner.title}
-                      className="w-full h-full object-cover transition-transform duration-1000"
-                    />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-white p-8 transition-transform duration-500 ease-out translate-y-[calc(100%-140px)] group-hover:translate-y-0 flex flex-col min-h-[140px]">
-                    <span className="text-orange-500 font-extrabold text-xl mb-3 block">
-                      {partner.cooperationYear}
-                    </span>
-                    <h3 className="text-2xl font-bold text-slate-700 leading-tight mb-2">
-                      {partner.title}
-                    </h3>
-                    <div className="pt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                      <div className="w-12 h-0.5 bg-gray-200 mb-4"></div>
-                      <p className="text-gray-500 leading-relaxed text-base line-clamp-3">
-                        {partner.description}
-                      </p>
+            {/* Horizontal Logos / Cover Images List */}
+            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 w-full mb-12">
+              {loading ? (
+                <div className="flex justify-center w-full py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 "></div>
+                </div>
+              ) : partners.map((partner) => {
+                const isSelected = selectedPartnerId === partner.id;
+                return (
+                  <div
+                    key={`top-${partner.id}`}
+                    className="relative flex flex-col items-center group cursor-pointer"
+                    onClick={() => {
+                      setSelectedPartnerId(partner.id); // Luôn set khi bấm vào
+                      setTimeout(() => {
+                        const el = document.getElementById(`partner-acc-${partner.id}`);
+                        if (el) {
+                          const offset = 120;
+                          const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+                          window.scrollTo({ top: y, behavior: 'smooth' });
+                        }
+                      }, 100);
+                    }}
+                  >
+                    <div
+                      className={`transition-all duration-300 flex items-center justify-center p-3 md:p-4 rounded-xl bg-white
+                        ${isSelected
+                          ? 'scale-110 border-orange-500 ring-4 ring-orange-500/20'
+                          : ' opacity-80 hover:opacity-100'
+                        }`}
+                    >
+                      <img
+                        src={partner.images?.[0]?.url || "https://images.unsplash.com/photo-1600880292203-757bb62b4baf"}
+                        alt={partner.title}
+                        className="w-20 md:w-28 h-12 md:h-16 object-contain"
+                      />
                     </div>
                   </div>
-                </Link>
-              ))}
-          </div>
-
-          {(!meta || partners.length < meta.total) && (
-            <div className="mt-16 flex justify-center">
-              <button
-                onClick={() => setLimit((prev) => prev + 6)}
-                className="px-8 py-3 border border-orange-500 text-orange-500 font-bold rounded-full hover:bg-orange-500 hover:text-white transition-colors duration-300 flex items-center gap-2"
-              >
-                Xem thêm <span className="ml-2">↓</span>
-              </button>
+                );
+              })}
             </div>
-          )}
+
+            <div className="w-full h-px bg-gray-200 mb-16"></div>
+
+            <h3 className="text-2xl font-bold text-slate-800 mb-8 uppercase text-left">Danh sách chi tiết</h3>
+
+            {/* Partners Accordion List */}
+            <div className="w-full flex flex-col border-t border-gray-200">
+              {loading ? (
+                <div className="flex justify-center w-full py-10">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                </div>
+              ) : partners.map((partner) => {
+                const isSelected = selectedPartnerId === partner.id;
+                return (
+                  <div key={partner.id} id={`partner-acc-${partner.id}`} className="">
+                    <button
+                      className="w-full py-6 md:py-8 flex items-center justify-between text-left focus:outline-none group"
+                      onClick={() => setSelectedPartnerId(isSelected ? null : partner.id)}
+                    >
+                      <div className="flex items-center gap-6 md:gap-10 overflow-hidden">
+                        <div className="w-24 h-14 md:w-40 md:h-20 flex-shrink-0 flex items-center justify-center p-3 md:p-4 bg-white rounded-xl border border-gray-100 shadow-sm  transition-all duration-300">
+                          <img
+                            src={partner.images?.[0]?.url || "https://images.unsplash.com/photo-1600880292203-757bb62b4baf"}
+                            alt={partner.title}
+                            className="max-w-full max-h-full object-contain  transition-all duration-300"
+                          />
+                        </div>
+                        <h3 className="text-lg md:text-2xl font-bold text-slate-800 uppercase group-hover:text-orange-600 transition-colors truncate">
+                          {partner.title}
+                        </h3>
+                      </div>
+                      <div className="ml-4 flex-shrink-0 bg-gray-50 rounded-full p-2 group-hover:bg-orange-50 transition-colors">
+                        <svg
+                          className={`w-6 h-6 md:w-8 md:h-8 text-gray-400 transform transition-transform duration-300 ${isSelected ? 'rotate-180 text-orange-500' : 'group-hover:text-orange-500'}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </button>
+
+                    {/* Accordion Content */}
+                    <div
+                      className={`grid transition-all duration-300 ease-in-out ${isSelected ? 'grid-rows-[1fr] opacity-100 mb-8' : 'grid-rows-[0fr] opacity-0 mb-0'}`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="pl-4 md:pl-[12.5rem] pr-4 text-left ml-5 md:ml-12 text-gray-600 leading-relaxed text-base md:text-lg">
+                          <div className="inline-block px-4 py-1 bg-orange-50 text-orange-600 font-semibold rounded-full text-sm mb-4">
+                            Đối tác từ năm {partner.cooperationYear || new Date().getFullYear()}
+                          </div>
+                          <p className="whitespace-pre-line">
+                            {partner.description || 'Thông tin chi tiết về đối tác đang được cập nhật...'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
         </Container>
       </section>
     </div>
@@ -167,3 +173,4 @@ const PartnerPage: React.FC = () => {
 };
 
 export default PartnerPage;
+

@@ -173,10 +173,34 @@ const RecruitmentPage: React.FC = () => {
               </h2>
               <div className="w-20 h-1 bg-showcase-primary mx-auto" />
               {recruitmentInfo.content && (
-                <div className="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-100 max-w-3xl mx-auto text-left shadow-sm">
-                  <p className="text-gray-600 leading-relaxed text-base md:text-lg whitespace-pre-wrap">
-                    {recruitmentInfo.content}
-                  </p>
+                <div className="bg-gray-50 p-6 md:p-10 rounded-2xl border border-gray-100 max-w-4xl mx-auto text-left shadow-sm">
+                  <div className="space-y-3">
+                    {recruitmentInfo.content.split('\n').map((line, idx) => {
+                      const trimmedLine = line.trim();
+                      if (trimmedLine.startsWith('📌')) {
+                        return (
+                          <h3 key={idx} className="text-lg md:text-xl font-bold text-teal-950 mt-8 first:mt-0 mb-3 flex items-start gap-2">
+                            <span className="text-orange-600 text-xl leading-none mt-1">📌</span>
+                            <span className="leading-snug">{trimmedLine.replace('📌', '').trim()}</span>
+                          </h3>
+                        );
+                      }
+                      if (trimmedLine.startsWith('-')) {
+                        return (
+                          <div key={idx} className="flex items-start gap-3 ml-2 md:ml-4 text-gray-700 leading-relaxed text-base md:text-lg mb-2">
+                            <span className="text-orange-500 font-bold mt-1 text-sm">■</span>
+                            <p>{trimmedLine.substring(1).trim()}</p>
+                          </div>
+                        );
+                      }
+                      if (trimmedLine === '') return <br key={idx} className="hidden md:block" />;
+                      return (
+                        <p key={idx} className="text-gray-600 leading-relaxed text-base md:text-lg mb-2">
+                          {line}
+                        </p>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
               {recruitmentInfo.position && (
