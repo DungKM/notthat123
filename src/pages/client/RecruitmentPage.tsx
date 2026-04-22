@@ -162,241 +162,201 @@ const RecruitmentPage: React.FC = () => {
         </Container>
       </section>
 
-      {/* Recruitment Info Section — trước Tại sao chọn Hochi */}
+      {/* 2-Column: Cơ hội nghề nghiệp (trái) + Form ứng tuyển (phải) */}
       {recruitmentInfo?.isActive && (
         <section className="py-20 bg-white border-b border-gray-100">
           <Container>
-            <div className="max-w-4xl mx-auto text-center space-y-6">
-              <Badge variant="gold" className="uppercase tracking-[0.2em]">CƠ HỘI NGHỀ NGHIỆP</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-teal-950 uppercase leading-snug" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {recruitmentInfo.title}
-              </h2>
-              <div className="w-20 h-1 bg-showcase-primary mx-auto" />
-              {recruitmentInfo.content && (
-                <div className="bg-gray-50 p-6 md:p-10 rounded-2xl border border-gray-100 max-w-4xl mx-auto text-left shadow-sm">
-                  <div className="space-y-3">
-                    {recruitmentInfo.content.split('\n').map((line, idx) => {
-                      const trimmedLine = line.trim();
-                      if (trimmedLine.startsWith('📌')) {
-                        return (
-                          <h3 key={idx} className="text-lg md:text-xl font-bold text-teal-950 mt-8 first:mt-0 mb-3 flex items-start gap-2">
-                            <span className="text-orange-600 text-xl leading-none mt-1">📌</span>
-                            <span className="leading-snug">{trimmedLine.replace('📌', '').trim()}</span>
-                          </h3>
-                        );
-                      }
-                      if (trimmedLine.startsWith('-')) {
-                        return (
-                          <div key={idx} className="flex items-start gap-3 ml-2 md:ml-4 text-gray-700 leading-relaxed text-base md:text-lg mb-2">
-                            <span className="text-orange-500 font-bold mt-1 text-sm">■</span>
-                            <p>{trimmedLine.substring(1).trim()}</p>
-                          </div>
-                        );
-                      }
-                      if (trimmedLine === '') return <br key={idx} className="hidden md:block" />;
-                      return (
-                        <p key={idx} className="text-gray-600 leading-relaxed text-base md:text-lg mb-2">
-                          {line}
-                        </p>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              {recruitmentInfo.position && (
-                <p className="inline-block bg-showcase-primary/10 text-showcase-primary font-semibold px-5 py-2 rounded-full text-sm">
-                  {recruitmentInfo.position}
-                </p>
-              )}
-              {recruitmentInfo.required && recruitmentInfo.required.length > 0 && (
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-left">
-                  {recruitmentInfo.required.map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                      <CheckCircleFilled className="text-showcase-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-600 text-sm leading-relaxed">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
-              <div className="mt-10 pt-4">
-                <button
-                  onClick={() => {
-                    document.getElementById('recruitment-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className="bg-[#cca32e] cursor-pointer   text-white font-bold uppercase tracking-widest px-10 py-4 rounded-full hover:bg-teal-950 transition-colors shadow-lg hover:shadow-xl"
-                >
-                  Ứng tuyển ngay
-                </button>
+              {/* CỘT TRÁI — Nội dung cơ hội nghề nghiệp */}
+              <div className="space-y-6">
+                <Badge variant="gold" className="uppercase tracking-[0.2em]">CƠ HỘI NGHỀ NGHIỆP</Badge>
+                <h2 className="text-3xl md:text-4xl font-bold text-teal-950 uppercase leading-snug" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {recruitmentInfo.title}
+                </h2>
+                <div className="w-20 h-1 bg-showcase-primary" />
+
+                {recruitmentInfo.content && (
+                  <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="space-y-3">
+                      {recruitmentInfo.content.split('\n').map((line, idx) => {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine.startsWith('📌')) {
+                          return (
+                            <h3 key={idx} className="text-lg md:text-xl font-bold text-teal-950 mt-8 first:mt-0 mb-3 flex items-start gap-2">
+                              <span className="text-orange-600 text-xl leading-none mt-1">📌</span>
+                              <span className="leading-snug">{trimmedLine.replace('📌', '').trim()}</span>
+                            </h3>
+                          );
+                        }
+                        if (trimmedLine.startsWith('-')) {
+                          return (
+                            <div key={idx} className="flex items-start gap-3 ml-2 md:ml-4 text-gray-700 leading-relaxed text-base mb-2">
+                              <span className="text-orange-500 font-bold mt-1 text-sm">■</span>
+                              <p>{trimmedLine.substring(1).trim()}</p>
+                            </div>
+                          );
+                        }
+                        if (trimmedLine === '') return <br key={idx} className="hidden md:block" />;
+                        return (
+                          <p key={idx} className="text-gray-600 leading-relaxed text-base mb-2">{line}</p>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {recruitmentInfo.position && (
+                  <p className="inline-block bg-showcase-primary/10 text-showcase-primary font-semibold px-5 py-2 rounded-full text-sm">
+                    {recruitmentInfo.position}
+                  </p>
+                )}
+
+                {recruitmentInfo.required && recruitmentInfo.required.length > 0 && (
+                  <ul className="grid grid-cols-1 gap-3">
+                    {recruitmentInfo.required.map((item, i) => (
+                      <li key={i} className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <CheckCircleFilled className="text-showcase-primary mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-600 text-sm leading-relaxed">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
+
+              {/* CỘT PHẢI — Form ứng tuyển */}
+              <div id="recruitment-form">
+                <div className="text-center mb-8">
+                  <Badge variant="gold" className="mb-4">ỨNG TUYỂN NGAY</Badge>
+                  <h2 className="text-2xl md:text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>ĐIỀN THÔNG TIN ỨNG TUYỂN</h2>
+                  <div className="w-16 h-1 bg-showcase-primary mx-auto mt-4" />
+                </div>
+
+                <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-6 md:p-8 border-t-8 border-showcase-primary">
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Vị trí ứng tuyển *</label>
+                      <input
+                        type="text"
+                        name="position"
+                        value={formData.position}
+                        onChange={handleChange}
+                        placeholder="VD: Kiến trúc sư..."
+                        className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.position ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
+                      />
+                      {errors.position && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.position}</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Họ và tên *</label>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        placeholder="Nhập đầy đủ họ tên"
+                        className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.fullName ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
+                      />
+                      {errors.fullName && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.fullName}</p>}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Số điện thoại *</label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="Số điện thoại"
+                          className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
+                        />
+                        {errors.phone && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.phone}</p>}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Giới tính</label>
+                        <select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleChange}
+                          className="w-full px-5 py-4 bg-gray-50 rounded-xl border border-transparent focus:border-showcase-primary outline-none transition-all bg-white font-medium"
+                        >
+                          <option value="Nam">Nam</option>
+                          <option value="Nữ">Nữ</option>
+                          <option value="Khác">Khác</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Địa chỉ hiện tại *</label>
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="Số nhà, đường, tỉnh/thành phố"
+                        className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.address ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
+                      />
+                      {errors.address && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.address}</p>}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Độ tuổi *</label>
+                        <input
+                          type="number"
+                          name="age"
+                          value={formData.age}
+                          onChange={handleChange}
+                          placeholder="Số tuổi"
+                          className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.age ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
+                        />
+                        {errors.age && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.age}</p>}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Kinh nghiệm (năm) *</label>
+                        <input
+                          type="number"
+                          name="experience"
+                          value={formData.experience}
+                          onChange={handleChange}
+                          placeholder="Ví dụ: 3"
+                          className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.experience ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
+                        />
+                        {errors.experience && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.experience}</p>}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Ghi chú thêm</label>
+                      <textarea
+                        name="note"
+                        value={formData.note}
+                        onChange={handleChange}
+                        rows={4}
+                        placeholder="Thông tin thêm..."
+                        className="w-full px-5 py-4 bg-gray-50 rounded-xl border border-transparent focus:border-showcase-primary outline-none transition-all placeholder:text-gray-300 resize-none"
+                      />
+                    </div>
+
+                    <div className="pt-2">
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-teal-950 text-white py-5 rounded-xl font-bold uppercase tracking-[0.3em] hover:bg-showcase-primary transition-all shadow-xl hover:shadow-showcase-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                      >
+                        {loading ? 'ĐANG GỬI...' : 'GỬI HỒ SƠ ỨNG TUYỂN'}
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
             </div>
           </Container>
         </section>
       )}
-
-      {/* Benefits Section */}
-      <section className="py-24 bg-gray-50 border-b border-gray-100">
-        <Container>
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl font-bold text-teal-950 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>TẠI SAO CHỌN HOCHI?</h2>
-            <div className="w-20 h-1 bg-showcase-primary mx-auto"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: <CrownOutlined />, title: 'Môi trường Chuyên nghiệp', desc: 'Làm việc trong không gian hiện đại, quy trình chuẩn, tiếp xúc với khách hàng cao cấp và tác phong chuyên nghiệp.' },
-              { icon: <ThunderboltOutlined />, title: 'Sáng tạo không giới hạn', desc: 'Mọi ý tưởng kiến trúc độc bản luôn được tôn trọng và hiện thực hóa.' },
-              { icon: <TeamOutlined />, title: 'Đội ngũ chuyên gia', desc: 'Đồng hành cùng những nghệ nhân và kiến trúc sư hàng đầu trong nghề nội thất.' },
-              { icon: <PlusOutlined />, title: 'Chế độ đãi ngộ', desc: 'Thưởng xứng đáng theo năng lực và các kỳ nghỉ dưỡng cao cấp hàng năm.' }
-            ].map((benefit, i) => (
-              <div key={i} className="bg-white p-10 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-showcase-primary/20 group">
-                <div className="text-4xl text-showcase-primary mb-6 transition-transform group-hover:scale-110 duration-300">
-                  {benefit.icon}
-                </div>
-                <h3 className="text-lg font-bold text-teal-950 mb-3">{benefit.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{benefit.desc}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* Form Section */}
-      <section id="recruitment-form" className="py-24 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-showcase-light opacity-50 -z-10 skew-x-12 transform translate-x-1/2"></div>
-        <Container>
-          <div className="max-w-4xl mx-auto relative z-10">
-            <div className="text-center mb-10">
-              <Badge variant="gold" className="mb-4">ỨNG TUYỂN NGAY</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>ĐIỀN THÔNG TIN ỨNG TUYỂN</h2>
-              <div className="w-16 h-1 bg-showcase-primary mx-auto mt-6"></div>
-            </div>
-
-            {/* Form Card */}
-            <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 md:p-12 border-t-8 border-showcase-primary">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Vị trí ứng tuyển *</label>
-                  <input
-                    type="text"
-                    name="position"
-                    value={formData.position}
-                    onChange={handleChange}
-                    placeholder="VD: Kiến trúc sư..."
-                    className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.position ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
-                  />
-                  {errors.position && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.position}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Họ và tên *</label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    placeholder="Nhập đầy đủ họ tên"
-                    className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.fullName ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
-                  />
-                  {errors.fullName && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.fullName}</p>}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Số điện thoại *</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Số điện thoại"
-                      className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
-                    />
-                    {errors.phone && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.phone}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Giới tính</label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      className="w-full px-5 py-4 bg-gray-50 rounded-xl border border-transparent focus:border-showcase-primary outline-none transition-all bg-white font-medium"
-                    >
-                      <option value="Nam">Nam</option>
-                      <option value="Nữ">Nữ</option>
-                      <option value="Khác">Khác</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Địa chỉ hiện tại *</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="Số nhà, đường, tỉnh/thành phố"
-                    className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.address ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
-                  />
-                  {errors.address && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.address}</p>}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Độ tuổi *</label>
-                    <input
-                      type="number"
-                      name="age"
-                      value={formData.age}
-                      onChange={handleChange}
-                      placeholder="Số tuổi"
-                      className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.age ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
-                    />
-                    {errors.age && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.age}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Kinh nghiệm (năm) *</label>
-                    <input
-                      type="number"
-                      name="experience"
-                      value={formData.experience}
-                      onChange={handleChange}
-                      placeholder="Ví dụ: 3"
-                      className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.experience ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
-                    />
-                    {errors.experience && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.experience}</p>}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Ghi chú thêm</label>
-                  <textarea
-                    name="note"
-                    value={formData.note}
-                    onChange={handleChange}
-                    rows={4}
-                    placeholder="Thông tin thêm..."
-                    className="w-full px-5 py-4 bg-gray-50 rounded-xl border border-transparent focus:border-showcase-primary outline-none transition-all placeholder:text-gray-300 resize-none"
-                  ></textarea>
-                </div>
-
-                <div className="pt-4">
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-teal-950 text-white py-5 rounded-xl font-bold uppercase tracking-[0.3em] hover:bg-showcase-primary transition-all shadow-xl hover:shadow-showcase-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'ĐANG GỬI...' : 'GỬI HỒ SƠ ỨNG TUYỂN'}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </Container>
-      </section>
     </div>
   );
 };

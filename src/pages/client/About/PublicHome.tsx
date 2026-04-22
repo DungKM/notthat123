@@ -7,6 +7,7 @@ import Testimonials from '@/src/features/showcase/components/sections/Testimonia
 import CTA from '@/src/features/showcase/components/sections/CTA';
 import CTAImageSection from '@/src/features/showcase/components/sections/CTAImageSection';
 import ProductShopSection from '@/src/features/showcase/components/sections/ProductShopSection';
+import InteriorCategorySection from '@/src/features/showcase/components/sections/InteriorCategorySection';
 import SEO from '@/src/components/common/SEO';
 
 const PublicHome: React.FC = () => {
@@ -53,6 +54,7 @@ const PublicHome: React.FC = () => {
       `}</style>
 
       <Hero />
+      <InteriorCategorySection />
       {/* <ProductShopSection /> */}
       <Showcase />
       <Features />
