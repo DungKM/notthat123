@@ -103,9 +103,6 @@ const PartnerPage: React.FC = () => {
               })}
             </div>
 
-            <div className="w-full h-px bg-gray-200 mb-16"></div>
-
-            <h3 className="text-2xl font-bold text-slate-800 mb-8 uppercase text-left">Danh sách chi tiết</h3>
 
             {/* Partners Accordion List */}
             <div className="w-full flex flex-col border-t border-gray-200">
@@ -122,13 +119,6 @@ const PartnerPage: React.FC = () => {
                       onClick={() => setSelectedPartnerId(isSelected ? null : partner.id)}
                     >
                       <div className="flex items-center gap-6 md:gap-10 overflow-hidden">
-                        <div className="w-24 h-14 md:w-40 md:h-20 flex-shrink-0 flex items-center justify-center p-3 md:p-4 bg-white rounded-xl border border-gray-100 shadow-sm  transition-all duration-300">
-                          <img
-                            src={partner.images?.[0]?.url || "https://images.unsplash.com/photo-1600880292203-757bb62b4baf"}
-                            alt={partner.title}
-                            className="max-w-full max-h-full object-contain  transition-all duration-300"
-                          />
-                        </div>
                         <h3 className="text-lg md:text-2xl font-bold text-slate-800 uppercase group-hover:text-orange-600 transition-colors truncate">
                           {partner.title}
                         </h3>
@@ -150,7 +140,7 @@ const PartnerPage: React.FC = () => {
                       className={`grid transition-all duration-300 ease-in-out ${isSelected ? 'grid-rows-[1fr] opacity-100 mb-8' : 'grid-rows-[0fr] opacity-0 mb-0'}`}
                     >
                       <div className="overflow-hidden">
-                        <div className="pl-4 md:pl-[12.5rem] pr-4 text-left ml-5 md:ml-12 text-gray-600 leading-relaxed text-base md:text-lg">
+                        <div className="pb-6 pr-4 text-left text-gray-600 leading-relaxed text-base md:text-lg">
                           <div className="inline-block px-4 py-1 bg-orange-50 text-orange-600 font-semibold rounded-full text-sm mb-4">
                             Đối tác từ năm {partner.cooperationYear || new Date().getFullYear()}
                           </div>
