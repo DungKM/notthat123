@@ -74,11 +74,11 @@ const PartnerPage: React.FC = () => {
                     key={`top-${partner.id}`}
                     className="relative flex flex-col items-center group cursor-pointer"
                     onClick={() => {
-                      setSelectedPartnerId(partner.id); // Luôn set khi bấm vào
+                      setSelectedPartnerId(partner.id);
                       setTimeout(() => {
-                        const el = document.getElementById(`partner-acc-${partner.id}`);
+                        const el = document.getElementById('partner-content-area');
                         if (el) {
-                          const offset = 120;
+                          const offset = 200;
                           const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
                           window.scrollTo({ top: y, behavior: 'smooth' });
                         }
@@ -104,55 +104,35 @@ const PartnerPage: React.FC = () => {
             </div>
 
 
-            {/* Partners Accordion List */}
-            <div className="w-full flex flex-col border-t border-gray-200">
+            {/* Selected Partner Content Area */}
+            <div id="partner-content-area" className="w-full flex flex-col pt-12 border-t border-gray-100 min-h-[200px]">
               {loading ? (
                 <div className="flex justify-center w-full py-10">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                 </div>
-              ) : partners.map((partner) => {
-                const isSelected = selectedPartnerId === partner.id;
-                return (
-                  <div key={partner.id} id={`partner-acc-${partner.id}`} className="">
-                    <button
-                      className="w-full py-6 md:py-8 flex items-center justify-between text-left focus:outline-none group"
-                      onClick={() => setSelectedPartnerId(isSelected ? null : partner.id)}
-                    >
-                      <div className="flex items-center gap-6 md:gap-10 overflow-hidden">
-                        <h3 className="text-lg md:text-2xl font-bold text-slate-800 uppercase group-hover:text-orange-600 transition-colors truncate">
-                          {partner.title}
-                        </h3>
-                      </div>
-                      <div className="ml-4 flex-shrink-0 bg-gray-50 rounded-full p-2 group-hover:bg-orange-50 transition-colors">
-                        <svg
-                          className={`w-6 h-6 md:w-8 md:h-8 text-gray-400 transform transition-transform duration-300 ${isSelected ? 'rotate-180 text-orange-500' : 'group-hover:text-orange-500'}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </button>
-
-                    {/* Accordion Content */}
-                    <div
-                      className={`grid transition-all duration-300 ease-in-out ${isSelected ? 'grid-rows-[1fr] opacity-100 mb-8' : 'grid-rows-[0fr] opacity-0 mb-0'}`}
-                    >
-                      <div className="overflow-hidden">
-                        <div className="pb-6 pr-4 text-left text-gray-600 leading-relaxed text-base md:text-lg">
-                          <div className="inline-block px-4 py-1 bg-orange-50 text-orange-600 font-semibold rounded-full text-sm mb-4">
-                            Đối tác từ năm {partner.cooperationYear || new Date().getFullYear()}
-                          </div>
-                          <p className="whitespace-pre-line">
-                            {partner.description || 'Thông tin chi tiết về đối tác đang được cập nhật...'}
-                          </p>
-                        </div>
-                      </div>
+              ) : selectedPartnerId ? (
+                (() => {
+                  const partner = partners.find((p) => p.id === selectedPartnerId);
+                  if (!partner) return null;
+                  return (
+                    <div className="text-left bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100 animate-fadeIn mx-auto max-w-3xl w-full">
+                       <h3 className="text-xl md:text-2xl font-bold text-slate-800 uppercase mb-4 tracking-wider">
+                         {partner.title}
+                       </h3>
+                       <div className="inline-block px-4 py-1.5 bg-orange-50 text-orange-600 font-semibold rounded-full text-sm mb-6">
+                         Đối tác từ năm {partner.cooperationYear || new Date().getFullYear()}
+                       </div>
+                       <p className="whitespace-pre-line text-gray-600 leading-relaxed text-base md:text-lg">
+                         {partner.description || 'Thông tin chi tiết về đối tác đang được cập nhật...'}
+                       </p>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })()
+              ) : (
+                <div className="py-20 text-center text-gray-400">
+                  <p className="text-lg">Vui lòng nhấp vào một đối tác ở trên để xem thông tin chi tiết.</p>
+                </div>
+              )}
             </div>
 
           </div>

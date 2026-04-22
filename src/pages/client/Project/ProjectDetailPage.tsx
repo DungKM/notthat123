@@ -192,7 +192,7 @@ const ProjectDetailPage: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <div className="shrink-0 mt-2 sm:mt-1 relative">
+                      <div className="shrink-0 -mt-2 sm:mt-1 relative self-end sm:self-auto">
                         {/* Pulse dot trên nút Quan tâm */}
                         <span className="absolute -top-2.5 -right-2.5 z-10 flex h-6 w-6">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full border-2 border-[#cca32e] opacity-75"></span>

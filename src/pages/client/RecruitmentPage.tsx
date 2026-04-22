@@ -206,22 +206,6 @@ const RecruitmentPage: React.FC = () => {
                   </div>
                 )}
 
-                {recruitmentInfo.position && (
-                  <p className="inline-block bg-showcase-primary/10 text-showcase-primary font-semibold px-5 py-2 rounded-full text-sm">
-                    {recruitmentInfo.position}
-                  </p>
-                )}
-
-                {recruitmentInfo.required && recruitmentInfo.required.length > 0 && (
-                  <ul className="grid grid-cols-1 gap-3">
-                    {recruitmentInfo.required.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <CheckCircleFilled className="text-showcase-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600 text-sm leading-relaxed">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </div>
 
               {/* CỘT PHẢI — Form ứng tuyển */}
@@ -230,6 +214,25 @@ const RecruitmentPage: React.FC = () => {
                   <Badge variant="gold" className="mb-4">ỨNG TUYỂN NGAY</Badge>
                   <h2 className="text-2xl md:text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>ĐIỀN THÔNG TIN ỨNG TUYỂN</h2>
                   <div className="w-16 h-1 bg-showcase-primary mx-auto mt-4" />
+                </div>
+
+                <div className="mb-8">
+                  {recruitmentInfo.position && (
+                    <p className="inline-block bg-showcase-primary/10 text-showcase-primary font-semibold px-5 py-2 rounded-full text-sm mb-4">
+                      {recruitmentInfo.position}
+                    </p>
+                  )}
+
+                  {recruitmentInfo.required && recruitmentInfo.required.length > 0 && (
+                    <ul className="grid grid-cols-1 gap-3">
+                      {recruitmentInfo.required.map((item, i) => (
+                        <li key={i} className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                          <CheckCircleFilled className="text-gray-800 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-600 text-sm leading-relaxed uppercase">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
                 <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-6 md:p-8 border-t-8 border-showcase-primary">

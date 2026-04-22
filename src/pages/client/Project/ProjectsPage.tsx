@@ -119,7 +119,7 @@ const ProjectsPage: React.FC = () => {
           // Lọc thêm theo category nếu đang chọn
           if (qCategoryId) {
             constructions = constructions.filter(
-              (c: any) => (c.categoryId === qCategoryId || c.category?._id === qCategoryId || c.category?.id === qCategoryId)
+              (c: any) => (c.categoryId === qCategoryId || c.category?._id === qCategoryId || c.category?.id === qCategoryId || c.category?.slug === qCategoryId)
             );
           }
           setProjects(constructions);
@@ -154,6 +154,11 @@ const ProjectsPage: React.FC = () => {
     }, 100);
   };
 
+  const currentCategory = categories.find((cat: any) =>
+    cat._id === selectedCategoryId || cat.id === selectedCategoryId || cat.slug === selectedCategoryId
+  );
+  const isParentCategory = currentCategory && currentCategory.children && currentCategory.children.length > 0;
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <SEO
@@ -184,8 +189,58 @@ const ProjectsPage: React.FC = () => {
         </Container>
       </section>
 
+      {/* Sibling category bar (moved directly under Hero Banner) */}
+      {!isParentCategory && (() => {
+        const parentCat = categories.find((cat: any) =>
+          cat.children?.some((c: any) => c.id === selectedCategoryId || c._id === selectedCategoryId || c.slug === selectedCategoryId)
+        );
+        if (!parentCat || !parentCat.children?.length) return null;
+        return (
+          <section className="pt-10 pb-0 relative z-10">
+            <Container>
+              <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
+                  Danh mục {parentCat.name}
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 lg:gap-4">
+                  {parentCat.children.map((sib: any) => {
+                    const sibId = sib.id || sib._id;
+                    const isActive = sibId === selectedCategoryId || sib.slug === selectedCategoryId;
+
+                    const itemImage = sib.image || sib.representativeImage;
+
+                    return (
+                      <button
+                        key={sibId}
+                        onClick={() => handleCategorySelect(sibId)}
+                        className={`bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left w-full cursor-pointer border transition-all ${isActive
+                          ? 'bg-white border-showcase-primary ring-1 ring-showcase-primary shadow-sm'
+                          : 'border-transparent hover:border-gray-200 hover:shadow-md hover:bg-white'
+                          }`}
+                      >
+                        {itemImage && (
+                          <div className="w-12 h-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 mix-blend-multiply border border-black/5">
+                            <img src={itemImage} alt={sib.name} className="w-full h-full object-cover" loading="lazy" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className={`text-[12px] md:text-[13px] font-semibold leading-tight line-clamp-2 ${isActive ? 'text-showcase-primary' : 'text-gray-800'
+                            }`}>
+                            {sib.name}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </Container>
+          </section>
+        );
+      })()}
+
       {/* Filter + Grid Layout */}
-      <section className="py-16 lg:py-24">
+      <section className="pt-10 pb-16 lg:pt-16 lg:pb-24">
         <Container>
           <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-8 xl:gap-10">
             {/* Left Filter Sidebar */}
@@ -251,9 +306,9 @@ const ProjectsPage: React.FC = () => {
                         const catId = cat.id || cat._id;
                         const hasChildren = cat.children && cat.children.length > 0;
                         const isExpanded = expandedCategories.has(catId);
-                        const isParentActive = selectedCategoryId === catId;
+                        const isParentActive = selectedCategoryId === catId || cat.slug === selectedCategoryId;
                         const isChildActive = hasChildren && cat.children.some(
-                          (child: any) => (child.id || child._id) === selectedCategoryId
+                          (child: any) => (child.id || child._id) === selectedCategoryId || child.slug === selectedCategoryId
                         );
 
                         return (
@@ -326,115 +381,103 @@ const ProjectsPage: React.FC = () => {
 
             {/* Right Content */}
             <div ref={listRef} id="danh-sach">
-              {(() => {
-                const currentCategory = categories.find((cat: any) =>
-                  cat._id === selectedCategoryId || cat.id === selectedCategoryId
-                );
-                const isParentCategory = currentCategory && currentCategory.children && currentCategory.children.length > 0;
+              <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
+                {isParentCategory
+                  ? `Danh mục con thuộc ${currentCategory.name}`
+                  : `Hiển thị ${projects.length} thiết kế nội thất ${searchQuery ? `cho "${searchQuery}"` : ''}`
+                }
+              </div>
 
-                return (
-                  <>
-                    <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
-                      {isParentCategory
-                        ? `Danh mục con thuộc ${currentCategory.name}`
-                        : `Hiển thị ${projects.length} thiết kế nội thất
-                         ${searchQuery ? `cho "${searchQuery}"` : ''}`
-                      }
-                    </div>
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                </div>
+              ) : isParentCategory ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                  {currentCategory.children.map((child: any) => {
+                    const childValue = child.id || child._id;
+                    const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
+                    return (
+                      <button
+                        key={childValue}
+                        onClick={() => {
+                          handleCategorySelect(childValue);
+                          setExpandedCategories(prev => new Set(prev).add(currentCategory._id || currentCategory.id));
+                        }}
+                        className="group block text-left"
+                      >
+                        <div className="overflow-hidden bg-gray-100 rounded-xl">
+                          <img
+                            src={coverImage}
+                            alt={child.name}
+                            loading="lazy"
+                            className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                        <h3 className="mt-3 text-sm font-bold text-gray-800 uppercase tracking-wide group-hover:text-showcase-primary transition-colors">
+                          {child.name}
+                        </h3>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="py-20 text-center text-gray-400">
+                  <p className="text-lg">Không tìm thấy thiết kế nội thất nào phù hợp.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                  {projects.map((proj, i) => {
+                    const coverImage =
+                      proj.images && proj.images.length > 0
+                        ? proj.images[0].url
+                        : proj.image;
+                    return (
+                      <ProjectCard
+                        key={proj._id || proj.id || i}
+                        slug={`${proj.slug || String(proj._id || proj.id)}?id=${proj._id || proj.id}`}
+                        name={proj.name}
+                        image={coverImage}
+                      />
+                    );
+                  })}
+                </div>
+              )}
 
-                    {loading ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-                      </div>
-                    ) : isParentCategory ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-                        {currentCategory.children.map((child: any) => {
-                          const childValue = child.id || child._id;
-                          const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
-                          return (
-                            <button
-                              key={childValue}
-                              onClick={() => {
-                                handleCategorySelect(childValue);
-                                setExpandedCategories(prev => new Set(prev).add(currentCategory._id || currentCategory.id));
-                              }}
-                              className="group block text-left"
-                            >
-                              <div className="overflow-hidden bg-gray-100 rounded-xl">
-                                <img
-                                  src={coverImage}
-                                  alt={child.name}
-                                  loading="lazy"
-                                  className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                              </div>
-                              <h3 className="mt-3 text-sm font-bold text-gray-800 uppercase tracking-wide group-hover:text-showcase-primary transition-colors">
-                                {child.name}
-                              </h3>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : projects.length === 0 ? (
-                      <div className="py-20 text-center text-gray-400">
-                        <p className="text-lg">Không tìm thấy thiết kế nội thất nào phù hợp.</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-                        {projects.map((proj, i) => {
-                          const coverImage =
-                            proj.images && proj.images.length > 0
-                              ? proj.images[0].url
-                              : proj.image;
-                          return (
-                            <ProjectCard
-                              key={proj._id || proj.id || i}
-                              slug={`${proj.slug || String(proj._id || proj.id)}?id=${proj._id || proj.id}`}
-                              name={proj.name}
-                              image={coverImage}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
+              {/* Pagination */}
+              {!(currentCategory && currentCategory.children && currentCategory.children.length > 0) && meta.totalPages > 1 && (
+                <div className="mt-24 flex flex-wrap justify-center items-center gap-2">
+                  {(() => {
+                    const { totalPages } = meta;
+                    let pages: (number | string)[] = [];
+                    if (totalPages <= 7) {
+                      pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+                    } else if (currentPage <= 3) {
+                      pages = [1, 2, 3, 4, '...', totalPages - 1, totalPages];
+                    } else if (currentPage >= totalPages - 2) {
+                      pages = [1, 2, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                    } else {
+                      pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+                    }
 
-                    {/* Pagination */}
-                    {!(currentCategory && currentCategory.children && currentCategory.children.length > 0) && meta.totalPages > 1 && (
-                      <div className="mt-24 flex flex-wrap justify-center items-center gap-2">
-                        {(() => {
-                          const { totalPages } = meta;
-                          let pages: (number | string)[] = [];
-                          if (totalPages <= 7) {
-                            pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-                          } else if (currentPage <= 3) {
-                            pages = [1, 2, 3, 4, '...', totalPages - 1, totalPages];
-                          } else if (currentPage >= totalPages - 2) {
-                            pages = [1, 2, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-                          } else {
-                            pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
-                          }
-
-                          return pages.map((p, index) => (
-                            <button
-                              key={`${p}-${index}`}
-                              onClick={() => typeof p === 'number' && setCurrentPage(p)}
-                              disabled={typeof p === 'string'}
-                              className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
-                                ? 'bg-showcase-primary text-white border-showcase-primary'
-                                : typeof p === 'string'
-                                  ? 'bg-transparent border-transparent text-gray-500 cursor-default'
-                                  : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
-                                }`}
-                            >
-                              {p}
-                            </button>
-                          ));
-                        })()}
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
+                    return pages.map((p, index) => (
+                      <button
+                        key={`${p}-${index}`}
+                        onClick={() => typeof p === 'number' && setCurrentPage(p)}
+                        disabled={typeof p === 'string'}
+                        className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
+                          ? 'bg-showcase-primary text-white border-showcase-primary'
+                          : typeof p === 'string'
+                            ? 'bg-transparent border-transparent text-gray-500 cursor-default'
+                            : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
+                          }`}
+                      >
+                        {p}
+                      </button>
+                    ));
+                  })()}
+                </div>
+              )}
             </div>
           </div>
         </Container>

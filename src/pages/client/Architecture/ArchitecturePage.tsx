@@ -62,6 +62,68 @@ const ArchitecturePage: React.FC = () => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const listRef = useRef<HTMLDivElement>(null);
 
+  // ====== Logic Kéo Thả Cuộn Ngang (Carousel) ======
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const dragStart = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [childPage, setChildPage] = useState(0);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!scrollRef.current) return;
+    dragStart.current = {
+      isDown: true,
+      startX: e.pageX,
+      scrollLeft: scrollRef.current.scrollLeft,
+    };
+    setIsDragging(false);
+    scrollRef.current.style.scrollBehavior = 'auto'; // Tắt smooth để drag 1:1
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStart.current.isDown || !scrollRef.current) return;
+    const x = e.pageX;
+    const walk = (x - dragStart.current.startX) * 1.5; // Hệ số drag giống nội thất
+    if (Math.abs(walk) > 5) {
+      if (!isDragging) setIsDragging(true);
+      scrollRef.current.style.scrollSnapType = 'none';
+      scrollRef.current.scrollLeft = dragStart.current.scrollLeft - walk;
+    }
+  };
+
+  const handlePointerUp = () => {
+    dragStart.current.isDown = false;
+    if (scrollRef.current) {
+      scrollRef.current.style.scrollSnapType = 'x mandatory';
+      scrollRef.current.style.scrollBehavior = '';
+    }
+    setTimeout(() => setIsDragging(false), 50);
+  };
+
+  const handlePointerLeave = () => {
+    if (dragStart.current.isDown) handlePointerUp();
+  };
+
+  const handleChildScroll = () => {
+    if (!scrollRef.current) return;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    const width = scrollRef.current.clientWidth;
+    const newPage = Math.round(scrollLeft / width);
+    if (!dragStart.current.isDown && newPage !== childPage) {
+      setChildPage(newPage);
+    }
+  };
+
+  const handleChildDotClick = (i: number) => {
+    setChildPage(i);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        left: i * scrollRef.current.clientWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
+  // ==============================================
+
   // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
   useEffect(() => {
     if (location.hash === '#danh-sach') {
@@ -137,6 +199,10 @@ const ArchitecturePage: React.FC = () => {
   const handleCategorySelect = (catId: string) => {
     setSelectedCategoryId(catId);
     setCurrentPage(1);
+    setChildPage(0);
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = 0;
+    }
 
     setTimeout(() => {
       if (window.innerWidth < 1024 && listRef.current) {
@@ -338,34 +404,95 @@ const ArchitecturePage: React.FC = () => {
                         {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                       </div>
                     ) : isParentCategory ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-                        {currentCategory.children.map((child: any) => {
-                          const childValue = child.id || child._id;
-                          const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&q=80';
-                          return (
-                            <button
-                              key={childValue}
-                              onClick={() => {
-                                handleCategorySelect(childValue);
-                                setExpandedCategories(prev => new Set(prev).add(currentCategory._id || currentCategory.id));
-                              }}
-                              className="group block text-left"
+                      (() => {
+                        const ITEMS_PER_CHILD_PAGE = 12; // 3-4 cột x 3 hàng tùy màn hình
+                        const children = currentCategory.children || [];
+                        const totalChildPages = Math.ceil(children.length / ITEMS_PER_CHILD_PAGE);
+                        
+                        const chunks = [];
+                        for (let i = 0; i < children.length; i += ITEMS_PER_CHILD_PAGE) {
+                          chunks.push(children.slice(i, i + ITEMS_PER_CHILD_PAGE));
+                        }
+
+                        return (
+                          <>
+                            <style dangerouslySetInnerHTML={{__html: `
+                              .hide-scrollbar::-webkit-scrollbar { display: none; }
+                              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                            `}} />
+                            <div 
+                              ref={scrollRef}
+                              onScroll={handleChildScroll}
+                              onPointerDown={handlePointerDown}
+                              onPointerMove={handlePointerMove}
+                              onPointerUp={handlePointerUp}
+                              onPointerLeave={handlePointerLeave}
+                              className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-pan-y cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
                             >
-                              <div className="overflow-hidden bg-gray-100 rounded-xl">
-                                <img
-                                  src={coverImage}
-                                  alt={child.name}
-                                  loading="lazy"
-                                  className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
+                              {chunks.map((chunk, index) => (
+                                <div key={index} className="w-full flex-shrink-0 snap-start px-1">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {chunk.map((child: any) => {
+                                      const childValue = child.id || child._id;
+                                      const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&q=80';
+                                      return (
+                                        <button
+                                          key={childValue}
+                                          onClick={(e) => {
+                                            if (isDragging) {
+                                              e.preventDefault();
+                                              return;
+                                            }
+                                            handleCategorySelect(childValue);
+                                            setExpandedCategories(prev => new Set(prev).add(currentCategory._id || currentCategory.id));
+                                          }}
+                                          className="bg-white rounded-xl p-3 flex flex-row items-center gap-3 shadow-sm border border-gray-100 text-left w-full cursor-pointer hover:border-showcase-primary/50 hover:bg-gray-50 transition-colors"
+                                          draggable={false}
+                                        >
+                                          <div className="w-14 h-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 pointer-events-none">
+                                            <img
+                                              src={coverImage}
+                                              alt={child.name}
+                                              className="w-full h-full object-cover"
+                                              loading="lazy"
+                                              draggable={false}
+                                            />
+                                          </div>
+                                          <div className="min-w-0">
+                                            <p className="text-[13px] font-semibold text-gray-800 leading-tight line-clamp-2">
+                                              {child.name}
+                                            </p>
+                                            {(child.constructionCount ?? 0) > 0 && (
+                                              <span className="text-[11px] text-gray-400 mt-0.5 block">
+                                                {child.constructionCount} công trình
+                                              </span>
+                                            )}
+                                          </div>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {totalChildPages > 1 && (
+                              <div className="flex items-center justify-center gap-2 mt-8 border-b pb-6 border-gray-100 mb-6">
+                                {Array.from({ length: totalChildPages }).map((_, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => handleChildDotClick(i)}
+                                    className={`rounded-full transition-all duration-200 cursor-pointer ${i === childPage
+                                        ? 'w-6 h-3 bg-showcase-primary'
+                                        : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                                      }`}
+                                  />
+                                ))}
                               </div>
-                              <h3 className="mt-3 text-sm font-bold text-gray-800 uppercase tracking-wide group-hover:text-showcase-primary transition-colors">
-                                {child.name}
-                              </h3>
-                            </button>
-                          );
-                        })}
-                      </div>
+                            )}
+                          </>
+                        );
+                      })()
                     ) : items.length === 0 ? (
                       <div className="py-20 text-center text-gray-400">
                         <p className="text-lg">Không tìm thấy thiết kế nào phù hợp.</p>

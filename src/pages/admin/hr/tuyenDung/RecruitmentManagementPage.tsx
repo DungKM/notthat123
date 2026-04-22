@@ -283,13 +283,13 @@ const RecruitmentManagementPage: React.FC = () => {
           name="content"
           label="Mô tả chung"
           placeholder="Mô tả ngắn về cơ hội nghề nghiệp..."
-          fieldProps={{ rows: 3 }}
+          fieldProps={{ autoSize: { minRows: 3, maxRows: 15 } }}
         />
         <ProFormTextArea
           name="required"
           label="Danh sách yêu cầu / quyền lợi"
           placeholder={"Mỗi dòng là một mục, ví dụ:\nQuy trình làm việc chuyên nghiệp.\nSử dụng vật liệu cao cấp."}
-          fieldProps={{ rows: 6 }}
+          fieldProps={{ autoSize: { minRows: 6, maxRows: 25 } }}
           extra="Mỗi dòng tương ứng một mục hiển thị (nhấn Enter để xuống dòng)."
         />
       </ModalForm>
