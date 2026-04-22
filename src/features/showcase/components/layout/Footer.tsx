@@ -15,11 +15,11 @@ const Footer: React.FC = () => {
   const { data: companyInfo } = useCompanyInfoQuery();
 
   return (
-    <footer className="bg-white text-gray-800 pt-16 pb-8 border-t border-gray-100">
+    <footer className="bg-white text-gray-800 pt-8 sm:pt-16 pb-6 sm:pb-8 border-t border-gray-100">
       <Container>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 border-b border-gray-100 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12 border-b border-gray-100 pb-8 sm:pb-12">
           {/* Brand Column */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Link to="/" className="flex items-start gap-2 group cursor-pointer -mt-2">
               <div className="w-[100px] sm:w-[120px] md:w-[140px] lg:w-[160px] xl:w-[180px]">
                 <img
@@ -58,37 +58,39 @@ const Footer: React.FC = () => {
 
           {/* Dynamic Branches */}
           {(companyInfo?.branches || []).map((branch: any, idx: number) => (
-            <div key={idx} className="flex flex-col h-full gap-4">
-              <div className="flex-1">
-                <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-4">{branch.name}</h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li className="flex items-start gap-3">
-                    <EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> {branch.address}
-                  </li>
-                  {(branch.phones && branch.phones.length > 0) && (
+            <div key={idx} className="flex flex-col h-full gap-2 sm:gap-0">
+              <h4 className="font-bold uppercase tracking-widest text-sm text-showcase-primary mb-1 sm:mb-4">{branch.name}</h4>
+              <div className="flex flex-row sm:flex-col items-start sm:items-stretch gap-4 sm:gap-0 flex-1">
+                <div className="flex-1">
+                  <ul className="space-y-2 text-sm text-gray-600">
                     <li className="flex items-start gap-3">
-                      <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
-                      <div className="flex flex-col gap-1">
-                        {branch.phones.map((p: any, pIdx: number) => (
-                          <span key={pIdx}>
-                            {p.number} {p.label ? `(${p.label})` : ''}
-                          </span>
-                        ))}
-                      </div>
+                      <EnvironmentOutlined className="mt-1 text-showcase-primary shrink-0" /> {branch.address}
                     </li>
-                  )}
-                </ul>
-              </div>
-              <div className="border border-gray-100 rounded overflow-hidden h-[180px] shrink-0 w-full shadow-sm transition-all duration-500 mt-4">
-                <iframe
-                  title={`Map ${branch.name}`}
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(branch.address)}&output=embed`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen={true}
-                  loading="lazy"
-                ></iframe>
+                    {(branch.phones && branch.phones.length > 0) && (
+                      <li className="flex items-start gap-3">
+                        <PhoneOutlined className="mt-1 text-showcase-primary shrink-0" />
+                        <div className="flex flex-col gap-1">
+                          {branch.phones.map((p: any, pIdx: number) => (
+                            <span key={pIdx}>
+                              {p.number} {p.label ? `(${p.label})` : ''}
+                            </span>
+                          ))}
+                        </div>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                <div className="border border-gray-100 rounded overflow-hidden w-[80px] h-[80px] sm:w-full sm:h-[180px] shrink-0 shadow-sm transition-all duration-500 sm:mt-4">
+                  <iframe
+                    title={`Map ${branch.name}`}
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(branch.address)}&output=embed`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen={true}
+                    loading="lazy"
+                  ></iframe>
+                </div>
               </div>
             </div>
           ))}

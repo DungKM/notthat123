@@ -204,7 +204,7 @@ const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-white overflow-x-hidden w-full">
       {loading && !product ? (
         <div className="pt-40 pb-24 text-center text-gray-400">Đang tải thông tin sản phẩm...</div>
       ) : !product ? (
@@ -315,10 +315,13 @@ const ProductDetailPage: React.FC = () => {
                         </button>
 
                         <div className="relative inline-flex ml-auto self-center">
-                          <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
+                          <span className="absolute -top-2.5 -right-2.5 z-10 flex h-6 w-6">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full border-2 border-[#cca32e] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-6 w-6 border-[#cca32e] bg-transparent shadow"></span>
+                          </span>
                           <button
                             onClick={() => setIsInterestModalOpen(true)}
-                            className="relative h-9 px-6 bg-white border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
+                            className="h-9 px-6 bg-white border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
                           >
                             Quan tâm
                           </button>
@@ -337,7 +340,7 @@ const ProductDetailPage: React.FC = () => {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex flex-wrap items-stretch gap-3 mb-8">
+                      <div className="flex flex-wrap items-stretch gap-2 mb-8">
                         <div className={`flex border rounded overflow-hidden h-10 w-[80px] shrink-0 transition-opacity ${!product.stockQuantity ? 'border-gray-200 bg-gray-50 opacity-60 pointer-events-none' : 'border-gray-300 bg-white'}`}>
                           <input
                             type="text"
@@ -391,7 +394,7 @@ const ProductDetailPage: React.FC = () => {
                         {!product.stockQuantity ? (
                           <button
                             disabled
-                            className="h-10 px-8 bg-gray-300 text-gray-500 font-bold rounded flex items-center justify-center gap-2 cursor-not-allowed text-[14px] tracking-wide"
+                            className="h-10 flex-1 min-w-[100px] bg-gray-300 text-gray-500 font-bold rounded flex items-center justify-center gap-2 cursor-not-allowed text-[13px] tracking-wide"
                           >
                             Đã bán hết
                           </button>
@@ -399,7 +402,7 @@ const ProductDetailPage: React.FC = () => {
                           <>
                             <button
                               onClick={handleAddToCart}
-                              className="h-10 px-6 bg-[#cca32e] hover:bg-[#bea748] text-white font-bold rounded flex items-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer "
+                              className="h-10 flex-1 min-w-[100px] bg-[#cca32e] hover:bg-[#bea748] text-white font-bold rounded flex items-center justify-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
                             >
                               <ShoppingCartOutlined className="text-[16px]" />
                               Thêm vào giỏ
@@ -407,7 +410,7 @@ const ProductDetailPage: React.FC = () => {
 
                             <button
                               onClick={handleBuyNow}
-                              className="h-10 px-6 bg-[#e54d42] hover:bg-[#c93f35] text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
+                              className="h-10 flex-1 min-w-[80px] bg-[#e54d42] hover:bg-[#c93f35] text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
                             >
                               Mua ngay
                             </button>
@@ -416,7 +419,7 @@ const ProductDetailPage: React.FC = () => {
 
                         <a
                           href="tel:0326908884"
-                          className="h-10 px-6 !bg-[#222] hover:bg-black !text-white font-bold rounded flex items-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
+                          className="h-10 flex-1 min-w-[80px] !bg-[#222] hover:bg-black !text-white font-bold rounded flex items-center justify-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
                         >
                           <PhoneFilled className="text-[16px]" />
                           Gọi tư vấn

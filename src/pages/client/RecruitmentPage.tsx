@@ -265,39 +265,11 @@ const RecruitmentPage: React.FC = () => {
       <section id="recruitment-form" className="py-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-showcase-light opacity-50 -z-10 skew-x-12 transform translate-x-1/2"></div>
         <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
-            {/* Form Info */}
-            <div className="space-y-10 py-6">
-              <div className="space-y-4">
-                <Badge variant="gold">ỨNG TUYỂN NGAY</Badge>
-                <h2 className="text-4xl font-bold text-teal-950 uppercase leading-snug" style={{ fontFamily: "'Inter', sans-serif" }}>GIA NHẬP <br />ĐỘI NGŨ HOCHI</h2>
-                <div className="w-20 h-1 bg-showcase-primary"></div>
-              </div>
-
-              <div className="prose prose-gray">
-                <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap">
-                  {recruitmentInfo?.content || 'Chúng tôi tìm kiếm những cá nhân đam mê thiết kế và nội thất cao cấp, khao khát kiến tạo những không gian sống mang dấu ấn riêng và giá trị thẩm mỹ khác biệt.'}
-                </p>
-                <ul className="space-y-4 mt-8">
-                  {(recruitmentInfo?.required || [
-                    'Quy trình làm việc chuyên nghiệp, minh bạch và chuẩn mực.',
-                    'Sử dụng vật liệu cao cấp, được tuyển chọn theo tiêu chuẩn chất lượng khắt khe.',
-                    'Tham gia các dự án biệt thự, penthouse đẳng cấp trên toàn quốc.',
-                    'Môi trường phát triển toàn diện về tư duy thiết kế và kỹ năng nghề nghiệp.'
-                  ]).map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-gray-500">
-                      <CheckCircleFilled className="text-showcase-primary" /> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="bg-teal-950 p-8 rounded-2xl text-white shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                <h4 className="text-showcase-primary font-bold uppercase tracking-widest text-sm mb-2">Hotline Tuyển dụng</h4>
-                <p className="text-2xl font-bold">032.690.8884</p>
-                <p className="text-xs text-gray-400 mt-2">Hỗ trợ 24/7 cho các ứng viên</p>
-              </div>
+          <div className="max-w-4xl mx-auto relative z-10">
+            <div className="text-center mb-10">
+              <Badge variant="gold" className="mb-4">ỨNG TUYỂN NGAY</Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>ĐIỀN THÔNG TIN ỨNG TUYỂN</h2>
+              <div className="w-16 h-1 bg-showcase-primary mx-auto mt-6"></div>
             </div>
 
             {/* Form Card */}

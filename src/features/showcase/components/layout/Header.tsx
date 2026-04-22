@@ -229,7 +229,7 @@ const Header: React.FC = () => {
   const isDetailLikePage =
     location.pathname.startsWith('/san-pham/') ||
     location.pathname.startsWith('/checkout') ||
-    location.pathname.startsWith('/cong-trinh/') ||
+    location.pathname.startsWith('/thiet-ke-noi-that/') ||
     location.pathname.startsWith('/doi-tac/');
 
   const isDarkHeader = true; // Luôn dùng nền trắng làm mặc định thay vì trong suốt
@@ -665,7 +665,7 @@ const Header: React.FC = () => {
                             onClick={() => {
                               setShowResults(false);
                               setSearchQuery('');
-                              navigate(`/cong-trinh/${item.slug}`);
+                              navigate(`/thiet-ke-noi-that/${item.slug}`);
                             }}
                             className="flex items-center gap-3 w-full px-4 py-2 hover:bg-blue-50 text-left transition-colors group/item"
                           >
@@ -1107,204 +1107,221 @@ const Header: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Mobile Menu Drawer - Full Screen Slide */}
+      {/* Mobile Menu Drawer - 70% width slide from left */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[100] flex flex-col xl:hidden"
-          >
-            <div className="flex items-center justify-between p-6 border-b">
-              <div className="w-[100px]">
-                <img src="/assets/images/image-logo.png" alt="Logo" className="w-full h-auto" />
+          <>
+            {/* Overlay backdrop - 30% bên phải, click để đóng */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99] xl:hidden"
+            />
+            {/* Drawer panel - 70% chiều rộng từ bên trái */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+              className="fixed top-0 right-0 h-full w-[70%] max-w-sm bg-white z-[100] flex flex-col xl:hidden shadow-2xl"
+            >
+              <div className="flex items-center justify-between p-5 border-b">
+                <div className="w-[90px]">
+                  <img src="/assets/images/image-logo.png" alt="Logo" className="w-full h-auto" />
+                </div>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
+                >
+                  <CloseOutlined className="text-base" />
+                </button>
               </div>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
-              >
-                <CloseOutlined className="text-lg" />
-              </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-1">
-                {navLinks.map((link) => (
-                  <div key={link.title} className="border-b border-gray-50 last:border-0">
-                    {/* Row tiêu đề menu */}
-                    {(link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC || link.href === ROUTES.DANH_SACH_SAN_PHAM) ? (
-                      // Mục có danh mục con: click vào hàng → toggle, không navigate
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-between py-4"
-                        onClick={() => {
-                          const key = link.href;
-                          setExpandedCategories(prev => {
-                            const next = new Set(prev);
-                            if (next.has(key)) next.delete(key);
-                            else next.add(key);
-                            return next;
-                          });
-                        }}
-                      >
-                        <span className="text-lg font-bold text-gray-900 uppercase tracking-tight">
-                          {link.title}
-                        </span>
-                        <DownOutlined
-                          className={`text-[12px] text-gray-500 transition-transform duration-200 ${expandedCategories.has(link.href) ? 'rotate-180' : ''
-                            }`}
-                        />
-                      </button>
-                    ) : (
-                      // Mục thường: click → navigate và đóng menu
-                      <div className="flex items-center justify-between py-4">
-                        <Link
-                          to={link.href}
-                          target={link.target}
-                          className="text-lg font-bold !text-gray-900 uppercase tracking-tight"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {link.title}
-                        </Link>
-                      </div>
-                    )}
-                    {link.submenu && (
-                      <div className="pb-4 pl-4 space-y-3">
-                        {link.submenu.map((sub) => (
-                          <a
-                            key={sub.title}
-                            href={sub.href}
-                            className="block !text-gray-500 font-medium hover:text-showcase-primary"
+              <div className="flex-1 overflow-y-auto p-5">
+                <div className="space-y-1">
+                  {navLinks.map((link) => (
+                    <div key={link.title} className="border-b border-gray-50 last:border-0">
+                      {/* Row tiêu đề menu */}
+                      {(link.href === ROUTES.CONG_TRINH || link.href === ROUTES.THIET_KE_KIEN_TRUC || link.href === ROUTES.DANH_SACH_SAN_PHAM) ? (
+                        // Mục có danh mục con: text → navigate đến trang all + scroll xuống list, chevron → toggle accordion
+                        <div className="w-full flex items-center justify-between py-3.5">
+                          <Link
+                            to={link.href + '#danh-sach'}
+                            className="text-[15px] font-bold !text-gray-900 uppercase tracking-tight flex-1"
                             onClick={() => setIsMenuOpen(false)}
                           >
-                            {sub.title}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                    {/* Danh mục Sản Phẩm trên mobile - Accordion */}
-                    {link.href === ROUTES.DANH_SACH_SAN_PHAM && productCategories.length > 0 && expandedCategories.has(ROUTES.DANH_SACH_SAN_PHAM) && (
-                      <div className="pb-4 pl-4 space-y-1">
-                        {productCategories.map((cat: any) => {
-                          const catId = String(cat.id || cat._id);
-                          const isExpanded = expandedCategories.has(catId);
-                          const hasChildren = cat.children && cat.children.length > 0;
-                          return (
-                            <div key={catId}>
-                              <button
-                                type="button"
-                                className="w-full flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[15px] font-semibold transition-colors"
-                                onClick={() => {
-                                  if (hasChildren) {
-                                    setExpandedCategories(prev => {
-                                      const next = new Set(prev);
-                                      if (next.has(catId)) next.delete(catId);
-                                      else next.add(catId);
-                                      return next;
-                                    });
-                                  } else {
-                                    navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?search=${cat.slug}`);
-                                    setIsMenuOpen(false);
-                                  }
-                                }}
-                              >
-                                <span>{cat.name}</span>
-                                {hasChildren && (
-                                  <DownOutlined
-                                    className={`text-[10px] text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                                  />
+                            {link.title}
+                          </Link>
+                          <button
+                            type="button"
+                            className="p-2 -mr-1"
+                            onClick={() => {
+                              const key = link.href;
+                              setExpandedCategories(prev => {
+                                const next = new Set(prev);
+                                if (next.has(key)) next.delete(key);
+                                else next.add(key);
+                                return next;
+                              });
+                            }}
+                          >
+                            <DownOutlined
+                              className={`text-[11px] text-gray-500 transition-transform duration-200 ${expandedCategories.has(link.href) ? 'rotate-180' : ''}`}
+                            />
+                          </button>
+                        </div>
+                      ) : (
+                        // Mục thường: click → navigate và đóng menu
+                        <div className="flex items-center justify-between py-3.5">
+                          <Link
+                            to={link.href}
+                            target={link.target}
+                            className="text-[15px] font-bold !text-gray-900 uppercase tracking-tight"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            {link.title}
+                          </Link>
+                        </div>
+                      )}
+                      {link.submenu && (
+                        <div className="pb-3 pl-3 space-y-2.5">
+                          {link.submenu.map((sub) => (
+                            <a
+                              key={sub.title}
+                              href={sub.href}
+                              className="block !text-gray-500 font-medium hover:text-showcase-primary text-sm"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              {sub.title}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                      {/* Danh mục Sản Phẩm trên mobile - Accordion */}
+                      {link.href === ROUTES.DANH_SACH_SAN_PHAM && productCategories.length > 0 && expandedCategories.has(ROUTES.DANH_SACH_SAN_PHAM) && (
+                        <div className="pb-3 pl-3 space-y-1">
+                          {productCategories.map((cat: any) => {
+                            const catId = String(cat.id || cat._id);
+                            const isExpanded = expandedCategories.has(catId);
+                            const hasChildren = cat.children && cat.children.length > 0;
+                            return (
+                              <div key={catId}>
+                                <button
+                                  type="button"
+                                  className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[14px] font-semibold transition-colors"
+                                  onClick={() => {
+                                    if (hasChildren) {
+                                      setExpandedCategories(prev => {
+                                        const next = new Set(prev);
+                                        if (next.has(catId)) next.delete(catId);
+                                        else next.add(catId);
+                                        return next;
+                                      });
+                                    } else {
+                                      navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?search=${cat.slug}`);
+                                      setIsMenuOpen(false);
+                                    }
+                                  }}
+                                >
+                                  <span>{cat.name}</span>
+                                  {hasChildren && (
+                                    <DownOutlined
+                                      className={`text-[10px] text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                    />
+                                  )}
+                                </button>
+                                {hasChildren && isExpanded && (
+                                  <div className="pl-3 mt-1 space-y-0.5">
+                                    {cat.children.map((child: any) => (
+                                      <a
+                                        key={child.id || child._id}
+                                        href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                        className="flex items-center gap-2 py-1.5 px-3 rounded-lg !text-gray-600 hover:!text-showcase-primary hover:bg-gray-50 text-[12px] transition-colors"
+                                        onClick={() => setIsMenuOpen(false)}
+                                      >
+                                        <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
+                                        {child.name}
+                                      </a>
+                                    ))}
+                                  </div>
                                 )}
-                              </button>
-                              {hasChildren && isExpanded && (
-                                <div className="pl-3 mt-1 space-y-0.5">
-                                  {cat.children.map((child: any) => (
-                                    <a
-                                      key={child.id || child._id}
-                                      href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
-                                      className="flex items-center gap-2 py-2 px-3 rounded-lg !text-gray-600 hover:!text-showcase-primary hover:bg-gray-50 text-[13px] transition-colors"
-                                      onClick={() => setIsMenuOpen(false)}
-                                    >
-                                      <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
-                                      {child.name}
-                                    </a>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
 
-                    {/* Danh mục Công Trình trên mobile - Accordion */}
-                    {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && expandedCategories.has(ROUTES.CONG_TRINH) && (
-                      <div className="pb-4 pl-4 space-y-1">
-                        {congTrinhCategories.map((cat) => (
-                          <a
-                            key={cat._id || cat.id}
-                            href={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
-                            className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-sm font-medium transition-colors mb-1"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            <span>{cat.name}</span>
-                            <ArrowRightOutlined className="text-[10px] text-gray-500" />
-                          </a>
-                        ))}
-                      </div>
-                    )}
+                      {/* Danh mục Công Trình trên mobile - Accordion */}
+                      {link.href === ROUTES.CONG_TRINH && congTrinhCategories.length > 0 && expandedCategories.has(ROUTES.CONG_TRINH) && (
+                        <div className="pb-3 pl-3 space-y-1">
+                          {congTrinhCategories.map((cat) => (
+                            <a
+                              key={cat._id || cat.id}
+                              href={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
+                              className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors mb-1"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <span>{cat.name}</span>
+                              <ArrowRightOutlined className="text-[10px] text-gray-500" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
 
-                    {/* Danh mục Thiết Kế Kiến Trúc trên mobile - Accordion */}
-                    {link.href === ROUTES.THIET_KE_KIEN_TRUC && architectureCategories.length > 0 && expandedCategories.has(ROUTES.THIET_KE_KIEN_TRUC) && (
-                      <div className="pb-4 pl-4 space-y-1">
-                        {architectureCategories.map((cat) => (
-                          <a
-                            key={cat._id || cat.id}
-                            href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat._id || cat.id}`}
-                            className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-sm font-medium transition-colors mb-1"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            <span>{cat.name}</span>
-                            <ArrowRightOutlined className="text-[10px] text-gray-500" />
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-10 space-y-6">
-                <div>
-                  <p className="text-xs font-black uppercase text-gray-400 tracking-widest mb-4">{t('common.language')}</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => i18n.changeLanguage(lang.code)}
-                        className={`flex flex-col items-center gap-1 p-3 rounded-2xl border transition-all ${i18n.language === lang.code
-                          ? 'bg-showcase-primary/10 border-showcase-primary text-showcase-primary'
-                          : 'bg-gray-50 border-transparent text-gray-600'
-                          }`}
-                      >
-                        <span className="text-2xl">{lang.flag}</span>
-                        <span className="text-[10px] font-bold">{lang.code.toUpperCase()}</span>
-                      </button>
-                    ))}
-                  </div>
+                      {/* Danh mục Thiết Kế Kiến Trúc trên mobile - Accordion */}
+                      {link.href === ROUTES.THIET_KE_KIEN_TRUC && architectureCategories.length > 0 && expandedCategories.has(ROUTES.THIET_KE_KIEN_TRUC) && (
+                        <div className="pb-3 pl-3 space-y-1">
+                          {architectureCategories.map((cat) => (
+                            <a
+                              key={cat._id || cat.id}
+                              href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat._id || cat.id}`}
+                              className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors mb-1"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <span>{cat.name}</span>
+                              <ArrowRightOutlined className="text-[10px] text-gray-500" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
 
-                <div className="p-6 bg-gray-900 rounded-3xl text-white">
-                  <p className="text-xs font-bold text-gray-400 mb-2">{t('common.contact_us')}</p>
-                  <h3 className="text-xl font-black mb-4">090 123 4567</h3>
-                  <button className="w-full py-3 bg-showcase-primary rounded-xl font-bold text-sm">
-                    {t('common.send_request')}
-                  </button>
+                <div className="mt-8 space-y-5">
+                  <div>
+                    <p className="text-xs font-black uppercase text-gray-400 tracking-widest mb-3">{t('common.language')}</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {languages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => i18n.changeLanguage(lang.code)}
+                          className={`flex flex-col items-center gap-1 p-2.5 rounded-2xl border transition-all ${i18n.language === lang.code
+                            ? 'bg-showcase-primary/10 border-showcase-primary text-showcase-primary'
+                            : 'bg-gray-50 border-transparent text-gray-600'
+                            }`}
+                        >
+                          <span className="text-xl">{lang.flag}</span>
+                          <span className="text-[10px] font-bold">{lang.code.toUpperCase()}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-5 bg-gray-900 rounded-3xl text-white">
+                    <p className="text-xs font-bold text-gray-400 mb-2">{t('common.contact_us')}</p>
+                    <h3 className="text-lg font-black mb-3">090 123 4567</h3>
+                    <button className="w-full py-3 bg-showcase-primary rounded-xl font-bold text-sm">
+                      {t('common.send_request')}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import SEO from '@/src/components/common/SEO';
@@ -13,11 +13,12 @@ interface ProjectCardProps {
   slug: string;
   name: string;
   image: string;
+  id: string;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ slug, name, image }) => (
-  <Link to={`/cong-trinh/${slug}`} className="group block">
-    <div className="overflow-hidden bg-gray-100">
+const ProjectCard: React.FC<ProjectCardProps> = ({ slug, name, image, id }) => (
+  <Link to={`/thiet-ke-noi-that/${slug}?id=${id}`} className="group block">
+    <div className="overflow-hidden bg-gray-100 rounded-xl">
       <img
         src={image}
         alt={name}
@@ -45,6 +46,7 @@ const SkeletonCard: React.FC = () => (
 
 const ProjectsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const categoryParam = searchParams.get('category') || '';
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,6 +63,20 @@ const ProjectsPage: React.FC = () => {
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
+  useEffect(() => {
+    if (location.hash === '#danh-sach') {
+      const timer = setTimeout(() => {
+        if (listRef.current) {
+          const yOffset = -80;
+          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash]);
 
   // Đồng bộ category khi url thay đổi (từ menu)
   useEffect(() => {
@@ -143,11 +159,11 @@ const ProjectsPage: React.FC = () => {
       <SEO
         title="Thiết kế nội thất thực tế - Thiết kế & Thi công Nội thất"
         description="Khám phá các công trình thiết kế và thi công nội thất thực tế của Nội Thất Hochi: biệt thự, penthouse, căn hộ, phòng ngủ, phòng khách... Ảnh thực tế 100%."
-        canonicalPath="/cong-trinh"
+        canonicalPath="/thiet-ke-noi-that"
         keywords="công trình nội thất, dự án nội thất hochi, thiết kế nội thất biệt thự, thi công nội thất căn hộ, phòng ngủ, phòng khách, tủ bếp"
         breadcrumbs={[
           { name: 'Trang chủ', url: '/' },
-          { name: 'Thiết kế nội thất', url: '/cong-trinh' },
+          { name: 'Thiết kế nội thất', url: '/thiet-ke-noi-that' },
         ]}
       />
 
@@ -309,7 +325,7 @@ const ProjectsPage: React.FC = () => {
             </aside>
 
             {/* Right Content */}
-            <div ref={listRef}>
+            <div ref={listRef} id="danh-sach">
               {(() => {
                 const currentCategory = categories.find((cat: any) =>
                   cat._id === selectedCategoryId || cat.id === selectedCategoryId
@@ -321,7 +337,8 @@ const ProjectsPage: React.FC = () => {
                     <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
                       {isParentCategory
                         ? `Danh mục con thuộc ${currentCategory.name}`
-                        : `Hiển thị ${projects.length} công trình ${searchQuery ? `cho "${searchQuery}"` : ''}`
+                        : `Hiển thị ${projects.length} thiết kế nội thất
+                         ${searchQuery ? `cho "${searchQuery}"` : ''}`
                       }
                     </div>
 
@@ -360,7 +377,7 @@ const ProjectsPage: React.FC = () => {
                       </div>
                     ) : projects.length === 0 ? (
                       <div className="py-20 text-center text-gray-400">
-                        <p className="text-lg">Không tìm thấy công trình nào phù hợp.</p>
+                        <p className="text-lg">Không tìm thấy thiết kế nội thất nào phù hợp.</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">

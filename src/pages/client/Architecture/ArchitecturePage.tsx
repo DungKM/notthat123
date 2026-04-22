@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import SEO from '@/src/components/common/SEO';
@@ -17,7 +17,7 @@ interface ArchitectureCardProps {
 
 const ArchitectureCard: React.FC<ArchitectureCardProps> = ({ slug, name, image }) => (
   <Link to={`/thiet-ke-kien-truc/${slug}`} className="group block">
-    <div className="overflow-hidden bg-gray-100">
+    <div className="overflow-hidden bg-gray-100 rounded-xl">
       <img
         src={image}
         alt={name}
@@ -44,6 +44,7 @@ const SkeletonCard: React.FC = () => (
 
 const ArchitecturePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const categoryParam = searchParams.get('category') || '';
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,6 +61,20 @@ const ArchitecturePage: React.FC = () => {
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
+  useEffect(() => {
+    if (location.hash === '#danh-sach') {
+      const timer = setTimeout(() => {
+        if (listRef.current) {
+          const yOffset = -80;
+          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash]);
 
   // Đồng bộ category khi url thay đổi (từ menu)
   useEffect(() => {
@@ -302,7 +317,7 @@ const ArchitecturePage: React.FC = () => {
             </aside>
 
             {/* Right Content */}
-            <div ref={listRef}>
+            <div ref={listRef} id="danh-sach">
               {(() => {
                 const currentCategory = categories.find((cat: any) =>
                   cat._id === selectedCategoryId || cat.id === selectedCategoryId

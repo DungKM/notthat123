@@ -66,7 +66,7 @@ const ProjectDetailPage: React.FC = () => {
     return (
       <div className="bg-white min-h-screen pt-40 pb-20 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Không tìm thấy công trình</h2>
-        <Link to="/cong-trinh" className="text-showcase-primary hover:underline flex items-center justify-center gap-2">
+        <Link to="/thiet-ke-noi-that" className="text-showcase-primary hover:underline flex items-center justify-center gap-2">
           <ArrowLeftOutlined /> Quay lại danh sách công trình
         </Link>
       </div>
@@ -97,15 +97,15 @@ const ProjectDetailPage: React.FC = () => {
       <SEO
         title={project.name}
         description={project.description || `Thiết kế nội thất ${project.name} - Thiết kế và thi công nội thất cao cấp bởi Nội Thất Hochi. Xem ảnh thực tế và thông tin chi tiết.`}
-        canonicalPath={`/cong-trinh/${slug}`}
+        canonicalPath={`/thiet-ke-noi-that/${slug}`}
         ogImage={coverImage}
         ogImageAlt={project.name}
         keywords={`${project.name}, ${categoryName}, công trình nội thất hochi, thiết kế nội thất, thi công nội thất${project.location ? ', ' + project.location : ''}`}
         breadcrumbs={[
           { name: 'Trang chủ', url: '/' },
-          { name: 'Thiết kế nội thất', url: '/cong-trinh' },
-          { name: categoryName, url: '/cong-trinh' },
-          { name: project.name, url: `/cong-trinh/${slug}` },
+          { name: 'Thiết kế nội thất', url: '/thiet-ke-noi-that' },
+          { name: categoryName, url: '/thiet-ke-noi-that' },
+          { name: project.name, url: `/thiet-ke-noi-that/${slug}` },
         ]}
       />
 
@@ -115,7 +115,7 @@ const ProjectDetailPage: React.FC = () => {
           <div className="text-[13px] !text-gray-500 mb-6 font-medium">
             <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
             <span className="mx-2">/</span>
-            <Link to="/cong-trinh" className="hover:text-showcase-primary !text-gray-500">Thiết kế nội thất</Link>
+            <Link to="/thiet-ke-noi-that" className="hover:text-showcase-primary !text-gray-500">Thiết kế nội thất</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900">{project.name}</span>
           </div>
@@ -124,7 +124,7 @@ const ProjectDetailPage: React.FC = () => {
             {/* Top layout */}
             <div className="grid grid-cols-1 gap-12 xl:gap-16">
               {/* Main content */}
-              <article className="bg-white shadow-sm border border-gray-100">
+              <article className="bg-white shadow-sm border border-gray-100 relative">
                 <Image.PreviewGroup>
 
                   {/* Slider Ảnh */}
@@ -143,13 +143,13 @@ const ProjectDetailPage: React.FC = () => {
                         <>
                           <button
                             onClick={prevImage}
-                            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-0 group-hover:opacity-100"
+                            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all"
                           >
                             <ArrowLeftOutlined />
                           </button>
                           <button
                             onClick={nextImage}
-                            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-0 group-hover:opacity-100"
+                            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all"
                           >
                             <ArrowRightOutlined />
                           </button>
@@ -192,11 +192,15 @@ const ProjectDetailPage: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <div className="shrink-0 mt-2 sm:mt-1 relative inline-flex self-start">
-                        <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
+                      <div className="shrink-0 mt-2 sm:mt-1 relative">
+                        {/* Pulse dot trên nút Quan tâm */}
+                        <span className="absolute -top-2.5 -right-2.5 z-10 flex h-6 w-6">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full border-2 border-[#cca32e] opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-6 w-6  border-[#cca32e] bg-transparent shadow"></span>
+                        </span>
                         <button
                           onClick={() => setIsInterestModalOpen(true)}
-                          className="relative h-10 px-8 bg-white border-2 border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide cursor-pointer inline-flex items-center uppercase"
+                          className="h-10 px-8 bg-white border-2 border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide cursor-pointer inline-flex items-center uppercase"
                         >
                           Quan tâm
                         </button>

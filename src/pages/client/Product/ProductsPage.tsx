@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Container from '@/src/features/showcase/components/ui/Container';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
@@ -31,6 +31,7 @@ const FilterSection = ({ title, defaultOpen = true, children }: { title: string,
 
 const ProductsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const initialSlug = searchParams.get('slug') || searchParams.get('category');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -50,6 +51,7 @@ const ProductsPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>('');
   const [sortOpen, setSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const sortOptions = [
@@ -60,6 +62,20 @@ const ProductsPage: React.FC = () => {
     { value: 'name_asc', label: 'Tên: Từ A - Z' },
     { value: 'name_desc', label: 'Tên: Từ Z - A' }
   ];
+
+  // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
+  useEffect(() => {
+    if (location.hash === '#danh-sach') {
+      const timer = setTimeout(() => {
+        if (listRef.current) {
+          const yOffset = -80;
+          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash]);
 
   // Close sort dropdown when clicking outside
   useEffect(() => {
@@ -408,7 +424,7 @@ const ProductsPage: React.FC = () => {
             </aside>
 
             {/* Right Content */}
-            <div>
+            <div ref={listRef} id="danh-sach">
               {/* Header Right Content (Sort & Title) */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-b border-gray-200 mb-6">
                 <div>

@@ -124,7 +124,7 @@ const ArchitectureDetailPage: React.FC = () => {
             {/* Top layout */}
             <div className="grid grid-cols-1 gap-12 xl:gap-16">
               {/* Main content */}
-              <article className="bg-white shadow-sm border border-gray-100">
+              <article className="bg-white shadow-sm border border-gray-100 relative">
                 <Image.PreviewGroup>
 
                   {/* Slider Ảnh */}
@@ -143,13 +143,13 @@ const ArchitectureDetailPage: React.FC = () => {
                         <>
                           <button
                             onClick={prevImage}
-                            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-0 group-hover:opacity-100"
+                            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all"
                           >
                             <ArrowLeftOutlined />
                           </button>
                           <button
                             onClick={nextImage}
-                            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-0 group-hover:opacity-100"
+                            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-showcase-primary hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all"
                           >
                             <ArrowRightOutlined />
                           </button>
@@ -192,11 +192,15 @@ const ArchitectureDetailPage: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <div className="shrink-0 mt-2 sm:mt-1 relative inline-flex self-start">
-                        <div className="absolute inset-0 bg-[#cca32e] rounded opacity-40 animate-ping" style={{ animationDuration: '2s' }}></div>
+                      <div className="shrink-0 mt-2 sm:mt-1 relative">
+                        {/* Pulse dot trên nút Quan tâm */}
+                        <span className="absolute -top-2.5 -right-2.5 z-10 flex h-6 w-6">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full border-2 border-[#cca32e] opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-6 w-6 border-[#cca32e] bg-transparent shadow"></span>
+                        </span>
                         <button
                           onClick={() => setIsInterestModalOpen(true)}
-                          className="relative h-10 px-8 bg-white border-2 border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide cursor-pointer inline-flex items-center uppercase"
+                          className="h-10 px-8 bg-white border-2 border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide cursor-pointer inline-flex items-center uppercase"
                         >
                           Quan tâm
                         </button>
