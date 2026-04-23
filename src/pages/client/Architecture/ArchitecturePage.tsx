@@ -400,7 +400,7 @@ const ArchitecturePage: React.FC = () => {
                     </div>
 
                     {loading ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
                         {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                       </div>
                     ) : isParentCategory ? (
@@ -431,7 +431,7 @@ const ArchitecturePage: React.FC = () => {
                             >
                               {chunks.map((chunk, index) => (
                                 <div key={index} className="w-full flex-shrink-0 snap-start px-1">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                                     {chunk.map((child: any) => {
                                       const childValue = child.id || child._id;
                                       const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&q=80';
@@ -498,7 +498,7 @@ const ArchitecturePage: React.FC = () => {
                         <p className="text-lg">Không tìm thấy thiết kế nào phù hợp.</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">
                         {items.map((item, i) => {
                           const coverImage =
                             item.images && item.images.length > 0

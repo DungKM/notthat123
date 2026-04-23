@@ -389,11 +389,11 @@ const ProjectsPage: React.FC = () => {
               </div>
 
               {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
                   {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
               ) : isParentCategory ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">
                   {currentCategory.children.map((child: any) => {
                     const childValue = child.id || child._id;
                     const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
@@ -426,7 +426,7 @@ const ProjectsPage: React.FC = () => {
                   <p className="text-lg">Không tìm thấy thiết kế nội thất nào phù hợp.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">
                   {projects.map((proj, i) => {
                     const coverImage =
                       proj.images && proj.images.length > 0
@@ -434,10 +434,11 @@ const ProjectsPage: React.FC = () => {
                         : proj.image;
                     return (
                       <ProjectCard
-                        key={proj._id || proj.id || i}
-                        slug={`${proj.slug || String(proj._id || proj.id)}?id=${proj._id || proj.id}`}
+                        key={proj.id || proj._id || i}
+                        slug={proj.slug || String(proj.id || proj._id)}
                         name={proj.name}
                         image={coverImage}
+                        id={proj.id || proj._id}
                       />
                     );
                   })}
