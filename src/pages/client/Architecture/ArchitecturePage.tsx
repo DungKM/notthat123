@@ -61,6 +61,7 @@ const ArchitecturePage: React.FC = () => {
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const listRef = useRef<HTMLDivElement>(null);
+  const contentStartRef = useRef<HTMLDivElement>(null);
 
   // ====== Logic Kéo Thả Cuộn Ngang (Carousel) ======
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -124,13 +125,12 @@ const ArchitecturePage: React.FC = () => {
   };
   // ==============================================
 
-  // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
   useEffect(() => {
     if (location.hash === '#danh-sach') {
       const timer = setTimeout(() => {
-        if (listRef.current) {
+        if (contentStartRef.current) {
           const yOffset = -80;
-          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          const y = contentStartRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
       }, 600);
@@ -150,9 +150,9 @@ const ArchitecturePage: React.FC = () => {
   useEffect(() => {
     if (window.innerWidth < 1024 && categoryParam) {
       const timer = setTimeout(() => {
-        if (listRef.current) {
+        if (contentStartRef.current) {
           const yOffset = -80; // Trừ khoảng hở header
-          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          const y = contentStartRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
       }, 600); // Đợi thêm chút để API load và đẩy layout xuống
@@ -205,9 +205,9 @@ const ArchitecturePage: React.FC = () => {
     }
 
     setTimeout(() => {
-      if (window.innerWidth < 1024 && listRef.current) {
+      if (window.innerWidth < 1024 && contentStartRef.current) {
         const yOffset = -80;
-        const element = listRef.current;
+        const element = contentStartRef.current;
         const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
@@ -244,6 +244,7 @@ const ArchitecturePage: React.FC = () => {
         </Container>
       </section>
 
+      <div ref={contentStartRef}>
       {/* Filter + Grid Layout */}
       <section className="py-16 lg:py-24">
         <Container>
@@ -295,11 +296,11 @@ const ArchitecturePage: React.FC = () => {
                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
                       Danh mục
                     </p>
-                    <div className="space-y-1">
+                    <div className="flex overflow-x-auto hide-scrollbar gap-2 lg:flex-col lg:gap-0 lg:space-y-1 pb-2 lg:pb-0">
                       <button
                         type="button"
                         onClick={() => handleCategorySelect('')}
-                        className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
+                        className={`flex-shrink-0 whitespace-nowrap lg:w-full text-left px-4 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
                           ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                           : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                           }`}
@@ -317,13 +318,13 @@ const ArchitecturePage: React.FC = () => {
                         );
 
                         return (
-                          <div key={catId}>
+                          <div key={catId} className="flex-shrink-0 lg:flex-shrink">
                             {/* Danh mục cha */}
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
                                 onClick={() => handleCategorySelect(catId)}
-                                className={`flex-1 text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${isParentActive || isChildActive
+                                className={`whitespace-nowrap flex-1 text-left px-4 py-2 rounded-xl border text-xs font-semibold transition-all ${isParentActive || isChildActive
                                   ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                                   : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                                   }`}
@@ -342,7 +343,7 @@ const ArchitecturePage: React.FC = () => {
                                       return next;
                                     });
                                   }}
-                                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
+                                  className="hidden lg:flex flex-shrink-0 w-7 h-7 items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
                                 >
                                   {isExpanded
                                     ? <ChevronDown className="w-3 h-3" />
@@ -354,7 +355,7 @@ const ArchitecturePage: React.FC = () => {
 
                             {/* Danh mục con */}
                             {hasChildren && isExpanded && (
-                              <div className="mt-1 ml-3 space-y-1 border-l-2 border-gray-100 pl-2">
+                              <div className="hidden lg:block mt-1 ml-3 space-y-1 border-l-2 border-gray-100 pl-2">
                                 {cat.children.map((child: any) => {
                                   const childId = child.id || child._id;
                                   return (
@@ -557,6 +558,7 @@ const ArchitecturePage: React.FC = () => {
           </div>
         </Container>
       </section>
+      </div>
     </div>
   );
 };

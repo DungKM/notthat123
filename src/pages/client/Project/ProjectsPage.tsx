@@ -63,14 +63,15 @@ const ProjectsPage: React.FC = () => {
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const listRef = useRef<HTMLDivElement>(null);
+  const contentStartRef = useRef<HTMLDivElement>(null);
 
   // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
   useEffect(() => {
     if (location.hash === '#danh-sach') {
       const timer = setTimeout(() => {
-        if (listRef.current) {
+        if (contentStartRef.current) {
           const yOffset = -80;
-          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          const y = contentStartRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
       }, 600);
@@ -90,9 +91,9 @@ const ProjectsPage: React.FC = () => {
   useEffect(() => {
     if (window.innerWidth < 1024 && categoryParam) {
       const timer = setTimeout(() => {
-        if (listRef.current) {
+        if (contentStartRef.current) {
           const yOffset = -80; // Trừ khoảng hở header
-          const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          const y = contentStartRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
       }, 600); // Đợi thêm chút để API load và đẩy layout xuống
@@ -145,9 +146,9 @@ const ProjectsPage: React.FC = () => {
     setCurrentPage(1);
 
     setTimeout(() => {
-      if (window.innerWidth < 1024 && listRef.current) {
+      if (window.innerWidth < 1024 && contentStartRef.current) {
         const yOffset = -80;
-        const element = listRef.current;
+        const element = contentStartRef.current;
         const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
@@ -189,6 +190,7 @@ const ProjectsPage: React.FC = () => {
         </Container>
       </section>
 
+      <div ref={contentStartRef}>
       {/* Sibling category bar (moved directly under Hero Banner) */}
       {!isParentCategory && (() => {
         const parentCat = categories.find((cat: any) =>
@@ -202,7 +204,7 @@ const ProjectsPage: React.FC = () => {
                 <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
                   Danh mục {parentCat.name}
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 lg:gap-4">
+                <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-3 pb-2 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 md:gap-4">
                   {parentCat.children.map((sib: any) => {
                     const sibId = sib.id || sib._id;
                     const isActive = sibId === selectedCategoryId || sib.slug === selectedCategoryId;
@@ -213,7 +215,7 @@ const ProjectsPage: React.FC = () => {
                       <button
                         key={sibId}
                         onClick={() => handleCategorySelect(sibId)}
-                        className={`bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left w-full cursor-pointer border transition-all ${isActive
+                        className={`flex-shrink-0 w-[180px] md:w-auto snap-start bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left cursor-pointer border transition-all ${isActive
                           ? 'bg-white border-showcase-primary ring-1 ring-showcase-primary shadow-sm'
                           : 'border-transparent hover:border-gray-200 hover:shadow-md hover:bg-white'
                           }`}
@@ -223,7 +225,7 @@ const ProjectsPage: React.FC = () => {
                             <img src={itemImage} alt={sib.name} className="w-full h-full object-cover" loading="lazy" />
                           </div>
                         )}
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className={`text-[12px] md:text-[13px] font-semibold leading-tight line-clamp-2 ${isActive ? 'text-showcase-primary' : 'text-gray-800'
                             }`}>
                             {sib.name}
@@ -483,6 +485,7 @@ const ProjectsPage: React.FC = () => {
           </div>
         </Container>
       </section>
+      </div>
     </div>
   );
 };
