@@ -5,6 +5,7 @@ import Button from '@/src/features/showcase/components/ui/Button';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import {
   ArrowLeftOutlined,
+  ArrowRightOutlined,
   CheckCircleFilled,
   ShoppingCartOutlined,
   PhoneFilled,
@@ -133,7 +134,7 @@ const ProductDetailPage: React.FC = () => {
       } else if (slug) {
         res = await getBySlug(slug);
       }
-      
+
       if (res) {
         // Fetch products cùng category làm gợi ý nếu có categoryId
         if (res?.categoryId?.id) {
@@ -142,7 +143,7 @@ const ProductDetailPage: React.FC = () => {
           getRelated({ limit: 5 });
         }
       }
-      
+
       // Gọi API lấy dữ liệu Sản Phẩm Mới (sắp xếp theo newest)
       getNewProducts({ sort: 'newest', limit: 5 });
     };
@@ -259,9 +260,36 @@ const ProductDetailPage: React.FC = () => {
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
+                        {product.images && product.images.length > 1 && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                setActiveImgIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+                              }}
+                              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/90 hover:bg-[#cca32e] hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                            >
+                              <ArrowLeftOutlined className="text-sm sm:text-base" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                setActiveImgIndex((prev) => (prev + 1) % product.images.length);
+                              }}
+                              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/90 hover:bg-[#cca32e] hover:text-white text-gray-800 rounded-full shadow-lg z-10 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                            >
+                              <ArrowRightOutlined className="text-sm sm:text-base" />
+                            </button>
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium tracking-widest shadow-sm z-10">
+                              {activeImgIndex + 1} / {product.images.length}
+                            </div>
+                          </>
+                        )}
                         {/* Like Badge */}
                         {likeCount > 0 && (
-                          <div className="absolute top-2 right-4 bg-[#f43f5e] text-white px-3 py-1.5 font-bold text-[14px] flex items-center gap-1.5 shadow-md" style={{ borderRadius: '6px' }}>
+                          <div className="absolute top-2 right-4 bg-[#f43f5e] text-white px-3 py-1.5 font-bold text-[14px] flex items-center gap-1.5 shadow-md z-10" style={{ borderRadius: '6px' }}>
                             <HeartFilled className="text-white text-[12px]" />
                             <span>{likeCount}</span>
                           </div>
