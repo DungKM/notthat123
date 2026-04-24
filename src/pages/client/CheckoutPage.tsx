@@ -48,6 +48,13 @@ const CheckoutPage: React.FC = () => {
   } | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
+  const normalizedPaymentMethod = customer.paymentMethod.toLowerCase();
+  const isHalfPayment = normalizedPaymentMethod.includes('50');
+  const isBankTransfer =
+    normalizedPaymentMethod.includes('chuyển khoản') ||
+    normalizedPaymentMethod.includes('chuyen khoan') ||
+    normalizedPaymentMethod.includes('bank_transfer');
+
   React.useEffect(() => {
     requestSetting('GET', '/shop-info')
       .then((res: any) => {
@@ -132,10 +139,19 @@ const CheckoutPage: React.FC = () => {
 
       toast.success('Tạo đơn hàng thành công! Cảm ơn bạn đã tin tưởng Nội Thất Hochi.');
       clearCart();
-      navigate('/');
+      navigate('/san-pham/danh-sach');
     } catch (err: any) {
       console.error('Lỗi khi thiết lập đơn hàng:', err);
       toast.error('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!');
+    }
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    const isLastItem = cartItems.length === 1;
+    removeFromCart(itemId);
+
+    if (isLastItem) {
+      navigate('/san-pham/danh-sach');
     }
   };
 
@@ -287,6 +303,44 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Payment Method Card */}
+              <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md">
+                <div className="flex items-center gap-3 bg-gray-50/50 px-6 py-4 border-b border-gray-100">
+                  <CreditCardOutlined className="text-showcase-primary text-xl" />
+                  <h2 className="text-lg font-bold text-teal-950 uppercase tracking-wider">Phương thức thanh toán</h2>
+                </div>
+                <div className="p-8">
+                  <div className="space-y-2">
+                    {paymentMethods.length > 0 ? paymentMethods.map(method => (
+                      <label
+                        key={method.id || method.name}
+                        className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-all ${customer.paymentMethod === method.name
+                          ? 'border-showcase-primary bg-showcase-light/5 shadow-sm'
+                          : 'border-gray-100 hover:border-gray-200'
+                          }`}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          checked={customer.paymentMethod === method.name}
+                          onChange={() => setCustomer({ ...customer, paymentMethod: method.name })}
+                          className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
+                        />
+                        <span className="text-[13px] font-semibold text-teal-950">{method.name}</span>
+                      </label>
+                    )) : (
+                      <div className="text-sm text-gray-500 italic pb-2">Đang tải phương thức thanh toán...</div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 rounded-lg bg-gray-50/50 p-3 border border-gray-100">
+                    <p className="text-gray-500 text-[11px] leading-relaxed italic">
+                      "{t('checkout.payment_note')}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
 
             </div>
 
@@ -406,7 +460,7 @@ const CheckoutPage: React.FC = () => {
                                 <PopConfirm
                                   title="Xoá sản phẩm"
                                   description="Bạn có chắc chắn muốn xoá sản phẩm này?"
-                                  onConfirm={() => removeFromCart(item.id)}
+                                  onConfirm={() => handleRemoveItem(item.id)}
                                   okText="Xoá ngay"
                                   cancelText="Không"
                                   placement="top"
@@ -448,39 +502,7 @@ const CheckoutPage: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Payment Method Toggle inside Summary */}
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Phương thức thanh toán</p>
-                          <div className="space-y-2">
-                            {paymentMethods.length > 0 ? paymentMethods.map(method => (
-                              <label
-                                key={method.id || method.name}
-                                className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-all ${customer.paymentMethod === method.name
-                                  ? 'border-showcase-primary bg-showcase-light/5 shadow-sm'
-                                  : 'border-gray-100 hover:border-gray-200'
-                                  }`}
-                              >
-                                <input
-                                  type="radio"
-                                  name="paymentMethod"
-                                  checked={customer.paymentMethod === method.name}
-                                  onChange={() => setCustomer({ ...customer, paymentMethod: method.name })}
-                                  className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
-                                />
-                                <span className="text-[13px] font-semibold text-teal-950">{method.name}</span>
-                              </label>
-                            )) : (
-                              <div className="text-sm text-gray-500 italic pb-2">Đang tải phương thức thanh toán...</div>
-                            )}
-                          </div>
-                      
-                          <div className="mt-3 rounded-lg bg-gray-50/50 p-3 border border-gray-100">
-                            <p className="text-gray-500 text-[11px] leading-relaxed italic">
-                              "{t('checkout.payment_note')}"
-                            </p>
-                          </div>
-                        </div>
-                        {customer.paymentMethod.includes('50') && (
+                        {isHalfPayment && (
                           <div className="mt-4 rounded-xl bg-amber-50/50 p-4 border border-amber-100 space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="font-medium text-amber-800">Thanh toán trước (50%)</span>
@@ -497,7 +519,7 @@ const CheckoutPage: React.FC = () => {
                           </div>
                         )}
 
-                        {customer.paymentMethod.toLowerCase().includes('chuyển khoản') && (
+                        {isBankTransfer && (
                           <div className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm">
                             <h3 className="text-[13px] font-bold text-teal-950 uppercase tracking-wider mb-4">Quét mã QR để thanh toán</h3>
                             {shopInfo?.qrCodeUrl ? (
@@ -534,7 +556,7 @@ const CheckoutPage: React.FC = () => {
                               )}
                               <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                                 <span className="text-xs font-medium text-gray-600">Số tiền chuyển:</span>
-                                <span className="font-black text-red-600 text-[15px]">{(customer.paymentMethod === 'bank_transfer_50' ? totalAmount / 2 : totalAmount).toLocaleString('vi-VN')} đ</span>
+                                <span className="font-black text-red-600 text-[15px]">{(isHalfPayment ? totalAmount / 2 : totalAmount).toLocaleString('vi-VN')} đ</span>
                               </div>
                             </div>
                           </div>

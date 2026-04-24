@@ -62,8 +62,40 @@ const ProjectsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [isMobileView, setIsMobileView] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
   const listRef = useRef<HTMLDivElement>(null);
   const contentStartRef = useRef<HTMLDivElement>(null);
+
+  const buildExpandedSetForSelection = (catId: string) => {
+    if (!catId) return new Set<string>();
+
+    let matchedParentId = '';
+
+    for (const cat of categories) {
+      const parentId = cat.id || cat._id;
+      const isParentSelected =
+        parentId === catId ||
+        cat.slug === catId;
+
+      if (isParentSelected && cat.children?.length > 0) {
+        matchedParentId = parentId;
+        break;
+      }
+
+      const childMatched = cat.children?.some(
+        (child: any) => (child.id || child._id) === catId || child.slug === catId
+      );
+
+      if (childMatched) {
+        matchedParentId = parentId;
+        break;
+      }
+    }
+
+    return matchedParentId ? new Set<string>([matchedParentId]) : new Set<string>();
+  };
 
   // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
   useEffect(() => {
@@ -100,6 +132,12 @@ const ProjectsPage: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [categoryParam]);
+
+  useEffect(() => {
+    const onResize = () => setIsMobileView(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     getCategories({ limit: 50 }).then(res => {
@@ -141,9 +179,26 @@ const ProjectsPage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [selectedCategoryId, searchQuery, currentPage, constructionRequest, searchRequest, categories]);
 
+  useEffect(() => {
+    const next = buildExpandedSetForSelection(selectedCategoryId);
+    setExpandedCategories(prev => {
+      if (prev.size === next.size && [...prev].every((id) => next.has(id))) {
+        return prev;
+      }
+      return next;
+    });
+  }, [selectedCategoryId, categories]);
+
   const handleCategorySelect = (catId: string) => {
     setSelectedCategoryId(catId);
     setCurrentPage(1);
+    const next = buildExpandedSetForSelection(catId);
+    setExpandedCategories(prev => {
+      if (prev.size === next.size && [...prev].every((id) => next.has(id))) {
+        return prev;
+      }
+      return next;
+    });
 
     setTimeout(() => {
       if (window.innerWidth < 1024 && contentStartRef.current) {
@@ -159,6 +214,22 @@ const ProjectsPage: React.FC = () => {
     cat._id === selectedCategoryId || cat.id === selectedCategoryId || cat.slug === selectedCategoryId
   );
   const isParentCategory = currentCategory && currentCategory.children && currentCategory.children.length > 0;
+  const siblingCategoryParent = (() => {
+    if (!categories.length) return null;
+
+    if (currentCategory?.children?.length > 0) {
+      return currentCategory;
+    }
+
+    const matchedParent = categories.find((cat: any) =>
+      cat.children?.some((c: any) => c.id === selectedCategoryId || c._id === selectedCategoryId || c.slug === selectedCategoryId)
+    );
+    if (matchedParent) return matchedParent;
+
+    return isMobileView
+      ? categories.find((cat: any) => cat.children && cat.children.length > 0) || null
+      : null;
+  })();
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -174,7 +245,7 @@ const ProjectsPage: React.FC = () => {
       />
 
       {/* Hero Banner */}
-      <section className="relative h-[400px] flex items-center pt-20">
+      <section className="relative h-60 md:h-75 flex items-center pt-20">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600"
@@ -186,60 +257,54 @@ const ProjectsPage: React.FC = () => {
         </div>
         <Container className="relative z-10 text-center text-white">
           <Badge variant="gold">KIẾN TẠO KHÔNG GIAN</Badge>
-          <h1 className="text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>THIẾT KẾ NỘI THẤT</h1>
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>THIẾT KẾ NỘI THẤT</h1>
         </Container>
       </section>
 
       <div ref={contentStartRef}>
-      {/* Sibling category bar (moved directly under Hero Banner) */}
-      {!isParentCategory && (() => {
-        const parentCat = categories.find((cat: any) =>
-          cat.children?.some((c: any) => c.id === selectedCategoryId || c._id === selectedCategoryId || c.slug === selectedCategoryId)
-        );
-        if (!parentCat || !parentCat.children?.length) return null;
-        return (
-          <section className="pt-10 pb-0 relative z-10">
-            <Container>
-              <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
-                <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
-                  Danh mục {parentCat.name}
-                </p>
-                <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-3 pb-2 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 md:gap-4">
-                  {parentCat.children.map((sib: any) => {
-                    const sibId = sib.id || sib._id;
-                    const isActive = sibId === selectedCategoryId || sib.slug === selectedCategoryId;
+      {/* Sibling category bar (show on mobile for quick swipe, keep desktop behavior) */}
+      {(isMobileView || !isParentCategory) && siblingCategoryParent?.children?.length > 0 && (
+        <section className="pt-10 pb-0 relative z-10">
+          <Container>
+            <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
+              <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
+                Danh mục {siblingCategoryParent.name}
+              </p>
+              <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-3 pb-2 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 md:gap-4">
+                {siblingCategoryParent.children.map((sib: any) => {
+                  const sibId = sib.id || sib._id;
+                  const isActive = sibId === selectedCategoryId || sib.slug === selectedCategoryId;
 
-                    const itemImage = sib.image || sib.representativeImage;
+                  const itemImage = sib.image || sib.representativeImage;
 
-                    return (
-                      <button
-                        key={sibId}
-                        onClick={() => handleCategorySelect(sibId)}
-                        className={`flex-shrink-0 w-[180px] md:w-auto snap-start bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left cursor-pointer border transition-all ${isActive
-                          ? 'bg-white border-showcase-primary ring-1 ring-showcase-primary shadow-sm'
-                          : 'border-transparent hover:border-gray-200 hover:shadow-md hover:bg-white'
-                          }`}
-                      >
-                        {itemImage && (
-                          <div className="w-12 h-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 mix-blend-multiply border border-black/5">
-                            <img src={itemImage} alt={sib.name} className="w-full h-full object-cover" loading="lazy" />
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className={`text-[12px] md:text-[13px] font-semibold leading-tight line-clamp-2 ${isActive ? 'text-showcase-primary' : 'text-gray-800'
-                            }`}>
-                            {sib.name}
-                          </p>
+                  return (
+                    <button
+                      key={sibId}
+                      onClick={() => handleCategorySelect(sibId)}
+                      className={`flex-shrink-0 w-[180px] md:w-auto snap-start bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left cursor-pointer border transition-all ${isActive
+                        ? 'bg-white border-showcase-primary ring-1 ring-showcase-primary shadow-sm'
+                        : 'border-transparent hover:border-gray-200 hover:shadow-md hover:bg-white'
+                        }`}
+                    >
+                      {itemImage && (
+                        <div className="w-12 h-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 mix-blend-multiply border border-black/5">
+                          <img src={itemImage} alt={sib.name} className="w-full h-full object-cover" loading="lazy" />
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-[12px] md:text-[13px] font-semibold leading-tight line-clamp-2 ${isActive ? 'text-showcase-primary' : 'text-gray-800'
+                          }`}>
+                          {sib.name}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            </Container>
-          </section>
-        );
-      })()}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Filter + Grid Layout */}
       <section className="pt-10 pb-16 lg:pt-16 lg:pb-24">
@@ -404,7 +469,6 @@ const ProjectsPage: React.FC = () => {
                         key={childValue}
                         onClick={() => {
                           handleCategorySelect(childValue);
-                          setExpandedCategories(prev => new Set(prev).add(currentCategory._id || currentCategory.id));
                         }}
                         className="group block text-left"
                       >

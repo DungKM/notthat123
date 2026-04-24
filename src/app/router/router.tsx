@@ -29,6 +29,7 @@ const RecruitmentPage = lazy(() => import('@/src/pages/client/RecruitmentPage'))
 const PartnerPage = lazy(() => import('@/src/pages/client/Partner/PartnerPage'));
 const PartnerDetailPage = lazy(() => import('@/src/pages/client/Partner/PartnerDetailPage'));
 const CheckoutPage = lazy(() => import('@/src/pages/client/CheckoutPage'));
+const OrderLookupPage = lazy(() => import('@/src/pages/client/Order/OrderLookupPage'));
 const LoginPage = lazy(() => import('@/src/pages/auth/LoginPage'));
 const SearchResultsPage = lazy(() => import('@/src/pages/client/Search/SearchResultsPage'));
 
@@ -96,6 +97,7 @@ const AppRouter: React.FC = () => {
             <Route path={ROUTES.DOI_TAC} element={<PartnerPage />} />
             <Route path={ROUTES.CHI_TIET_DOI_TAC} element={<PartnerDetailPage />} />
             <Route path={ROUTES.THANH_TOAN} element={<CheckoutPage />} />
+            <Route path={ROUTES.DON_HANG_CUA_BAN} element={<OrderLookupPage />} />
             <Route path={ROUTES.TIM_KIEM} element={<SearchResultsPage />} />
           </Route>
 

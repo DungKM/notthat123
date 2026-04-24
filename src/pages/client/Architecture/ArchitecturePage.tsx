@@ -63,6 +63,35 @@ const ArchitecturePage: React.FC = () => {
   const listRef = useRef<HTMLDivElement>(null);
   const contentStartRef = useRef<HTMLDivElement>(null);
 
+  const buildExpandedSetForSelection = (catId: string) => {
+    if (!catId) return new Set<string>();
+
+    let matchedParentId = '';
+
+    for (const cat of categories) {
+      const parentId = cat.id || cat._id;
+      const isParentSelected =
+        parentId === catId ||
+        cat.slug === catId;
+
+      if (isParentSelected && cat.children?.length > 0) {
+        matchedParentId = parentId;
+        break;
+      }
+
+      const childMatched = cat.children?.some(
+        (child: any) => (child.id || child._id) === catId || child.slug === catId
+      );
+
+      if (childMatched) {
+        matchedParentId = parentId;
+        break;
+      }
+    }
+
+    return matchedParentId ? new Set<string>([matchedParentId]) : new Set<string>();
+  };
+
   // ====== Logic Kéo Thả Cuộn Ngang (Carousel) ======
   const scrollRef = useRef<HTMLDivElement>(null);
   const dragStart = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
@@ -196,10 +225,27 @@ const ArchitecturePage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [selectedCategoryId, searchQuery, currentPage, architectureRequest, searchRequest, categories]);
 
+  useEffect(() => {
+    const next = buildExpandedSetForSelection(selectedCategoryId);
+    setExpandedCategories(prev => {
+      if (prev.size === next.size && [...prev].every((id) => next.has(id))) {
+        return prev;
+      }
+      return next;
+    });
+  }, [selectedCategoryId, categories]);
+
   const handleCategorySelect = (catId: string) => {
     setSelectedCategoryId(catId);
     setCurrentPage(1);
     setChildPage(0);
+    const next = buildExpandedSetForSelection(catId);
+    setExpandedCategories(prev => {
+      if (prev.size === next.size && [...prev].every((id) => next.has(id))) {
+        return prev;
+      }
+      return next;
+    });
     if (scrollRef.current) {
       scrollRef.current.scrollLeft = 0;
     }
@@ -228,7 +274,7 @@ const ArchitecturePage: React.FC = () => {
       />
 
       {/* Hero Banner */}
-      <section className="relative h-[400px] flex items-center pt-20">
+      <section className="relative h-60 md:h-75 flex items-center pt-20">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&q=80&w=1600"
@@ -240,7 +286,7 @@ const ArchitecturePage: React.FC = () => {
         </div>
         <Container className="relative z-10 text-center text-white">
           <Badge variant="gold">KIẾN TRÚC ĐỈNH CAO</Badge>
-          <h1 className="text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>THIẾT KẾ KIẾN TRÚC</h1>
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>THIẾT KẾ KIẾN TRÚC</h1>
         </Container>
       </section>
 
@@ -445,7 +491,6 @@ const ArchitecturePage: React.FC = () => {
                                               return;
                                             }
                                             handleCategorySelect(childValue);
-                                            setExpandedCategories(prev => new Set(prev).add(currentCategory._id || currentCategory.id));
                                           }}
                                           className="bg-white rounded-xl p-3 flex flex-row items-center gap-3 shadow-sm border border-gray-100 text-left w-full cursor-pointer hover:border-showcase-primary/50 hover:bg-gray-50 transition-colors"
                                           draggable={false}

@@ -26,6 +26,7 @@ export const ROUTES = {
   DOI_TAC: '/doi-tac',
   CHI_TIET_DOI_TAC: '/doi-tac/:slug',
   THANH_TOAN: '/checkout',
+  DON_HANG_CUA_BAN: '/don-hang-cua-ban',
   DANG_NHAP: '/login',
   TRO_CHUYEN: '/quan-tri/tin-nhan',
   TIM_KIEM: '/tim-kiem',

@@ -57,7 +57,7 @@ const VideoPage: React.FC = () => {
       />
 
       {/* Page Header */}
-      <section className="relative h-[400px] flex items-center pt-20">
+      <section className="relative h-60 md:h-75 flex items-center pt-20">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600"
@@ -68,7 +68,7 @@ const VideoPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <Container className="relative z-10 text-center text-white">
-          <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>VIDEO</h1>
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>VIDEO</h1>
         </Container>
       </section>
 

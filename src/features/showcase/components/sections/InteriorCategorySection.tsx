@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConstructionCategoryService } from '@/src/api/services';
 import Container from '../ui/Container';
 import { ROUTES } from '@/src/routes/index';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-const ITEMS_PER_PAGE = 15; // 5 cột × 3 hàng
+const DESKTOP_ITEMS_PER_PAGE = 15; // 5 cột × 3 hàng
+const MOBILE_ITEMS_PER_PAGE = 16; // 2 cột × 8 hàng
+const MOBILE_BREAKPOINT = 639;
 
 interface SubCategory {
   _id: string;
@@ -22,6 +22,12 @@ const InteriorCategorySection: React.FC = () => {
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
+  );
+  const [isCoarsePointer, setIsCoarsePointer] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(pointer: coarse)').matches : false
+  );
 
   // Dùng ref để tránh re-fetch vô tận do getAll thay đổi reference mỗi render
   const getAllRef = React.useRef(getAll);
@@ -63,53 +69,114 @@ const InteriorCategorySection: React.FC = () => {
     fetchCategories();
   }, []); // chỉ chạy 1 lần khi mount
 
-  const totalPages = Math.ceil(subCategories.length / ITEMS_PER_PAGE);
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
+    };
 
-  const chunks = [];
-  for (let i = 0; i < subCategories.length; i += ITEMS_PER_PAGE) {
-    chunks.push(subCategories.slice(i, i + ITEMS_PER_PAGE));
-  }
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(pointer: coarse)');
+    const onChange = (event: MediaQueryListEvent) => {
+      setIsCoarsePointer(event.matches);
+    };
+
+    setIsCoarsePointer(mediaQuery.matches);
+    mediaQuery.addEventListener('change', onChange);
+    return () => mediaQuery.removeEventListener('change', onChange);
+  }, []);
+
+  const itemsPerPage = isMobile ? MOBILE_ITEMS_PER_PAGE : DESKTOP_ITEMS_PER_PAGE;
+
+  const chunks = useMemo(() => {
+    const pages: SubCategory[][] = [];
+    for (let i = 0; i < subCategories.length; i += itemsPerPage) {
+      pages.push(subCategories.slice(i, i + itemsPerPage));
+    }
+    return pages;
+  }, [subCategories, itemsPerPage]);
+
+  const totalPages = chunks.length;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const dragStart = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const dragDeltaRef = useRef(0);
+  const isDraggingRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+
+  const applyDragScroll = () => {
+    if (!scrollRef.current || !dragStart.current.isDown) {
+      rafIdRef.current = null;
+      return;
+    }
+
+    scrollRef.current.scrollLeft = dragStart.current.scrollLeft - dragDeltaRef.current;
+    rafIdRef.current = null;
+  };
+
+  const queueDragScroll = () => {
+    if (rafIdRef.current !== null) return;
+    rafIdRef.current = window.requestAnimationFrame(applyDragScroll);
+  };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isCoarsePointer || !scrollRef.current) return;
+    scrollRef.current.setPointerCapture(e.pointerId);
+
     if (!scrollRef.current) return;
     dragStart.current = {
       isDown: true,
       startX: e.pageX,
       scrollLeft: scrollRef.current.scrollLeft,
     };
-    setIsDragging(false);
+    dragDeltaRef.current = 0;
+    isDraggingRef.current = false;
     // Quan trọng: Tắt smooth scroll để kéo mượt & không bị trễ (lag)
     scrollRef.current.style.scrollBehavior = 'auto';
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isCoarsePointer) return;
     if (!dragStart.current.isDown || !scrollRef.current) return;
-    const x = e.pageX;
-    const walk = (x - dragStart.current.startX) * 1.5; // <= CHỈNH TỐC ĐỘ KÉO Ở ĐÂY (1.0 là tỷ lệ 1:1 với chuột)
+    const walk = (e.pageX - dragStart.current.startX) * 1.25;
+    dragDeltaRef.current = walk;
+
     if (Math.abs(walk) > 5) {
-      if (!isDragging) setIsDragging(true);
+      isDraggingRef.current = true;
       scrollRef.current.style.scrollSnapType = 'none';
-      scrollRef.current.scrollLeft = dragStart.current.scrollLeft - walk;
+      queueDragScroll();
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e?: React.PointerEvent<HTMLDivElement>) => {
+    if (isCoarsePointer) return;
     dragStart.current.isDown = false;
+
+    if (scrollRef.current && e && scrollRef.current.hasPointerCapture(e.pointerId)) {
+      scrollRef.current.releasePointerCapture(e.pointerId);
+    }
+
+    if (rafIdRef.current !== null) {
+      window.cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+
     if (scrollRef.current) {
       scrollRef.current.style.scrollSnapType = 'x mandatory';
       // Bật lại default smooth scroll
       scrollRef.current.style.scrollBehavior = '';
     }
+
     setTimeout(() => {
-      setIsDragging(false);
+      isDraggingRef.current = false;
     }, 50);
   };
 
   const handlePointerLeave = () => {
+    if (isCoarsePointer) return;
     if (dragStart.current.isDown) {
       handlePointerUp();
     }
@@ -138,6 +205,28 @@ const InteriorCategorySection: React.FC = () => {
   const handleClick = (cat: SubCategory) => {
     navigate(`${ROUTES.CONG_TRINH}?category=${cat.id}`);
   };
+
+  useEffect(() => {
+    if (!totalPages) return;
+    if (page >= totalPages) {
+      const nextPage = totalPages - 1;
+      setPage(nextPage);
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({
+          left: nextPage * scrollRef.current.clientWidth,
+          behavior: 'auto',
+        });
+      }
+    }
+  }, [page, totalPages]);
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        window.cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -184,16 +273,16 @@ const InteriorCategorySection: React.FC = () => {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-pan-y cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
+          className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
         >
           {chunks.map((chunk, index) => (
-            <div key={index} className="w-full flex-shrink-0 snap-start px-1">
+            <div key={index} className="w-full shrink-0 snap-start px-1">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {chunk.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={(e) => {
-                      if (isDragging) {
+                      if (isDraggingRef.current) {
                         e.preventDefault();
                         e.stopPropagation();
                         return;
@@ -204,7 +293,7 @@ const InteriorCategorySection: React.FC = () => {
                     draggable={false}
                   >
                     {/* Ảnh nhỏ bên trái */}
-                    <div className="w-14 h-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 pointer-events-none">
+                    <div className="w-14 h-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 pointer-events-none">
                       <img
                         src={cat.image}
                         alt={cat.name}

@@ -17,10 +17,14 @@ const PartnerPage: React.FC = () => {
       <SEO
         title="Đối tác"
         description="HOCHI tự hào hợp tác cùng các đối tác uy tín, mang đến những trải nghiệm không điểm trừ cho khách hàng."
+        breadcrumbs={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Đối tác', url: '/doi-tac' },
+        ]}
       />
 
       {/* Hero Banner */}
-      <section className="relative h-[400px] flex items-center pt-20">
+      <section className="relative h-60 md:h-75 flex items-center pt-20">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=2000"
@@ -39,7 +43,7 @@ const PartnerPage: React.FC = () => {
         </div>
         <Container className="relative z-10 text-center text-white flex flex-col items-center justify-center">
           <h1
-            className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-widest leading-tight"
+            className="text-3xl md:text-5xl font-bold uppercase tracking-widest leading-tight mt-4"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             ĐỐI TÁC

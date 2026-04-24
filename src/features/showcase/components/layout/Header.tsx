@@ -338,7 +338,7 @@ const Header: React.FC = () => {
                               <div
                                 key={cat.id || cat._id}
                                 onMouseEnter={() => setActiveMegaCategory(cat)}
-                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.slug || cat.id || cat._id}`); }}
+                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id || cat.slug}`); }}
                                 className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
                                   }`}
                               >
@@ -364,7 +364,7 @@ const Header: React.FC = () => {
                                 {currentCat.children.map((child: any) => (
                                   <a
                                     key={child.id || child._id}
-                                    href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                    href={`${ROUTES.DANH_SACH_SAN_PHAM}?category=${child.id || child._id || child.slug}`}
                                     className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                   >
@@ -910,15 +910,27 @@ const Header: React.FC = () => {
                       <h3 className="text-lg font-semibold text-gray-900">{t('cart.empty_title')}</h3>
                       <p className="text-gray-500 text-sm mt-1">{t('cart.empty_desc')}</p>
                     </div>
-                    <button
-                      onClick={() => {
-                        setIsCartOpen(false);
-                        navigate('/san-pham');
-                      }}
-                      className="px-8 py-3 bg-showcase-primary text-white rounded-full font-bold hover:opacity-90 transition-opacity"
-                    >
-                      {t('cart.continue_shopping')}
-                    </button>
+                    <div className="w-full max-w-[260px] grid grid-cols-1 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCartOpen(false);
+                          navigate(ROUTES.DON_HANG_CUA_BAN);
+                        }}
+                        className="w-full py-3 bg-white text-gray-700 border border-gray-200 font-bold hover:bg-showcase-primary/10 transition-all"
+                      >
+                        Đơn hàng của bạn
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsCartOpen(false);
+                          navigate('/san-pham');
+                        }}
+                        className="w-full py-3 bg-showcase-primary text-white font-bold hover:opacity-90 transition-opacity"
+                      >
+                        {t('cart.continue_shopping')}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   cartItems.map((item) => (
@@ -1041,6 +1053,16 @@ const Header: React.FC = () => {
                       className="w-full py-4 bg-showcase-primary cursor-pointer text-white font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-showcase-primary/20 transition-all"
                     >
                       {t('cart.checkout')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCartOpen(false);
+                        navigate(ROUTES.DON_HANG_CUA_BAN);
+                      }}
+                      className="w-full cursor-pointer py-4 bg-white text-gray-700 border border-gray-200 font-bold hover:bg-showcase-primary/10 transition-all"
+                    >
+                      Đơn hàng của bạn
                     </button>
                     <button
                       onClick={() => {
@@ -1221,7 +1243,7 @@ const Header: React.FC = () => {
                                         return next;
                                       });
                                     } else {
-                                      navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?search=${cat.slug}`);
+                                      navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id || cat.slug}`);
                                       setIsMenuOpen(false);
                                     }
                                   }}
@@ -1238,7 +1260,7 @@ const Header: React.FC = () => {
                                     {cat.children.map((child: any) => (
                                       <a
                                         key={child.id || child._id}
-                                        href={`${ROUTES.DANH_SACH_SAN_PHAM}?search=${child.slug}`}
+                                        href={`${ROUTES.DANH_SACH_SAN_PHAM}?category=${child.id || child._id || child.slug}`}
                                         className="flex items-center gap-2 py-1.5 px-3 rounded-lg !text-gray-600 hover:!text-showcase-primary hover:bg-gray-50 text-[12px] transition-colors"
                                         onClick={() => setIsMenuOpen(false)}
                                       >
