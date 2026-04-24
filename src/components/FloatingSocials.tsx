@@ -27,7 +27,7 @@ const FloatingSocials: React.FC = () => {
       {/* Button số điện thoại bên trái */}
       <a
         href="tel:0326908884"
-        className={`fixed bottom-4 left-4 md:bottom-10 md:left-6 z-[999] flex items-center gap-2 !bg-showcase-primary !text-white px-4 py-3 rounded-full shadow-xl hover:scale-105 transition-all duration-300 animate-ripple ${isCartOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'}`}
+        className={`hidden md:fixed md:flex md:bottom-10 md:left-6 z-999 items-center gap-2 bg-showcase-primary! text-white! px-4 py-3 rounded-full shadow-xl hover:scale-105 transition-all duration-300 animate-ripple ${isCartOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'}`}
       >
         <PhoneOutlined className="text-xl" />
         <span className="font-semibold ">
@@ -36,7 +36,7 @@ const FloatingSocials: React.FC = () => {
       </a>
 
       {/* Social bên phải */}
-      <div className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[999] flex flex-col gap-3 transition-all duration-300 ${isCartOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+      <div className={`hidden md:fixed md:flex md:bottom-6 md:right-6 z-999 flex-col gap-3 transition-all duration-300 ${isCartOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
         <a
           href="https://zalo.me/0326908884"
           target="_blank"
