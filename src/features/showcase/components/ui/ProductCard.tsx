@@ -32,7 +32,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <img
           src={image}
           alt={title}
-          className="w-full h-full object-cover"
+          className="block w-full h-full object-cover object-center scale-125"
           loading="lazy"
         />
 
