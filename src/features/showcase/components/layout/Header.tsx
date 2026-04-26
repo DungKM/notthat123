@@ -371,7 +371,7 @@ const Header: React.FC = () => {
                               <div
                                 key={cat.id || cat._id}
                                 onMouseEnter={() => setActiveMegaCategory(cat)}
-                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id || cat.slug}`); }}
+                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id || cat.slug}#danh-sach`); }}
                                 className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
                                   }`}
                               >
@@ -397,7 +397,7 @@ const Header: React.FC = () => {
                                 {currentCat.children.map((child: any) => (
                                   <a
                                     key={child.id || child._id}
-                                    href={`${ROUTES.DANH_SACH_SAN_PHAM}?category=${child.id || child._id || child.slug}`}
+                                    href={`${ROUTES.DANH_SACH_SAN_PHAM}?category=${child.id || child._id || child.slug}#danh-sach`}
                                     className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                   >
@@ -448,7 +448,7 @@ const Header: React.FC = () => {
                               <div
                                 key={cat.id || cat._id}
                                 onMouseEnter={() => setActiveMegaProjectCategory(cat)}
-                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id || cat._id}`); }}
+                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.CONG_TRINH}?category=${cat.slug || cat.id || cat._id}#danh-sach`); }}
                                 className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
                                   }`}
                               >
@@ -472,7 +472,7 @@ const Header: React.FC = () => {
                                   <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
                                   <div className="mt-4">
                                     <a
-                                      href={`${ROUTES.CONG_TRINH}?category=${currentCat.slug || currentCat.id || currentCat._id}`}
+                                      href={`${ROUTES.CONG_TRINH}?category=${currentCat.slug || currentCat.id || currentCat._id}#danh-sach`}
                                       className="inline-flex items-center gap-2 text-[13px] font-bold text-showcase-primary hover:underline hover:text-[#C5A059]"
                                       onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                     >
@@ -488,7 +488,7 @@ const Header: React.FC = () => {
                                 {currentCat.children.map((child: any) => (
                                   <a
                                     key={child.id || child._id}
-                                    href={`${ROUTES.CONG_TRINH}?category=${child.slug}`}
+                                    href={`${ROUTES.CONG_TRINH}?category=${child.slug}#danh-sach`}
                                     className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                   >
@@ -539,7 +539,7 @@ const Header: React.FC = () => {
                               <div
                                 key={cat.id || cat._id}
                                 onMouseEnter={() => setActiveMegaArchCategory(cat)}
-                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat.slug || cat.id || cat._id}`); }}
+                                onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); navigate(`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat.slug || cat.id || cat._id}#danh-sach`); }}
                                 className={`flex items-center px-6 py-3.5 cursor-pointer transition-all duration-300 relative border-b ${isActive ? 'bg-showcase-primary text-white border-showcase-primary' : 'text-gray-700 border-[#e5e9f0] hover:bg-[#ebf0f5]'
                                   }`}
                               >
@@ -563,7 +563,7 @@ const Header: React.FC = () => {
                                   <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
                                   <div className="mt-4">
                                     <a
-                                      href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${currentCat?.slug || currentCat?.id || currentCat?._id}`}
+                                      href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${currentCat?.slug || currentCat?.id || currentCat?._id}#danh-sach`}
                                       className="inline-flex items-center gap-2 text-[13px] font-bold text-showcase-primary hover:underline hover:text-[#C5A059]"
                                       onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                     >
@@ -579,7 +579,7 @@ const Header: React.FC = () => {
                                 {currentCat.children.map((child: any) => (
                                   <a
                                     key={child.id || child._id}
-                                    href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${child.slug}`}
+                                    href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${child.slug}#danh-sach`}
                                     className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg hover:border-showcase-primary group/sub bg-white"
                                     onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                   >
@@ -1256,31 +1256,37 @@ const Header: React.FC = () => {
                             const hasChildren = cat.children && cat.children.length > 0;
                             return (
                               <div key={catId}>
-                                <button
-                                  type="button"
-                                  className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[14px] font-semibold transition-colors"
-                                  onClick={() => {
-                                    if (hasChildren) {
-                                      toggleMobileProductCategoryAccordion(catId);
-                                    } else {
-                                      navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id || cat.slug}`);
+                                <div className="w-full flex items-center gap-1 py-1">
+                                  <button
+                                    type="button"
+                                    className="flex-1 flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[14px] font-semibold transition-colors text-left"
+                                    onClick={() => {
+                                      navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id}#danh-sach`);
                                       setIsMenuOpen(false);
-                                    }
-                                  }}
-                                >
-                                  <span>{cat.name}</span>
+                                    }}
+                                  >
+                                    <span>{cat.name}</span>
+                                  </button>
+
                                   {hasChildren && (
-                                    <DownOutlined
-                                      className={`text-[10px] text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                                    />
+                                    <button
+                                      type="button"
+                                      className="p-2 rounded-md text-gray-400 hover:text-showcase-primary hover:bg-gray-100 transition-colors"
+                                      aria-label={isExpanded ? 'Thu gọn danh mục con' : 'Mở danh mục con'}
+                                      onClick={() => toggleMobileProductCategoryAccordion(catId)}
+                                    >
+                                      <DownOutlined
+                                        className={`text-[10px] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                      />
+                                    </button>
                                   )}
-                                </button>
+                                </div>
                                 {hasChildren && isExpanded && (
                                   <div className="pl-3 mt-1 space-y-0.5">
                                     {cat.children.map((child: any) => (
                                       <a
                                         key={child.id || child._id}
-                                        href={`${ROUTES.DANH_SACH_SAN_PHAM}?category=${child.id || child._id || child.slug}`}
+                                        href={`${ROUTES.DANH_SACH_SAN_PHAM}?category=${child.id || child._id}#danh-sach`}
                                         className="flex items-center gap-2 py-1.5 px-3 rounded-lg !text-gray-600 hover:!text-showcase-primary hover:bg-gray-50 text-[12px] transition-colors"
                                         onClick={() => setIsMenuOpen(false)}
                                       >
@@ -1302,7 +1308,7 @@ const Header: React.FC = () => {
                           {congTrinhCategories.map((cat) => (
                             <a
                               key={cat._id || cat.id}
-                              href={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}`}
+                              href={`${ROUTES.CONG_TRINH}?category=${cat._id || cat.id}#danh-sach`}
                               className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors mb-1"
                               onClick={() => setIsMenuOpen(false)}
                             >
@@ -1319,7 +1325,7 @@ const Header: React.FC = () => {
                           {architectureCategories.map((cat) => (
                             <a
                               key={cat._id || cat.id}
-                              href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat._id || cat.id}`}
+                              href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${cat._id || cat.id}#danh-sach`}
                               className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[13px] font-medium transition-colors mb-1"
                               onClick={() => setIsMenuOpen(false)}
                             >

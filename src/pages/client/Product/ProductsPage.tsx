@@ -33,6 +33,7 @@ const ProductsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const initialSlug = searchParams.get('slug') || searchParams.get('category');
+  const currentCategoryOrSlug = searchParams.get('category') || searchParams.get('slug') || '';
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -85,7 +86,7 @@ const ProductsPage: React.FC = () => {
       }, 600);
       return () => clearTimeout(timer);
     }
-  }, [location.hash]);
+  }, [location.hash, currentCategoryOrSlug]);
 
   // Close sort dropdown when clicking outside
   useEffect(() => {
@@ -267,7 +268,7 @@ const ProductsPage: React.FC = () => {
             )}
 
             {/* Left Filter Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-50 w-[300px] max-w-[85vw] bg-white h-screen flex flex-col shadow-2xl transform transition-transform duration-300 ease-in-out lg:sticky lg:top-24 lg:h-fit lg:w-auto lg:bg-transparent lg:overflow-visible lg:transform-none lg:block lg:shadow-none ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+            <aside className={`fixed inset-y-0 left-0 z-50 w-[300px] max-w-[85vw] bg-white h-screen flex flex-col shadow-2xl transform transition-transform duration-300 ease-in-out lg:sticky lg:top-28 lg:z-0 lg:h-fit lg:w-auto lg:bg-transparent lg:overflow-visible lg:transform-none lg:block lg:shadow-none ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
               <div className="flex items-center justify-between p-5 lg:p-0 lg:mb-6 border-b border-gray-100 lg:border-none sticky top-0 bg-white z-10 lg:static">
                 <div className="flex items-center gap-3">
                   <Filter className="w-5 h-5 text-gray-700" />

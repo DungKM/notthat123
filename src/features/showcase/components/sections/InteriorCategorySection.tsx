@@ -4,7 +4,7 @@ import { useConstructionCategoryService } from '@/src/api/services';
 import Container from '../ui/Container';
 import { ROUTES } from '@/src/routes/index';
 const DESKTOP_ITEMS_PER_PAGE = 15; // 5 cột × 3 hàng
-const MOBILE_ITEMS_PER_PAGE = 16; // 2 cột × 8 hàng
+const MOBILE_ITEMS_PER_PAGE = 8; // 2 cột × 4 hàng
 const MOBILE_BREAKPOINT = 639;
 
 interface SubCategory {
@@ -193,14 +193,26 @@ const InteriorCategorySection: React.FC = () => {
   };
 
   const handleDotClick = (i: number) => {
-    setPage(i);
+    const targetPage = Math.max(0, Math.min(i, totalPages - 1));
+    setPage(targetPage);
     if (scrollRef.current) {
       scrollRef.current.scrollTo({
-        left: i * scrollRef.current.clientWidth,
+        left: targetPage * scrollRef.current.clientWidth,
         behavior: 'smooth'
       });
     }
   };
+
+  const handlePrevPage = () => {
+    handleDotClick(page - 1);
+  };
+
+  const handleNextPage = () => {
+    handleDotClick(page + 1);
+  };
+
+  const canGoPrev = page > 0;
+  const canGoNext = page < totalPages - 1;
 
   const handleClick = (cat: SubCategory) => {
     navigate(`${ROUTES.CONG_TRINH}?category=${cat.id}`);
@@ -233,7 +245,7 @@ const InteriorCategorySection: React.FC = () => {
       <section className="py-16 bg-[#f5f5f5]">
         <Container>
           <div className="h-10 bg-gray-200 rounded w-48 mx-auto mb-10 animate-pulse" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-4`}>
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
                 <div className="w-16 h-16 bg-gray-200 rounded-xl mx-auto mb-3" />
@@ -266,58 +278,88 @@ const InteriorCategorySection: React.FC = () => {
         `}} />
 
         {/* Carousel Container */}
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerLeave}
-          className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-auto cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
-        >
-          {chunks.map((chunk, index) => (
-            <div key={index} className="w-full shrink-0 snap-start px-1">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {chunk.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={(e) => {
-                      if (isDraggingRef.current) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return;
-                      }
-                      handleClick(cat);
-                    }}
-                    className="bg-white rounded-xl p-3 flex flex-row items-center gap-3 shadow-sm text-left w-full cursor-pointer hover:bg-gray-50 transition-colors"
-                    draggable={false}
-                  >
-                    {/* Ảnh nhỏ bên trái */}
-                    <div className="w-14 h-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 pointer-events-none">
-                      <img
-                        src={cat.image}
-                        alt={cat.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        draggable={false}
-                      />
-                    </div>
-                    {/* Text bên phải */}
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-gray-800 leading-tight line-clamp-2">
-                        {cat.name}
-                      </p>
-                      {(cat.constructionCount ?? 0) > 0 && (
-                        <span className="text-[11px] text-gray-400 mt-0.5 block">
-                          {cat.constructionCount} công trình
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
+        <div className="relative">
+          {totalPages > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={handlePrevPage}
+                disabled={!canGoPrev}
+                aria-label="Trang trước"
+                className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full border bg-white shadow-sm flex items-center justify-center transition-all ${canGoPrev ? 'text-gray-700 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary' : 'text-gray-300 border-gray-100 cursor-not-allowed'}`}
+              >
+                <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+                  <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextPage}
+                disabled={!canGoNext}
+                aria-label="Trang sau"
+                className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full border bg-white shadow-sm flex items-center justify-center transition-all ${canGoNext ? 'text-gray-700 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary' : 'text-gray-300 border-gray-100 cursor-not-allowed'}`}
+              >
+                <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+                  <path d="M7.5 4.5L13 10l-5.5 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerLeave}
+            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-auto cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
+          >
+            {chunks.map((chunk, index) => (
+              <div key={index} className="w-full shrink-0 snap-start px-1">
+                <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3`}>
+                  {chunk.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={(e) => {
+                        if (isDraggingRef.current) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          return;
+                        }
+                        handleClick(cat);
+                      }}
+                      className="bg-white rounded-xl p-3 flex flex-row items-center gap-3 shadow-sm text-left w-full cursor-pointer hover:bg-gray-50 transition-colors"
+                      draggable={false}
+                    >
+                      {/* Ảnh nhỏ bên trái */}
+                      <div className="w-14 h-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 pointer-events-none">
+                        <img
+                          src={cat.image}
+                          alt={cat.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          draggable={false}
+                        />
+                      </div>
+                      {/* Text bên phải */}
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-gray-800 leading-tight line-clamp-2">
+                          {cat.name}
+                        </p>
+                        {(cat.constructionCount ?? 0) > 0 && (
+                          <span className="text-[11px] text-gray-400 mt-0.5 block">
+                            {cat.constructionCount} công trình
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Pagination dots */}

@@ -68,6 +68,14 @@ const ProjectsPage: React.FC = () => {
   const listRef = useRef<HTMLDivElement>(null);
   const contentStartRef = useRef<HTMLDivElement>(null);
 
+  const scrollToTargetSection = () => {
+    const yOffset = -80;
+    const target = listRef.current || contentStartRef.current;
+    if (!target) return;
+    const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  };
+
   const buildExpandedSetForSelection = (catId: string) => {
     if (!catId) return new Set<string>();
 
@@ -101,11 +109,7 @@ const ProjectsPage: React.FC = () => {
   useEffect(() => {
     if (location.hash === '#danh-sach') {
       const timer = setTimeout(() => {
-        if (contentStartRef.current) {
-          const yOffset = -80;
-          const y = contentStartRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
+        scrollToTargetSection();
       }, 600);
       return () => clearTimeout(timer);
     }
@@ -121,17 +125,13 @@ const ProjectsPage: React.FC = () => {
 
   // Tự động cuộn trên mobile khi chọn từ menu
   useEffect(() => {
-    if (window.innerWidth < 1024 && categoryParam) {
+    if (location.hash === '#danh-sach' && categoryParam) {
       const timer = setTimeout(() => {
-        if (contentStartRef.current) {
-          const yOffset = -80; // Trừ khoảng hở header
-          const y = contentStartRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
+        scrollToTargetSection();
       }, 600); // Đợi thêm chút để API load và đẩy layout xuống
       return () => clearTimeout(timer);
     }
-  }, [categoryParam]);
+  }, [categoryParam, location.hash]);
 
   useEffect(() => {
     const onResize = () => setIsMobileView(window.innerWidth < 768);
@@ -202,10 +202,7 @@ const ProjectsPage: React.FC = () => {
 
     setTimeout(() => {
       if (window.innerWidth < 1024 && contentStartRef.current) {
-        const yOffset = -80;
-        const element = contentStartRef.current;
-        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
+        scrollToTargetSection();
       }
     }, 100);
   };
