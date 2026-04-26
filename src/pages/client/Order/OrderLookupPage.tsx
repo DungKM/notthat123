@@ -71,10 +71,24 @@ const normalizeOrderDetail = (res: any): LookupOrder | null => {
   return null;
 };
 
+const normalizePhone = (value: string): string => value.replace(/[^\d]/g, '');
+
+const isValidPhone = (value: string): boolean => {
+  const phone = normalizePhone(value);
+  return /^(0\d{9,10}|84\d{9,10})$/.test(phone);
+};
+
+const getPhoneError = (value: string): string => {
+  const normalizedPhone = normalizePhone(value);
+  if (!normalizedPhone) return 'Vui lòng nhập số điện thoại';
+  if (!isValidPhone(normalizedPhone)) return 'Số điện thoại không hợp lệ';
+  return '';
+};
+
 const OrderLookupPage: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [orders, setOrders] = useState<LookupOrder[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string>('');
@@ -85,15 +99,26 @@ const OrderLookupPage: React.FC = () => {
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const nextPhoneError = getPhoneError(keyword);
+    if (nextPhoneError) {
+      setPhoneError(nextPhoneError);
+      setSubmitted(true);
+      setOrders([]);
+      setOrderDetail(null);
+      return;
+    }
+
+    const normalizedPhone = normalizePhone(keyword);
+
+    setPhoneError('');
+
     setLoading(true);
     setSubmitted(true);
     setSelectedOrderId('');
     setOrderDetail(null);
 
     try {
-      const listRes = await api.get('/orders/list', {
-        params: { page: 1, limit: 100, search: keyword.trim() },
-      });
+      const listRes = await api.get(`/orders/lookup/${normalizedPhone}`);
 
       const foundOrders = normalizeOrderList(listRes).sort((a, b) => {
         const aTime = new Date(a.createdAt || 0).getTime();
@@ -107,32 +132,24 @@ const OrderLookupPage: React.FC = () => {
         const firstOrderId = String(foundOrders[0].id || foundOrders[0]._id || '');
         if (firstOrderId) {
           setSelectedOrderId(firstOrderId);
-          await handleGetDetail(firstOrderId);
+          setOrderDetail(foundOrders[0]);
         }
       }
     } catch (error: any) {
       setOrders([]);
+      setOrderDetail(null);
       toast.error(error?.message || 'Không thể tra cứu đơn hàng. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGetDetail = async (orderId: string) => {
+  const handleGetDetail = (orderId: string) => {
     if (!orderId) return;
 
-    setDetailLoading(true);
-    try {
-      const detailRes = await api.get(`/orders/${orderId}`);
-      const detail = normalizeOrderDetail(detailRes);
-      setOrderDetail(detail);
-      setSelectedOrderId(orderId);
-    } catch (error: any) {
-      setOrderDetail(null);
-      toast.error(error?.message || 'Không thể lấy chi tiết đơn hàng');
-    } finally {
-      setDetailLoading(false);
-    }
+    const selected = orders.find((order) => String(order.id || order._id || '') === orderId) || null;
+    setOrderDetail(selected);
+    setSelectedOrderId(orderId);
   };
 
   return (
@@ -173,16 +190,34 @@ const OrderLookupPage: React.FC = () => {
         <Container>
           <div className="max-w-5xl mx-auto bg-white border border-gray-100 rounded-2xl shadow-sm p-6 md:p-8">
             <h2 className="text-xl md:text-2xl font-bold text-teal-950">Tra cứu đơn hàng của bạn</h2>
-            <p className="mt-2 text-sm text-gray-500">Nhập số điện thoại hoặc thông tin đơn hàng để tìm kiếm.</p>
+            <p className="mt-2 text-sm text-gray-500">Nhập số điện thoại đã đặt hàng để tra cứu.</p>
 
             <form className="mt-6" onSubmit={handleLookup}>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
-                  type="text"
+                  type="tel"
                   value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
+                  onChange={(e) => {
+                    const nextValue = e.target.value;
+                    setKeyword(nextValue);
+                    if (!nextValue.trim()) {
+                      setPhoneError('');
+                      return;
+                    }
+
+                    const normalized = normalizePhone(nextValue);
+                    if (normalized.length >= 10) {
+                      setPhoneError(getPhoneError(nextValue));
+                    } else {
+                      setPhoneError('');
+                    }
+                  }}
+                  onBlur={() => {
+                    if (!keyword.trim()) return;
+                    setPhoneError(getPhoneError(keyword));
+                  }}
                   placeholder="Ví dụ: 0876887677"
-                  className="flex-1 rounded-xl border border-gray-200 px-4 py-3 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20"
+                  className={`flex-1 rounded-xl border px-4 py-3 outline-none transition-all focus:border-showcase-primary focus:ring-1 focus:ring-showcase-primary/20 ${phoneError ? 'border-red-500' : 'border-gray-200'}`}
                 />
                 <button
                   type="submit"
@@ -193,11 +228,12 @@ const OrderLookupPage: React.FC = () => {
                   {loading ? 'Đang tra cứu...' : 'Tra cứu đơn hàng'}
                 </button>
               </div>
+              {phoneError && <p className="mt-2 text-[12px] text-red-500">{phoneError}</p>}
             </form>
           </div>
 
           <div className="max-w-5xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] gap-5">
-            {submitted && !loading && orders.length === 0 && (
+            {submitted && !loading && !phoneError && orders.length === 0 && (
               <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-gray-500 lg:col-span-2">
                 Không tìm thấy đơn hàng phù hợp với thông tin đã nhập.
               </div>
@@ -222,7 +258,7 @@ const OrderLookupPage: React.FC = () => {
                             : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
                             }`}
                         >
-                          <p className="text-sm font-bold text-teal-950">#{orderId || 'N/A'}</p>
+                          <p className="text-sm font-bold text-teal-950">Đơn hàng</p>
                           <p className="text-xs text-gray-500 mt-1">{order.fullName || '-'} - {order.phone || '-'}</p>
                           <p className="text-xs text-gray-400 mt-1">{order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '-'}</p>
                         </button>
@@ -232,9 +268,7 @@ const OrderLookupPage: React.FC = () => {
                 </div>
 
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 shadow-sm min-h-70">
-                  {detailLoading ? (
-                    <div className="h-full flex items-center justify-center text-gray-500">Đang tải chi tiết đơn hàng...</div>
-                  ) : !orderDetail ? (
+                  {!orderDetail ? (
                     <div className="h-full flex items-center justify-center text-gray-500">Chọn một đơn hàng trong danh sách để xem chi tiết.</div>
                   ) : (
                     (() => {
@@ -248,10 +282,6 @@ const OrderLookupPage: React.FC = () => {
                       return (
                         <>
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                              <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Mã đơn</p>
-                              <p className="text-sm md:text-base font-bold text-teal-950">#{orderDetail.id || orderDetail._id || 'N/A'}</p>
-                            </div>
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${meta.className}`}>
                               {meta.icon}
                               {meta.label}
