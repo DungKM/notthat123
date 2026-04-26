@@ -53,6 +53,16 @@ const ProductsPage: React.FC = () => {
   const sortRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  useEffect(() => {
+    if (isMobileFilterOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isMobileFilterOpen]);
 
   const sortOptions = [
     { value: '', label: 'Tùy chọn gợi ý' },
@@ -248,16 +258,30 @@ const ProductsPage: React.FC = () => {
         <Container>
           <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)] gap-8 xl:gap-12">
 
+            {/* Mobile Filter Overlay */}
+            {isMobileFilterOpen && (
+              <div 
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity" 
+                onClick={() => setIsMobileFilterOpen(false)} 
+              />
+            )}
+
             {/* Left Filter Sidebar */}
-            <aside className="lg:sticky lg:top-24 h-fit hidden lg:block">
-              <div className="flex items-center gap-3 mb-6">
-                <Filter className="w-5 h-5 text-gray-700" />
-                <h2 className="text-xl font-bold text-gray-900 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Bộ lọc
-                </h2>
+            <aside className={`fixed inset-y-0 left-0 z-50 w-[300px] max-w-[85vw] bg-white h-screen flex flex-col shadow-2xl transform transition-transform duration-300 ease-in-out lg:sticky lg:top-24 lg:h-fit lg:w-auto lg:bg-transparent lg:overflow-visible lg:transform-none lg:block lg:shadow-none ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+              <div className="flex items-center justify-between p-5 lg:p-0 lg:mb-6 border-b border-gray-100 lg:border-none sticky top-0 bg-white z-10 lg:static">
+                <div className="flex items-center gap-3">
+                  <Filter className="w-5 h-5 text-gray-700" />
+                  <h2 className="text-xl font-bold text-gray-900 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Bộ lọc
+                  </h2>
+                </div>
+                <button className="lg:hidden p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors" onClick={() => setIsMobileFilterOpen(false)}>
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="bg-white border text-gray-800 border-gray-200 rounded-lg p-5">
+              <div className="flex-1 overflow-y-auto lg:overflow-visible p-5 lg:p-0">
+                <div className="bg-white lg:border text-gray-800 border-gray-200 rounded-lg lg:p-5">
 
                 {/* Search in sidebar */}
                 {/* <div className="mb-6">
@@ -420,6 +444,7 @@ const ProductsPage: React.FC = () => {
                   ))}
                 </FilterSection>
 
+                </div>
               </div>
             </aside>
 
@@ -435,8 +460,16 @@ const ProductsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center sm:justify-end gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                  <button 
+                    onClick={() => setIsMobileFilterOpen(true)}
+                    className="flex lg:hidden flex-1 sm:flex-none items-center justify-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-[13px] font-medium text-gray-800 transition-all hover:bg-gray-50 shadow-sm"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Lọc
+                  </button>
+
                   <span className="text-[13px] text-gray-600 font-semibold whitespace-nowrap hidden sm:inline-block">Sắp xếp:</span>
-                  <div className="relative w-full sm:w-[200px]" ref={sortRef}>
+                  <div className="relative flex-1 sm:flex-none sm:w-[200px]" ref={sortRef}>
                     <div
                       className="w-full flex items-center justify-between border border-gray-200 text-[13px] font-medium rounded-xl px-4 py-2.5 bg-white cursor-pointer text-gray-800 transition-all hover:bg-gray-50 shadow-sm"
                       onClick={() => setSortOpen(!sortOpen)}
