@@ -3,7 +3,7 @@ import React from 'react';
 const ProductCardSkeleton: React.FC = () => {
   return (
     <div className="group block">
-      <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-gray-200 animate-pulse">
+      <div className="relative h-55 sm:h-65 xl:h-75 overflow-hidden rounded-xl bg-gray-200 animate-pulse">
       </div>
       <div className="mt-5 text-center flex flex-col items-center">
         <div className="h-2 w-16 mb-2 bg-gray-200 animate-pulse rounded"></div>

@@ -27,7 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   return (
     <Link to={`${basePath}/${slug}`} className="group block">
-      <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-white">
+      <div className="relative h-55 sm:h-65 xl:h-75 overflow-hidden rounded-xl bg-white">
         {tag && <Badge variant="gold" className="absolute top-4 left-4 z-10 shadow-lg">{tag}</Badge>}
         <img
           src={image}

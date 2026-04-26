@@ -226,6 +226,39 @@ const Header: React.FC = () => {
     { title: t('nav.internal'), href: ROUTES.DANG_NHAP, target: '_blank' }
   ];
 
+  const productCategoryIds = React.useMemo(
+    () => productCategories.map((cat: any) => String(cat.id || cat._id)),
+    [productCategories]
+  );
+
+  const toggleMobileRootAccordion = (key: string) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      const rootKeys = [ROUTES.DANH_SACH_SAN_PHAM, ROUTES.CONG_TRINH, ROUTES.THIET_KE_KIEN_TRUC];
+
+      rootKeys.forEach((rootKey) => next.delete(rootKey));
+      productCategoryIds.forEach((catId) => next.delete(catId));
+
+      if (!prev.has(key)) {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const toggleMobileProductCategoryAccordion = (catId: string) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+
+      productCategoryIds.forEach((id) => next.delete(id));
+
+      if (!prev.has(catId)) {
+        next.add(catId);
+      }
+      return next;
+    });
+  };
+
   const isDetailLikePage =
     location.pathname.startsWith('/san-pham/') ||
     location.pathname.startsWith('/checkout') ||
@@ -1180,15 +1213,7 @@ const Header: React.FC = () => {
                           <button
                             type="button"
                             className="p-2 -mr-1"
-                            onClick={() => {
-                              const key = link.href;
-                              setExpandedCategories(prev => {
-                                const next = new Set(prev);
-                                if (next.has(key)) next.delete(key);
-                                else next.add(key);
-                                return next;
-                              });
-                            }}
+                            onClick={() => toggleMobileRootAccordion(link.href)}
                           >
                             <DownOutlined
                               className={`text-[11px] text-gray-500 transition-transform duration-200 ${expandedCategories.has(link.href) ? 'rotate-180' : ''}`}
@@ -1236,12 +1261,7 @@ const Header: React.FC = () => {
                                   className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 !text-gray-900 hover:!text-showcase-primary hover:bg-gray-100 text-[14px] font-semibold transition-colors"
                                   onClick={() => {
                                     if (hasChildren) {
-                                      setExpandedCategories(prev => {
-                                        const next = new Set(prev);
-                                        if (next.has(catId)) next.delete(catId);
-                                        else next.add(catId);
-                                        return next;
-                                      });
+                                      toggleMobileProductCategoryAccordion(catId);
                                     } else {
                                       navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id || cat.slug}`);
                                       setIsMenuOpen(false);

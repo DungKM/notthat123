@@ -224,11 +224,11 @@ const ProductsPage: React.FC = () => {
       <SEO
         title="Sản phẩm nội thất gỗ cao cấp - Mua nội thất Hà Nội"
         description="Mua sản phẩm nội thất gỗ cao cấp tại Hà Nội: sofa, giường ngủ, tủ bếp, bàn ăn, kệ TV, tủ quần áo. Chất liệu gỗ óc chó, gỗ MDF. Giao lắp miễn phí. Nội Thất Hochi."
-        canonicalPath="/san-pham"
+        canonicalPath="/san-pham/danh-sach"
         keywords="mua nội thất, nội thất gỗ cao cấp, sofa nội thất hochi, giường ngủ, tủ bếp, bàn ăn, kệ TV, nội thất hà nội, gỗ óc chó, gỗ MDF, đặt đồ theo yêu cầu"
         breadcrumbs={[
           { name: 'Trang chủ', url: '/' },
-          { name: 'Sản phẩm', url: '/san-pham' },
+          { name: 'Sản phẩm', url: '/san-pham/danh-sach' },
         ]}
       />
 
@@ -248,7 +248,7 @@ const ProductsPage: React.FC = () => {
           <div className="mt-4 text-sm font-medium opacity-80 flex items-center justify-center gap-2">
             <Link to="/" className="!text-white hover:!text-gray-300 transition-colors">Trang chủ</Link>
             <span className="!text-white">/</span>
-            <Link to="/san-pham" className="!text-white hover:!text-gray-300 transition-colors">Sản phẩm</Link>
+            <Link to="/san-pham/danh-sach" className="!text-white hover:!text-gray-300 transition-colors">Sản phẩm</Link>
           </div>
         </Container>
       </section>
@@ -260,9 +260,9 @@ const ProductsPage: React.FC = () => {
 
             {/* Mobile Filter Overlay */}
             {isMobileFilterOpen && (
-              <div 
-                className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity" 
-                onClick={() => setIsMobileFilterOpen(false)} 
+              <div
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+                onClick={() => setIsMobileFilterOpen(false)}
               />
             )}
 
@@ -283,8 +283,8 @@ const ProductsPage: React.FC = () => {
               <div className="flex-1 overflow-y-auto lg:overflow-visible p-5 lg:p-0">
                 <div className="bg-white lg:border text-gray-800 border-gray-200 rounded-lg lg:p-5">
 
-                {/* Search in sidebar */}
-                {/* <div className="mb-6">
+                  {/* Search in sidebar */}
+                  {/* <div className="mb-6">
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                       <Search className="w-4 h-4 text-gray-400 group-focus-within:text-showcase-primary transition-colors" />
@@ -308,141 +308,141 @@ const ProductsPage: React.FC = () => {
                   </div>
                 </div> */}
 
-                <FilterSection title="DANH MỤC" defaultOpen={true}>
-                  <div className="max-h-[320px] overflow-y-auto pr-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 hover:[&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full transition-colors">
-                    <CheckboxItem
-                      label="Tất cả sản phẩm"
-                      checked={selectedCategories.length === 0}
-                      onChange={() => { setSelectedCategories([]); setCurrentPage(1); }}
-                    />
-                    {(apiCategories || []).map((cat: any) => (
-                      <React.Fragment key={cat.id || cat._id}>
-                        <CheckboxItem
-                          label={cat.name}
-                          count={cat.productCount}
-                          checked={selectedCategories.includes(cat.id || cat._id)}
-                          onChange={() => toggleCategory(cat.id || cat._id)}
+                  <FilterSection title="DANH MỤC" defaultOpen={true}>
+                    <div className="max-h-[320px]  overflow-y-auto pr-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 hover:[&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full transition-colors">
+                      <CheckboxItem
+                        label="TẤT CẢ SẢN PHẨM"
+                        checked={selectedCategories.length === 0}
+                        onChange={() => { setSelectedCategories([]); setCurrentPage(1); }}
+                      />
+                      {(apiCategories || []).map((cat: any) => (
+                        <React.Fragment key={cat.id || cat._id}>
+                          <CheckboxItem
+                            label={cat.name}
+                            count={cat.productCount}
+                            checked={selectedCategories.includes(cat.id || cat._id)}
+                            onChange={() => toggleCategory(cat.id || cat._id)}
+                          />
+                          {cat.children && cat.children.length > 0 && cat.children.map((child: any) => (
+                            <div key={child.id || child._id} className="ml-5 mt-1 border-l-[1.5px] pl-4 border-gray-100">
+                              <CheckboxItem
+                                label={child.name}
+                                count={child.productCount}
+                                checked={selectedCategories.includes(child.id || child._id)}
+                                onChange={() => toggleCategory(child.id || child._id)}
+                                isSub
+                              />
+                            </div>
+                          ))}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </FilterSection>
+
+                  {/* GIÁ Filter */}
+                  <FilterSection title="GIÁ (VNĐ)" defaultOpen={true}>
+                    <div className="pt-1 pb-2">
+                      {/* Input row */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <input
+                          type="text"
+                          value={priceRange[0].toLocaleString('vi-VN')}
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/\D/g, '');
+                            setPriceRange([valStr ? Number(valStr) : 0, priceRange[1]]);
+                          }}
+                          className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-white focus:outline-none focus:border-showcase-primary transition-all"
                         />
-                        {cat.children && cat.children.length > 0 && cat.children.map((child: any) => (
-                          <div key={child.id || child._id} className="ml-5 mt-1 border-l-[1.5px] pl-4 border-gray-100">
-                            <CheckboxItem
-                              label={child.name}
-                              count={child.productCount}
-                              checked={selectedCategories.includes(child.id || child._id)}
-                              onChange={() => toggleCategory(child.id || child._id)}
-                              isSub
-                            />
-                          </div>
-                        ))}
-                      </React.Fragment>
+                        <span className="text-gray-400 shrink-0 text-sm">-</span>
+                        <input
+                          type="text"
+                          value={priceRange[1].toLocaleString('vi-VN')}
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/\D/g, '');
+                            setPriceRange([priceRange[0], valStr ? Number(valStr) : 0]);
+                          }}
+                          onBlur={() => {
+                            if (priceRange[1] < priceRange[0]) {
+                              setPriceRange([priceRange[0], priceRange[0]]);
+                            }
+                          }}
+                          className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-white focus:outline-none focus:border-showcase-primary transition-all"
+                        />
+                      </div>
+
+                      {/* Dual range slider */}
+                      <div className="relative h-6 flex items-center">
+                        {/* Track background */}
+                        <div className="absolute w-full h-1 bg-gray-200 rounded-full" />
+                        {/* Active track */}
+                        <div
+                          className="absolute h-1 bg-showcase-primary rounded-full"
+                          style={{
+                            left: `${(priceRange[0] / MAX_PRICE) * 100}%`,
+                            right: `${100 - (priceRange[1] / MAX_PRICE) * 100}%`,
+                          }}
+                        />
+                        {/* Min slider - pointer-events:none on track, all on thumb only */}
+                        <input
+                          type="range"
+                          min={MIN_PRICE}
+                          max={MAX_PRICE}
+                          step={500_000}
+                          value={priceRange[0]}
+                          onChange={(e) => {
+                            const v = Math.min(Number(e.target.value), priceRange[1] - 500_000);
+                            setPriceRange([v, priceRange[1]]);
+                          }}
+                          className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-showcase-primary [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+                          style={{ zIndex: 10 }}
+                        />
+                        {/* Max slider */}
+                        <input
+                          type="range"
+                          min={MIN_PRICE}
+                          max={MAX_PRICE}
+                          step={500_000}
+                          value={priceRange[1]}
+                          onChange={(e) => {
+                            const v = Math.max(Number(e.target.value), priceRange[0] + 500_000);
+                            setPriceRange([priceRange[0], v]);
+                          }}
+                          className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-showcase-primary [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+                          style={{ zIndex: 10 }}
+                        />
+                      </div>
+
+                      {/* Min / Max labels */}
+                      <div className="flex justify-between mt-3 text-[11px] text-gray-400">
+                        <span>{MIN_PRICE.toLocaleString('vi-VN')}</span>
+                        <span>{MAX_PRICE.toLocaleString('vi-VN')}</span>
+                      </div>
+
+                      {/* Reset button */}
+                      {(priceRange[0] > MIN_PRICE || priceRange[1] < MAX_PRICE) && (
+                        <button
+                          type="button"
+                          onClick={() => setPriceRange([MIN_PRICE, MAX_PRICE])}
+                          className="mt-3 text-[12px] text-showcase-primary hover:underline"
+                        >
+                          Xóa lọc giá
+                        </button>
+                      )}
+                    </div>
+                  </FilterSection>
+
+
+
+                  <FilterSection title="CHẤT LIỆU" defaultOpen={true}>
+                    {MOCK_MATERIALS.map((mat) => (
+                      <CheckboxItem
+                        key={mat}
+                        label={mat}
+                        checked={selectedMaterials === mat}
+                        onChange={() => toggleRadio(mat, selectedMaterials, setSelectedMaterials)}
+                      />
                     ))}
-                  </div>
-                </FilterSection>
-
-                {/* GIÁ Filter */}
-                <FilterSection title="GIÁ (VNĐ)" defaultOpen={true}>
-                  <div className="pt-1 pb-2">
-                    {/* Input row */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <input
-                        type="text"
-                        value={priceRange[0].toLocaleString('vi-VN')}
-                        onChange={(e) => {
-                          const valStr = e.target.value.replace(/\D/g, '');
-                          setPriceRange([valStr ? Number(valStr) : 0, priceRange[1]]);
-                        }}
-                        className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-white focus:outline-none focus:border-showcase-primary transition-all"
-                      />
-                      <span className="text-gray-400 shrink-0 text-sm">-</span>
-                      <input
-                        type="text"
-                        value={priceRange[1].toLocaleString('vi-VN')}
-                        onChange={(e) => {
-                          const valStr = e.target.value.replace(/\D/g, '');
-                          setPriceRange([priceRange[0], valStr ? Number(valStr) : 0]);
-                        }}
-                        onBlur={() => {
-                          if (priceRange[1] < priceRange[0]) {
-                            setPriceRange([priceRange[0], priceRange[0]]);
-                          }
-                        }}
-                        className="w-full text-center text-[13px] border border-gray-200 rounded-md py-1.5 px-2 text-gray-700 bg-white focus:outline-none focus:border-showcase-primary transition-all"
-                      />
-                    </div>
-
-                    {/* Dual range slider */}
-                    <div className="relative h-6 flex items-center">
-                      {/* Track background */}
-                      <div className="absolute w-full h-1 bg-gray-200 rounded-full" />
-                      {/* Active track */}
-                      <div
-                        className="absolute h-1 bg-showcase-primary rounded-full"
-                        style={{
-                          left: `${(priceRange[0] / MAX_PRICE) * 100}%`,
-                          right: `${100 - (priceRange[1] / MAX_PRICE) * 100}%`,
-                        }}
-                      />
-                      {/* Min slider - pointer-events:none on track, all on thumb only */}
-                      <input
-                        type="range"
-                        min={MIN_PRICE}
-                        max={MAX_PRICE}
-                        step={500_000}
-                        value={priceRange[0]}
-                        onChange={(e) => {
-                          const v = Math.min(Number(e.target.value), priceRange[1] - 500_000);
-                          setPriceRange([v, priceRange[1]]);
-                        }}
-                        className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-showcase-primary [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
-                        style={{ zIndex: 10 }}
-                      />
-                      {/* Max slider */}
-                      <input
-                        type="range"
-                        min={MIN_PRICE}
-                        max={MAX_PRICE}
-                        step={500_000}
-                        value={priceRange[1]}
-                        onChange={(e) => {
-                          const v = Math.max(Number(e.target.value), priceRange[0] + 500_000);
-                          setPriceRange([priceRange[0], v]);
-                        }}
-                        className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-showcase-primary [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
-                        style={{ zIndex: 10 }}
-                      />
-                    </div>
-
-                    {/* Min / Max labels */}
-                    <div className="flex justify-between mt-3 text-[11px] text-gray-400">
-                      <span>{MIN_PRICE.toLocaleString('vi-VN')}</span>
-                      <span>{MAX_PRICE.toLocaleString('vi-VN')}</span>
-                    </div>
-
-                    {/* Reset button */}
-                    {(priceRange[0] > MIN_PRICE || priceRange[1] < MAX_PRICE) && (
-                      <button
-                        type="button"
-                        onClick={() => setPriceRange([MIN_PRICE, MAX_PRICE])}
-                        className="mt-3 text-[12px] text-showcase-primary hover:underline"
-                      >
-                        Xóa lọc giá
-                      </button>
-                    )}
-                  </div>
-                </FilterSection>
-
-
-
-                <FilterSection title="CHẤT LIỆU" defaultOpen={true}>
-                  {MOCK_MATERIALS.map((mat) => (
-                    <CheckboxItem
-                      key={mat}
-                      label={mat}
-                      checked={selectedMaterials === mat}
-                      onChange={() => toggleRadio(mat, selectedMaterials, setSelectedMaterials)}
-                    />
-                  ))}
-                </FilterSection>
+                  </FilterSection>
 
                 </div>
               </div>
@@ -460,7 +460,7 @@ const ProductsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center sm:justify-end gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-                  <button 
+                  <button
                     onClick={() => setIsMobileFilterOpen(true)}
                     className="flex lg:hidden flex-1 sm:flex-none items-center justify-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-[13px] font-medium text-gray-800 transition-all hover:bg-gray-50 shadow-sm"
                   >

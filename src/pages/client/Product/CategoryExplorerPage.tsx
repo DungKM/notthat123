@@ -174,7 +174,7 @@ const CategoryExplorerPage = () => {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => navigate(ROUTES.DANH_SACH_SAN_PHAM)}
-                    className="w-full text-left flex justify-between items-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-50"
+                    className=" uppercase w-full text-left flex justify-between items-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-50"
                   >
                     Tất cả
                   </button>

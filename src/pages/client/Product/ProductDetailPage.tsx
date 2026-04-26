@@ -242,7 +242,7 @@ const ProductDetailPage: React.FC = () => {
               <div className="text-[13px] !text-gray-500 mb-6 font-medium">
                 <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
                 <span className="mx-2">/</span>
-                <Link to="/san-pham" className="hover:text-showcase-primary !text-gray-500">Sản phẩm</Link>
+                <Link to="/san-pham/danh-sach" className="hover:text-showcase-primary !text-gray-500">Sản phẩm</Link>
                 <span className="mx-2">/</span>
                 <span className="text-gray-900">{product.title}</span>
               </div>

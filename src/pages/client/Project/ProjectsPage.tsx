@@ -361,7 +361,7 @@ const ProjectsPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCategorySelect('')}
-                        className={`w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
+                        className={`uppercase w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
                           ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                           : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                           }`}
