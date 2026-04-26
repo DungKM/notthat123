@@ -274,7 +274,7 @@ const ArchitectureDetailPage: React.FC = () => {
                     const pCover = p.images && p.images.length > 0 ? p.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
                     return (
                       <ProductCard
-                        key={p._id || p.id}
+                        key={p.id || p._id}
                         basePath="/thiet-ke-kien-truc"
                         slug={`${p.slug || String(p._id || p.id)}?id=${p._id || p.id}`}
                         title={p.name}

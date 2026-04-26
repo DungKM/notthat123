@@ -276,7 +276,7 @@ const ProjectDetailPage: React.FC = () => {
                     return (
                       <ProductCard
                         key={p._id || p.id}
-                        basePath="/cong-trinh"
+                        basePath="/thiet-ke-noi-that"
                         slug={`${p.slug || String(p._id || p.id)}?id=${p._id || p.id}`}
                         title={p.name}
                         category={pCatName}
