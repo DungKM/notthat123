@@ -273,7 +273,7 @@ const InteriorCategorySection: React.FC = () => {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
+          className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-auto cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
         >
           {chunks.map((chunk, index) => (
             <div key={index} className="w-full shrink-0 snap-start px-1">
