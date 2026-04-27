@@ -60,7 +60,7 @@ const PublicHome: React.FC = () => {
       <Features />
       <Feedback />
       {/* <Testimonials /> */}
-      <CTAImageSection />
+      {/* <CTAImageSection /> */}
       <CTA />
     </div>
   );

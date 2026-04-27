@@ -44,6 +44,8 @@ const Header: React.FC = () => {
   const [minQtyWarnings, setMinQtyWarnings] = useState<Record<string, boolean>>({});
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileSearchQuery, setMobileSearchQuery] = useState('');
+  const [mobileSearchResults, setMobileSearchResults] = useState<{ products: any[]; constructions: any[] }>({ products: [], constructions: [] });
+  const [isMobileSearching, setIsMobileSearching] = useState(false);
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -133,6 +135,40 @@ const Header: React.FC = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // ─── Debounced Search (Mobile Overlay) ───
+  useEffect(() => {
+    if (!mobileSearchOpen || !mobileSearchQuery.trim()) {
+      setMobileSearchResults({ products: [], constructions: [] });
+      setIsMobileSearching(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsMobileSearching(true);
+      try {
+        const res = await searchRequest('GET', '', null, { keyword: mobileSearchQuery.trim(), limit: 4 });
+        const data = res?.data || {};
+        setMobileSearchResults({
+          products: Array.isArray(data.products) ? data.products : [],
+          constructions: Array.isArray(data.constructions) ? data.constructions : [],
+        });
+      } catch {
+        setMobileSearchResults({ products: [], constructions: [] });
+      } finally {
+        setIsMobileSearching(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [mobileSearchOpen, mobileSearchQuery, searchRequest]);
+
+  const mobileSuggestionProducts = mobileSearchResults.products.slice(0, 2);
+  const mobileSuggestionConstructions = mobileSearchResults.constructions.slice(0, 2);
+  const mobileSuggestions = [
+    ...mobileSuggestionProducts.map((item: any) => ({ ...item, __type: 'product' as const })),
+    ...mobileSuggestionConstructions.map((item: any) => ({ ...item, __type: 'construction' as const })),
+  ].slice(0, 4);
 
   // Close search dropdown on outside click
   useEffect(() => {
@@ -837,6 +873,46 @@ const Header: React.FC = () => {
                     <CloseOutlined className="text-lg" />
                   </button>
                 </div>
+                {mobileSearchQuery.trim() && (
+                  <div className="bg-white border-t border-gray-100 max-h-[260px] overflow-y-auto">
+                    {isMobileSearching && (
+                      <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
+                        <LoadingOutlined />
+                        <span>Đang tìm kiếm...</span>
+                      </div>
+                    )}
+
+                    {!isMobileSearching && mobileSuggestions.map((item: any) => (
+                      <button
+                        key={`${item.__type}-${item.id || item._id || item.slug}`}
+                        type="button"
+                        onClick={() => {
+                          setMobileSearchOpen(false);
+                          setMobileSearchQuery('');
+                          navigate(item.__type === 'product' ? `/san-pham/${item.slug}` : `/thiet-ke-noi-that/${item.slug}`);
+                        }}
+                        className="w-full px-4 py-3 flex items-center gap-3 border-b border-gray-50 last:border-b-0 text-left hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0">
+                          {item.image
+                            ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            : <img src="/assets/images/image-logo.png" className="w-full h-full object-contain p-1" alt="" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 truncate">{item.name}</p>
+                          <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                            {item.__type === 'product' ? 'Sản phẩm' : 'Công trình'}
+                          </p>
+                        </div>
+                        <ArrowRightOutlined className="text-[11px] text-gray-300" />
+                      </button>
+                    ))}
+
+                    {!isMobileSearching && mobileSuggestions.length === 0 && (
+                      <div className="px-4 py-3 text-sm text-gray-500">Không có gợi ý phù hợp</div>
+                    )}
+                  </div>
+                )}
                 {/* Nút tìm */}
                 {mobileSearchQuery.trim() && (
                   <div className="bg-white border-t border-gray-100">
@@ -1184,9 +1260,9 @@ const Header: React.FC = () => {
               className="fixed top-0 right-0 h-full w-[70%] max-w-sm bg-white z-[100] flex flex-col xl:hidden shadow-2xl"
             >
               <div className="flex items-center justify-between p-5 border-b">
-                <div className="w-[90px]">
+                <Link to="/" className="w-[90px] block" onClick={() => setIsMenuOpen(false)}>
                   <img src="/assets/images/image-logo.png" alt="Logo" className="w-full h-auto" />
-                </div>
+                </Link>
                 <button
                   onClick={() => setIsMenuOpen(false)}
                   className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"

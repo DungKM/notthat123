@@ -5,6 +5,7 @@ import Container from '@/src/features/showcase/components/ui/Container';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import ProductCardSkeleton from '@/src/features/showcase/components/ui/ProductCardSkeleton';
 import SEO from '@/src/components/common/SEO';
+import PaginationControls from '@/src/components/common/PaginationControls';
 import { useCategoryService, useProductService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
 import { Search, X, Filter, ChevronDown, ChevronUp } from 'lucide-react';
@@ -55,6 +56,17 @@ const ProductsPage: React.FC = () => {
   const listRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage === currentPage) return;
+    setCurrentPage(nextPage);
+
+    if (listRef.current) {
+      const yOffset = -80;
+      const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     if (isMobileFilterOpen) {
@@ -529,37 +541,13 @@ const ProductsPage: React.FC = () => {
 
               {/* Pagination Placeholder */}
               {meta.totalPages > 1 && (
-                <div className="mt-16 flex flex-wrap justify-center items-center gap-2">
-                  {(() => {
-                    const { totalPages } = meta;
-                    let pages: (number | string)[] = [];
-                    if (totalPages <= 7) {
-                      pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-                    } else if (currentPage <= 3) {
-                      pages = [1, 2, 3, 4, '...', totalPages - 1, totalPages];
-                    } else if (currentPage >= totalPages - 2) {
-                      pages = [1, 2, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-                    } else {
-                      pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
-                    }
-
-                    return pages.map((p, index) => (
-                      <button
-                        key={`${p}-${index}`}
-                        onClick={() => typeof p === 'number' && setCurrentPage(p)}
-                        disabled={typeof p === 'string'}
-                        className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
-                          ? 'bg-showcase-primary text-white border-showcase-primary'
-                          : typeof p === 'string'
-                            ? 'bg-transparent border-transparent text-gray-500 cursor-default'
-                            : 'bg-white text-gray-500 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
-                          }`}
-                      >
-                        {p}
-                      </button>
-                    ));
-                  })()}
-                </div>
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={meta.totalPages}
+                  onPageChange={handlePageChange}
+                  containerClassName="mt-16 flex flex-wrap justify-center items-center gap-2"
+                  inactiveButtonClassName="bg-white text-gray-500 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary"
+                />
               )}
             </div>
           </div>

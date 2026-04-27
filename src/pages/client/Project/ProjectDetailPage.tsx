@@ -18,6 +18,7 @@ const ProjectDetailPage: React.FC = () => {
 
   const [project, setProject] = useState<any>(null);
   const [relatedProjects, setRelatedProjects] = useState<any[]>([]);
+  const [visibleRelatedCount, setVisibleRelatedCount] = useState(3);
   const [error, setError] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -37,7 +38,7 @@ const ProjectDetailPage: React.FC = () => {
           // Fetch related projects by category
           if (res.data.categoryId?._id || res.data.categoryId?.id) {
             const catId = res.data.categoryId._id || res.data.categoryId.id;
-            const relatedRes = await request('GET', '', null, { categoryId: catId, limit: 3 });
+            const relatedRes = await request('GET', '', null, { categoryId: catId, limit: 100 });
             if (relatedRes?.data) {
               setRelatedProjects(relatedRes.data.filter((p: any) => (p._id || p.id) !== (res.data._id || res.data.id)));
             }
@@ -53,6 +54,10 @@ const ProjectDetailPage: React.FC = () => {
 
     fetchDetail();
   }, [slug, request]);
+
+  useEffect(() => {
+    setVisibleRelatedCount(3);
+  }, [relatedProjects]);
 
   if (loading && !project) {
     return (
@@ -270,7 +275,7 @@ const ProjectDetailPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {relatedProjects.map((p) => {
+                  {relatedProjects.slice(0, visibleRelatedCount).map((p) => {
                     const pCatName = p.categoryId?.name || 'Thiết kế nội thất';
                     const pCover = p.images && p.images.length > 0 ? p.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
                     return (
@@ -287,6 +292,18 @@ const ProjectDetailPage: React.FC = () => {
                     );
                   })}
                 </div>
+
+                {visibleRelatedCount < relatedProjects.length && (
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleRelatedCount((prev) => prev + 3)}
+                      className="inline-flex items-center justify-center rounded-xl border border-showcase-primary px-6 py-2.5 text-sm font-bold text-showcase-primary transition-colors hover:bg-showcase-primary hover:text-white"
+                    >
+                      Xem thêm
+                    </button>
+                  </div>
+                )}
               </section>
             )}
           </div>

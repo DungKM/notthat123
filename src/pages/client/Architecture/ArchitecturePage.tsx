@@ -1,11 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import Badge from '@/src/features/showcase/components/ui/Badge';
 import SEO from '@/src/components/common/SEO';
+import PaginationControls from '@/src/components/common/PaginationControls';
 import { Search, X, Filter, ChevronDown, ChevronRight } from 'lucide-react';
 import { useArchitectureService, useArchitectureCategoryService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
+
+const SIBLING_ITEMS_PER_PAGE_MOBILE = 2;
+const SIBLING_ITEMS_PER_PAGE_DESKTOP = 3;
+const SIBLING_AUTO_SLIDE_INTERVAL_MS = 4000;
 
 // ====================== Architecture Card ======================
 
@@ -60,8 +65,14 @@ const ArchitecturePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [isMobileView, setIsMobileView] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+  const [siblingPage, setSiblingPage] = useState(0);
+  const [siblingAutoSlideDisabled, setSiblingAutoSlideDisabled] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const contentStartRef = useRef<HTMLDivElement>(null);
+  const siblingScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToTargetSection = () => {
     const yOffset = -80;
@@ -69,6 +80,12 @@ const ArchitecturePage: React.FC = () => {
     if (!target) return;
     const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
     window.scrollTo({ top: y, behavior: 'smooth' });
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage === currentPage) return;
+    setCurrentPage(nextPage);
+    scrollToTargetSection();
   };
 
   const buildExpandedSetForSelection = (catId: string) => {
@@ -190,6 +207,12 @@ const ArchitecturePage: React.FC = () => {
   }, [categoryParam, location.hash]);
 
   useEffect(() => {
+    const onResize = () => setIsMobileView(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
     getCategories({ limit: 50 }).then(res => {
       setCategories(res || []);
     }).catch(console.error);
@@ -257,6 +280,91 @@ const ArchitecturePage: React.FC = () => {
     }, 100);
   };
 
+  const currentCategory = categories.find((cat: any) =>
+    cat._id === selectedCategoryId || cat.id === selectedCategoryId || cat.slug === selectedCategoryId
+  );
+  const isParentCategory = currentCategory && currentCategory.children && currentCategory.children.length > 0;
+  const siblingCategoryParent = (() => {
+    if (!categories.length) return null;
+
+    if (currentCategory?.children?.length > 0) {
+      return currentCategory;
+    }
+
+    const matchedParent = categories.find((cat: any) =>
+      cat.children?.some((c: any) => c.id === selectedCategoryId || c._id === selectedCategoryId || c.slug === selectedCategoryId)
+    );
+    if (matchedParent) return matchedParent;
+
+    return isMobileView
+      ? categories.find((cat: any) => cat.children && cat.children.length > 0) || null
+      : null;
+  })();
+
+  const siblingChildren = siblingCategoryParent?.children || [];
+  const siblingItemsPerPage = isMobileView
+    ? SIBLING_ITEMS_PER_PAGE_MOBILE
+    : SIBLING_ITEMS_PER_PAGE_DESKTOP;
+
+  const siblingChunks = useMemo(() => {
+    const chunks: any[][] = [];
+    for (let i = 0; i < siblingChildren.length; i += siblingItemsPerPage) {
+      chunks.push(siblingChildren.slice(i, i + siblingItemsPerPage));
+    }
+    return chunks;
+  }, [siblingChildren, siblingItemsPerPage]);
+  const siblingTotalPages = siblingChunks.length;
+
+  const handleSiblingScroll = () => {
+    if (!siblingScrollRef.current) return;
+    const width = siblingScrollRef.current.clientWidth;
+    if (width <= 0) return;
+    const newPage = Math.round(siblingScrollRef.current.scrollLeft / width);
+    if (newPage !== siblingPage) {
+      setSiblingPage(newPage);
+    }
+  };
+
+  const handleSiblingDotClick = (pageIndex: number) => {
+    setSiblingAutoSlideDisabled(true);
+    const targetPage = Math.max(0, Math.min(pageIndex, siblingTotalPages - 1));
+    setSiblingPage(targetPage);
+
+    if (siblingScrollRef.current) {
+      siblingScrollRef.current.scrollTo({
+        left: targetPage * siblingScrollRef.current.clientWidth,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  useEffect(() => {
+    setSiblingPage(0);
+    setSiblingAutoSlideDisabled(false);
+
+    if (siblingScrollRef.current) {
+      siblingScrollRef.current.scrollTo({ left: 0, behavior: 'auto' });
+    }
+  }, [siblingCategoryParent?._id, siblingCategoryParent?.id, siblingChildren.length, siblingItemsPerPage]);
+
+  useEffect(() => {
+    if (siblingTotalPages <= 1 || siblingAutoSlideDisabled) return;
+
+    const timer = window.setTimeout(() => {
+      const nextPage = (siblingPage + 1) % siblingTotalPages;
+      setSiblingPage(nextPage);
+
+      if (siblingScrollRef.current) {
+        siblingScrollRef.current.scrollTo({
+          left: nextPage * siblingScrollRef.current.clientWidth,
+          behavior: 'smooth',
+        });
+      }
+    }, SIBLING_AUTO_SLIDE_INTERVAL_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [siblingPage, siblingTotalPages, siblingAutoSlideDisabled]);
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <SEO
@@ -288,6 +396,80 @@ const ArchitecturePage: React.FC = () => {
       </section>
 
       <div ref={contentStartRef}>
+        {(isMobileView || !isParentCategory) && siblingCategoryParent?.children?.length > 0 && (
+          <section className="pt-10 pb-0 relative z-10">
+            <Container>
+              <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
+                  Danh mục {siblingCategoryParent.name}
+                </p>
+                <div className="relative">
+                  <div
+                    ref={siblingScrollRef}
+                    onScroll={handleSiblingScroll}
+                    onPointerDown={() => setSiblingAutoSlideDisabled(true)}
+                    className="flex overflow-x-auto hide-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory -mx-1 px-1 pb-2"
+                  >
+                    {siblingChunks.map((chunk, chunkIndex) => (
+                      <div key={chunkIndex} className="w-full shrink-0 snap-start px-1">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {chunk.map((sib: any) => {
+                            const sibId = sib.id || sib._id;
+                            const isActive = sibId === selectedCategoryId || sib.slug === selectedCategoryId;
+                            const itemImage = sib.image || sib.representativeImage;
+
+                            return (
+                              <button
+                                key={sibId}
+                                onClick={() => {
+                                  setSiblingAutoSlideDisabled(true);
+                                  handleCategorySelect(sibId);
+                                }}
+                                className={`bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left cursor-pointer border transition-all ${isActive
+                                  ? 'bg-white border-showcase-primary ring-1 ring-showcase-primary shadow-sm'
+                                  : 'border-transparent hover:border-gray-200 hover:shadow-md hover:bg-white'
+                                  }`}
+                              >
+                                {itemImage && (
+                                  <div className="w-12 h-12 shrink-0 overflow-hidden rounded-lg bg-gray-100 mix-blend-multiply border border-black/5">
+                                    <img src={itemImage} alt={sib.name} className="w-full h-full object-cover" loading="lazy" />
+                                  </div>
+                                )}
+                                <div className="min-w-0 flex-1">
+                                  <p className={`text-[12px] md:text-[13px] font-semibold leading-tight line-clamp-2 ${isActive ? 'text-showcase-primary' : 'text-gray-800'}`}>
+                                    {sib.name}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {siblingTotalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-5">
+                      {Array.from({ length: siblingTotalPages }).map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleSiblingDotClick(i)}
+                          className={`rounded-full transition-all duration-200 ${i === siblingPage
+                            ? 'w-6 h-3 bg-showcase-primary'
+                            : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                            }`}
+                          aria-label={`Trang ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Container>
+          </section>
+        )}
+
         {/* Filter + Grid Layout */}
         <section className="py-16 lg:py-24">
           <Container>
@@ -429,11 +611,6 @@ const ArchitecturePage: React.FC = () => {
               {/* Right Content */}
               <div ref={listRef} id="danh-sach">
                 {(() => {
-                  const currentCategory = categories.find((cat: any) =>
-                    cat._id === selectedCategoryId || cat.id === selectedCategoryId
-                  );
-                  const isParentCategory = currentCategory && currentCategory.children && currentCategory.children.length > 0;
-
                   return (
                     <>
                       <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
@@ -562,37 +739,11 @@ const ArchitecturePage: React.FC = () => {
 
                       {/* Pagination */}
                       {!(currentCategory && currentCategory.children && currentCategory.children.length > 0) && meta.totalPages > 1 && (
-                        <div className="mt-24 flex flex-wrap justify-center items-center gap-2">
-                          {(() => {
-                            const { totalPages } = meta;
-                            let pages: (number | string)[] = [];
-                            if (totalPages <= 7) {
-                              pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-                            } else if (currentPage <= 3) {
-                              pages = [1, 2, 3, 4, '...', totalPages - 1, totalPages];
-                            } else if (currentPage >= totalPages - 2) {
-                              pages = [1, 2, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-                            } else {
-                              pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
-                            }
-
-                            return pages.map((p, index) => (
-                              <button
-                                key={`${p}-${index}`}
-                                onClick={() => typeof p === 'number' && setCurrentPage(p)}
-                                disabled={typeof p === 'string'}
-                                className={`w-10 h-10 flex items-center justify-center rounded-md border font-medium transition-all ${p === currentPage
-                                  ? 'bg-showcase-primary text-white border-showcase-primary'
-                                  : typeof p === 'string'
-                                    ? 'bg-transparent border-transparent text-gray-500 cursor-default'
-                                    : 'bg-white text-gray-400 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary'
-                                  }`}
-                              >
-                                {p}
-                              </button>
-                            ));
-                          })()}
-                        </div>
+                        <PaginationControls
+                          currentPage={currentPage}
+                          totalPages={meta.totalPages}
+                          onPageChange={handlePageChange}
+                        />
                       )}
                     </>
                   );

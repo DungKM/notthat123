@@ -6,6 +6,7 @@ import { ROUTES } from '@/src/routes/index';
 const DESKTOP_ITEMS_PER_PAGE = 15; // 5 cột × 3 hàng
 const MOBILE_ITEMS_PER_PAGE = 8; // 2 cột × 4 hàng
 const MOBILE_BREAKPOINT = 639;
+const AUTO_SLIDE_INTERVAL_MS = 4000;
 
 interface SubCategory {
   _id: string;
@@ -22,6 +23,7 @@ const InteriorCategorySection: React.FC = () => {
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [autoSlideDisabled, setAutoSlideDisabled] = useState(false);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
   );
@@ -123,6 +125,7 @@ const InteriorCategorySection: React.FC = () => {
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    setAutoSlideDisabled(true);
     if (isCoarsePointer || !scrollRef.current) return;
     scrollRef.current.setPointerCapture(e.pointerId);
 
@@ -193,6 +196,7 @@ const InteriorCategorySection: React.FC = () => {
   };
 
   const handleDotClick = (i: number) => {
+    setAutoSlideDisabled(true);
     const targetPage = Math.max(0, Math.min(i, totalPages - 1));
     setPage(targetPage);
     if (scrollRef.current) {
@@ -231,6 +235,24 @@ const InteriorCategorySection: React.FC = () => {
       }
     }
   }, [page, totalPages]);
+
+  useEffect(() => {
+    if (totalPages <= 1 || autoSlideDisabled) return;
+
+    const timer = window.setTimeout(() => {
+      const nextPage = (page + 1) % totalPages;
+      setPage(nextPage);
+
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({
+          left: nextPage * scrollRef.current.clientWidth,
+          behavior: 'smooth',
+        });
+      }
+    }, AUTO_SLIDE_INTERVAL_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [page, totalPages, autoSlideDisabled]);
 
   useEffect(() => {
     return () => {

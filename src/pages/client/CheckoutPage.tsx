@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
 import { useCart } from '@/src/features/showcase/context/CartContext';
@@ -26,6 +26,7 @@ const CheckoutPage: React.FC = () => {
   const { cartItems, totalAmount, updateQuantity, removeFromCart, clearCart } = useCart();
   const navigate = useNavigate();
   const { request: requestSetting } = useSettingService();
+  const orderSummaryRef = useRef<HTMLDivElement>(null);
 
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -137,7 +138,7 @@ const CheckoutPage: React.FC = () => {
         paymentMethod: customer.paymentMethod
       });
 
-      toast.success('Tạo đơn hàng thành công! Cảm ơn bạn đã tin tưởng Nội Thất Hochi.');
+      toast.success('Hệ thống đã nhận đơn hàng của bạn!');
       clearCart();
       navigate('/san-pham/danh-sach');
     } catch (err: any) {
@@ -323,7 +324,10 @@ const CheckoutPage: React.FC = () => {
                           type="radio"
                           name="paymentMethod"
                           checked={customer.paymentMethod === method.name}
-                          onChange={() => setCustomer({ ...customer, paymentMethod: method.name })}
+                          onChange={() => {
+                            setCustomer({ ...customer, paymentMethod: method.name });
+                            orderSummaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
                           className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
                         />
                         <span className="text-[13px] font-semibold text-teal-950">{method.name}</span>
@@ -345,7 +349,7 @@ const CheckoutPage: React.FC = () => {
             </div>
 
             {/* Right Column - Summary */}
-            <div className="h-fit">
+            <div className="h-fit" ref={orderSummaryRef}>
               <div className="sticky top-32 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                 <div className="flex items-center gap-3 bg-teal-950 px-6 py-5 text-white">
                   <ShoppingOutlined className="text-xl" />

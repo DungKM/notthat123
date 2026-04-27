@@ -85,6 +85,18 @@ const getPhoneError = (value: string): string => {
   return '';
 };
 
+const formatDeliveryTime = (deliveryTime?: string): string => {
+  if (!deliveryTime) return '-';
+
+  const normalized = deliveryTime.toLowerCase();
+  const deliveryTimeMap: Record<string, string> = {
+    business_hours: 'Giờ hành chính',
+    outside_business_hours: 'Ngoài giờ hành chính',
+  };
+
+  return deliveryTimeMap[normalized] || deliveryTime;
+};
+
 const OrderLookupPage: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -313,7 +325,7 @@ const OrderLookupPage: React.FC = () => {
                             </div>
                             <div>
                               <p className="text-gray-400">Khung giờ giao</p>
-                              <p className="font-semibold text-gray-800">{orderDetail.deliveryTime || '-'}</p>
+                              <p className="font-semibold text-gray-800">{formatDeliveryTime(orderDetail.deliveryTime)}</p>
                             </div>
                             <div>
                               <p className="text-gray-400">Thanh toán</p>
