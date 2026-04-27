@@ -376,6 +376,10 @@ const ProductManagementPage: React.FC = () => {
             creatorButtonText: 'Thêm kích thước',
             icon: <PlusOutlined />,
           }}
+          deleteIconProps={{
+            tooltipText: 'Xóa',
+            
+          }}
           copyIconProps={false}
           itemRender={({ listDom, action }, { record }) => {
             return (
