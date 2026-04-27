@@ -69,6 +69,7 @@ const ProductDetailPage: React.FC = () => {
   const [quantity, setQuantity] = React.useState<number | string>(1);
   const [stockWarning, setStockWarning] = React.useState<string | null>(null);
   const [activeImgIndex, setActiveImgIndex] = React.useState(0);
+  const [selectedSize, setSelectedSize] = React.useState<string>('');
 
   const [isInterestModalOpen, setIsInterestModalOpen] = React.useState(false);
 
@@ -93,6 +94,9 @@ const ProductDetailPage: React.FC = () => {
     if (apiProduct) {
       setIsLiked(Boolean(apiProduct.isLiked));
       setLikeCount(Number(apiProduct.likeCount || 0));
+      if (apiProduct.size && apiProduct.size.length > 0 && !selectedSize) {
+        setSelectedSize(apiProduct.size[0]);
+      }
     }
   }, [apiProduct]);
 
@@ -162,6 +166,7 @@ const ProductDetailPage: React.FC = () => {
     productCode: apiProduct.productCode || 'Đang cập nhật',
     description: apiProduct.description || 'Chi tiết sản phẩm nội thất cao cấp với thiết kế hiện đại, chất liệu bền bỉ và đẹp mắt. Tôn vinh Không gian sống đẳng cấp.',
     stockQuantity: apiProduct.stockQuantity || 0,
+    sizes: apiProduct.size || [],
     images: apiProduct.images && apiProduct.images.length > 0
       ? apiProduct.images.map((img: any) => img.url).filter(Boolean)
       : [
@@ -187,6 +192,7 @@ const ProductDetailPage: React.FC = () => {
 
     addToCart({
       id: product.id,
+      productId: product.id,
       slug: product.slug,
       title: product.title,
       price: product.price,
@@ -194,6 +200,7 @@ const ProductDetailPage: React.FC = () => {
       quantity: Number(quantity) || 1,
       subtotal: product.price * (Number(quantity) || 1),
       stockQuantity: product.stockQuantity,
+      size: selectedSize || undefined,
     });
     // Trigger cart drawer open
     // setIsCartOpen(true);
@@ -355,6 +362,28 @@ const ProductDetailPage: React.FC = () => {
                           </button>
                         </div>
                       </div>
+
+                      {/* Sizes */}
+                      {product.sizes && product.sizes.length > 0 && (
+                        <div className="mb-6">
+                          <h3 className="text-[14px] font-bold text-gray-800 mb-3">Kích thước (cm):</h3>
+                          <div className="flex flex-wrap gap-2.5">
+                            {product.sizes.map((s: string, idx: number) => (
+                              <button
+                                key={idx}
+                                onClick={() => setSelectedSize(s)}
+                                className={`px-4 py-2 border rounded-md transition-all text-[13px] font-semibold !cursor-pointer ${
+                                  selectedSize === s
+                                    ? 'border-[#cca32e] text-[#cca32e] bg-[#cca32e]/5 shadow-sm'
+                                    : 'border-gray-200 text-gray-700 bg-white hover:border-[#cca32e] hover:text-[#cca32e]'
+                                }`}
+                              >
+                                {s}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Stock Status */}
                       <div className="mb-6 flex items-center gap-2 text-[14px] font-medium">

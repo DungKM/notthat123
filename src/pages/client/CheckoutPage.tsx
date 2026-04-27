@@ -384,6 +384,9 @@ const CheckoutPage: React.FC = () => {
 
                             <div className="flex-1 flex flex-col">
                               <h4 className="text-[15px] font-medium !text-gray-900 line-clamp-2 leading-snug">{item.title}</h4>
+                              {item.size && (
+                                <p className="text-[13px] text-gray-500 mt-1">Kích thước: {item.size}</p>
+                              )}
 
                               <div className="mt-3">
                                 <div className={`flex shrink-0 items-center rounded-full overflow-hidden h-9 w-[100px] bg-white border ${item.stockQuantity !== undefined && item.quantity >= item.stockQuantity ? 'border-red-400' : 'border-gray-200'}`}>

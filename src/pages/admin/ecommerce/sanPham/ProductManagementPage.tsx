@@ -9,6 +9,7 @@ import {
   ProFormTextArea,
   ProFormSelect,
   ProFormUploadButton,
+  ProFormList,
   ProTable,
 } from '@ant-design/pro-components';
 import { useApi } from '@/src/api';
@@ -33,6 +34,7 @@ interface ProductItem {
   warranty?: string;
   style?: string;
   material?: string;
+  size?: string[];
   createdAt?: string;
   categoryId?: {
     id: string;
@@ -365,6 +367,33 @@ const ProductManagementPage: React.FC = () => {
         label="Chất liệu"
         placeholder="VD: Gỗ Sồi, Gỗ Óc chó"
       />
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Kích thước sản phẩm</label>
+        <ProFormList
+          name="sizeList"
+          creatorButtonProps={{
+            position: 'bottom',
+            creatorButtonText: 'Thêm kích thước',
+            icon: <PlusOutlined />,
+          }}
+          copyIconProps={false}
+          itemRender={({ listDom, action }, { record }) => {
+            return (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>{listDom}</div>
+                <div style={{ marginTop: 6 }}>{action}</div>
+              </div>
+            );
+          }}
+        >
+          <ProFormText
+            name="val"
+            placeholder="Nhập kích thước (VD: 1800x900)"
+            rules={[{ required: true, message: 'Nhập kích thước hoặc xóa dòng này' }]}
+            formItemProps={{ style: { marginBottom: 8 } }}
+          />
+        </ProFormList>
+      </div>
       <ProFormTextArea
         name="description"
         label="Mô tả"
@@ -476,7 +505,7 @@ const ProductManagementPage: React.FC = () => {
           destroyOnClose: true,
           onCancel: () => setCreateOpen(false),
         }}
-        onFinish={async (values) => {
+        onFinish={async (values: any) => {
           const formData = new FormData();
           formData.append('name', values.name);
           formData.append('categoryId', values.categoryId);
@@ -487,6 +516,11 @@ const ProductManagementPage: React.FC = () => {
           if (values.style) formData.append('style', values.style);
           if (values.material) formData.append('material', values.material);
           if (values.description) formData.append('description', values.description);
+          if (values.sizeList && values.sizeList.length > 0) {
+            values.sizeList.forEach((s: any) => {
+              if (s && s.val) formData.append('size[]', s.val);
+            });
+          }
 
           if (imageFiles.length > 0) {
             for (const fileItem of imageFiles.slice(0, 4)) {
@@ -525,8 +559,9 @@ const ProductManagementPage: React.FC = () => {
         initialValues={{
           ...editRecord,
           categoryId: typeof editRecord?.categoryId === 'object' ? editRecord.categoryId?.id : editRecord?.categoryId,
+          sizeList: Array.isArray(editRecord?.size) ? editRecord.size.map(s => ({ val: s })) : [],
         }}
-        onFinish={async (values) => {
+        onFinish={async (values: any) => {
           if (!editRecord) return false;
           const formData = new FormData();
           formData.append('name', values.name);
@@ -538,6 +573,11 @@ const ProductManagementPage: React.FC = () => {
           if (values.style) formData.append('style', values.style);
           if (values.material) formData.append('material', values.material);
           if (values.description) formData.append('description', values.description);
+          if (values.sizeList && values.sizeList.length > 0) {
+            values.sizeList.forEach((s: any) => {
+              if (s && s.val) formData.append('size[]', s.val);
+            });
+          }
 
           let keepImageCount = 0;
 

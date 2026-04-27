@@ -12,6 +12,7 @@ interface OrderItemProduct {
   productName?: string;
   quantity?: number;
   subtotal?: number;
+  size?: string;
 }
 
 interface LookupOrder {
@@ -342,6 +343,7 @@ const OrderLookupPage: React.FC = () => {
                                 {(orderDetail.items || []).map((item, idx) => (
                                   <div key={idx} className="flex items-center justify-between gap-3 text-sm border border-gray-100 rounded-lg px-3 py-2">
                                     <p className="font-medium text-gray-800 truncate">{item.productName || 'Sản phẩm'}</p>
+                                    <p className="text-gray-500">{item.size ? `(${item.size})` : ''}</p>
                                     <p className="text-gray-600 whitespace-nowrap">x{item.quantity || 0}</p>
                                     <p className="font-semibold text-gray-900 whitespace-nowrap">{(item.subtotal || 0).toLocaleString('vi-VN')} đ</p>
                                   </div>

@@ -3,7 +3,8 @@ import { useCartService } from '@/src/api/services';
 import toast from 'react-hot-toast';
 
 export interface CartItem {
-  id: string;
+  id: string; // Có thể là cartItemId hoặc productId tuỳ implementation
+  productId?: string; // Bổ sung tham chiếu id sản phẩm thật
   slug: string;
   title: string;
   price: number;
@@ -11,7 +12,10 @@ export interface CartItem {
   quantity: number;
   subtotal: number;
   stockQuantity?: number;
+  size?: string; // Thêm trường size nếu cần thiết
 }
+
+const makeCartLineKey = (productId?: string, size?: string) => `${productId || ''}::${size || '__nosize__'}`;
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -47,10 +51,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mappedItems: CartItem[] = data.items.map((it: any) => {
         const pId = it.productId?.id || it.productId?._id;
         const price = it.productId?.price || 0;
-        const oldItem = prevItems.find((p) => p.id === pId);
+        const lineKey = makeCartLineKey(pId, it.size);
+        const oldItem = prevItems.find((p) => p.id === lineKey || (p.productId === pId && p.size === it.size));
 
         return {
-          id: pId,
+          id: it._id || lineKey, // Nếu không có cartItemId từ backend thì dùng key productId+size
+          productId: pId, // Lưu lại productId thật
           slug: it.productId?.slug || pId,
           title: it.productId?.name || 'Sản phẩm',
           price: price,
@@ -58,6 +64,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           quantity: it.quantity,
           subtotal: it.subtotal || (price * it.quantity),
           stockQuantity: it.productId?.stockQuantity ?? oldItem?.stockQuantity,
+          size: it.size,
         };
       });
       return mappedItems;
@@ -86,10 +93,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 1. Cập nhật state (Optimistic UI) để báo hiệu cho người dùng ngay lập tức
     let addedQuantity = item.quantity;
     setCartItems((prev) => {
-      const existed = prev.find((p) => p.id === item.id);
+      // Tìm xem có cart item nào với cùng productId (hay id) và cùng size ko
+      const pId = item.productId || item.id;
+      const lineKey = makeCartLineKey(pId, item.size);
+      const existed = prev.find((p) => (p.productId === pId || p.id === pId) && p.size === item.size);
       if (existed) {
         return prev.map((p) => {
-          if (p.id === item.id) {
+          if ((p.productId === pId || p.id === pId) && p.size === item.size) {
             let newQuantity = p.quantity + item.quantity;
             const max = p.stockQuantity ?? item.stockQuantity;
             if (max !== undefined && max > 0 && newQuantity > max) {
@@ -102,15 +112,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return p;
         });
       }
-      return [...prev, { ...item, subtotal: item.price * item.quantity }];
+      return [...prev, { ...item, id: lineKey, productId: pId, subtotal: item.price * item.quantity }];
     });
     setTotalAmount((prev) => prev + (item.price * addedQuantity));
 
     // 2. Gọi API để lưu dữ liệu thật vào DB
     try {
       const res = await request('POST', '/add', {
-        productId: item.id,
-        quantity: addedQuantity > 0 ? addedQuantity : item.quantity // Fallback API payload
+        productId: item.productId || item.id,
+        quantity: addedQuantity > 0 ? addedQuantity : item.quantity, // Fallback API payload
+        size: item.size
       });
       if (res?.data) updateCartStateFromAPI(res.data);
       else fetchCart();
@@ -131,7 +142,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 2. Lệnh gọi API để xóa thật dưới Database
     try {
-      const res = await request('DELETE', `/remove/${id}`);
+      const targetId = itemToRemove?.productId || id;
+      const res = await request('DELETE', `/remove/${targetId}`, {
+        size: itemToRemove?.size,
+      }, {
+        size: itemToRemove?.size,
+      });
       toast.success('Xóa sản phẩm khỏi giỏ hàng thành công');
       if (res?.data) updateCartStateFromAPI(res.data);
       else fetchCart();
@@ -143,16 +159,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Hàm gọi API thật (chỉ được gọi sau khi debounce kết thúc)
-  const syncQuantityToServer = useCallback(async (id: string, quantity: number) => {
+  const syncQuantityToServer = useCallback(async (actualProductId: string, quantity: number, size?: string) => {
     try {
       const data = await patch('update', {
-        items: [{ productId: id, quantity }]
+        items: [{ productId: actualProductId, quantity, size }]
       }, { showSuccessMsg: false });
 
       // Suy luận tồn kho: Nếu Backend âm thầm bóp số lượng nhỏ hơn số ta gửi đi -> đó chính là giới hạn Stock tối đa!
       if (data && data.items) {
-        const pId = id;
-        const returnedItem = data.items.find((it: any) => (it.productId?.id || it.productId?._id) === pId);
+        const returnedItem = data.items.find((it: any) => (it.productId?.id || it.productId?._id) === actualProductId && it.size === size);
 
         if (returnedItem && returnedItem.quantity < quantity) {
           // Gắn cưỡng bức limit này vào productId gốc để updateCartStateFromAPI ghi nhận
@@ -212,7 +227,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(debounceTimers.current[id]);
     }
     debounceTimers.current[id] = setTimeout(() => {
-      syncQuantityToServer(id, finalQuantity);
+      syncQuantityToServer(item.productId || id, finalQuantity, item.size);
       delete debounceTimers.current[id];
     }, 500);
   };
