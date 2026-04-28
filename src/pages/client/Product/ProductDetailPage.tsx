@@ -329,7 +329,6 @@ const ProductDetailPage: React.FC = () => {
                           {product.title}
                         </h1>
                         <div className="text-[15px] text-gray-700 space-y-1.5">
-                          <p>Mã sản phẩm: <span className="text-gray-900">{product.productCode}</span>.</p>
                           <p><strong>Xem thêm:</strong> <Link to="/san-pham" className="!text-gray-700 hover:text-showcase-primary">{product.category}</Link></p>
                         </div>
                       </div>
