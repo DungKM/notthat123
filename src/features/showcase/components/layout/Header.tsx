@@ -873,62 +873,92 @@ const Header: React.FC = () => {
                     <CloseOutlined className="text-lg" />
                   </button>
                 </div>
-                {mobileSearchQuery.trim() && (
-                  <div className="bg-white border-t border-gray-100 max-h-[260px] overflow-y-auto">
-                    {isMobileSearching && (
-                      <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
-                        <LoadingOutlined />
-                        <span>Đang tìm kiếm...</span>
-                      </div>
-                    )}
+                {mobileSearchQuery.trim() ? (
+                  <>
+                    <div className="bg-white border-t border-gray-100 max-h-[260px] overflow-y-auto">
+                      {isMobileSearching && (
+                        <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
+                          <LoadingOutlined />
+                          <span>Đang tìm kiếm...</span>
+                        </div>
+                      )}
 
-                    {!isMobileSearching && mobileSuggestions.map((item: any) => (
+                      {!isMobileSearching && mobileSuggestions.map((item: any) => (
+                        <button
+                          key={`${item.__type}-${item.id || item._id || item.slug}`}
+                          type="button"
+                          onClick={() => {
+                            setMobileSearchOpen(false);
+                            setMobileSearchQuery('');
+                            navigate(item.__type === 'product' ? `/san-pham/${item.slug}` : `/thiet-ke-noi-that/${item.slug}`);
+                          }}
+                          className="w-full px-4 py-3 flex items-center gap-3 border-b border-gray-50 last:border-b-0 text-left hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0">
+                            {item.image
+                              ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                              : <img src="/assets/images/image-logo.png" className="w-full h-full object-contain p-1" alt="" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-800 truncate">{item.name}</p>
+                            <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                              {item.__type === 'product' ? 'Sản phẩm' : 'Công trình'}
+                            </p>
+                          </div>
+                          <ArrowRightOutlined className="text-[11px] text-gray-300" />
+                        </button>
+                      ))}
+
+                      {!isMobileSearching && mobileSuggestions.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-gray-500">Không có gợi ý phù hợp</div>
+                      )}
+                    </div>
+                    {/* Nút tìm */}
+                    <div className="bg-white border-t border-gray-100">
                       <button
-                        key={`${item.__type}-${item.id || item._id || item.slug}`}
                         type="button"
                         onClick={() => {
                           setMobileSearchOpen(false);
+                          navigate(`/tim-kiem?q=${encodeURIComponent(mobileSearchQuery.trim())}`);
                           setMobileSearchQuery('');
-                          navigate(item.__type === 'product' ? `/san-pham/${item.slug}` : `/thiet-ke-noi-that/${item.slug}`);
                         }}
-                        className="w-full px-4 py-3 flex items-center gap-3 border-b border-gray-50 last:border-b-0 text-left hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-amber-50 text-left transition-colors"
                       >
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0">
-                          {item.image
-                            ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                            : <img src="/assets/images/image-logo.png" className="w-full h-full object-contain p-1" alt="" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-800 truncate">{item.name}</p>
-                          <p className="text-[11px] text-gray-400 uppercase tracking-wide">
-                            {item.__type === 'product' ? 'Sản phẩm' : 'Công trình'}
-                          </p>
-                        </div>
-                        <ArrowRightOutlined className="text-[11px] text-gray-300" />
+                        <SearchOutlined className="text-showcase-primary" />
+                        <span className="text-sm text-gray-700">Tìm kiếm <span className="font-bold text-gray-900">"{mobileSearchQuery}"</span></span>
+                        <ArrowRightOutlined className="text-[11px] text-gray-400 ml-auto" />
                       </button>
-                    ))}
-
-                    {!isMobileSearching && mobileSuggestions.length === 0 && (
-                      <div className="px-4 py-3 text-sm text-gray-500">Không có gợi ý phù hợp</div>
-                    )}
-                  </div>
-                )}
-                {/* Nút tìm */}
-                {mobileSearchQuery.trim() && (
-                  <div className="bg-white border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileSearchOpen(false);
-                        navigate(`/tim-kiem?q=${encodeURIComponent(mobileSearchQuery.trim())}`);
-                        setMobileSearchQuery('');
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-amber-50 text-left transition-colors"
-                    >
-                      <SearchOutlined className="text-showcase-primary" />
-                      <span className="text-sm text-gray-700">Tìm kiếm <span className="font-bold text-gray-900">"{mobileSearchQuery}"</span></span>
-                      <ArrowRightOutlined className="text-[11px] text-gray-400 ml-auto" />
-                    </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-white border-t border-gray-100 p-4 rounded-b-2xl">
+                    <h3 className="text-[13px] font-bold text-gray-900 mb-3 uppercase tracking-wider">Danh mục phổ biến</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {productCategories.slice(0, 6).map((cat: any) => (
+                        <button
+                          key={cat.id || cat._id}
+                          onClick={() => {
+                            setMobileSearchOpen(false);
+                            navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${cat.id || cat._id || cat.slug}`);
+                          }}
+                          className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-[13px] font-medium rounded-full border border-gray-200 transition-colors"
+                        >
+                          {cat.name}
+                        </button>
+                      ))}
+                      {congTrinhCategories.slice(0, 2).map((cat: any) => (
+                        <button
+                          key={cat.id || cat._id}
+                          onClick={() => {
+                            setMobileSearchOpen(false);
+                            navigate(`${ROUTES.CONG_TRINH}?category=${cat.id || cat._id || cat.slug}`);
+                          }}
+                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[13px] font-medium rounded-full border border-blue-200 transition-colors"
+                        >
+                          {cat.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
                 {/* Backdrop click to close */}

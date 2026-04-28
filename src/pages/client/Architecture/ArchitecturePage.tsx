@@ -477,44 +477,10 @@ const ArchitecturePage: React.FC = () => {
               {/* Left Filter Sidebar */}
               <aside className="lg:sticky lg:top-24 h-fit">
                 <div className="bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Tìm kiếm</p>
-                      <h2 className="text-sm font-bold text-teal-950 uppercase tracking-widest mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Bộ lọc
-                      </h2>
-                    </div>
-                    <Filter className="w-4 h-4 text-gray-300" />
-                  </div>
+
 
                   <div className="mt-4 space-y-4">
-                    {/* Search */}
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
-                        Từ khóa
-                      </p>
-                      <div className="relative group">
-                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                          <Search className="w-3.5 h-3.5 text-gray-400 group-focus-within:text-showcase-primary transition-colors" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Biệt thự, nhà phố..."
-                          className="w-full pl-8 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-showcase-primary focus:border-showcase-primary transition-all text-xs"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        {searchQuery && (
-                          <button
-                            onClick={() => setSearchQuery('')}
-                            className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
-                            type="button"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
+
 
                     {/* Categories */}
                     <div>

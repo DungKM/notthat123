@@ -337,298 +337,264 @@ const ProjectsPage: React.FC = () => {
       </section>
 
       <div ref={contentStartRef}>
-      {/* Sibling category bar (show on mobile for quick swipe, keep desktop behavior) */}
-      {(isMobileView || !isParentCategory) && siblingCategoryParent?.children?.length > 0 && (
-        <section className="pt-10 pb-0 relative z-10">
+        {/* Sibling category bar (show on mobile for quick swipe, keep desktop behavior) */}
+        {(isMobileView || !isParentCategory) && siblingCategoryParent?.children?.length > 0 && (
+          <section className="pt-10 pb-0 relative z-10">
+            <Container>
+              <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
+                  Danh mục {siblingCategoryParent.name}
+                </p>
+                <div className="relative">
+                  <div
+                    ref={siblingScrollRef}
+                    onScroll={handleSiblingScroll}
+                    onPointerDown={() => setSiblingAutoSlideDisabled(true)}
+                    className="flex overflow-x-auto hide-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory -mx-1 px-1 pb-2"
+                  >
+                    {siblingChunks.map((chunk, chunkIndex) => (
+                      <div key={chunkIndex} className="w-full shrink-0 snap-start px-1">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {chunk.map((sib: any) => {
+                            const sibId = sib.id || sib._id;
+                            const isActive = sibId === selectedCategoryId || sib.slug === selectedCategoryId;
+                            const itemImage = sib.image || sib.representativeImage;
+
+                            return (
+                              <button
+                                key={sibId}
+                                onClick={() => {
+                                  setSiblingAutoSlideDisabled(true);
+                                  handleCategorySelect(sibId);
+                                }}
+                                className={`bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left cursor-pointer border transition-all ${isActive
+                                  ? 'bg-white border-showcase-primary ring-1 ring-showcase-primary shadow-sm'
+                                  : 'border-transparent hover:border-gray-200 hover:shadow-md hover:bg-white'
+                                  }`}
+                              >
+                                {itemImage && (
+                                  <div className="w-12 h-12 shrink-0 overflow-hidden rounded-lg bg-gray-100 mix-blend-multiply border border-black/5">
+                                    <img src={itemImage} alt={sib.name} className="w-full h-full object-cover" loading="lazy" />
+                                  </div>
+                                )}
+                                <div className="min-w-0 flex-1">
+                                  <p className={`text-[12px] md:text-[13px] font-semibold leading-tight line-clamp-2 ${isActive ? 'text-showcase-primary' : 'text-gray-800'}`}>
+                                    {sib.name}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {siblingTotalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-5">
+                      {Array.from({ length: siblingTotalPages }).map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleSiblingDotClick(i)}
+                          className={`rounded-full transition-all duration-200 ${i === siblingPage
+                            ? 'w-6 h-3 bg-showcase-primary'
+                            : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                            }`}
+                          aria-label={`Trang ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Container>
+          </section>
+        )}
+
+        {/* Filter + Grid Layout */}
+        <section className="pt-10 pb-16 lg:pt-16 lg:pb-24">
           <Container>
-            <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
-              <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
-                Danh mục {siblingCategoryParent.name}
-              </p>
-              <div className="relative">
-                <div
-                  ref={siblingScrollRef}
-                  onScroll={handleSiblingScroll}
-                  onPointerDown={() => setSiblingAutoSlideDisabled(true)}
-                  className="flex overflow-x-auto hide-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory -mx-1 px-1 pb-2"
-                >
-                  {siblingChunks.map((chunk, chunkIndex) => (
-                    <div key={chunkIndex} className="w-full shrink-0 snap-start px-1">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {chunk.map((sib: any) => {
-                          const sibId = sib.id || sib._id;
-                          const isActive = sibId === selectedCategoryId || sib.slug === selectedCategoryId;
-                          const itemImage = sib.image || sib.representativeImage;
+            <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-8 xl:gap-10">
+              {/* Left Filter Sidebar */}
+              <aside className="lg:sticky lg:top-24 h-fit">
+                <div className="bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm p-4">
+
+                  <div className="mt-4 space-y-4">
+                    {/* Search */}
+
+
+                    {/* Categories */}
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
+                        Danh mục
+                      </p>
+                      <div className="space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => handleCategorySelect('')}
+                          className={`uppercase w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
+                            ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
+                            }`}
+                        >
+                          Tất cả
+                        </button>
+
+                        {categories.map((cat) => {
+                          const catId = cat.id || cat._id;
+                          const hasChildren = cat.children && cat.children.length > 0;
+                          const isExpanded = expandedCategories.has(catId);
+                          const isParentActive = selectedCategoryId === catId || cat.slug === selectedCategoryId;
+                          const isChildActive = hasChildren && cat.children.some(
+                            (child: any) => (child.id || child._id) === selectedCategoryId || child.slug === selectedCategoryId
+                          );
 
                           return (
-                            <button
-                              key={sibId}
-                              onClick={() => {
-                                setSiblingAutoSlideDisabled(true);
-                                handleCategorySelect(sibId);
-                              }}
-                              className={`bg-[#f8fafc] rounded-xl p-3 flex flex-row items-center gap-3 text-left cursor-pointer border transition-all ${isActive
-                                ? 'bg-white border-showcase-primary ring-1 ring-showcase-primary shadow-sm'
-                                : 'border-transparent hover:border-gray-200 hover:shadow-md hover:bg-white'
-                                }`}
-                            >
-                              {itemImage && (
-                                <div className="w-12 h-12 shrink-0 overflow-hidden rounded-lg bg-gray-100 mix-blend-multiply border border-black/5">
-                                  <img src={itemImage} alt={sib.name} className="w-full h-full object-cover" loading="lazy" />
+                            <div key={catId}>
+                              {/* Danh mục cha */}
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleCategorySelect(catId);
+                                  }}
+                                  className={`flex-1 text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${isParentActive || isChildActive
+                                    ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
+                                    : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
+                                    }`}
+                                >
+                                  {cat.name}
+                                </button>
+                                {hasChildren && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedCategories(prev => {
+                                        const next = new Set(prev);
+                                        if (next.has(catId)) next.delete(catId);
+                                        else next.add(catId);
+                                        return next;
+                                      });
+                                    }}
+                                    className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
+                                  >
+                                    {isExpanded
+                                      ? <ChevronDown className="w-3 h-3" />
+                                      : <ChevronRight className="w-3 h-3" />
+                                    }
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Danh mục con */}
+                              {hasChildren && isExpanded && (
+                                <div className="mt-1 ml-3 space-y-1 border-l-2 border-gray-100 pl-2">
+                                  {cat.children.map((child: any) => {
+                                    const childId = child.id || child._id;
+                                    return (
+                                      <button
+                                        key={childId}
+                                        type="button"
+                                        onClick={() => handleCategorySelect(childId)}
+                                        className={`w-full text-left px-3 py-1.5 rounded-lg border text-xs transition-all ${selectedCategoryId === childId
+                                          ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm font-semibold'
+                                          : 'bg-white text-gray-600 border-gray-100 hover:border-showcase-primary/30 hover:bg-gray-50 font-medium'
+                                          }`}
+                                      >
+                                        {child.name}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               )}
-                              <div className="min-w-0 flex-1">
-                                <p className={`text-[12px] md:text-[13px] font-semibold leading-tight line-clamp-2 ${isActive ? 'text-showcase-primary' : 'text-gray-800'}`}>
-                                  {sib.name}
-                                </p>
-                              </div>
-                            </button>
+                            </div>
                           );
                         })}
                       </div>
                     </div>
-                  ))}
+                  </div>
+                </div>
+              </aside>
+
+              {/* Right Content */}
+              <div ref={listRef} id="danh-sach">
+                <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
+                  {isParentCategory
+                    ? `Danh mục con thuộc ${currentCategory.name}`
+                    : `Hiển thị ${projects.length} thiết kế nội thất ${searchQuery ? `cho "${searchQuery}"` : ''}`
+                  }
                 </div>
 
-                {siblingTotalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-5">
-                    {Array.from({ length: siblingTotalPages }).map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleSiblingDotClick(i)}
-                        className={`rounded-full transition-all duration-200 ${i === siblingPage
-                          ? 'w-6 h-3 bg-showcase-primary'
-                          : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
-                          }`}
-                        aria-label={`Trang ${i + 1}`}
-                      />
-                    ))}
+                {loading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                   </div>
+                ) : isParentCategory ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">
+                    {currentCategory.children.map((child: any) => {
+                      const childValue = child.id || child._id;
+                      const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
+                      return (
+                        <button
+                          key={childValue}
+                          onClick={() => {
+                            handleCategorySelect(childValue);
+                          }}
+                          className="group block text-left"
+                        >
+                          <div className="overflow-hidden bg-gray-100 rounded-xl">
+                            <img
+                              src={coverImage}
+                              alt={child.name}
+                              loading="lazy"
+                              className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          </div>
+                          <h3 className="mt-3 text-sm font-bold text-gray-800 uppercase tracking-wide group-hover:text-showcase-primary transition-colors">
+                            {child.name}
+                          </h3>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : projects.length === 0 ? (
+                  <div className="py-20 text-center text-gray-400">
+                    <p className="text-lg">Không tìm thấy thiết kế nội thất nào phù hợp.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">
+                    {projects.map((proj, i) => {
+                      const coverImage =
+                        proj.images && proj.images.length > 0
+                          ? proj.images[0].url
+                          : proj.image;
+                      return (
+                        <ProjectCard
+                          key={proj.id || proj._id || i}
+                          slug={proj.slug || String(proj.id || proj._id)}
+                          name={proj.name}
+                          image={coverImage}
+                          id={proj.id || proj._id}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {!(currentCategory && currentCategory.children && currentCategory.children.length > 0) && meta.totalPages > 1 && (
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={meta.totalPages}
+                    onPageChange={handlePageChange}
+                  />
                 )}
               </div>
             </div>
           </Container>
         </section>
-      )}
-
-      {/* Filter + Grid Layout */}
-      <section className="pt-10 pb-16 lg:pt-16 lg:pb-24">
-        <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-8 xl:gap-10">
-            {/* Left Filter Sidebar */}
-            <aside className="lg:sticky lg:top-24 h-fit">
-              <div className="bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Tìm kiếm</p>
-                    <h2 className="text-sm font-bold text-teal-950 uppercase tracking-widest mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Bộ lọc
-                    </h2>
-                  </div>
-                  <Filter className="w-4 h-4 text-gray-300" />
-                </div>
-
-                <div className="mt-4 space-y-4">
-                  {/* Search */}
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
-                      Từ khóa
-                    </p>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Search className="w-3.5 h-3.5 text-gray-400 group-focus-within:text-showcase-primary transition-colors" />
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Vinhomes, biệt thự..."
-                        className="w-full pl-8 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-showcase-primary focus:border-showcase-primary transition-all text-xs"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={() => setSearchQuery('')}
-                          className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
-                          type="button"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Categories */}
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
-                      Danh mục
-                    </p>
-                    <div className="space-y-1">
-                      <button
-                        type="button"
-                        onClick={() => handleCategorySelect('')}
-                        className={`uppercase w-full text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
-                          ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
-                          }`}
-                      >
-                        Tất cả
-                      </button>
-
-                      {categories.map((cat) => {
-                        const catId = cat.id || cat._id;
-                        const hasChildren = cat.children && cat.children.length > 0;
-                        const isExpanded = expandedCategories.has(catId);
-                        const isParentActive = selectedCategoryId === catId || cat.slug === selectedCategoryId;
-                        const isChildActive = hasChildren && cat.children.some(
-                          (child: any) => (child.id || child._id) === selectedCategoryId || child.slug === selectedCategoryId
-                        );
-
-                        return (
-                          <div key={catId}>
-                            {/* Danh mục cha */}
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleCategorySelect(catId);
-                                }}
-                                className={`flex-1 text-left px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${isParentActive || isChildActive
-                                  ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
-                                  : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
-                                  }`}
-                              >
-                                {cat.name}
-                              </button>
-                              {hasChildren && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setExpandedCategories(prev => {
-                                      const next = new Set(prev);
-                                      if (next.has(catId)) next.delete(catId);
-                                      else next.add(catId);
-                                      return next;
-                                    });
-                                  }}
-                                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
-                                >
-                                  {isExpanded
-                                    ? <ChevronDown className="w-3 h-3" />
-                                    : <ChevronRight className="w-3 h-3" />
-                                  }
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Danh mục con */}
-                            {hasChildren && isExpanded && (
-                              <div className="mt-1 ml-3 space-y-1 border-l-2 border-gray-100 pl-2">
-                                {cat.children.map((child: any) => {
-                                  const childId = child.id || child._id;
-                                  return (
-                                    <button
-                                      key={childId}
-                                      type="button"
-                                      onClick={() => handleCategorySelect(childId)}
-                                      className={`w-full text-left px-3 py-1.5 rounded-lg border text-xs transition-all ${selectedCategoryId === childId
-                                        ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm font-semibold'
-                                        : 'bg-white text-gray-600 border-gray-100 hover:border-showcase-primary/30 hover:bg-gray-50 font-medium'
-                                        }`}
-                                    >
-                                      {child.name}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </aside>
-
-            {/* Right Content */}
-            <div ref={listRef} id="danh-sach">
-              <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
-                {isParentCategory
-                  ? `Danh mục con thuộc ${currentCategory.name}`
-                  : `Hiển thị ${projects.length} thiết kế nội thất ${searchQuery ? `cho "${searchQuery}"` : ''}`
-                }
-              </div>
-
-              {loading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-                </div>
-              ) : isParentCategory ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">
-                  {currentCategory.children.map((child: any) => {
-                    const childValue = child.id || child._id;
-                    const coverImage = child.representativeImage || child.image || child.thumbnail || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
-                    return (
-                      <button
-                        key={childValue}
-                        onClick={() => {
-                          handleCategorySelect(childValue);
-                        }}
-                        className="group block text-left"
-                      >
-                        <div className="overflow-hidden bg-gray-100 rounded-xl">
-                          <img
-                            src={coverImage}
-                            alt={child.name}
-                            loading="lazy"
-                            className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
-                        <h3 className="mt-3 text-sm font-bold text-gray-800 uppercase tracking-wide group-hover:text-showcase-primary transition-colors">
-                          {child.name}
-                        </h3>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : projects.length === 0 ? (
-                <div className="py-20 text-center text-gray-400">
-                  <p className="text-lg">Không tìm thấy thiết kế nội thất nào phù hợp.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">
-                  {projects.map((proj, i) => {
-                    const coverImage =
-                      proj.images && proj.images.length > 0
-                        ? proj.images[0].url
-                        : proj.image;
-                    return (
-                      <ProjectCard
-                        key={proj.id || proj._id || i}
-                        slug={proj.slug || String(proj.id || proj._id)}
-                        name={proj.name}
-                        image={coverImage}
-                        id={proj.id || proj._id}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Pagination */}
-              {!(currentCategory && currentCategory.children && currentCategory.children.length > 0) && meta.totalPages > 1 && (
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalPages={meta.totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-            </div>
-          </div>
-        </Container>
-      </section>
       </div>
     </div>
   );
