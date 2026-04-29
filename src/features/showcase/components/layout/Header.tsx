@@ -46,6 +46,8 @@ const Header: React.FC = () => {
   const [mobileSearchQuery, setMobileSearchQuery] = useState('');
   const [mobileSearchResults, setMobileSearchResults] = useState<{ products: any[]; constructions: any[] }>({ products: [], constructions: [] });
   const [isMobileSearching, setIsMobileSearching] = useState(false);
+  const [hasMobileSearched, setHasMobileSearched] = useState(false);
+  const [visualViewportHeight, setVisualViewportHeight] = useState<number | null>(null);
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -153,9 +155,12 @@ const Header: React.FC = () => {
     if (!mobileSearchOpen || !mobileSearchQuery.trim()) {
       setMobileSearchResults({ products: [], constructions: [] });
       setIsMobileSearching(false);
+      setHasMobileSearched(false);
       return;
     }
 
+    // Đánh dấu đang trong giai đoạn debounce - chưa search
+    setHasMobileSearched(false);
     const requestId = ++mobileSearchRequestIdRef.current;
 
     const timer = setTimeout(async () => {
@@ -168,9 +173,11 @@ const Header: React.FC = () => {
           products: Array.isArray(data.products) ? data.products : [],
           constructions: Array.isArray(data.constructions) ? data.constructions : [],
         });
+        setHasMobileSearched(true);
       } catch {
         if (requestId !== mobileSearchRequestIdRef.current) return;
         setMobileSearchResults({ products: [], constructions: [] });
+        setHasMobileSearched(true);
       } finally {
         if (requestId === mobileSearchRequestIdRef.current) setIsMobileSearching(false);
       }
@@ -196,6 +203,20 @@ const Header: React.FC = () => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Track visualViewport height để fix keyboard che suggestions trên iOS/Android
+  useEffect(() => {
+    if (!mobileSearchOpen) {
+      setVisualViewportHeight(null);
+      return;
+    }
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => setVisualViewportHeight(vv.height);
+    update();
+    vv.addEventListener('resize', update);
+    return () => vv.removeEventListener('resize', update);
+  }, [mobileSearchOpen]);
 
   const totalSearchResults = searchResults.products.length + searchResults.constructions.length;
 
@@ -862,7 +883,13 @@ const Header: React.FC = () => {
 
             {/* Mobile Search Overlay */}
             {mobileSearchOpen && (
-              <div className="fixed inset-0 z-[200] flex flex-col md:hidden" style={{ background: 'rgba(0,0,0,0.7)' }}>
+              <div
+                className="fixed z-[200] flex flex-col md:hidden left-0 right-0 top-0"
+                style={{
+                  background: 'rgba(0,0,0,0.7)',
+                  height: visualViewportHeight ? `${visualViewportHeight}px` : '100dvh',
+                }}
+              >
                 {/* Header of overlay */}
                 <div className="bg-white px-4 py-3 flex items-center gap-3 shadow-md">
                   <SearchOutlined className="text-gray-400 text-lg flex-shrink-0" />
@@ -883,7 +910,7 @@ const Header: React.FC = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => { setMobileSearchOpen(false); setMobileSearchQuery(''); }}
+                    onClick={() => { setMobileSearchOpen(false); setMobileSearchQuery(''); setHasMobileSearched(false); }}
                     className="text-gray-400 hover:text-gray-700 transition-colors p-1"
                   >
                     <CloseOutlined className="text-lg" />
@@ -925,8 +952,14 @@ const Header: React.FC = () => {
                         </button>
                       ))}
 
-                      {!isMobileSearching && mobileSuggestions.length === 0 && (
-                        <div className="px-4 py-3 text-sm text-gray-500">Không có gợi ý phù hợp</div>
+                      {!isMobileSearching && hasMobileSearched && mobileSuggestions.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-gray-500">Không tìm thấy kết quả phù hợp</div>
+                      )}
+                      {!isMobileSearching && !hasMobileSearched && mobileSearchQuery.trim() && (
+                        <div className="px-4 py-3 flex items-center gap-2 text-sm text-gray-400">
+                          <LoadingOutlined className="text-gray-300" />
+                          <span>Đang tìm kiếm...</span>
+                        </div>
                       )}
                     </div>
                     {/* Nút tìm */}
@@ -978,7 +1011,7 @@ const Header: React.FC = () => {
                   </div>
                 )}
                 {/* Backdrop click to close */}
-                <div className="flex-1" onClick={() => { setMobileSearchOpen(false); setMobileSearchQuery(''); }} />
+                <div className="flex-1" onClick={() => { setMobileSearchOpen(false); setMobileSearchQuery(''); setHasMobileSearched(false); }} />
               </div>
             )}
 
