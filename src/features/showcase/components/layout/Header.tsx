@@ -52,6 +52,8 @@ const Header: React.FC = () => {
   const [searchResults, setSearchResults] = useState<{ products: any[]; constructions: any[] }>({ products: [], constructions: [] });
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const desktopSearchRequestIdRef = useRef(0);
+  const mobileSearchRequestIdRef = useRef(0);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const { request: searchRequest } = useApi<any>('/search');
 
@@ -87,7 +89,9 @@ const Header: React.FC = () => {
       .then((res) => {
         const data = res || [];
         setCongTrinhCategories(data);
-        localStorage.setItem('HOCHI_CONG_TRINH_CATS', JSON.stringify(data));
+        try {
+          localStorage.setItem('HOCHI_CONG_TRINH_CATS', JSON.stringify(data));
+        } catch { }
       })
       .catch(() => { });
 
@@ -95,7 +99,9 @@ const Header: React.FC = () => {
       .then((res) => {
         const data = res || [];
         setProductCategories(data);
-        localStorage.setItem('HOCHI_PRODUCT_CATS', JSON.stringify(data));
+        try {
+          localStorage.setItem('HOCHI_PRODUCT_CATS', JSON.stringify(data));
+        } catch { }
       })
       .catch(() => { });
 
@@ -103,7 +109,9 @@ const Header: React.FC = () => {
       .then((res) => {
         const data = res || [];
         setArchitectureCategories(data);
-        localStorage.setItem('HOCHI_ARCHITECTURE_CATS', JSON.stringify(data));
+        try {
+          localStorage.setItem('HOCHI_ARCHITECTURE_CATS', JSON.stringify(data));
+        } catch { }
       })
       .catch(() => { });
   }, []);
@@ -117,10 +125,13 @@ const Header: React.FC = () => {
       setShowResults(false);
       return;
     }
+
+    const requestId = ++desktopSearchRequestIdRef.current;
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
         const res = await searchRequest('GET', '', null, { keyword: searchQuery.trim(), limit: 8 });
+        if (requestId !== desktopSearchRequestIdRef.current) return;
         const data = res?.data || {};
         setSearchResults({
           products: Array.isArray(data.products) ? data.products : [],
@@ -128,13 +139,14 @@ const Header: React.FC = () => {
         });
         setShowResults(true);
       } catch {
+        if (requestId !== desktopSearchRequestIdRef.current) return;
         setSearchResults({ products: [], constructions: [] });
       } finally {
-        setIsSearching(false);
+        if (requestId === desktopSearchRequestIdRef.current) setIsSearching(false);
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, searchRequest]);
 
   // ─── Debounced Search (Mobile Overlay) ───
   useEffect(() => {
@@ -144,19 +156,23 @@ const Header: React.FC = () => {
       return;
     }
 
+    const requestId = ++mobileSearchRequestIdRef.current;
+
     const timer = setTimeout(async () => {
       setIsMobileSearching(true);
       try {
         const res = await searchRequest('GET', '', null, { keyword: mobileSearchQuery.trim(), limit: 4 });
+        if (requestId !== mobileSearchRequestIdRef.current) return;
         const data = res?.data || {};
         setMobileSearchResults({
           products: Array.isArray(data.products) ? data.products : [],
           constructions: Array.isArray(data.constructions) ? data.constructions : [],
         });
       } catch {
+        if (requestId !== mobileSearchRequestIdRef.current) return;
         setMobileSearchResults({ products: [], constructions: [] });
       } finally {
-        setIsMobileSearching(false);
+        if (requestId === mobileSearchRequestIdRef.current) setIsMobileSearching(false);
       }
     }, 350);
 

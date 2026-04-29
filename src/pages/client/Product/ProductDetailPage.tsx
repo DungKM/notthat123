@@ -188,7 +188,7 @@ const ProductDetailPage: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
-    toast.success('Đã thêm vào giỏ hàng!', { id: 'add-cart-toast' });
+    // toast.success('Đã thêm vào giỏ hàng!', { id: 'add-cart-toast' });
 
     addToCart({
       id: product.id,
