@@ -18,7 +18,7 @@ const ArchitectureDetailPage: React.FC = () => {
 
   const [project, setProject] = useState<any>(null);
   const [relatedProjects, setRelatedProjects] = useState<any[]>([]);
-  const [visibleRelatedCount, setVisibleRelatedCount] = useState(3);
+  const [visibleRelatedCount, setVisibleRelatedCount] = useState(6);
   const [error, setError] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -56,7 +56,7 @@ const ArchitectureDetailPage: React.FC = () => {
   }, [slug, request]);
 
   useEffect(() => {
-    setVisibleRelatedCount(3);
+    setVisibleRelatedCount(6);
   }, [relatedProjects]);
 
   if (loading && !project) {
@@ -273,7 +273,7 @@ const ArchitectureDetailPage: React.FC = () => {
                   <div className="w-16 h-1 bg-showcase-primary mx-auto" />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
                   {relatedProjects.slice(0, visibleRelatedCount).map((p) => {
                     const pCatName = p.categoryId?.name || 'Thiết kế kiến trúc';
                     const pCover = p.images && p.images.length > 0 ? p.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
@@ -287,6 +287,8 @@ const ArchitectureDetailPage: React.FC = () => {
                         image={pCover}
                         tag={pCatName.toUpperCase()}
                         likes={p.likeCount || p.likes}
+                        imageClassName="h-32 sm:h-65 xl:h-75"
+                        titleClassName="uppercase text-[12px] sm:text-sm tracking-wide line-clamp-2"
                       />
                     );
                   })}
@@ -296,7 +298,7 @@ const ArchitectureDetailPage: React.FC = () => {
                   <div className="mt-8 flex justify-center">
                     <button
                       type="button"
-                      onClick={() => setVisibleRelatedCount((prev) => prev + 3)}
+                      onClick={() => setVisibleRelatedCount((prev) => prev + 6)}
                       className="inline-flex items-center justify-center rounded-xl border border-showcase-primary px-6 py-2.5 text-sm font-bold text-showcase-primary transition-colors hover:bg-showcase-primary hover:text-white"
                     >
                       Xem thêm

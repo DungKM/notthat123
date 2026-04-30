@@ -27,7 +27,7 @@ const ArchitectureCard: React.FC<ArchitectureCardProps> = ({ slug, name, image }
         src={image}
         alt={name}
         loading="lazy"
-        className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
+        className="w-full aspect-4/3 object-cover transition-transform duration-500 group-hover:scale-105"
       />
     </div>
     <p className="mt-3 text-sm text-[#c9922a] font-medium leading-snug group-hover:underline line-clamp-2">
@@ -40,7 +40,7 @@ const ArchitectureCard: React.FC<ArchitectureCardProps> = ({ slug, name, image }
 
 const SkeletonCard: React.FC = () => (
   <div className="animate-pulse">
-    <div className="w-full aspect-[4/3] bg-gray-200" />
+    <div className="w-full aspect-4/3 bg-gray-200" />
     <div className="mt-3 h-4 bg-gray-200 rounded w-3/4" />
   </div>
 );
@@ -397,7 +397,7 @@ const ArchitecturePage: React.FC = () => {
 
       <div ref={contentStartRef}>
         {(isMobileView || !isParentCategory) && siblingCategoryParent?.children?.length > 0 && (
-          <section className="pt-10 pb-0 relative z-10">
+          <section className="hidden md:block pt-10 pb-0 relative z-10">
             <Container>
               <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
                 <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
@@ -475,7 +475,7 @@ const ArchitecturePage: React.FC = () => {
           <Container>
             <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-8 xl:gap-10">
               {/* Left Filter Sidebar */}
-              <aside className="lg:sticky lg:top-24 h-fit">
+              <aside className="hidden lg:block lg:sticky lg:top-24 h-fit">
                 <div className="bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm p-4">
 
 
@@ -491,7 +491,7 @@ const ArchitecturePage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleCategorySelect('')}
-                          className={`uppercase flex-shrink-0 whitespace-nowrap lg:w-full text-left px-4 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
+                          className={`uppercase shrink-0 whitespace-nowrap lg:w-full text-left px-4 py-2 rounded-xl border text-xs font-semibold transition-all ${!selectedCategoryId
                             ? 'bg-showcase-primary text-white border-showcase-primary shadow-sm'
                             : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                             }`}
@@ -509,7 +509,7 @@ const ArchitecturePage: React.FC = () => {
                           );
 
                           return (
-                            <div key={catId} className="flex-shrink-0 lg:flex-shrink">
+                            <div key={catId} className="shrink-0 lg:shrink">
                               {/* Danh mục cha */}
                               <div className="flex items-center gap-1">
                                 <button
@@ -534,7 +534,7 @@ const ArchitecturePage: React.FC = () => {
                                         return next;
                                       });
                                     }}
-                                    className="hidden lg:flex flex-shrink-0 w-7 h-7 items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
+                                    className="hidden lg:flex shrink-0 w-7 h-7 items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
                                   >
                                     {isExpanded
                                       ? <ChevronDown className="w-3 h-3" />
@@ -618,7 +618,7 @@ const ArchitecturePage: React.FC = () => {
                                 className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-pan-y cursor-grab active:cursor-grabbing select-none pb-2 -mx-1 px-1"
                               >
                                 {chunks.map((chunk, index) => (
-                                  <div key={index} className="w-full flex-shrink-0 snap-start px-1">
+                                  <div key={index} className="w-full shrink-0 snap-start px-1">
                                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                                       {chunk.map((child: any) => {
                                         const childValue = child.id || child._id;
@@ -636,7 +636,7 @@ const ArchitecturePage: React.FC = () => {
                                             className="bg-white rounded-xl p-3 flex flex-row items-center gap-3 shadow-sm border border-gray-100 text-left w-full cursor-pointer hover:border-showcase-primary/50 hover:bg-gray-50 transition-colors"
                                             draggable={false}
                                           >
-                                            <div className="w-14 h-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 pointer-events-none">
+                                            <div className="w-14 h-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 pointer-events-none">
                                               <img
                                                 src={coverImage}
                                                 alt={child.name}

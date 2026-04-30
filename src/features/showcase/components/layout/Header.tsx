@@ -346,7 +346,7 @@ const Header: React.FC = () => {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isDarkHeader ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-6'
           }`}
       >
-        <Container className="flex items-center justify-between !max-w-[1920px] w-full xl:px-8 2xl:px-12">
+        <Container className="flex items-center justify-between max-w-[1920px]! w-full xl:px-8 2xl:px-12">
           {/* Logo */}
           <Link to="/" className="relative z-50 transition-transform hover:scale-105 mr-2 lg:mr-4 xl:mr-2 2xl:mr-8 flex-shrink-0">
             <div className="w-[90px] sm:w-[120px]">
@@ -1112,7 +1112,7 @@ const Header: React.FC = () => {
                       <button
                         onClick={() => {
                           setIsCartOpen(false);
-                          navigate('/san-pham');
+                          navigate('/san-pham/danh-sach');
                         }}
                         className="w-full py-3 bg-showcase-primary text-white font-bold hover:opacity-90 transition-opacity"
                       >
@@ -1258,7 +1258,7 @@ const Header: React.FC = () => {
                     <button
                       onClick={() => {
                         setIsCartOpen(false);
-                        navigate('/san-pham');
+                        navigate('/san-pham/danh-sach');
                       }}
                       className="w-full cursor-pointer py-4 bg-white text-gray-700 border border-gray-200  font-bold hover:bg-showcase-primary/10 transition-all"
                     >
@@ -1275,7 +1275,7 @@ const Header: React.FC = () => {
       {/* Custom Confirm Delete Modal */}
       <AnimatePresence>
         {itemToDelete && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

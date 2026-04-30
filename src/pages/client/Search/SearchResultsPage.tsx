@@ -183,7 +183,7 @@ const SearchResultsPage: React.FC = () => {
                     to={`/san-pham/danh-sach?search=${encodeURIComponent(query)}`}
                     className="text-sm font-bold !text-amber-700 hover:!text-amber-800 flex items-center gap-1 whitespace-nowrap"
                   >
-                    Xem tất cả <ArrowRightOutlined className="text-[11px]" />
+                    Xem tất cả sản phẩm<ArrowRightOutlined className="text-[11px]" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -229,7 +229,7 @@ const SearchResultsPage: React.FC = () => {
                     to={`/thiet-ke-noi-that?search=${encodeURIComponent(query)}`}
                     className="text-sm font-bold !text-blue-600 hover:!text-blue-700 flex items-center gap-1 whitespace-nowrap"
                   >
-                    Xem tất cả <ArrowRightOutlined className="text-[11px]" />
+                    Xem tất cả sản phẩm<ArrowRightOutlined className="text-[11px]" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

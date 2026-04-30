@@ -28,7 +28,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ slug, name, image, id }) => (
         src={image}
         alt={name}
         loading="lazy"
-        className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
+        className="w-full aspect-4/3 object-cover transition-transform duration-500 group-hover:scale-105"
       />
     </div>
     {/* Tên công trình - không có dấu chấm */}
@@ -42,7 +42,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ slug, name, image, id }) => (
 
 const SkeletonCard: React.FC = () => (
   <div className="animate-pulse">
-    <div className="w-full aspect-[4/3] bg-gray-200" />
+    <div className="w-full aspect-4/3 bg-gray-200" />
     <div className="mt-3 h-4 bg-gray-200 rounded w-3/4" />
   </div>
 );
@@ -339,7 +339,7 @@ const ProjectsPage: React.FC = () => {
       <div ref={contentStartRef}>
         {/* Sibling category bar (show on mobile for quick swipe, keep desktop behavior) */}
         {(isMobileView || !isParentCategory) && siblingCategoryParent?.children?.length > 0 && (
-          <section className="pt-10 pb-0 relative z-10">
+          <section className="hidden md:block pt-10 pb-0 relative z-10">
             <Container>
               <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
                 <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400 mb-5">
@@ -417,7 +417,7 @@ const ProjectsPage: React.FC = () => {
           <Container>
             <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-8 xl:gap-10">
               {/* Left Filter Sidebar */}
-              <aside className="lg:sticky lg:top-24 h-fit">
+              <aside className="hidden lg:block lg:sticky lg:top-24 h-fit">
                 <div className="bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm p-4">
 
                   <div className="mt-4 space-y-4">
@@ -478,7 +478,7 @@ const ProjectsPage: React.FC = () => {
                                         return next;
                                       });
                                     }}
-                                    className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
+                                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all"
                                   >
                                     {isExpanded
                                       ? <ChevronDown className="w-3 h-3" />
@@ -549,7 +549,7 @@ const ProjectsPage: React.FC = () => {
                               src={coverImage}
                               alt={child.name}
                               loading="lazy"
-                              className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="w-full aspect-4/3 object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           </div>
                           <h3 className="mt-3 text-sm font-bold text-gray-800 uppercase tracking-wide group-hover:text-showcase-primary transition-colors">

@@ -473,6 +473,7 @@ const ProductsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center sm:justify-end gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                  {/*
                   <button
                     onClick={() => setIsMobileFilterOpen(true)}
                     className="flex lg:hidden flex-1 sm:flex-none items-center justify-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-[13px] font-medium text-gray-800 transition-all hover:bg-gray-50 shadow-sm"
@@ -480,9 +481,10 @@ const ProductsPage: React.FC = () => {
                     <Filter className="w-4 h-4" />
                     Lọc
                   </button>
+                  */}
 
                   <span className="text-[13px] text-gray-600 font-semibold whitespace-nowrap hidden sm:inline-block">Sắp xếp:</span>
-                  <div className="relative flex-1 sm:flex-none sm:w-[200px]" ref={sortRef}>
+                  <div className="relative flex-1 sm:flex-none sm:w-[200px] hidden sm:block" ref={sortRef}>
                     <div
                       className="w-full flex items-center justify-between border border-gray-200 text-[13px] font-medium rounded-xl px-4 py-2.5 bg-white cursor-pointer text-gray-800 transition-all hover:bg-gray-50 shadow-sm"
                       onClick={() => setSortOpen(!sortOpen)}
@@ -534,6 +536,8 @@ const ProductsPage: React.FC = () => {
                       image={product.images && product.images.length > 0 ? product.images[0].url : 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800'}
                       likes={product.likeCount ?? product.likes}
                       isLiked={product.isLiked}
+                      imageClassName="h-36 sm:h-65 xl:h-75"
+                      titleClassName="uppercase text-sm tracking-wide line-clamp-1"
                     />
                   ))}
                 </div>

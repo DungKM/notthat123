@@ -364,7 +364,7 @@ const CheckoutPage: React.FC = () => {
                     <div className="flex flex-col items-center justify-center py-12">
                       <ShoppingOutlined className="text-6xl mb-4 text-gray-300" />
                       <p className="text-sm font-medium text-gray-500 mb-6">{t('checkout.cart_empty') || 'Giỏ hàng của bạn đang trống'}</p>
-                      <Link to="/san-pham" className="px-6 py-2.5 bg-showcase-primary text-white font-bold rounded-lg hover:bg-[#bea748] transition-colors shadow-sm tracking-wide">
+                      <Link to="/san-pham/danh-sach" className="px-6 py-2.5 bg-showcase-primary text-white font-bold rounded-lg hover:bg-[#bea748] transition-colors shadow-sm tracking-wide">
                         Tiếp tục mua sắm
                       </Link>
                     </div>

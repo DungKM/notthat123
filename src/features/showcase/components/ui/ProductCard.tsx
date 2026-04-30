@@ -12,6 +12,8 @@ interface ProductCardProps {
   basePath?: string;
   likes?: number;
   isLiked?: boolean;
+  imageClassName?: string;
+  titleClassName?: string;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -24,10 +26,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   basePath = '/san-pham',
   likes,
   isLiked = false,
+  imageClassName = "h-55 sm:h-65 xl:h-75",
+  titleClassName = "uppercase text-sm tracking-wide",
 }) => {
   return (
     <Link to={`${basePath}/${slug}`} className="group block">
-      <div className="relative h-55 sm:h-65 xl:h-75 overflow-hidden rounded-xl bg-white">
+      <div className={`relative overflow-hidden rounded-xl bg-white ${imageClassName}`}>
         {tag && <Badge variant="gold" className="absolute top-4 left-4 z-10 shadow-lg">{tag}</Badge>}
         <img
           src={image}
@@ -60,9 +64,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
       </div>
-      <div className="mt-5 text-center">
+      <div className={`mt-5 text-center px-1`}>
         {category && <p className="text-showcase-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-1">{category}</p>}
-        <h3 className="font-bold text-gray-900 group-hover:text-showcase-primary transition-colors uppercase text-sm tracking-wide">{title}</h3>
+        <h3 className={`font-bold text-gray-900 group-hover:text-showcase-primary transition-colors ${titleClassName}`}>{title}</h3>
         {price && <p className="mt-1 text-gray-500 text-xs font-medium">{price}</p>}
         <div className="mt-3 flex justify-center gap-1 opacity-20 group-hover:opacity-100">
           <span className="w-8 h-0.5 bg-teal-900"></span>
