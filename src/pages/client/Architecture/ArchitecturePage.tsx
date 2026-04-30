@@ -75,7 +75,7 @@ const ArchitecturePage: React.FC = () => {
   const siblingScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToTargetSection = () => {
-    const yOffset = -80;
+    const yOffset = -150;
     const target = listRef.current || contentStartRef.current;
     if (!target) return;
     const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;

@@ -283,7 +283,7 @@ const InteriorCategorySection: React.FC = () => {
   if (subCategories.length === 0) return null;
 
   return (
-    <section className="py-16 bg-[#f5f5f5]">
+    <section className="py-16 bg-[#f5f5f5] hidden md:block">
       <Container>
         {/* Title */}
         <h2

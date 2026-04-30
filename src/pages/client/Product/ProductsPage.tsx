@@ -62,7 +62,7 @@ const ProductsPage: React.FC = () => {
     setCurrentPage(nextPage);
 
     if (listRef.current) {
-      const yOffset = -80;
+      const yOffset = -150;
       const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
@@ -91,7 +91,7 @@ const ProductsPage: React.FC = () => {
     if (location.hash === '#danh-sach') {
       const timer = setTimeout(() => {
         if (listRef.current) {
-          const yOffset = -80;
+          const yOffset = -150;
           const y = listRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }

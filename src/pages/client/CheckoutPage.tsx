@@ -326,7 +326,11 @@ const CheckoutPage: React.FC = () => {
                           checked={customer.paymentMethod === method.name}
                           onChange={() => {
                             setCustomer({ ...customer, paymentMethod: method.name });
-                            orderSummaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            if (orderSummaryRef.current) {
+                              const yOffset = -120;
+                              const y = orderSummaryRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                              window.scrollTo({ top: y, behavior: 'smooth' });
+                            }
                           }}
                           className="h-4 w-4 text-showcase-primary focus:ring-showcase-primary"
                         />

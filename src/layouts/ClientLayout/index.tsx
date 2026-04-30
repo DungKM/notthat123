@@ -9,7 +9,7 @@ const ClientLayout: React.FC = () => {
     <CartProvider>
       <div className="min-h-screen bg-white font-sans selection:bg-teal-100">
         <Header />
-        <main>
+        <main className="pt-[40px] md:pt-0">
           <Outlet />
         </main>
         <Footer />

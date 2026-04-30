@@ -377,10 +377,7 @@ const Header: React.FC = () => {
     const existing = mobileActiveParentId[tab];
     const hasExisting = parents.some((p: any) => String(p.id || p._id || p.slug) === String(existing));
     if (existing && hasExisting) return existing;
-    const first = parents[0];
-    const firstId = first ? String(first.id || first._id || first.slug || '') : '';
-    if (firstId) setMobileActiveParentId((prev) => ({ ...prev, [tab]: firstId }));
-    return firstId;
+    return ''; // Không tự động lấy phần tử đầu tiên
   };
 
   const openMobileBottomTab = (tab: 'products' | 'projects' | 'architecture') => {
@@ -502,8 +499,8 @@ const Header: React.FC = () => {
                       >
                         {/* Left Sidebar - Parent Categories */}
                         <div className="w-[200px] bg-[#f4f7f9] flex flex-col py-4 shrink-0 border-r border-[#e5e9f0]">
-                          {productCategories.map((cat: any, index: number) => {
-                            const isActive = activeMegaCategory ? activeMegaCategory.id === cat.id : index === 0;
+                          {productCategories.map((cat: any) => {
+                            const isActive = activeMegaCategory?.id === cat.id;
                             return (
                               <div
                                 key={cat.id || cat._id}
@@ -525,8 +522,18 @@ const Header: React.FC = () => {
                         {/* Right Area - Child Categories */}
                         <div className="flex-1 bg-[#fbfcfd] p-8 overflow-y-auto">
                           {(() => {
-                            const currentCat = activeMegaCategory || productCategories[0];
-                            if (!currentCat || !currentCat.children || currentCat.children.length === 0) {
+                            const currentCat = activeMegaCategory;
+                            if (!currentCat) {
+                              return (
+                                <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-4">
+                                  <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center border border-dashed border-gray-200">
+                                    <ArrowRightOutlined className="text-xl rotate-180 opacity-50" />
+                                  </div>
+                                  <p className="text-[15px] font-medium">Vui lòng chọn danh mục để xem chi tiết</p>
+                                </div>
+                              );
+                            }
+                            if (!currentCat.children || currentCat.children.length === 0) {
                               return <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>;
                             }
                             return (
@@ -579,8 +586,8 @@ const Header: React.FC = () => {
                       >
                         {/* Left Sidebar - Parent Categories */}
                         <div className="w-[200px] bg-[#f4f7f9] flex flex-col py-4 shrink-0 border-r border-[#e5e9f0]">
-                          {congTrinhCategories.map((cat: any, index: number) => {
-                            const isActive = activeMegaProjectCategory ? activeMegaProjectCategory.id === cat.id : index === 0;
+                          {congTrinhCategories.map((cat: any) => {
+                            const isActive = activeMegaProjectCategory?.id === cat.id;
                             return (
                               <div
                                 key={cat.id || cat._id}
@@ -602,8 +609,18 @@ const Header: React.FC = () => {
                         {/* Right Area - Child Categories */}
                         <div className="flex-1 bg-[#fbfcfd] p-8 overflow-y-auto">
                           {(() => {
-                            const currentCat = activeMegaProjectCategory || congTrinhCategories[0];
-                            if (!currentCat || !currentCat.children || currentCat.children.length === 0) {
+                            const currentCat = activeMegaProjectCategory;
+                            if (!currentCat) {
+                              return (
+                                <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-4">
+                                  <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center border border-dashed border-gray-200">
+                                    <ArrowRightOutlined className="text-xl rotate-180 opacity-50" />
+                                  </div>
+                                  <p className="text-[15px] font-medium">Vui lòng chọn danh mục để xem chi tiết</p>
+                                </div>
+                              );
+                            }
+                            if (!currentCat.children || currentCat.children.length === 0) {
                               return (
                                 <div>
                                   <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
@@ -670,8 +687,8 @@ const Header: React.FC = () => {
                       >
                         {/* Left Sidebar - Parent Categories */}
                         <div className="w-[200px] bg-[#f4f7f9] flex flex-col py-4 shrink-0 border-r border-[#e5e9f0]">
-                          {architectureCategories.map((cat: any, index: number) => {
-                            const isActive = activeMegaArchCategory ? activeMegaArchCategory.id === cat.id : index === 0;
+                          {architectureCategories.map((cat: any) => {
+                            const isActive = activeMegaArchCategory?.id === cat.id;
                             return (
                               <div
                                 key={cat.id || cat._id}
@@ -693,8 +710,18 @@ const Header: React.FC = () => {
                         {/* Right Area - Child Categories */}
                         <div className="flex-1 bg-[#fbfcfd] p-8 overflow-y-auto">
                           {(() => {
-                            const currentCat = activeMegaArchCategory || architectureCategories[0];
-                            if (!currentCat || !currentCat.children || currentCat.children.length === 0) {
+                            const currentCat = activeMegaArchCategory;
+                            if (!currentCat) {
+                              return (
+                                <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-4">
+                                  <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center border border-dashed border-gray-200">
+                                    <ArrowRightOutlined className="text-xl rotate-180 opacity-50" />
+                                  </div>
+                                  <p className="text-[15px] font-medium">Vui lòng chọn danh mục để xem chi tiết</p>
+                                </div>
+                              );
+                            }
+                            if (!currentCat.children || currentCat.children.length === 0) {
                               return (
                                 <div>
                                   <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
@@ -1109,18 +1136,18 @@ const Header: React.FC = () => {
             </div>
 
             {/* Mobile Menu Toggle */}
-            <button
+            {/* <button
               className={`xl:hidden flex items-center justify-center w-10 h-10 rounded-full transition-all ${isDarkHeader ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'
                 }`}
               onClick={() => setIsMenuOpen(true)}
             >
               <MenuOutlined className="text-xl" />
-            </button>
+            </button> */}
           </div>
         </Container>
 
         {/* Mobile Bottom Header (tabs + submenu) */}
-        <div className={`md:hidden border-t border-gray-100 transition-all duration-500 overflow-hidden ${isCartOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'} ${isMobileVisible ? 'max-h-[500px] py-0' : 'max-h-0 opacity-0 border-none'}`}>
+        <div className={`md:hidden border-t border-gray-100 transition-all duration-500 relative ${isCartOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'} ${isMobileVisible ? 'max-h-[500px] py-0 overflow-visible' : 'max-h-0 opacity-0 border-none overflow-hidden'}`}>
           <Container className="max-w-[1920px]! w-full">
             <div className="flex items-center justify-between gap-1.5 py-2.5">
               <button
@@ -1157,7 +1184,7 @@ const Header: React.FC = () => {
           </Container>
 
           <AnimatePresence>
-            {mobileBottomTab && (
+            {mobileBottomTab && isMobileVisible && (
               <>
                 <motion.div
                   initial={{ y: -5, opacity: 0 }}
@@ -1166,18 +1193,36 @@ const Header: React.FC = () => {
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   className="absolute left-0 right-0 top-full bg-white z-[56] border-t border-gray-50 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.1)]"
                 >
-                  <Container className="max-w-[1920px]! w-full">
+                  <button
+                    type="button"
+                    onClick={() => setMobileBottomTab(null)}
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-md z-[57] active:scale-90 transition-transform"
+                  >
+                    <CloseOutlined className="text-[10px] text-gray-400" />
+                  </button>
+                  <Container className="max-w-[1920px]! w-full pt-2">
                     {(() => {
                       const tab = mobileBottomTab;
                       const parents = getMobileParents(tab);
                       const activeParentId = ensureMobileActiveParent(tab);
                       const activeParent =
-                        parents.find((p: any) => String(p.id || p._id || p.slug) === String(activeParentId)) || parents[0];
+                        parents.find((p: any) => String(p.id || p._id || p.slug) === String(activeParentId));
                       const children = activeParent?.children || [];
 
                       return (
                         <div className="py-3 space-y-3">
                           <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const route = tab === 'products' ? ROUTES.DANH_SACH_SAN_PHAM : tab === 'projects' ? ROUTES.CONG_TRINH : ROUTES.THIET_KE_KIEN_TRUC;
+                                navigate(route);
+                                setMobileBottomTab(null);
+                              }}
+                              className="shrink-0 px-4 py-2 rounded-full border text-[12px] font-bold bg-gray-50 text-gray-800 border-gray-200 active:bg-gray-100 transition-colors"
+                            >
+                              Tất cả
+                            </button>
                             {parents.map((p: any) => {
                               const pid = String(p.id || p._id || p.slug || '');
                               const isActive = String(pid) === String(activeParentId);
@@ -1198,7 +1243,12 @@ const Header: React.FC = () => {
                           </div>
 
                           <div className="flex items-stretch gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-2">
-                            {children.length === 0 ? (
+                            {!activeParent ? (
+                              <div className="w-full flex flex-col items-center justify-center text-gray-400 py-4 space-y-2">
+
+                                <p className="text-[12px] font-medium">Vui lòng chọn danh mục cha</p>
+                              </div>
+                            ) : children.length === 0 ? (
                               <div className="text-[12px] text-gray-400 py-3">Không có danh mục con</div>
                             ) : (
                               children.map((c: any) => {
@@ -1232,18 +1282,22 @@ const Header: React.FC = () => {
                             )}
                           </div>
 
-                          {/* Nút Xem tất cả ở góc dưới bên phải */}
+                          {/* Nút Xem tất cả / Xem danh mục đang chọn ở góc dưới bên phải */}
                           <div className="flex justify-end pt-1">
                             <button
                               type="button"
                               onClick={() => {
-                                const route = tab === 'products' ? ROUTES.DANH_SACH_SAN_PHAM : tab === 'projects' ? ROUTES.CONG_TRINH : ROUTES.THIET_KE_KIEN_TRUC;
-                                navigate(route);
-                                setMobileBottomTab(null);
+                                if (activeParent) {
+                                  mobileGoToCategory(tab, activeParent);
+                                } else {
+                                  const route = tab === 'products' ? ROUTES.DANH_SACH_SAN_PHAM : tab === 'projects' ? ROUTES.CONG_TRINH : ROUTES.THIET_KE_KIEN_TRUC;
+                                  navigate(route);
+                                  setMobileBottomTab(null);
+                                }
                               }}
                               className="text-[10px] font-black text-showcase-primary flex items-center gap-1 uppercase tracking-widest active:opacity-70 transition-all py-1"
                             >
-                              Xem tất cả <ArrowRightOutlined className="text-[9px]" />
+                              Xem {activeParent?.name || 'tất cả'} <ArrowRightOutlined className="text-[9px]" />
                             </button>
                           </div>
                         </div>
@@ -1739,32 +1793,32 @@ const Header: React.FC = () => {
             to={ROUTES.DOI_TAC}
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Đối tác</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Đối tác</span>
           </Link>
           <Link
             to={ROUTES.VIDEO}
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Videos</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Video</span>
           </Link>
           <Link
             to={ROUTES.LIEN_HE}
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Liên hệ</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Liên hệ</span>
           </Link>
           <Link
             to={ROUTES.TUYEN_DUNG}
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Tuyển dụng</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Tuyển dụng</span>
           </Link>
           <Link
             to={ROUTES.DANG_NHAP}
             target="_blank"
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Nội bộ</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Nội bộ</span>
           </Link>
         </div>
       </div>

@@ -105,7 +105,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (max !== undefined && max > 0 && newQuantity > max) {
               newQuantity = max;
               addedQuantity = max - p.quantity;
-              setTimeout(() => toast.error(`Trong kho chỉ còn tối đa ${max} sản phẩm`), 0);
             }
             return { ...p, quantity: newQuantity, subtotal: newQuantity * p.price, stockQuantity: max };
           }
@@ -123,6 +122,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         quantity: addedQuantity > 0 ? addedQuantity : item.quantity, // Fallback API payload
         size: item.size
       });
+
+      if (res?.success) {
+        if (addedQuantity > 0) {
+          toast.success(res.message || 'Đã thêm sản phẩm vào giỏ hàng', { id: 'cart-toast' });
+        } else {
+          // Trường hợp đã chạm giới hạn kho từ trước khi bấm thêm
+          const max = item.stockQuantity;
+          toast.error(`Trong kho chỉ còn tối đa ${max} sản phẩm`, { id: 'cart-toast' });
+        }
+      }
+
       if (res?.data) updateCartStateFromAPI(res.data);
       else fetchCart();
     } catch (err) {
@@ -148,7 +158,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }, {
         size: itemToRemove?.size,
       });
-      toast.success('Xóa sản phẩm khỏi giỏ hàng thành công');
+      toast.success(res?.message || 'Xóa sản phẩm khỏi giỏ hàng thành công', { id: 'cart-toast' });
       if (res?.data) updateCartStateFromAPI(res.data);
       else fetchCart();
     } catch (err) {
