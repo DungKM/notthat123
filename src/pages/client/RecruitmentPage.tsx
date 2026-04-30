@@ -141,24 +141,20 @@ const RecruitmentPage: React.FC = () => {
         }}
       />
 
-      {/* Premium Hero Section */}
-      <section className="relative h-125 flex items-center pt-20">
+      {/* Page Header */}
+      <section className="relative h-60 md:h-75 flex items-center pt-20">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=2000"
-            alt="Interior Luxury Office"
+            alt="Recruitment Banner"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/70"></div>
+          <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <Container className="relative z-10 text-center text-white">
-          <Badge variant="gold" className="mb-6 uppercase tracking-[0.3em]">CƠ HỘI NGHỀ NGHIỆP</Badge>
-          <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-widest leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-            KIẾN TẠO <br /> GIÁ TRỊ NGHỆ THUẬT
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Tuyển dụng
           </h1>
-          <p className="mt-6 text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
-            Nội Thất Hochi tìm kiếm những đồng nghiệp tài năng để cùng xây dựng những không gian sống đẳng cấp nhất Việt Nam.
-          </p>
         </Container>
       </section>
 
@@ -191,7 +187,7 @@ const RecruitmentPage: React.FC = () => {
                         }
                         if (trimmedLine.startsWith('-')) {
                           return (
-                            <div key={idx} className="flex items-start gap-3 ml-2 md:ml-4 text-gray-700 leading-relaxed text-base mb-2">
+                            <div key={idx} className="flex items-start gap-3 ml-2 md:ml-4 text-gray-700 leading-relaxed text-sm mb-2">
                               <span className="text-orange-500 font-bold mt-1 text-sm">■</span>
                               <p>{trimmedLine.substring(1).trim()}</p>
                             </div>
@@ -199,7 +195,7 @@ const RecruitmentPage: React.FC = () => {
                         }
                         if (trimmedLine === '') return <br key={idx} className="hidden md:block" />;
                         return (
-                          <p key={idx} className="text-gray-600 leading-relaxed text-base mb-2">{line}</p>
+                          <p key={idx} className="text-gray-600 leading-relaxed text-sm mb-2">{line}</p>
                         );
                       })}
                     </div>

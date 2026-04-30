@@ -48,6 +48,15 @@ const Header: React.FC = () => {
   const [isMobileSearching, setIsMobileSearching] = useState(false);
   const [hasMobileSearched, setHasMobileSearched] = useState(false);
   const [visualViewportHeight, setVisualViewportHeight] = useState<number | null>(null);
+  const [mobileBottomTab, setMobileBottomTab] = useState<'products' | 'projects' | 'architecture' | null>(null);
+  const [mobileActiveParentId, setMobileActiveParentId] = useState<{ products: string; projects: string; architecture: string }>({
+    products: '',
+    projects: '',
+    architecture: '',
+  });
+
+  const [isMobileVisible, setIsMobileVisible] = useState(true);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ─── Search ───
   const [searchQuery, setSearchQuery] = useState('');
@@ -132,7 +141,7 @@ const Header: React.FC = () => {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await searchRequest('GET', '', null, { keyword: searchQuery.trim(), limit: 8 });
+        const res = await searchRequest('GET', '', null, { keyword: searchQuery, limit: 8 });
         if (requestId !== desktopSearchRequestIdRef.current) return;
         const data = res?.data || {};
         setSearchResults({
@@ -166,7 +175,7 @@ const Header: React.FC = () => {
     const timer = setTimeout(async () => {
       setIsMobileSearching(true);
       try {
-        const res = await searchRequest('GET', '', null, { keyword: mobileSearchQuery.trim(), limit: 4 });
+        const res = await searchRequest('GET', '', null, { keyword: mobileSearchQuery, limit: 4 });
         if (requestId !== mobileSearchRequestIdRef.current) return;
         const data = res?.data || {};
         setMobileSearchResults({
@@ -223,9 +232,21 @@ const Header: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+
+      // Mobile: Ẩn/Hiện khi scroll
+      if (window.innerWidth < 1024) {
+        setIsMobileVisible(false);
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = setTimeout(() => {
+          setIsMobileVisible(true);
+        }, 300);
+      }
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
   }, []);
 
   // Ngăn chặn cuộn body khi giỏ hàng đang mở
@@ -339,6 +360,49 @@ const Header: React.FC = () => {
     location.pathname.startsWith('/doi-tac/');
 
   const isDarkHeader = true; // Luôn dùng nền trắng làm mặc định thay vì trong suốt
+
+  useEffect(() => {
+    // Close bottom submenu when route changes
+    setMobileBottomTab(null);
+  }, [location.pathname, location.search, location.hash]);
+
+  const getMobileParents = (tab: 'products' | 'projects' | 'architecture') => {
+    if (tab === 'products') return productCategories || [];
+    if (tab === 'projects') return congTrinhCategories || [];
+    return architectureCategories || [];
+  };
+
+  const ensureMobileActiveParent = (tab: 'products' | 'projects' | 'architecture') => {
+    const parents = getMobileParents(tab);
+    const existing = mobileActiveParentId[tab];
+    const hasExisting = parents.some((p: any) => String(p.id || p._id || p.slug) === String(existing));
+    if (existing && hasExisting) return existing;
+    const first = parents[0];
+    const firstId = first ? String(first.id || first._id || first.slug || '') : '';
+    if (firstId) setMobileActiveParentId((prev) => ({ ...prev, [tab]: firstId }));
+    return firstId;
+  };
+
+  const openMobileBottomTab = (tab: 'products' | 'projects' | 'architecture') => {
+    if (mobileBottomTab === tab) {
+      setMobileBottomTab(null);
+      return;
+    }
+    ensureMobileActiveParent(tab);
+    setMobileBottomTab(tab);
+  };
+
+  const mobileGoToCategory = (tab: 'products' | 'projects' | 'architecture', cat: any) => {
+    const id = String(cat?.id || cat?._id || cat?.slug || '');
+    if (!id) return;
+    const encoded = encodeURIComponent(id);
+
+    if (tab === 'products') navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?category=${encoded}#danh-sach`);
+    else if (tab === 'projects') navigate(`${ROUTES.CONG_TRINH}?category=${encoded}#danh-sach`);
+    else navigate(`${ROUTES.THIET_KE_KIEN_TRUC}?category=${encoded}#danh-sach`);
+
+    setMobileBottomTab(null);
+  };
 
   return (
     <>
@@ -1054,6 +1118,143 @@ const Header: React.FC = () => {
             </button>
           </div>
         </Container>
+
+        {/* Mobile Bottom Header (tabs + submenu) */}
+        <div className={`md:hidden border-t border-gray-100 transition-all duration-500 overflow-hidden ${isCartOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'} ${isMobileVisible ? 'max-h-[500px] py-0' : 'max-h-0 opacity-0 border-none'}`}>
+          <Container className="max-w-[1920px]! w-full">
+            <div className="flex items-center justify-between gap-1.5 py-2.5">
+              <button
+                type="button"
+                onClick={() => openMobileBottomTab('products')}
+                className={`flex-1 rounded-full px-2 py-2 text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${mobileBottomTab === 'products'
+                  ? 'bg-showcase-primary text-white scale-[1.02]'
+                  : 'bg-gray-50 text-gray-500 border border-transparent'
+                  }`}
+              >
+                Sản phẩm
+              </button>
+              <button
+                type="button"
+                onClick={() => openMobileBottomTab('projects')}
+                className={`flex-1 rounded-full px-2 py-2 text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${mobileBottomTab === 'projects'
+                  ? 'bg-showcase-primary text-white scale-[1.02]'
+                  : 'bg-gray-50 text-gray-500 border border-transparent'
+                  }`}
+              >
+                Nội thất
+              </button>
+              <button
+                type="button"
+                onClick={() => openMobileBottomTab('architecture')}
+                className={`flex-1 rounded-full px-2 py-2 text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${mobileBottomTab === 'architecture'
+                  ? 'bg-showcase-primary text-white scale-[1.02]'
+                  : 'bg-gray-50 text-gray-500 border border-transparent'
+                  }`}
+              >
+                Kiến trúc
+              </button>
+            </div>
+          </Container>
+
+          <AnimatePresence>
+            {mobileBottomTab && (
+              <>
+                <motion.div
+                  initial={{ y: -5, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -5, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute left-0 right-0 top-full bg-white z-[56] border-t border-gray-50 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.1)]"
+                >
+                  <Container className="max-w-[1920px]! w-full">
+                    {(() => {
+                      const tab = mobileBottomTab;
+                      const parents = getMobileParents(tab);
+                      const activeParentId = ensureMobileActiveParent(tab);
+                      const activeParent =
+                        parents.find((p: any) => String(p.id || p._id || p.slug) === String(activeParentId)) || parents[0];
+                      const children = activeParent?.children || [];
+
+                      return (
+                        <div className="py-3 space-y-3">
+                          <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-1">
+                            {parents.map((p: any) => {
+                              const pid = String(p.id || p._id || p.slug || '');
+                              const isActive = String(pid) === String(activeParentId);
+                              return (
+                                <button
+                                  key={pid}
+                                  type="button"
+                                  onClick={() => setMobileActiveParentId((prev) => ({ ...prev, [tab]: pid }))}
+                                  className={`shrink-0 px-3 py-2 rounded-full border text-[12px] font-bold transition-colors ${isActive
+                                    ? 'bg-showcase-primary text-white border-showcase-primary'
+                                    : 'bg-white text-gray-700 border-gray-200'
+                                    }`}
+                                >
+                                  {p.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex items-stretch gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-2">
+                            {children.length === 0 ? (
+                              <div className="text-[12px] text-gray-400 py-3">Không có danh mục con</div>
+                            ) : (
+                              children.map((c: any) => {
+                                const cid = String(c.id || c._id || c.slug || '');
+                                const img = c.representativeImage || c.image || c.thumbnail;
+                                return (
+                                  <button
+                                    key={cid}
+                                    type="button"
+                                    onClick={() => mobileGoToCategory(tab, c)}
+                                    className="shrink-0 w-[calc(50%-6px)] rounded-2xl border border-gray-100 bg-white hover:border-showcase-primary/40 transition-colors text-left overflow-hidden"
+                                  >
+                                    <div className="flex items-center gap-2 p-2">
+                                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
+                                        <img
+                                          src={img || '/assets/images/image-logo.png'}
+                                          alt={c.name}
+                                          className="w-full h-full object-cover"
+                                          loading="lazy"
+                                        />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-[9px] font-black text-gray-900 uppercase tracking-tight line-clamp-2 leading-tight">
+                                          {c.name}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+
+                          {/* Nút Xem tất cả ở góc dưới bên phải */}
+                          <div className="flex justify-end pt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const route = tab === 'products' ? ROUTES.DANH_SACH_SAN_PHAM : tab === 'projects' ? ROUTES.CONG_TRINH : ROUTES.THIET_KE_KIEN_TRUC;
+                                navigate(route);
+                                setMobileBottomTab(null);
+                              }}
+                              className="text-[10px] font-black text-showcase-primary flex items-center gap-1 uppercase tracking-widest active:opacity-70 transition-all py-1"
+                            >
+                              Xem tất cả <ArrowRightOutlined className="text-[9px]" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </Container>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
 
       {/* Cart Drawer - Improved for Mobile & Desktop */}
@@ -1530,6 +1731,43 @@ const Header: React.FC = () => {
           </>
         )}
       </AnimatePresence>
+
+      {/* Mobile Fixed Bottom Navigation (Đối tác, Video, Liên hệ, Tuyển dụng) */}
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-[1001] bg-white border-t border-gray-100 px-3 pt-2 transition-all duration-300 ${isMobileVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`} style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}>
+        <div className="flex items-center justify-between gap-1.5">
+          <Link
+            to={ROUTES.DOI_TAC}
+            className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
+          >
+            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Đối tác</span>
+          </Link>
+          <Link
+            to={ROUTES.VIDEO}
+            className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
+          >
+            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Videos</span>
+          </Link>
+          <Link
+            to={ROUTES.LIEN_HE}
+            className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
+          >
+            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Liên hệ</span>
+          </Link>
+          <Link
+            to={ROUTES.TUYEN_DUNG}
+            className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
+          >
+            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Tuyển dụng</span>
+          </Link>
+          <Link
+            to={ROUTES.DANG_NHAP}
+            target="_blank"
+            className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
+          >
+            <span className="text-[9px] font-black uppercase tracking-tighter text-gray-500">Nội bộ</span>
+          </Link>
+        </div>
+      </div>
     </>
   );
 };
