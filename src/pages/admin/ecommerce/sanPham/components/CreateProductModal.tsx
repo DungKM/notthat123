@@ -16,14 +16,13 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({ open, on
   const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
   const { request } = useApi<ProductItem>('/products');
 
+  const resetState = () => { setImageFiles([]); setImageDescriptions([]); };
+
   return (
     <ModalForm<Partial<ProductItem>>
       title="Thêm sản phẩm mới"
       open={open}
-      modalProps={{
-        destroyOnClose: true,
-        onCancel: () => onOpenChange(false),
-      }}
+      modalProps={{ destroyOnClose: true, onCancel: () => { onOpenChange(false); resetState(); }, width: 720 }}
       onFinish={async (values: any) => {
         const formData = new FormData();
         formData.append('name', values.name);
@@ -34,36 +33,45 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({ open, on
         if (values.style) formData.append('style', values.style);
         if (values.material) formData.append('material', values.material);
         if (values.description) formData.append('description', values.description);
-        if (values.sizeList && values.sizeList.length > 0) {
-          values.sizeList.forEach((s: any) => {
-            if (s && s.val) formData.append('size[]', s.val);
-          });
-        }
 
-        if (imageFiles.length > 0) {
-          for (const fileItem of imageFiles.slice(0, 4)) {
-            if (fileItem.originFileObj) {
-              const compressedFile = await compressImageFile(fileItem.originFileObj as File);
-              formData.append('images', compressedFile);
+        // Ảnh sản phẩm
+        for (const fileItem of imageFiles.slice(0, 4)) {
+          if (fileItem.originFileObj) {
+            formData.append('images', await compressImageFile(fileItem.originFileObj));
+          }
+        }
+        imageDescriptions.slice(0, imageFiles.length).forEach(d => formData.append('imageDescriptions', d || ''));
+
+        // Biến thể — ảnh lấy từ values.variants[i].variantImage (đã đúng index)
+        const variantList: any[] = values.variants || [];
+        if (variantList.length > 0) {
+          const variantsPayload = variantList.map(v => ({
+            size: v.size || '',
+            colorId: v.colorId || '',
+            price: v.price ?? 0,
+            stockQuantity: v.stockQuantity ?? 0,
+          }));
+          formData.append('variants', JSON.stringify(variantsPayload));
+
+          for (let i = 0; i < variantList.length; i++) {
+            // ProFormUploadButton trả về UploadFile[] trong form value
+            const imgList: any[] = variantList[i].variantImage || [];
+            const newFile = imgList.find((f: any) => f.originFileObj);
+            if (newFile?.originFileObj) {
+              formData.append(`variant_image_${i}`, await compressImageFile(newFile.originFileObj));
             }
           }
-          imageDescriptions.slice(0, imageFiles.length).forEach((desc) => {
-            formData.append('imageDescriptions', desc || '');
-          });
         }
 
         await request('POST', '', formData);
-        setImageFiles([]);
-        setImageDescriptions([]);
+        resetState();
         onSuccess();
         return true;
       }}
     >
-      <ProductFormFields 
-        imageFiles={imageFiles}
-        setImageFiles={setImageFiles}
-        imageDescriptions={imageDescriptions}
-        setImageDescriptions={setImageDescriptions}
+      <ProductFormFields
+        imageFiles={imageFiles} setImageFiles={setImageFiles}
+        imageDescriptions={imageDescriptions} setImageDescriptions={setImageDescriptions}
       />
     </ModalForm>
   );

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-components';
 import { useAuth } from '@/src/auth/hooks/useAuth';
 import { Dropdown, Space, Tag, Badge, Grid, message } from 'antd';
-import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined, VideoCameraOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
+import { LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, TeamOutlined, DollarOutlined, FileTextOutlined, CalendarOutlined, AppstoreOutlined, TagsOutlined, ShoppingCartOutlined, BarChartOutlined, MessageOutlined, BellOutlined, VideoCameraOutlined, ReloadOutlined, SettingOutlined, BgColorsOutlined } from '@ant-design/icons';
 import { Role } from '@/src/auth/types';
 import { ROUTES } from '@/src/routes/index';
 import logo from '@/src/statics/logo_hochi.jpg';
@@ -83,6 +83,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           children: [
             { path: ROUTES.ADMIN_SAN_PHAM, name: 'Quản lý sản phẩm', icon: <AppstoreOutlined /> },
             { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục ', icon: <TagsOutlined /> },
+            { path: ROUTES.ADMIN_MAU_SAC, name: 'Quản lý màu sắc', icon: <BgColorsOutlined /> },
           ]
         },
         {
@@ -103,12 +104,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
             { path: ROUTES.ADMIN_KIEN_TRUC_DANH_MUC, name: 'Quản lý danh mục', icon: <TagsOutlined /> },
           ]
         },
-        { path: ROUTES.ADMIN_QUAN_LY_DOI_TAC, name: 'Quản lý đối tác', icon: <ProjectOutlined /> },
-        { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Quản lý tuyển dụng', icon: <TeamOutlined /> },
-        { path: ROUTES.ADMIN_QUAN_LY_LIEN_HE, name: 'Quản lý liên hệ', icon: <MessageOutlined /> },
+        { path: ROUTES.ADMIN_QUAN_LY_DOI_TAC, name: 'Đối tác', icon: <ProjectOutlined /> },
+        { path: ROUTES.ADMIN_QUAN_LY_TUYEN_DUNG, name: 'Tuyển dụng', icon: <TeamOutlined /> },
+        { path: ROUTES.ADMIN_QUAN_LY_LIEN_HE, name: 'Liên hệ', icon: <MessageOutlined /> },
         { path: ROUTES.ADMIN_KHACH_HANG_QUAN_TAM, name: 'Khách hàng quan tâm', icon: <TeamOutlined /> },
-        { path: ROUTES.ADMIN_VIDEO, name: 'Quản lý Video', icon: <VideoCameraOutlined /> },
-        { path: ROUTES.ADMIN_DANH_GIA, name: 'Quản lý đánh giá', icon: <MessageOutlined /> },
+        { path: ROUTES.ADMIN_VIDEO, name: 'Video', icon: <VideoCameraOutlined /> },
+        { path: ROUTES.ADMIN_DANH_GIA, name: 'Đánh giá', icon: <MessageOutlined /> },
         { path: ROUTES.ADMIN_CAI_DAT_CONG_TY, name: 'Cài đặt công ty', icon: <SettingOutlined /> },
       ],
     };

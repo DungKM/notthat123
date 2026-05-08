@@ -112,3 +112,6 @@ export const useArchitectureCategoryService = () => useApi<any>('/architectures/
 export const useInterestesService = () => useApi<any>('/interests');
 
 export const useCompanyInfoService = () => useApi<any>('/company-info');
+
+// ─── Colors (Bảng màu) ───
+export const useColorService = () => useApi<any>('/colors');

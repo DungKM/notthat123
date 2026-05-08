@@ -70,6 +70,8 @@ const ProductDetailPage: React.FC = () => {
   const [stockWarning, setStockWarning] = React.useState<string | null>(null);
   const [activeImgIndex, setActiveImgIndex] = React.useState(0);
   const [selectedSize, setSelectedSize] = React.useState<string>('');
+  const [selectedColor, setSelectedColor] = React.useState<string>(''); // colorId
+  const [selectedVariant, setSelectedVariant] = React.useState<any>(null);
 
   const [isInterestModalOpen, setIsInterestModalOpen] = React.useState(false);
 
@@ -94,7 +96,29 @@ const ProductDetailPage: React.FC = () => {
     if (apiProduct) {
       setIsLiked(Boolean(apiProduct.isLiked));
       setLikeCount(Number(apiProduct.likeCount || 0));
-      if (apiProduct.size && apiProduct.size.length > 0 && !selectedSize) {
+
+      const variants: any[] = (apiProduct as any).variants || [];
+
+      if (variants.length > 0) {
+        // Chọn variant đầu tiên mặc định
+        const firstVariant = variants[0];
+        setSelectedSize(firstVariant.size || '');
+        setSelectedColor(firstVariant.colorId?.id || firstVariant.colorId || '');
+        setSelectedVariant(firstVariant);
+
+        if (firstVariant.image) {
+          let allImgs = apiProduct.images ? apiProduct.images.map((img: any) => img.url).filter(Boolean) : [];
+          variants.forEach((v: any) => {
+            if (v.image && !allImgs.includes(v.image)) {
+              allImgs.push(v.image);
+            }
+          });
+          const imgIdx = allImgs.indexOf(firstVariant.image);
+          if (imgIdx !== -1) {
+            setActiveImgIndex(imgIdx);
+          }
+        }
+      } else if (apiProduct.size && apiProduct.size.length > 0 && !selectedSize) {
         setSelectedSize(apiProduct.size[0]);
       }
     }
@@ -156,29 +180,66 @@ const ProductDetailPage: React.FC = () => {
   }, [slug, idFromUrl]);
 
   // Map API data sang View Model
+  const variants: any[] = apiProduct ? ((apiProduct as any).variants || []) : [];
+
+  // Các size duy nhất từ variants (nếu có), fallback về apiProduct.size
+  const variantSizes: string[] = variants.length > 0
+    ? [...new Set(variants.map((v: any) => v.size).filter(Boolean))]
+    : (apiProduct?.size || []);
+
+  // Màu sắc tương ứng với size đang chọn
+  const colorsForSelectedSize: any[] = variants
+    .filter((v: any) => v.size === selectedSize)
+    .map((v: any) => ({
+      id: v.colorId?.id || v.colorId || '',
+      name: v.colorId?.name || 'Màu',
+      image: v.image || null,
+      price: v.price,
+      stockQuantity: v.stockQuantity,
+      variantId: v._id,
+    }));
+
+  // Giá hiển thị: ưu tiên variant đang chọn
+  const displayPrice = selectedVariant?.price ?? apiProduct?.price ?? 0;
+  const displayStock = selectedVariant?.stockQuantity ?? apiProduct?.stockQuantity ?? 0;
+
+  let allImages = apiProduct?.images && apiProduct.images.length > 0
+    ? apiProduct.images.map((img: any) => img.url).filter(Boolean)
+    : [];
+
+  if (apiProduct && variants.length > 0) {
+    variants.forEach((v: any) => {
+      if (v.image && !allImages.includes(v.image)) {
+        allImages.push(v.image);
+      }
+    });
+  }
+
+  if (allImages.length === 0) {
+    allImages = [
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1595514535415-816bdfb607ce?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1583847268964-b28ce8f52859?auto=format&fit=crop&q=80&w=800',
+    ];
+  }
+
   const product = apiProduct ? {
     id: apiProduct.id,
     slug: apiProduct.id,
     title: apiProduct.name || 'Đang cập nhật',
     category: apiProduct.categoryId?.name || 'Sản phẩm',
-    price: apiProduct.price || 0,
-    priceText: apiProduct.price ? `${apiProduct.price.toLocaleString()} VND` : 'Liên hệ',
+    price: displayPrice,
+    priceText: displayPrice > 0 ? `${displayPrice.toLocaleString()} VND` : 'Liên hệ',
     productCode: apiProduct.productCode || 'Đang cập nhật',
     description: apiProduct.description || 'Chi tiết sản phẩm nội thất cao cấp với thiết kế hiện đại, chất liệu bền bỉ và đẹp mắt. Tôn vinh Không gian sống đẳng cấp.',
-    stockQuantity: apiProduct.stockQuantity || 0,
-    sizes: apiProduct.size || [],
-    images: apiProduct.images && apiProduct.images.length > 0
-      ? apiProduct.images.map((img: any) => img.url).filter(Boolean)
-      : [
-        'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=1200',
-        'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&q=80&w=800',
-        'https://images.unsplash.com/photo-1595514535415-816bdfb607ce?auto=format&fit=crop&q=80&w=800',
-        'https://images.unsplash.com/photo-1583847268964-b28ce8f52859?auto=format&fit=crop&q=80&w=800',
-      ],
+    stockQuantity: displayStock,
+    sizes: variantSizes,
+    images: allImages,
     specs: [
       { label: 'Chất liệu', value: apiProduct.material || 'Đang cập nhật' },
       { label: 'Phong cách', value: apiProduct.style || 'Đang cập nhật' },
-      { label: 'Tồn kho', value: apiProduct.stockQuantity ? `${apiProduct.stockQuantity} sản phẩm` : 'Đặt hàng' },
+      { label: 'Tồn kho', value: displayStock ? `${displayStock} sản phẩm` : 'Đặt hàng' },
       { label: 'Bảo hành', value: apiProduct.warranty || 'Đang cập nhật' },
     ],
     imageDetails: apiProduct.images && apiProduct.images.length > 0
@@ -201,6 +262,8 @@ const ProductDetailPage: React.FC = () => {
       subtotal: product.price * (Number(quantity) || 1),
       stockQuantity: product.stockQuantity,
       size: selectedSize || undefined,
+      color: selectedVariant?.colorId?.name || undefined,
+      variantId: selectedVariant?._id || selectedVariant?.id || undefined,
     });
     // Trigger cart drawer open
     // setIsCartOpen(true);
@@ -335,8 +398,18 @@ const ProductDetailPage: React.FC = () => {
 
                       {/* Price */}
                       <div className="mb-4 pb-4 border-b border-gray-100 flex items-center gap-4">
-                        <div className="text-xl font-bold text-[#cca32e]">
-                          {product.price > 0 && quantity ? `${(product.price * (Number(quantity) || 1)).toLocaleString()} VND` : product.priceText}
+                        <div>
+                          <div className="text-xl font-bold text-[#cca32e]">
+                            {displayPrice > 0 && quantity
+                              ? `${(displayPrice * (Number(quantity) || 1)).toLocaleString()} VND`
+                              : 'Liên hệ'}
+                          </div>
+                          {selectedVariant && variants.length > 1 && (
+                            <div className="text-[12px] text-gray-400 mt-0.5">
+                              Giá cho: {selectedVariant.size}
+                              {selectedVariant.colorId?.name ? ` · ${selectedVariant.colorId.name}` : ''}
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={handleLike}
@@ -362,15 +435,32 @@ const ProductDetailPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Sizes */}
+                      {/* Sizes + Colors từ Variants */}
                       {product.sizes && product.sizes.length > 0 && (
                         <div className="mb-6">
+                          {/* Chọn kích thước */}
                           <h3 className="text-[14px] font-bold text-gray-800 mb-3">Kích thước (cm):</h3>
-                          <div className="flex flex-wrap gap-2.5">
+                          <div className="flex flex-wrap gap-2.5 mb-4">
                             {product.sizes.map((s: string, idx: number) => (
                               <button
                                 key={idx}
-                                onClick={() => setSelectedSize(s)}
+                                onClick={() => {
+                                  setSelectedSize(s);
+                                  // Khi đổi size, chọn màu đầu tiên của size đó
+                                  const firstVariantOfSize = variants.find((v: any) => v.size === s);
+                                  if (firstVariantOfSize) {
+                                    const cid = firstVariantOfSize.colorId?.id || firstVariantOfSize.colorId || '';
+                                    setSelectedColor(cid);
+                                    setSelectedVariant(firstVariantOfSize);
+                                    if (firstVariantOfSize.image && product) {
+                                      const imgIndex = product.images.indexOf(firstVariantOfSize.image);
+                                      if (imgIndex !== -1) setActiveImgIndex(imgIndex);
+                                    }
+                                  } else {
+                                    setSelectedColor('');
+                                    setSelectedVariant(null);
+                                  }
+                                }}
                                 className={`px-4 py-2 border rounded-md transition-all text-[13px] font-semibold !cursor-pointer ${
                                   selectedSize === s
                                     ? 'border-[#cca32e] text-[#cca32e] bg-[#cca32e]/5 shadow-sm'
@@ -381,6 +471,53 @@ const ProductDetailPage: React.FC = () => {
                               </button>
                             ))}
                           </div>
+
+                          {/* Màu sắc theo size đang chọn */}
+                          {colorsForSelectedSize.length > 0 && (
+                            <div>
+                              <h3 className="text-[14px] font-bold text-gray-800 mb-3">
+                                Màu sắc:
+                                {selectedVariant && (
+                                  <span className="ml-2 text-[#cca32e] font-bold">
+                                    {selectedVariant.colorId?.name || ''}
+                                  </span>
+                                )}
+                              </h3>
+                              <div className="flex flex-wrap gap-2.5">
+                                {colorsForSelectedSize.map((c: any) => (
+                                  <button
+                                    key={c.id}
+                                    onClick={() => {
+                                      setSelectedColor(c.id);
+                                      const v = variants.find((vt: any) =>
+                                        vt.size === selectedSize &&
+                                        (vt.colorId?.id || vt.colorId) === c.id
+                                      );
+                                      setSelectedVariant(v || null);
+                                      if (v && v.image && product) {
+                                        const imgIndex = product.images.indexOf(v.image);
+                                        if (imgIndex !== -1) setActiveImgIndex(imgIndex);
+                                      }
+                                    }}
+                                    title={c.name}
+                                    className={`relative flex flex-col items-center justify-center px-4 py-2 min-w-[80px] border rounded-md transition-all !cursor-pointer ${
+                                      selectedColor === c.id
+                                        ? 'border-[#cca32e] bg-[#cca32e]/5 shadow-sm ring-1 ring-[#cca32e]'
+                                        : 'border-gray-200 bg-white hover:border-[#cca32e]'
+                                    }`}
+                                  >
+                                    <span className={`text-[13px] font-bold ${selectedColor === c.id ? 'text-[#cca32e]' : 'text-gray-700 group-hover:text-[#cca32e]'}`}>{c.name}</span>
+                                    <span className={`text-[11px] mt-0.5 ${selectedColor === c.id ? 'text-[#cca32e]/80' : 'text-gray-500'}`}>{c.price > 0 ? `${c.price.toLocaleString()}đ` : 'Liên hệ'}</span>
+                                    {selectedColor === c.id && (
+                                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#cca32e] rounded-full flex items-center justify-center shadow-sm">
+                                        <CheckOutlined className="text-white text-[8px]" />
+                                      </span>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 

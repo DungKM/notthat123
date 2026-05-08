@@ -64,6 +64,7 @@ const ProjectStagesPage = lazy(() => import('@/src/pages/admin/projects/giaiDoan
 const ItemCategoryManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/hangMuc/ItemCategoryManagementPage'));
 const CustomerInterestPage = lazy(() => import('@/src/pages/admin/ecommerce/khachHangQuanTam/CustomerInterestPage'));
 const CompanySettingsPage = lazy(() => import('@/src/pages/admin/ecommerce/caiDat/CompanySettingsPage'));
+const ColorManagementPage = lazy(() => import('@/src/pages/admin/ecommerce/mauSac/ColorManagementPage'));
 
 const Unauthorized = () => (
   <div style={{ padding: 50, textAlign: 'center' }}>
@@ -299,6 +300,15 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
                 <CompanySettingsPage />
+              </ProtectedAdminRoute>
+            }
+          />
+
+          <Route
+            path={ROUTES.ADMIN_MAU_SAC}
+            element={
+              <ProtectedAdminRoute roles={[Role.DIRECTOR, Role.ACCOUNTANT]}>
+                <ColorManagementPage />
               </ProtectedAdminRoute>
             }
           />

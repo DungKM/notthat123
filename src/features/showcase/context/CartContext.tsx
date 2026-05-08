@@ -13,9 +13,11 @@ export interface CartItem {
   subtotal: number;
   stockQuantity?: number;
   size?: string; // Thêm trường size nếu cần thiết
+  color?: string; // Thêm màu sắc
+  variantId?: string; // Thêm ID biến thể
 }
 
-const makeCartLineKey = (productId?: string, size?: string) => `${productId || ''}::${size || '__nosize__'}`;
+const makeCartLineKey = (productId?: string, size?: string, variantId?: string) => `${productId || ''}::${size || '__nosize__'}::${variantId || '__novariant__'}`;
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -51,8 +53,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mappedItems: CartItem[] = data.items.map((it: any) => {
         const pId = it.productId?.id || it.productId?._id;
         const price = it.productId?.price || 0;
-        const lineKey = makeCartLineKey(pId, it.size);
-        const oldItem = prevItems.find((p) => p.id === lineKey || (p.productId === pId && p.size === it.size));
+        const lineKey = makeCartLineKey(pId, it.size, it.variantId);
+        const oldItem = prevItems.find((p) => p.id === lineKey || (p.productId === pId && p.size === it.size && p.variantId === it.variantId));
 
         return {
           id: it._id || lineKey, // Nếu không có cartItemId từ backend thì dùng key productId+size
@@ -65,6 +67,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           subtotal: it.subtotal || (price * it.quantity),
           stockQuantity: it.productId?.stockQuantity ?? oldItem?.stockQuantity,
           size: it.size,
+          color: it.color,
+          variantId: it.variantId,
         };
       });
       return mappedItems;
@@ -93,13 +97,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 1. Cập nhật state (Optimistic UI) để báo hiệu cho người dùng ngay lập tức
     let addedQuantity = item.quantity;
     setCartItems((prev) => {
-      // Tìm xem có cart item nào với cùng productId (hay id) và cùng size ko
+      // Tìm xem có cart item nào với cùng productId (hay id) và cùng size, variantId ko
       const pId = item.productId || item.id;
-      const lineKey = makeCartLineKey(pId, item.size);
-      const existed = prev.find((p) => (p.productId === pId || p.id === pId) && p.size === item.size);
+      const lineKey = makeCartLineKey(pId, item.size, item.variantId);
+      const existed = prev.find((p) => (p.productId === pId || p.id === pId) && p.size === item.size && p.variantId === item.variantId);
       if (existed) {
         return prev.map((p) => {
-          if ((p.productId === pId || p.id === pId) && p.size === item.size) {
+          if ((p.productId === pId || p.id === pId) && p.size === item.size && p.variantId === item.variantId) {
             let newQuantity = p.quantity + item.quantity;
             const max = p.stockQuantity ?? item.stockQuantity;
             if (max !== undefined && max > 0 && newQuantity > max) {
@@ -120,7 +124,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await request('POST', '/add', {
         productId: item.productId || item.id,
         quantity: addedQuantity > 0 ? addedQuantity : item.quantity, // Fallback API payload
-        size: item.size
+        size: item.size,
+        color: item.color,
+        variantId: item.variantId
       });
 
       if (res?.success) {
