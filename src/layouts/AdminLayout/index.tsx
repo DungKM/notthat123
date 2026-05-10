@@ -83,7 +83,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
           children: [
             { path: ROUTES.ADMIN_SAN_PHAM, name: 'Quản lý sản phẩm', icon: <AppstoreOutlined /> },
             { path: ROUTES.ADMIN_DANH_MUC, name: 'Quản lý danh mục ', icon: <TagsOutlined /> },
-            { path: ROUTES.ADMIN_MAU_SAC, name: 'Quản lý màu sắc', icon: <BgColorsOutlined /> },
           ]
         },
         {
@@ -110,6 +109,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Hệ thố
         { path: ROUTES.ADMIN_KHACH_HANG_QUAN_TAM, name: 'Khách hàng quan tâm', icon: <TeamOutlined /> },
         { path: ROUTES.ADMIN_VIDEO, name: 'Video', icon: <VideoCameraOutlined /> },
         { path: ROUTES.ADMIN_DANH_GIA, name: 'Đánh giá', icon: <MessageOutlined /> },
+        { path: ROUTES.ADMIN_MAU_SAC, name: 'Quản lý màu sắc', icon: <BgColorsOutlined /> },
         { path: ROUTES.ADMIN_CAI_DAT_CONG_TY, name: 'Cài đặt công ty', icon: <SettingOutlined /> },
       ],
     };

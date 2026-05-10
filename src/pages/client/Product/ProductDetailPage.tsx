@@ -74,6 +74,7 @@ const ProductDetailPage: React.FC = () => {
   const [selectedVariant, setSelectedVariant] = React.useState<any>(null);
 
   const [isInterestModalOpen, setIsInterestModalOpen] = React.useState(false);
+  const [isDescExpanded, setIsDescExpanded] = React.useState(false);
 
   const { data: apiProduct, loading, getBySlug, getById, list: relatedProducts, getAll: getRelated, request: productRequest } = useProductService();
   const { list: newProducts, getAll: getNewProducts } = useProductService();
@@ -461,11 +462,10 @@ const ProductDetailPage: React.FC = () => {
                                     setSelectedVariant(null);
                                   }
                                 }}
-                                className={`px-4 py-2 border rounded-md transition-all text-[13px] font-semibold !cursor-pointer ${
-                                  selectedSize === s
+                                className={`px-4 py-2 border rounded-md transition-all text-[13px] font-semibold !cursor-pointer ${selectedSize === s
                                     ? 'border-[#cca32e] text-[#cca32e] bg-[#cca32e]/5 shadow-sm'
                                     : 'border-gray-200 text-gray-700 bg-white hover:border-[#cca32e] hover:text-[#cca32e]'
-                                }`}
+                                  }`}
                               >
                                 {s}
                               </button>
@@ -500,11 +500,10 @@ const ProductDetailPage: React.FC = () => {
                                       }
                                     }}
                                     title={c.name}
-                                    className={`relative flex flex-col items-center justify-center px-4 py-2 min-w-[80px] border rounded-md transition-all !cursor-pointer ${
-                                      selectedColor === c.id
+                                    className={`relative flex flex-col items-center justify-center px-4 py-2 min-w-[80px] border rounded-md transition-all !cursor-pointer ${selectedColor === c.id
                                         ? 'border-[#cca32e] bg-[#cca32e]/5 shadow-sm ring-1 ring-[#cca32e]'
                                         : 'border-gray-200 bg-white hover:border-[#cca32e]'
-                                    }`}
+                                      }`}
                                   >
                                     <span className={`text-[13px] font-bold ${selectedColor === c.id ? 'text-[#cca32e]' : 'text-gray-700 group-hover:text-[#cca32e]'}`}>{c.name}</span>
                                     <span className={`text-[11px] mt-0.5 ${selectedColor === c.id ? 'text-[#cca32e]/80' : 'text-gray-500'}`}>{c.price > 0 ? `${c.price.toLocaleString()}đ` : 'Liên hệ'}</span>
@@ -697,51 +696,78 @@ const ProductDetailPage: React.FC = () => {
                 </div>
 
                 {/* Content Box */}
-                <div className="border border-t-0 border-gray-200 bg-white p-6 sm:p-10 mb-16">
-                  <div className="prose max-w-none text-gray-900 text-[15px] leading-relaxed">
-                    {/* Mô tả sản phẩm */}
-                    {product.description && (
-                      <p className="font-bold mb-8 text-black">
-                        {product.description}
-                      </p>
-                    )}
+                <div className="border border-t-0 border-gray-200 bg-white mb-16">
+                  {/* Collapsible wrapper */}
+                  <div className="relative">
+                    <div
+                      className="overflow-hidden transition-all duration-500 ease-in-out"
+                      style={{ maxHeight: isDescExpanded ? '9999px' : '420px' }}
+                    >
+                      <div className="prose max-w-none text-gray-900 text-[15px] leading-relaxed p-6 sm:p-10">
+                        {/* Mô tả sản phẩm */}
+                        {product.description && (
+                          <p className="font-bold mb-8 text-black">
+                            {product.description}
+                          </p>
+                        )}
 
-                    {/* Thông số kỹ thuật */}
-                    <div className="mb-8 border border-gray-200 rounded-lg overflow-hidden">
-                      <table className="w-full text-[14px]">
-                        <tbody>
-                          {product.specs.map((spec: any, i: number) => (
-                            <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                              <td className="px-4 py-3 font-semibold text-gray-700 w-[140px] border-r border-gray-200">{spec.label}</td>
-                              <td className="px-4 py-3 text-gray-800">{spec.value}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        {/* Thông số kỹ thuật */}
+                        <div className="mb-8 border border-gray-200 rounded-lg overflow-hidden">
+                          <table className="w-full text-[14px]">
+                            <tbody>
+                              {product.specs.map((spec: any, i: number) => (
+                                <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                                  <td className="px-4 py-3 font-semibold text-gray-700 w-[140px] border-r border-gray-200">{spec.label}</td>
+                                  <td className="px-4 py-3 text-gray-800">{spec.value}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Ảnh sản phẩm kèm mô tả */}
+                        {product.imageDetails && product.imageDetails.length > 0 && (
+                          <Image.PreviewGroup>
+                            <div className="space-y-6 [&_.ant-image]:!w-full [&_.ant-image]:!max-w-4xl [&_.ant-image]:!mx-auto [&_.ant-image]:!block [&_.ant-image-img]:!w-full [&_.ant-image-img]:!block [&_.ant-image-img]:!rounded cursor-pointer">
+                              {product.imageDetails.map((img: any, i: number) => (
+                                <div key={i} className="flex flex-col items-center">
+                                  <Image
+                                    src={img.url}
+                                    alt={img.description || product.title}
+                                    className="w-full max-w-4xl mx-auto block rounded"
+                                    loading="lazy"
+                                  />
+                                  {img.description && (
+                                    <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
+                                      {img.description}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </Image.PreviewGroup>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Ảnh sản phẩm kèm mô tả */}
-                    {product.imageDetails && product.imageDetails.length > 0 && (
-                      <Image.PreviewGroup>
-                        <div className="space-y-6 [&_.ant-image]:!w-full [&_.ant-image]:!max-w-4xl [&_.ant-image]:!mx-auto [&_.ant-image]:!block [&_.ant-image-img]:!w-full [&_.ant-image-img]:!block [&_.ant-image-img]:!rounded cursor-pointer">
-                          {product.imageDetails.map((img: any, i: number) => (
-                            <div key={i} className="flex flex-col items-center">
-                              <Image
-                                src={img.url}
-                                alt={img.description || product.title}
-                                className="w-full max-w-4xl mx-auto block rounded"
-                                loading="lazy"
-                              />
-                              {img.description && (
-                                <div className="w-full max-w-4xl bg-[#f2f2f2] py-2.5 px-4 mt-1 text-center text-[14px] italic text-black">
-                                  {img.description}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </Image.PreviewGroup>
+                    {/* Gradient fade khi chưa mở */}
+                    {!isDescExpanded && (
+                      <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white to-transparent pointer-events-none" />
                     )}
+                  </div>
+
+                  {/* Nút Xem thêm / Thu gọn */}
+                  <div className="flex justify-center py-4 border-t border-gray-100">
+                    <button
+                      onClick={() => setIsDescExpanded(prev => !prev)}
+                      className="inline-flex items-center gap-2 px-6 py-2 border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-semibold rounded-full text-[13px] transition-all duration-200 cursor-pointer"
+                    >
+                      {isDescExpanded ? (
+                        <><span>Thu gọn</span><span className="text-[10px]">▲</span></>
+                      ) : (
+                        <><span>Xem thêm nội dung</span><span className="text-[10px]">▼</span></>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
