@@ -14,9 +14,14 @@ interface CreateProductModalProps {
 export const CreateProductModal: React.FC<CreateProductModalProps> = ({ open, onOpenChange, onSuccess }) => {
   const [imageFiles, setImageFiles] = useState<any[]>([]);
   const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
+  const [productType, setProductType] = useState<'simple' | 'variant'>('simple');
   const { request } = useApi<ProductItem>('/products');
 
-  const resetState = () => { setImageFiles([]); setImageDescriptions([]); };
+  const resetState = () => {
+    setImageFiles([]);
+    setImageDescriptions([]);
+    setProductType('simple');
+  };
 
   return (
     <ModalForm<Partial<ProductItem>>
@@ -27,8 +32,6 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({ open, on
         const formData = new FormData();
         formData.append('name', values.name);
         formData.append('categoryId', values.categoryId);
-        if (values.price) formData.append('price', values.price.toString());
-        if (values.stockQuantity) formData.append('stockQuantity', values.stockQuantity.toString());
         if (values.warranty) formData.append('warranty', values.warranty);
         if (values.style) formData.append('style', values.style);
         if (values.material) formData.append('material', values.material);
@@ -42,23 +45,28 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({ open, on
         }
         imageDescriptions.slice(0, imageFiles.length).forEach(d => formData.append('imageDescriptions', d || ''));
 
-        // Biến thể — ảnh lấy từ values.variants[i].variantImage (đã đúng index)
-        const variantList: any[] = values.variants || [];
-        if (variantList.length > 0) {
-          const variantsPayload = variantList.map(v => ({
-            size: v.size || '',
-            colorId: v.colorId || '',
-            price: v.price ?? 0,
-            stockQuantity: v.stockQuantity ?? 0,
-          }));
-          formData.append('variants', JSON.stringify(variantsPayload));
+        if (productType === 'simple') {
+          // Simple: 1 giá, 1 tồn kho
+          if (values.price) formData.append('price', values.price.toString());
+          if (values.stockQuantity) formData.append('stockQuantity', values.stockQuantity.toString());
+        } else {
+          // Variant: nhiều biến thể
+          const variantList: any[] = values.variants || [];
+          if (variantList.length > 0) {
+            const variantsPayload = variantList.map(v => ({
+              size: Array.isArray(v.size) ? (v.size[0] ?? '') : (v.size || ''),
+              colorId: v.colorId || '',
+              price: v.price ?? 0,
+              stockQuantity: v.stockQuantity ?? 0,
+            }));
+            formData.append('variants', JSON.stringify(variantsPayload));
 
-          for (let i = 0; i < variantList.length; i++) {
-            // ProFormUploadButton trả về UploadFile[] trong form value
-            const imgList: any[] = variantList[i].variantImage || [];
-            const newFile = imgList.find((f: any) => f.originFileObj);
-            if (newFile?.originFileObj) {
-              formData.append(`variant_image_${i}`, await compressImageFile(newFile.originFileObj));
+            for (let i = 0; i < variantList.length; i++) {
+              const imgList: any[] = variantList[i].variantImage || [];
+              const newFile = imgList.find((f: any) => f.originFileObj);
+              if (newFile?.originFileObj) {
+                formData.append(`variant_image_${i}`, await compressImageFile(newFile.originFileObj));
+              }
             }
           }
         }
@@ -72,6 +80,8 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({ open, on
       <ProductFormFields
         imageFiles={imageFiles} setImageFiles={setImageFiles}
         imageDescriptions={imageDescriptions} setImageDescriptions={setImageDescriptions}
+        productType={productType}
+        onProductTypeChange={setProductType}
       />
     </ModalForm>
   );

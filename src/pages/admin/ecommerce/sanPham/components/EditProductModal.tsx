@@ -15,10 +15,15 @@ interface EditProductModalProps {
 export const EditProductModal: React.FC<EditProductModalProps> = ({ editRecord, onClose, onSuccess }) => {
   const [imageFiles, setImageFiles] = useState<any[]>([]);
   const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
+  const [productType, setProductType] = useState<'simple' | 'variant'>('simple');
   const { request } = useApi<ProductItem>('/products');
 
   useEffect(() => {
     if (editRecord) {
+      // Detect loại sản phẩm từ dữ liệu API
+      const variants = (editRecord as any).variants || [];
+      setProductType(variants.length > 0 ? 'variant' : 'simple');
+
       const existingImages = (editRecord.images || []).map((img: any, i: number) => {
         const urlStr = typeof img === 'string' ? img : img.url;
         return { uid: img._id || img.id || `-img-${i}`, name: urlStr.split('/').pop() || `image-${i}`, status: 'done', url: urlStr, thumbUrl: urlStr };
@@ -28,6 +33,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ editRecord, 
     } else {
       setImageFiles([]);
       setImageDescriptions([]);
+      setProductType('simple');
     }
   }, [editRecord]);
 
@@ -37,7 +43,6 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ editRecord, 
     return {
       ...editRecord,
       categoryId: typeof editRecord.categoryId === 'object' ? editRecord.categoryId?.id : editRecord.categoryId,
-      // ✅ Ảnh biến thể nằm trong initialValues → đúng index khi submit
       variants: variants.map((v: any, i: number) => {
         const imgUrl = typeof v.image === 'string' ? v.image : v.image?.url || '';
         const variantImage = imgUrl ? [{
@@ -48,7 +53,8 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ editRecord, 
           thumbUrl: imgUrl,
         }] : [];
         return {
-          size: v.size || '',
+          // size có thể là string hoặc mảng — normalize về string để hiển thị
+          size: Array.isArray(v.size) ? v.size : [v.size || ''],
           colorId: v.colorId?.id || v.colorId || '',
           price: v.price ?? '',
           stockQuantity: v.stockQuantity ?? '',
@@ -69,8 +75,6 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ editRecord, 
         const formData = new FormData();
         formData.append('name', values.name);
         formData.append('categoryId', values.categoryId);
-        if (values.price) formData.append('price', values.price.toString());
-        if (values.stockQuantity) formData.append('stockQuantity', values.stockQuantity.toString());
         if (values.warranty) formData.append('warranty', values.warranty);
         if (values.style) formData.append('style', values.style);
         if (values.material) formData.append('material', values.material);
@@ -93,25 +97,29 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ editRecord, 
         if (Object.keys(existingMap).length > 0) formData.append('existingImageDescriptions', JSON.stringify(existingMap));
         if (keepImageCount === 0) formData.append('keepImageIds', '[]');
 
-        // Biến thể — ảnh lấy từ values.variants[i].variantImage (luôn đúng vị trí)
-        const variantList: any[] = values.variants || [];
-        if (variantList.length > 0) {
-          const variantsPayload = variantList.map(v => ({
-            size: v.size || '',
-            colorId: v.colorId || '',
-            price: v.price ?? 0,
-            stockQuantity: v.stockQuantity ?? 0,
-          }));
-          formData.append('variants', JSON.stringify(variantsPayload));
+        if (productType === 'simple') {
+          // Simple: 1 giá, 1 tồn kho
+          if (values.price) formData.append('price', values.price.toString());
+          if (values.stockQuantity) formData.append('stockQuantity', values.stockQuantity.toString());
+        } else {
+          // Variant: nhiều biến thể
+          const variantList: any[] = values.variants || [];
+          if (variantList.length > 0) {
+            const variantsPayload = variantList.map(v => ({
+              size: Array.isArray(v.size) ? (v.size[0] ?? '') : (v.size || ''),
+              colorId: v.colorId || '',
+              price: v.price ?? 0,
+              stockQuantity: v.stockQuantity ?? 0,
+            }));
+            formData.append('variants', JSON.stringify(variantsPayload));
 
-          for (let i = 0; i < variantList.length; i++) {
-            const imgList: any[] = variantList[i].variantImage || [];
-            // Tìm file MỚI (có originFileObj) — bỏ qua ảnh cũ status:done
-            const newFile = imgList.find((f: any) => f.originFileObj);
-            if (newFile?.originFileObj) {
-              formData.append(`variant_image_${i}`, await compressImageFile(newFile.originFileObj));
+            for (let i = 0; i < variantList.length; i++) {
+              const imgList: any[] = variantList[i].variantImage || [];
+              const newFile = imgList.find((f: any) => f.originFileObj);
+              if (newFile?.originFileObj) {
+                formData.append(`variant_image_${i}`, await compressImageFile(newFile.originFileObj));
+              }
             }
-            // Không có newFile → giữ nguyên ảnh cũ trên server
           }
         }
 
@@ -124,6 +132,8 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ editRecord, 
       <ProductFormFields
         imageFiles={imageFiles} setImageFiles={setImageFiles}
         imageDescriptions={imageDescriptions} setImageDescriptions={setImageDescriptions}
+        productType={productType}
+        onProductTypeChange={setProductType}
       />
     </ModalForm>
   );
