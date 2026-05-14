@@ -473,12 +473,18 @@ const ProductDetailPage: React.FC = () => {
                                     setSelectedVariant(null);
                                   }
                                 }}
-                                className={`px-4 py-2 border-2 rounded-md transition-all text-[13px] font-semibold !cursor-pointer ${selectedSize === s
-                                  ? 'border-[#cca32e] text-[#cca32e] bg-[#cca32e]/5 shadow-sm'
-                                  : 'border-gray-400 text-gray-700 bg-white hover:border-[#cca32e] hover:text-[#cca32e]'
-                                  }`}
+                                className={`relative px-4 py-2 border-2 rounded-md transition-all text-[13px] font-semibold !cursor-pointer ${
+                                  selectedSize === s
+                                    ? 'border-[#cca32e] text-[#cca32e] bg-[#cca32e]/5 shadow-sm ring-1 ring-[#cca32e]'
+                                    : 'border-gray-300 text-gray-700 bg-white hover:border-[#cca32e] hover:text-[#cca32e]'
+                                }`}
                               >
                                 {s}
+                                {selectedSize === s && (
+                                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#cca32e] rounded-full flex items-center justify-center shadow-sm">
+                                    <CheckOutlined className="text-white text-[8px]" />
+                                  </span>
+                                )}
                               </button>
                             ))}
                           </div>
@@ -499,6 +505,7 @@ const ProductDetailPage: React.FC = () => {
                                   const cId = c.id || c._id || '';
                                   const isAvailable = !selectedSize || availableColorIdsForSize.has(cId);
                                   const isActive = selectedColor === cId;
+                                  const hasImage = !!c.imageUrl;
                                   return (
                                     <button
                                       key={cId}
@@ -517,16 +524,36 @@ const ProductDetailPage: React.FC = () => {
                                         }
                                       }}
                                       title={!isAvailable ? `${c.name} — không có với kích thước này` : c.name}
-                                      className={`relative flex flex-col items-center justify-center px-4 py-2 min-w-[80px] border-2 rounded-md transition-all
+                                      className={`relative flex flex-col items-center gap-1.5 px-3 py-2 min-w-[72px] border-2 rounded-md transition-all
                                         ${
                                           !isAvailable
                                             ? 'border-gray-200 bg-gray-50 opacity-40 cursor-not-allowed'
                                             : isActive
-                                              ? 'border-[#cca32e] bg-[#cca32e]/5 shadow-sm ring-1 ring-[#cca32e] !cursor-pointer'
-                                              : 'border-gray-400 bg-white hover:border-[#cca32e] !cursor-pointer'
+                                              ? 'border-[#cca32e] text-[#cca32e] bg-[#cca32e]/5 shadow-sm ring-1 ring-[#cca32e] !cursor-pointer'
+                                              : 'border-gray-300 bg-white hover:border-[#cca32e] hover:text-[#cca32e] !cursor-pointer'
                                         }`}
                                     >
-                                      <span className={`text-[13px] font-bold ${
+                                      {/* Thumbnail ảnh hoặc text placeholder */}
+                                      {hasImage ? (
+                                        <div className="w-11 h-11 rounded overflow-hidden border border-gray-200 shrink-0">
+                                          <img
+                                            src={c.imageUrl}
+                                            alt={c.name}
+                                            className="w-full h-full object-cover"
+                                            loading="lazy"
+                                          />
+                                        </div>
+                                      ) : (
+                                        <div className={`w-11 h-11 rounded flex items-center justify-center text-[10px] font-bold border shrink-0 ${
+                                          !isAvailable ? 'border-gray-200 bg-gray-100 text-gray-300' :
+                                          isActive ? 'border-[#cca32e]/40 bg-[#cca32e]/10 text-[#cca32e]' :
+                                          'border-gray-200 bg-gray-50 text-gray-400'
+                                        }`}>
+                                          No img
+                                        </div>
+                                      )}
+                                      {/* Tên màu */}
+                                      <span className={`text-[12px] font-semibold leading-none ${
                                         !isAvailable ? 'text-gray-300 line-through' :
                                         isActive ? 'text-[#cca32e]' : 'text-gray-700'
                                       }`}>{c.name}</span>
