@@ -96,16 +96,16 @@ const CheckoutPage: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!customer.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên';
+    if (!customer.fullName.trim()) newErrors.fullName = t('checkout.errors.full_name_required');
     if (!customer.phone.trim()) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại';
+      newErrors.phone = t('checkout.errors.phone_required');
     } else if (!/^\d{10,11}$/.test(customer.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = t('checkout.errors.phone_invalid');
     }
     if (customer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('checkout.errors.email_invalid');
     }
-    if (!customer.address.trim()) newErrors.address = 'Vui lòng nhập địa chỉ';
+    if (!customer.address.trim()) newErrors.address = t('checkout.errors.address_required');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -124,7 +124,7 @@ const CheckoutPage: React.FC = () => {
     }
 
     if (cartItems.length === 0) {
-      toast.error('Giỏ hàng đang trống');
+      toast.error(t('checkout.toast.cart_empty'));
       return;
     }
 
@@ -138,12 +138,12 @@ const CheckoutPage: React.FC = () => {
         paymentMethod: customer.paymentMethod
       });
 
-      toast.success('Hệ thống đã nhận đơn hàng của bạn!');
+      toast.success(t('checkout.toast.order_received'));
       clearCart();
       navigate('/san-pham/danh-sach');
     } catch (err: any) {
       console.error('Lỗi khi thiết lập đơn hàng:', err);
-      toast.error('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!');
+      toast.error(t('checkout.toast.order_failed'));
     }
   };
 
@@ -160,7 +160,7 @@ const CheckoutPage: React.FC = () => {
     <div className="bg-[#FBFCFD] min-h-screen font-sans selection:bg-teal-100">
       <SEO
         title={t('checkout.page_title')}
-        description="Hoàn tất đơn hàng nội thất cao cấp của bạn tại Nội Thất Hochi."
+        description={t('checkout.page_description')}
       />
 
       <main className="pt-32 pb-24">
@@ -308,7 +308,7 @@ const CheckoutPage: React.FC = () => {
               <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md">
                 <div className="flex items-center gap-3 bg-gray-50/50 px-6 py-4 border-b border-gray-100">
                   <CreditCardOutlined className="text-showcase-primary text-xl" />
-                  <h2 className="text-lg font-bold text-teal-950 uppercase tracking-wider">Phương thức thanh toán</h2>
+                  <h2 className="text-lg font-bold text-teal-950 uppercase tracking-wider">{t('checkout.payment_title')}</h2>
                 </div>
                 <div className="p-8">
                   <div className="space-y-2">
@@ -336,8 +336,8 @@ const CheckoutPage: React.FC = () => {
                         />
                         <span className="text-[13px] font-semibold text-teal-950">{method.name}</span>
                       </label>
-                    )) : (
-                      <div className="text-sm text-gray-500 italic pb-2">Đang tải phương thức thanh toán...</div>
+                    ) : (
+                      <div className="text-sm text-gray-500 italic pb-2">{t('checkout.payment_loading')}</div>
                     )}
                   </div>
 
@@ -367,9 +367,9 @@ const CheckoutPage: React.FC = () => {
                   {cartItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12">
                       <ShoppingOutlined className="text-6xl mb-4 text-gray-300" />
-                      <p className="text-sm font-medium text-gray-500 mb-6">{t('checkout.cart_empty') || 'Giỏ hàng của bạn đang trống'}</p>
+                      <p className="text-sm font-medium text-gray-500 mb-6">{t('checkout.cart_empty')}</p>
                       <Link to="/san-pham/danh-sach" className="px-6 py-2.5 bg-showcase-primary text-white font-bold rounded-lg hover:bg-[#bea748] transition-colors shadow-sm tracking-wide">
-                        Tiếp tục mua sắm
+                        {t('cart.continue_shopping')}
                       </Link>
                     </div>
                   ) : (
@@ -389,7 +389,7 @@ const CheckoutPage: React.FC = () => {
                             <div className="flex-1 flex flex-col">
                               <h4 className="text-[15px] font-medium !text-gray-900 line-clamp-2 leading-snug">{item.title}</h4>
                               {item.size && (
-                                <p className="text-[13px] text-gray-500 mt-1">Kích thước: {item.size}</p>
+                                <p className="text-[13px] text-gray-500 mt-1">{t('checkout.size_label')}: {item.size}</p>
                               )}
 
                               <div className="mt-3">
@@ -460,29 +460,29 @@ const CheckoutPage: React.FC = () => {
                                 </div>
 
                                 {minQtyWarnings[item.id] && (
-                                  <p className="mt-1.5 text-[11px] text-amber-600 font-medium">Số lượng đặt hàng tối thiểu 1</p>
+                                  <p className="mt-1.5 text-[11px] text-amber-600 font-medium">{t('checkout.min_qty_warning')}</p>
                                 )}
                                 {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
-                                  <h2 className="mt-1.5 text-[11px] text-red-500 font-medium">Sản phẩm chỉ còn {item.stockQuantity} cái</h2>
+                                  <h2 className="mt-1.5 text-[11px] text-red-500 font-medium">{t('checkout.stock_warning', { count: item.stockQuantity })}</h2>
                                 )}
                               </div>
 
                               <div className="mt-auto flex items-end justify-between pt-2">
                                 <PopConfirm
-                                  title="Xoá sản phẩm"
-                                  description="Bạn có chắc chắn muốn xoá sản phẩm này?"
+                                  title={t('checkout.remove_item_title')}
+                                  description={t('checkout.remove_item_description')}
                                   onConfirm={() => handleRemoveItem(item.id)}
-                                  okText="Xoá ngay"
-                                  cancelText="Không"
+                                  okText={t('checkout.remove_item_confirm')}
+                                  cancelText={t('checkout.remove_item_cancel')}
                                   placement="top"
                                 >
                                   <button
                                     className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors"
-                                    title="Xoá sản phẩm"
+                                    title={t('checkout.remove_item_title')}
                                     type="button"
                                   >
                                     <DeleteOutlined className="text-lg" />
-                                    <span className="text-[13px] font-medium">Xóa</span>
+                                    <span className="text-[13px] font-medium">{t('checkout.remove_item_label')}</span>
                                   </button>
                                 </PopConfirm>
                                 <span className="text-lg font-black text-gray-900">{item.subtotal.toLocaleString('vi-VN')} đ</span>
@@ -516,13 +516,13 @@ const CheckoutPage: React.FC = () => {
                         {isHalfPayment && (
                           <div className="mt-4 rounded-xl bg-amber-50/50 p-4 border border-amber-100 space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                              <span className="font-medium text-amber-800">Thanh toán trước (50%)</span>
+                              <span className="font-medium text-amber-800">{t('checkout.half_payment')}</span>
                               <span className="font-bold text-amber-900">
                                 {(totalAmount / 2).toLocaleString('vi-VN')} {t('common.vnd')}
                               </span>
                             </div>
                             <div className="flex items-center justify-between text-sm pt-2 border-t border-amber-200/50">
-                              <span className="font-medium text-rose-800">Số tiền còn lại (50%)</span>
+                              <span className="font-medium text-rose-800">{t('checkout.remaining_payment')}</span>
                               <span className="font-bold text-rose-900">
                                 {(totalAmount / 2).toLocaleString('vi-VN')} {t('common.vnd')}
                               </span>
@@ -532,7 +532,7 @@ const CheckoutPage: React.FC = () => {
 
                         {isBankTransfer && (
                           <div className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm">
-                            <h3 className="text-[13px] font-bold text-teal-950 uppercase tracking-wider mb-4">Quét mã QR để thanh toán</h3>
+                            <h3 className="text-[13px] font-bold text-teal-950 uppercase tracking-wider mb-4">{t('checkout.qr_title')}</h3>
                             {shopInfo?.qrCodeUrl ? (
                               <div className="relative p-2 bg-white rounded-xl border-2 border-dashed border-showcase-primary/30 mx-auto">
                                 <img
@@ -543,30 +543,30 @@ const CheckoutPage: React.FC = () => {
                               </div>
                             ) : (
                               <div className="text-center p-4 bg-gray-100 text-gray-500 rounded-xl w-full max-w-[200px] border border-dashed border-gray-300 text-sm">
-                                Chưa tải ảnh QR
+                                {t('checkout.qr_missing')}
                               </div>
                             )}
                             <div className="mt-4 text-center space-y-2 bg-white p-3 rounded-lg border border-gray-100 w-full shadow-sm">
                               {shopInfo?.bankName && (
                                 <div className="flex justify-between items-center">
-                                  <span className="text-xs font-medium text-gray-600">Ngân hàng:</span>
+                                  <span className="text-xs font-medium text-gray-600">{t('checkout.bank_label')}</span>
                                   <span className="font-bold text-teal-950 text-sm">{shopInfo.bankName}</span>
                                 </div>
                               )}
                               {shopInfo?.accountNumber && (
                                 <div className="flex justify-between items-center">
-                                  <span className="text-xs font-medium text-gray-600">Số tài khoản:</span>
+                                  <span className="text-xs font-medium text-gray-600">{t('checkout.account_label')}</span>
                                   <span className="font-bold text-teal-950 text-sm tracking-wider">{shopInfo.accountNumber}</span>
                                 </div>
                               )}
                               {shopInfo?.accountHolder && (
                                 <div className="flex justify-between items-center">
-                                  <span className="text-xs font-medium text-gray-600">Chủ tài khoản:</span>
+                                  <span className="text-xs font-medium text-gray-600">{t('checkout.account_holder_label')}</span>
                                   <span className="font-bold text-teal-950 text-sm">{shopInfo.accountHolder}</span>
                                 </div>
                               )}
                               <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                                <span className="text-xs font-medium text-gray-600">Số tiền chuyển:</span>
+                                <span className="text-xs font-medium text-gray-600">{t('checkout.transfer_amount_label')}</span>
                                 <span className="font-black text-red-600 text-[15px]">{(isHalfPayment ? totalAmount / 2 : totalAmount).toLocaleString('vi-VN')} đ</span>
                               </div>
                             </div>
@@ -585,7 +585,7 @@ const CheckoutPage: React.FC = () => {
                       </button>
 
                       <p className="text-center text-[10px] text-gray-400 mt-4 leading-relaxed px-4">
-                        {t('checkout.terms')} <span className="underline cursor-pointer">{t('checkout.terms_link')}</span> và <span className="underline cursor-pointer">{t('checkout.warranty_link')}</span> của Nội Thất Hochi.
+                        {t('checkout.terms')} <span className="underline cursor-pointer">{t('checkout.terms_link')}</span> và <span className="underline cursor-pointer">{t('checkout.warranty_link')}</span> {t('checkout.terms_suffix')}
                       </p>
                     </div>
                   )}

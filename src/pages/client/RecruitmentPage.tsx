@@ -13,8 +13,10 @@ import {
 } from '@ant-design/icons';
 import { useApplicationService } from '@/src/api/services';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const RecruitmentPage: React.FC = () => {
+  const { t } = useTranslation();
   const { create: submitApplication, loading, request: appRequest } = useApplicationService();
   const [recruitmentInfo, setRecruitmentInfo] = React.useState<{
     title?: string;
@@ -61,13 +63,13 @@ const RecruitmentPage: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.position.trim()) newErrors.position = 'Vui lòng nhập vị trí ứng tuyển';
-    if (!formData.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên';
-    if (!formData.phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại';
-    else if (!/^\d{10,11}$/.test(formData.phone)) newErrors.phone = 'Số điện thoại không hợp lệ';
-    if (!formData.address.trim()) newErrors.address = 'Vui lòng nhập địa chỉ';
-    if (!formData.age) newErrors.age = 'Vui lòng nhập độ tuổi';
-    if (!formData.experience) newErrors.experience = 'Vui lòng nhập số năm kinh nghiệm';
+    if (!formData.position.trim()) newErrors.position = t('recruitment.errors.position_required');
+    if (!formData.fullName.trim()) newErrors.fullName = t('recruitment.errors.full_name_required');
+    if (!formData.phone.trim()) newErrors.phone = t('recruitment.errors.phone_required');
+    else if (!/^\d{10,11}$/.test(formData.phone)) newErrors.phone = t('recruitment.errors.phone_invalid');
+    if (!formData.address.trim()) newErrors.address = t('recruitment.errors.address_required');
+    if (!formData.age) newErrors.age = t('recruitment.errors.age_required');
+    if (!formData.experience) newErrors.experience = t('recruitment.errors.experience_required');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -82,7 +84,7 @@ const RecruitmentPage: React.FC = () => {
           age: Number(formData.age),
           experience: Number(formData.experience)
         });
-        toast.success('Cảm ơn bạn đã ứng tuyển! Chúng tôi sẽ liên hệ lại sớm nhất.');
+        toast.success(t('recruitment.toast.submitted'));
         setFormData({
           position: '',
           fullName: '',
@@ -110,22 +112,22 @@ const RecruitmentPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title="Tuyển dụng - Việc làm Nội Thất Hochi"
-        description="Nội Thất Hochi tuyển dụng: kiến trúc sư, thợ mộc, nhân viên kinh doanh, thiết kế nội thất. Môi trường chuyên nghiệp, lương cao, thưởng xứng đáng."
+        title={t('recruitment.seo.title')}
+        description={t('recruitment.seo.description')}
         canonicalPath="/tuyen-dung"
-        keywords="tuyển dụng nội thất, việc làm thiết kế nội thất, tuyển kiến trúc sư, tuyển thợ mộc, tìm việc nội thất hà nội"
+        keywords={t('recruitment.seo.keywords')}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Tuyển dụng', url: '/tuyen-dung' },
+          { name: t('recruitment.breadcrumbs.home'), url: '/' },
+          { name: t('recruitment.breadcrumbs.current'), url: '/tuyen-dung' },
         ]}
         structuredData={{
           '@context': 'https://schema.org',
           '@type': 'JobPosting',
-          title: 'Nhiều vị trí tuyển dụng',
-          description: 'Nội Thất Hochi tuyển dụng nhiều vị trí: kiến trúc sư, thợ mộc, nhân viên kinh doanh nội thất.',
+          title: t('recruitment.structured.title'),
+          description: t('recruitment.structured.description'),
           hiringOrganization: {
             '@type': 'Organization',
-            name: 'Nội Thất Hochi',
+            name: t('recruitment.structured.organization_name'),
             sameAs: 'https://www.noithathochi.vn',
           },
           jobLocation: {
@@ -153,7 +155,7 @@ const RecruitmentPage: React.FC = () => {
         </div>
         <Container className="relative z-10 text-center text-white">
           <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Tuyển dụng
+            {t('recruitment.hero_title')}
           </h1>
         </Container>
       </section>
@@ -166,7 +168,7 @@ const RecruitmentPage: React.FC = () => {
 
               {/* CỘT TRÁI — Nội dung cơ hội nghề nghiệp */}
               <div className="space-y-6">
-                <Badge variant="gold" className="uppercase tracking-[0.2em]">CƠ HỘI NGHỀ NGHIỆP</Badge>
+                <Badge variant="gold" className="uppercase tracking-[0.2em]">{t('recruitment.section_badge')}</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-teal-950 uppercase leading-snug" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {recruitmentInfo.title}
                 </h2>
@@ -207,8 +209,8 @@ const RecruitmentPage: React.FC = () => {
               {/* CỘT PHẢI — Form ứng tuyển */}
               <div id="recruitment-form">
                 <div className="text-center mb-8">
-                  <Badge variant="gold" className="mb-4">ỨNG TUYỂN NGAY</Badge>
-                  <h2 className="text-2xl md:text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>ĐIỀN THÔNG TIN ỨNG TUYỂN</h2>
+                  <Badge variant="gold" className="mb-4">{t('recruitment.apply_badge')}</Badge>
+                  <h2 className="text-2xl md:text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>{t('recruitment.apply_title')}</h2>
                   <div className="w-16 h-1 bg-showcase-primary mx-auto mt-4" />
                 </div>
 
@@ -234,26 +236,26 @@ const RecruitmentPage: React.FC = () => {
                 <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-6 md:p-8 border-t-8 border-showcase-primary">
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Vị trí ứng tuyển *</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.position_label')}</label>
                       <input
                         type="text"
                         name="position"
                         value={formData.position}
                         onChange={handleChange}
-                        placeholder="VD: Kiến trúc sư..."
+                        placeholder={t('recruitment.form.position_placeholder')}
                         className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.position ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
                       />
                       {errors.position && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.position}</p>}
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Họ và tên *</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.full_name_label')}</label>
                       <input
                         type="text"
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
-                        placeholder="Nhập đầy đủ họ tên"
+                        placeholder={t('recruitment.form.full_name_placeholder')}
                         className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.fullName ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
                       />
                       {errors.fullName && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.fullName}</p>}
@@ -261,40 +263,40 @@ const RecruitmentPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Số điện thoại *</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.phone_label')}</label>
                         <input
                           type="tel"
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          placeholder="Số điện thoại"
+                          placeholder={t('recruitment.form.phone_placeholder')}
                           className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
                         />
                         {errors.phone && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.phone}</p>}
                       </div>
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Giới tính</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.gender_label')}</label>
                         <select
                           name="gender"
                           value={formData.gender}
                           onChange={handleChange}
                           className="w-full px-5 py-4 bg-gray-50 rounded-xl border border-transparent focus:border-showcase-primary outline-none transition-all bg-white font-medium"
                         >
-                          <option value="Nam">Nam</option>
-                          <option value="Nữ">Nữ</option>
-                          <option value="Khác">Khác</option>
+                          <option value="Nam">{t('recruitment.form.gender_male')}</option>
+                          <option value="Nữ">{t('recruitment.form.gender_female')}</option>
+                          <option value="Khác">{t('recruitment.form.gender_other')}</option>
                         </select>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Địa chỉ hiện tại *</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.address_label')}</label>
                       <input
                         type="text"
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
-                        placeholder="Số nhà, đường, tỉnh/thành phố"
+                        placeholder={t('recruitment.form.address_placeholder')}
                         className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.address ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
                       />
                       {errors.address && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.address}</p>}
@@ -302,25 +304,25 @@ const RecruitmentPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Độ tuổi *</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.age_label')}</label>
                         <input
                           type="number"
                           name="age"
                           value={formData.age}
                           onChange={handleChange}
-                          placeholder="Số tuổi"
+                          placeholder={t('recruitment.form.age_placeholder')}
                           className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.age ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
                         />
                         {errors.age && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.age}</p>}
                       </div>
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Kinh nghiệm (năm) *</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.experience_label')}</label>
                         <input
                           type="number"
                           name="experience"
                           value={formData.experience}
                           onChange={handleChange}
-                          placeholder="Ví dụ: 3"
+                          placeholder={t('recruitment.form.experience_placeholder')}
                           className={`w-full px-5 py-4 bg-gray-50 rounded-xl border ${errors.experience ? 'border-red-500' : 'border-transparent focus:border-showcase-primary'} outline-none transition-all placeholder:text-gray-300`}
                         />
                         {errors.experience && <p className="mt-1 text-[10px] text-red-500 uppercase tracking-wider">{errors.experience}</p>}
@@ -328,13 +330,13 @@ const RecruitmentPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Ghi chú thêm</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">{t('recruitment.form.note_label')}</label>
                       <textarea
                         name="note"
                         value={formData.note}
                         onChange={handleChange}
                         rows={4}
-                        placeholder="Thông tin thêm..."
+                        placeholder={t('recruitment.form.note_placeholder')}
                         className="w-full px-5 py-4 bg-gray-50 rounded-xl border border-transparent focus:border-showcase-primary outline-none transition-all placeholder:text-gray-300 resize-none"
                       />
                     </div>
@@ -345,7 +347,7 @@ const RecruitmentPage: React.FC = () => {
                         disabled={loading}
                         className="w-full bg-teal-950 text-white py-5 rounded-xl font-bold uppercase tracking-[0.3em] hover:bg-showcase-primary transition-all shadow-xl hover:shadow-showcase-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
                       >
-                        {loading ? 'ĐANG GỬI...' : 'GỬI HỒ SƠ ỨNG TUYỂN'}
+                        {loading ? t('recruitment.form.submit_loading') : t('recruitment.form.submit')}
                       </Button>
                     </div>
                   </form>

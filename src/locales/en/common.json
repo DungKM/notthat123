@@ -52,7 +52,31 @@
     "email": "Email",
     "address": "Apartment Address",
     "message": "Your Message",
-    "submit": "SUBMIT"
+    "submit": "SUBMIT",
+    "submit_loading": "Submitting...",
+    "company_fallback": "HOCHI Interior",
+    "website_label": "Website:",
+    "email_label": "Email:",
+    "errors": {
+      "full_name_required": "Please enter your full name!",
+      "phone_required": "Please enter your phone number!",
+      "phone_invalid": "Invalid phone number!",
+      "email_invalid": "Invalid email!"
+    },
+    "seo": {
+      "title": "Contact - Hochi Interior",
+      "description": "Contact Hochi Interior. HQ: VIMECO Building, Pham Hung, Cau Giay, Hanoi. Hotline: 0326 908 884. Free interior design consultation.",
+      "keywords": "hochi interior contact, interior hotline, interior consultation hanoi, showroom cau giay"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Contact"
+    },
+    "structured": {
+      "name": "Contact Hochi Interior",
+      "description": "Contact and interior consultation page",
+      "organization_name": "Hochi Interior"
+    }
   },
   "checkout": {
     "breadcrumb_home": "Home",
@@ -60,6 +84,7 @@
     "breadcrumb_checkout": "Order Confirmation",
     "badge": "CHECKOUT PROCESS",
     "page_title": "Order Confirmation",
+    "page_description": "Complete your premium interior order at Hochi Interior.",
     "customer_info": "Customer Information",
     "full_name": "Full Name *",
     "full_name_placeholder": "Enter customer full name",
@@ -80,8 +105,12 @@
     "payment_cash": "Cash Payment",
     "payment_note": "After receiving your order confirmation, our architect team will contact you within 30 minutes to verify information and provide technical consultation.",
     "payment_hotline": "Direct support via Hotline",
+    "payment_loading": "Loading payment methods...",
     "order_title": "Your Order",
     "cart_empty": "Cart is empty",
+    "size_label": "Size",
+    "min_qty_warning": "Minimum order quantity is 1",
+    "stock_warning": "Only {{count}} left in stock",
     "unit_price": "Unit Price",
     "subtotal": "Subtotal",
     "shipping": "Shipping & Installation",
@@ -91,7 +120,142 @@
     "submit": "Complete Order",
     "terms": "By placing your order, you agree to our",
     "terms_link": "Terms of Service",
-    "warranty_link": "Warranty Policy"
+    "warranty_link": "Warranty Policy",
+    "terms_suffix": "of Hochi Interior.",
+    "remove_item_title": "Remove item",
+    "remove_item_description": "Are you sure you want to remove this item?",
+    "remove_item_confirm": "Remove",
+    "remove_item_cancel": "Cancel",
+    "remove_item_label": "Remove",
+    "half_payment": "Pay in advance (50%)",
+    "remaining_payment": "Remaining amount (50%)",
+    "qr_title": "Scan QR to pay",
+    "qr_missing": "QR image not available",
+    "bank_label": "Bank:",
+    "account_label": "Account number:",
+    "account_holder_label": "Account holder:",
+    "transfer_amount_label": "Transfer amount:",
+    "errors": {
+      "full_name_required": "Please enter your full name",
+      "phone_required": "Please enter your phone number",
+      "phone_invalid": "Invalid phone number",
+      "email_invalid": "Invalid email",
+      "address_required": "Please enter your address"
+    },
+    "toast": {
+      "cart_empty": "Your cart is empty",
+      "order_received": "We have received your order!",
+      "order_failed": "There was an error placing your order. Please try again!"
+    }
+  },
+  "order_lookup": {
+    "seo": {
+      "title": "Order Lookup",
+      "description": "Look up your order at Hochi Interior using your phone number and email."
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Order Lookup"
+    },
+    "hero": {
+      "alt": "Order lookup",
+      "title": "ORDER LOOKUP"
+    },
+    "title": "Look up your order",
+    "subtitle": "Enter the phone number used for the order.",
+    "phone_placeholder": "Example: 0876887677",
+    "button_loading": "Searching...",
+    "button_submit": "Look up order",
+    "empty_results": "No orders match the provided information.",
+    "list_title": "Order list",
+    "order_label": "Order",
+    "select_prompt": "Select an order from the list to view details.",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "shipping": "Shipping",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "errors": {
+      "phone_required": "Please enter your phone number",
+      "phone_invalid": "Invalid phone number"
+    },
+    "delivery": {
+      "business_hours": "Business hours",
+      "outside_business_hours": "After hours"
+    },
+    "detail": {
+      "recipient": "Recipient",
+      "phone": "Phone",
+      "email": "Email",
+      "order_date": "Order date",
+      "address": "Delivery address",
+      "delivery_time": "Delivery time",
+      "payment_method": "Payment method",
+      "items_title": "Items",
+      "items_empty": "No items data.",
+      "item_fallback": "Item",
+      "total_label": "Total"
+    },
+    "toast": {
+      "lookup_failed": "Unable to look up order. Please try again."
+    }
+  },
+  "recruitment": {
+    "seo": {
+      "title": "Careers - Hochi Interior Jobs",
+      "description": "Hochi Interior is hiring: architects, carpenters, sales, interior designers. Professional environment, competitive salary and bonuses.",
+      "keywords": "interior recruitment, interior design jobs, architect hiring, carpenter hiring, hanoi interior jobs"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Careers"
+    },
+    "structured": {
+      "title": "Open positions",
+      "description": "Hochi Interior is hiring multiple positions: architects, carpenters, interior sales.",
+      "organization_name": "Hochi Interior"
+    },
+    "hero_title": "Careers",
+    "section_badge": "CAREER OPPORTUNITIES",
+    "apply_badge": "APPLY NOW",
+    "apply_title": "APPLICANT INFORMATION",
+    "errors": {
+      "position_required": "Please enter the position you are applying for",
+      "full_name_required": "Please enter your full name",
+      "phone_required": "Please enter your phone number",
+      "phone_invalid": "Invalid phone number",
+      "address_required": "Please enter your address",
+      "age_required": "Please enter your age",
+      "experience_required": "Please enter years of experience"
+    },
+    "toast": {
+      "submitted": "Thank you for applying! We will contact you soon."
+    },
+    "form": {
+      "position_label": "Position applied for *",
+      "position_placeholder": "E.g.: Architect...",
+      "full_name_label": "Full name *",
+      "full_name_placeholder": "Enter full name",
+      "phone_label": "Phone number *",
+      "phone_placeholder": "Phone number",
+      "gender_label": "Gender",
+      "gender_male": "Male",
+      "gender_female": "Female",
+      "gender_other": "Other",
+      "address_label": "Current address *",
+      "address_placeholder": "House number, street, city/province",
+      "age_label": "Age *",
+      "age_placeholder": "Age",
+      "experience_label": "Experience (years) *",
+      "experience_placeholder": "E.g.: 3",
+      "note_label": "Additional notes",
+      "note_placeholder": "Additional info...",
+      "submit": "SUBMIT APPLICATION",
+      "submit_loading": "SUBMITTING..."
+    }
   },
   "cta": {
     "faq_title": "FREQUENTLY ASKED QUESTIONS",

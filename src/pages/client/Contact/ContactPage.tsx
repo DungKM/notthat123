@@ -49,22 +49,22 @@ const ContactPage: React.FC = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Vui lòng nhập họ tên!';
+      newErrors.fullName = t('contact.errors.full_name_required');
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại!';
+      newErrors.phone = t('contact.errors.phone_required');
     } else {
       const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
       if (!phoneRegex.test(formData.phone.trim())) {
-        newErrors.phone = 'Số điện thoại không hợp lệ!';
+        newErrors.phone = t('contact.errors.phone_invalid');
       }
     }
 
     if (formData.email.trim()) {
       const emailRegex = /^\S+@\S+\.\S+$/;
       if (!emailRegex.test(formData.email.trim())) {
-        newErrors.email = 'Email không hợp lệ!';
+        newErrors.email = t('contact.errors.email_invalid');
       }
     }
 
@@ -98,23 +98,23 @@ const ContactPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title="Liên hệ - Nội Thất Hochi"
-        description="Liên hệ với Nội Thất Hochi. Trụ sở: Toà nhà VIMECO, Phạm Hùng, Cầu Giấy, Hà Nội. Hotline: 0326 908 884. Tư vấn thiết kế nội thất miễn phí."
+        title={t('contact.seo.title')}
+        description={t('contact.seo.description')}
         canonicalPath="/lien-he"
-        keywords="liên hệ nội thất hochi, hotline nội thất, tư vấn nội thất hà nội, showroom nội thất cầu giấy"
+        keywords={t('contact.seo.keywords')}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Liên hệ', url: '/lien-he' },
+          { name: t('contact.breadcrumbs.home'), url: '/' },
+          { name: t('contact.breadcrumbs.current'), url: '/lien-he' },
         ]}
         structuredData={{
           '@context': 'https://schema.org',
           '@type': 'ContactPage',
-          name: 'Liên hệ Nội Thất Hochi',
-          description: 'Trang liên hệ và tư vấn nội thất',
+          name: t('contact.structured.name'),
+          description: t('contact.structured.description'),
           url: 'https://www.noithathochi.vn/lien-he',
           mainEntity: {
             '@type': 'Organization',
-            name: 'Nội Thất Hochi',
+            name: t('contact.structured.organization_name'),
             telephone: '+84326908884',
             address: {
               '@type': 'PostalAddress',
@@ -149,7 +149,7 @@ const ContactPage: React.FC = () => {
             <div className="space-y-12">
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-teal-950 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  {companyInfo?.name || "Nội Thất HOCHI"}
+                  {companyInfo?.name || t('contact.company_fallback')}
                 </h2>
                 <div className="w-20 h-1 bg-[#C5A059]"></div>
               </div>
@@ -185,13 +185,13 @@ const ContactPage: React.FC = () => {
                 {companyInfo?.socialLinks?.website && (
                   <div className="flex items-center gap-3 text-lg">
                     <GlobalOutlined className="text-[#C5A059]" />
-                    <span className="font-bold">Website: <a href={companyInfo.socialLinks.website} target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline">{companyInfo.socialLinks.website}</a></span>
+                    <span className="font-bold">{t('contact.website_label')} <a href={companyInfo.socialLinks.website} target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline">{companyInfo.socialLinks.website}</a></span>
                   </div>
                 )}
                 {companyInfo?.email && (
                   <div className="flex items-center gap-3 text-lg">
                     <MailOutlined className="text-[#C5A059]" />
-                    <span className="font-bold">Email: <span className="text-teal-700">{companyInfo.email}</span></span>
+                    <span className="font-bold">{t('contact.email_label')} <span className="text-teal-700">{companyInfo.email}</span></span>
                   </div>
                 )}
               </div>
@@ -263,7 +263,7 @@ const ContactPage: React.FC = () => {
                   disabled={loading}
                   className="bg-teal-900 border-none px-12 py-4 uppercase font-bold tracking-widest hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Đang gửi...' : t('contact.submit')}
+                  {loading ? t('contact.submit_loading') : t('contact.submit')}
                 </Button>
               </form>
             </div>

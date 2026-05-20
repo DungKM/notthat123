@@ -52,7 +52,31 @@
     "email": "电子邮件",
     "address": "公寓地址",
     "message": "您的留言",
-    "submit": "提交"
+    "submit": "提交",
+    "submit_loading": "正在发送...",
+    "company_fallback": "HOCHI家居",
+    "website_label": "网站：",
+    "email_label": "邮箱：",
+    "errors": {
+      "full_name_required": "请填写姓名！",
+      "phone_required": "请输入电话号码！",
+      "phone_invalid": "电话号码无效！",
+      "email_invalid": "电子邮件无效！"
+    },
+    "seo": {
+      "title": "联系我们 - HOCHI家居",
+      "description": "联系HOCHI家居。总部：越南河内市Cau Giay区Pham Hung，VIMECO大楼。热线：0326 908 884。免费室内设计咨询。",
+      "keywords": "HOCHI家居联系, 室内热线, 河内室内咨询, Cau Giay展厅"
+    },
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "联系我们"
+    },
+    "structured": {
+      "name": "联系HOCHI家居",
+      "description": "联系与家居咨询页面",
+      "organization_name": "HOCHI家居"
+    }
   },
   "checkout": {
     "breadcrumb_home": "首页",
@@ -60,6 +84,7 @@
     "breadcrumb_checkout": "确认订单",
     "badge": "结算流程",
     "page_title": "确认订单",
+    "page_description": "在HOCHI家居完成您的高端家居订单。",
     "customer_info": "客户信息",
     "full_name": "姓名 *",
     "full_name_placeholder": "请输入客户姓名",
@@ -80,8 +105,12 @@
     "payment_cash": "现金支付",
     "payment_note": "收到订单确认后，我们的建筑师团队将在30分钟内与您联系，核实信息并提供技术咨询。",
     "payment_hotline": "热线直接支持",
+    "payment_loading": "正在加载付款方式...",
     "order_title": "您的订单",
     "cart_empty": "购物车是空的",
+    "size_label": "尺寸",
+    "min_qty_warning": "最小下单数量为1",
+    "stock_warning": "仅剩 {{count}} 件",
     "unit_price": "单价",
     "subtotal": "小计",
     "shipping": "运费与安装",
@@ -91,7 +120,142 @@
     "submit": "完成下单",
     "terms": "点击下单即表示您同意我们的",
     "terms_link": "服务条款",
-    "warranty_link": "保修政策"
+    "warranty_link": "保修政策",
+    "terms_suffix": "属于HOCHI家居。",
+    "remove_item_title": "删除商品",
+    "remove_item_description": "确定要删除该商品吗？",
+    "remove_item_confirm": "删除",
+    "remove_item_cancel": "取消",
+    "remove_item_label": "删除",
+    "half_payment": "预付（50%）",
+    "remaining_payment": "剩余金额（50%）",
+    "qr_title": "扫码支付",
+    "qr_missing": "暂无二维码",
+    "bank_label": "银行：",
+    "account_label": "账号：",
+    "account_holder_label": "户名：",
+    "transfer_amount_label": "转账金额：",
+    "errors": {
+      "full_name_required": "请输入姓名",
+      "phone_required": "请输入电话号码",
+      "phone_invalid": "电话号码无效",
+      "email_invalid": "电子邮件无效",
+      "address_required": "请输入地址"
+    },
+    "toast": {
+      "cart_empty": "购物车是空的",
+      "order_received": "我们已收到您的订单！",
+      "order_failed": "下单时发生错误，请重试！"
+    }
+  },
+  "order_lookup": {
+    "seo": {
+      "title": "订单查询",
+      "description": "通过手机号和邮箱查询您在HOCHI家居的订单。"
+    },
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "订单查询"
+    },
+    "hero": {
+      "alt": "订单查询",
+      "title": "订单查询"
+    },
+    "title": "查询您的订单",
+    "subtitle": "请输入下单时的手机号。",
+    "phone_placeholder": "例如：0876887677",
+    "button_loading": "查询中...",
+    "button_submit": "查询订单",
+    "empty_results": "未找到符合条件的订单。",
+    "list_title": "订单列表",
+    "order_label": "订单",
+    "select_prompt": "请选择列表中的订单查看详情。",
+    "status": {
+      "pending": "待处理",
+      "confirmed": "已确认",
+      "shipping": "配送中",
+      "delivered": "已送达",
+      "cancelled": "已取消",
+      "unknown": "未知"
+    },
+    "errors": {
+      "phone_required": "请输入电话号码",
+      "phone_invalid": "电话号码无效"
+    },
+    "delivery": {
+      "business_hours": "工作时间",
+      "outside_business_hours": "非工作时间"
+    },
+    "detail": {
+      "recipient": "收货人",
+      "phone": "电话",
+      "email": "邮箱",
+      "order_date": "下单时间",
+      "address": "收货地址",
+      "delivery_time": "配送时间",
+      "payment_method": "付款方式",
+      "items_title": "商品",
+      "items_empty": "暂无商品数据。",
+      "item_fallback": "商品",
+      "total_label": "合计"
+    },
+    "toast": {
+      "lookup_failed": "无法查询订单，请重试。"
+    }
+  },
+  "recruitment": {
+    "seo": {
+      "title": "招聘 - HOCHI家居",
+      "description": "HOCHI家居招聘：建筑师、木工、销售、室内设计师。专业环境，高薪酬与奖金。",
+      "keywords": "家居招聘, 室内设计工作, 建筑师招聘, 木工招聘, 河内家居工作"
+    },
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "招聘"
+    },
+    "structured": {
+      "title": "招聘职位",
+      "description": "HOCHI家居招聘多个岗位：建筑师、木工、室内销售等。",
+      "organization_name": "HOCHI家居"
+    },
+    "hero_title": "招聘",
+    "section_badge": "职业机会",
+    "apply_badge": "立即申请",
+    "apply_title": "填写申请信息",
+    "errors": {
+      "position_required": "请输入应聘职位",
+      "full_name_required": "请输入姓名",
+      "phone_required": "请输入电话号码",
+      "phone_invalid": "电话号码无效",
+      "address_required": "请输入地址",
+      "age_required": "请输入年龄",
+      "experience_required": "请输入工作经验年限"
+    },
+    "toast": {
+      "submitted": "感谢申请！我们会尽快联系您。"
+    },
+    "form": {
+      "position_label": "应聘职位 *",
+      "position_placeholder": "例如：建筑师...",
+      "full_name_label": "姓名 *",
+      "full_name_placeholder": "请输入姓名",
+      "phone_label": "电话 *",
+      "phone_placeholder": "电话号码",
+      "gender_label": "性别",
+      "gender_male": "男",
+      "gender_female": "女",
+      "gender_other": "其他",
+      "address_label": "现居地址 *",
+      "address_placeholder": "门牌号、街道、省/市",
+      "age_label": "年龄 *",
+      "age_placeholder": "年龄",
+      "experience_label": "经验（年） *",
+      "experience_placeholder": "例如：3",
+      "note_label": "补充说明",
+      "note_placeholder": "补充信息...",
+      "submit": "提交申请",
+      "submit_loading": "提交中..."
+    }
   },
   "cta": {
     "faq_title": "常见问题",

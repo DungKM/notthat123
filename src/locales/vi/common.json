@@ -52,7 +52,31 @@
     "email": "Email",
     "address": "Địa chỉ căn hộ",
     "message": "Lời nhắn của bạn",
-    "submit": "ĐĂNG KÝ"
+    "submit": "ĐĂNG KÝ",
+    "submit_loading": "Đang gửi...",
+    "company_fallback": "Nội Thất HOCHI",
+    "website_label": "Website:",
+    "email_label": "Email:",
+    "errors": {
+      "full_name_required": "Vui lòng nhập họ tên!",
+      "phone_required": "Vui lòng nhập số điện thoại!",
+      "phone_invalid": "Số điện thoại không hợp lệ!",
+      "email_invalid": "Email không hợp lệ!"
+    },
+    "seo": {
+      "title": "Liên hệ - Nội Thất Hochi",
+      "description": "Liên hệ với Nội Thất Hochi. Trụ sở: Toà nhà VIMECO, Phạm Hùng, Cầu Giấy, Hà Nội. Hotline: 0326 908 884. Tư vấn thiết kế nội thất miễn phí.",
+      "keywords": "liên hệ nội thất hochi, hotline nội thất, tư vấn nội thất hà nội, showroom nội thất cầu giấy"
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Liên hệ"
+    },
+    "structured": {
+      "name": "Liên hệ Nội Thất Hochi",
+      "description": "Trang liên hệ và tư vấn nội thất",
+      "organization_name": "Nội Thất Hochi"
+    }
   },
   "checkout": {
     "breadcrumb_home": "Trang chủ",
@@ -60,6 +84,7 @@
     "breadcrumb_checkout": "Xác nhận đơn hàng",
     "badge": "QUY TRÌNH THANH TOÁN",
     "page_title": "Xác nhận đơn hàng",
+    "page_description": "Hoàn tất đơn hàng nội thất cao cấp của bạn tại Nội Thất Hochi.",
     "customer_info": "Thông tin phối hợp",
     "full_name": "Họ và tên *",
     "full_name_placeholder": "Nhập họ và tên khách hàng",
@@ -81,8 +106,12 @@
     "payment_transfer_50": "Thanh toán chuyển khoản 50%",
     "payment_note": "Sau khi nhận được xác nhận đơn hàng, đội ngũ kiến trúc sư của Nội Thất Hochi sẽ liên hệ trực tiếp với bạn trong vòng 30 phút để kiểm tra lại thông tin và tư vấn kỹ thuật.",
     "payment_hotline": "Hỗ trợ trực tiếp qua Hotline",
+    "payment_loading": "Đang tải phương thức thanh toán...",
     "order_title": "Đơn hàng của bạn",
     "cart_empty": "Giỏ hàng đang trống",
+    "size_label": "Kích thước",
+    "min_qty_warning": "Số lượng đặt hàng tối thiểu 1",
+    "stock_warning": "Sản phẩm chỉ còn {{count}} cái",
     "unit_price": "Đơn giá",
     "subtotal": "Tạm tính",
     "shipping": "Phí vận chuyển & lắp đặt",
@@ -92,7 +121,142 @@
     "submit": "Hoàn tất đặt sản phẩm",
     "terms": "Bằng cách bấm đặt hàng, bạn đồng ý với các",
     "terms_link": "Điều khoản dịch vụ",
-    "warranty_link": "Chính sách bảo hành"
+    "warranty_link": "Chính sách bảo hành",
+    "terms_suffix": "của Nội Thất Hochi.",
+    "remove_item_title": "Xoá sản phẩm",
+    "remove_item_description": "Bạn có chắc chắn muốn xoá sản phẩm này?",
+    "remove_item_confirm": "Xoá ngay",
+    "remove_item_cancel": "Không",
+    "remove_item_label": "Xóa",
+    "half_payment": "Thanh toán trước (50%)",
+    "remaining_payment": "Số tiền còn lại (50%)",
+    "qr_title": "Quét mã QR để thanh toán",
+    "qr_missing": "Chưa tải ảnh QR",
+    "bank_label": "Ngân hàng:",
+    "account_label": "Số tài khoản:",
+    "account_holder_label": "Chủ tài khoản:",
+    "transfer_amount_label": "Số tiền chuyển:",
+    "errors": {
+      "full_name_required": "Vui lòng nhập họ tên",
+      "phone_required": "Vui lòng nhập số điện thoại",
+      "phone_invalid": "Số điện thoại không hợp lệ",
+      "email_invalid": "Email không hợp lệ",
+      "address_required": "Vui lòng nhập địa chỉ"
+    },
+    "toast": {
+      "cart_empty": "Giỏ hàng đang trống",
+      "order_received": "Hệ thống đã nhận đơn hàng của bạn!",
+      "order_failed": "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!"
+    }
+  },
+  "order_lookup": {
+    "seo": {
+      "title": "Tra cứu đơn hàng",
+      "description": "Tra cứu đơn hàng của bạn tại Nội Thất Hochi bằng số điện thoại và email đã đặt hàng."
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Tra cứu đơn hàng"
+    },
+    "hero": {
+      "alt": "Tra cứu đơn hàng",
+      "title": "TRA CỨU ĐƠN HÀNG"
+    },
+    "title": "Tra cứu đơn hàng của bạn",
+    "subtitle": "Nhập số điện thoại đã đặt hàng để tra cứu.",
+    "phone_placeholder": "Ví dụ: 0876887677",
+    "button_loading": "Đang tra cứu...",
+    "button_submit": "Tra cứu đơn hàng",
+    "empty_results": "Không tìm thấy đơn hàng phù hợp với thông tin đã nhập.",
+    "list_title": "Danh sách đơn hàng",
+    "order_label": "Đơn hàng",
+    "select_prompt": "Chọn một đơn hàng trong danh sách để xem chi tiết.",
+    "status": {
+      "pending": "Chờ xử lý",
+      "confirmed": "Đã xác nhận",
+      "shipping": "Đang giao hàng",
+      "delivered": "Đã giao hàng",
+      "cancelled": "Đã hủy",
+      "unknown": "Không xác định"
+    },
+    "errors": {
+      "phone_required": "Vui lòng nhập số điện thoại",
+      "phone_invalid": "Số điện thoại không hợp lệ"
+    },
+    "delivery": {
+      "business_hours": "Giờ hành chính",
+      "outside_business_hours": "Ngoài giờ hành chính"
+    },
+    "detail": {
+      "recipient": "Người nhận",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "order_date": "Ngày đặt",
+      "address": "Địa chỉ giao hàng",
+      "delivery_time": "Khung giờ giao",
+      "payment_method": "Thanh toán",
+      "items_title": "Sản phẩm",
+      "items_empty": "Không có dữ liệu sản phẩm.",
+      "item_fallback": "Sản phẩm",
+      "total_label": "Tổng thanh toán"
+    },
+    "toast": {
+      "lookup_failed": "Không thể tra cứu đơn hàng. Vui lòng thử lại."
+    }
+  },
+  "recruitment": {
+    "seo": {
+      "title": "Tuyển dụng - Việc làm Nội Thất Hochi",
+      "description": "Nội Thất Hochi tuyển dụng: kiến trúc sư, thợ mộc, nhân viên kinh doanh, thiết kế nội thất. Môi trường chuyên nghiệp, lương cao, thưởng xứng đáng.",
+      "keywords": "tuyển dụng nội thất, việc làm thiết kế nội thất, tuyển kiến trúc sư, tuyển thợ mộc, tìm việc nội thất hà nội"
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Tuyển dụng"
+    },
+    "structured": {
+      "title": "Nhiều vị trí tuyển dụng",
+      "description": "Nội Thất Hochi tuyển dụng nhiều vị trí: kiến trúc sư, thợ mộc, nhân viên kinh doanh nội thất.",
+      "organization_name": "Nội Thất Hochi"
+    },
+    "hero_title": "Tuyển dụng",
+    "section_badge": "CƠ HỘI NGHỀ NGHIỆP",
+    "apply_badge": "ỨNG TUYỂN NGAY",
+    "apply_title": "ĐIỀN THÔNG TIN ỨNG TUYỂN",
+    "errors": {
+      "position_required": "Vui lòng nhập vị trí ứng tuyển",
+      "full_name_required": "Vui lòng nhập họ tên",
+      "phone_required": "Vui lòng nhập số điện thoại",
+      "phone_invalid": "Số điện thoại không hợp lệ",
+      "address_required": "Vui lòng nhập địa chỉ",
+      "age_required": "Vui lòng nhập độ tuổi",
+      "experience_required": "Vui lòng nhập số năm kinh nghiệm"
+    },
+    "toast": {
+      "submitted": "Cảm ơn bạn đã ứng tuyển! Chúng tôi sẽ liên hệ lại sớm nhất."
+    },
+    "form": {
+      "position_label": "Vị trí ứng tuyển *",
+      "position_placeholder": "VD: Kiến trúc sư...",
+      "full_name_label": "Họ và tên *",
+      "full_name_placeholder": "Nhập đầy đủ họ tên",
+      "phone_label": "Số điện thoại *",
+      "phone_placeholder": "Số điện thoại",
+      "gender_label": "Giới tính",
+      "gender_male": "Nam",
+      "gender_female": "Nữ",
+      "gender_other": "Khác",
+      "address_label": "Địa chỉ hiện tại *",
+      "address_placeholder": "Số nhà, đường, tỉnh/thành phố",
+      "age_label": "Độ tuổi *",
+      "age_placeholder": "Số tuổi",
+      "experience_label": "Kinh nghiệm (năm) *",
+      "experience_placeholder": "Ví dụ: 3",
+      "note_label": "Ghi chú thêm",
+      "note_placeholder": "Thông tin thêm...",
+      "submit": "GỬI HỒ SƠ ỨNG TUYỂN",
+      "submit_loading": "ĐANG GỬI..."
+    }
   },
   "cta": {
     "faq_title": "CÂU HỎI THƯỜNG GẶP",
