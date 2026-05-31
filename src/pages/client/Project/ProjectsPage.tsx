@@ -7,6 +7,7 @@ import PaginationControls from '@/src/components/common/PaginationControls';
 import { Search, X, Filter, ChevronDown, ChevronRight } from 'lucide-react';
 import { useConstructionService, useConstructionCategoryService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
+import { useTranslation } from 'react-i18next';
 
 const SIBLING_ITEMS_PER_PAGE_MOBILE = 2;
 const SIBLING_ITEMS_PER_PAGE_DESKTOP = 3;
@@ -50,6 +51,7 @@ const SkeletonCard: React.FC = () => (
 // ====================== Projects Page ======================
 
 const ProjectsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const categoryParam = searchParams.get('category') || '';
@@ -309,13 +311,13 @@ const ProjectsPage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <SEO
-        title="Thiết kế nội thất thực tế - Thiết kế & Thi công Nội thất"
-        description="Khám phá các công trình thiết kế và thi công nội thất thực tế của Nội Thất Hochi: biệt thự, penthouse, căn hộ, phòng ngủ, phòng khách... Ảnh thực tế 100%."
+        title={t('projects_page.seo.title')}
+        description={t('projects_page.seo.description')}
         canonicalPath="/thiet-ke-noi-that"
-        keywords="công trình nội thất, dự án nội thất hochi, thiết kế nội thất biệt thự, thi công nội thất căn hộ, phòng ngủ, phòng khách, tủ bếp"
+        keywords={t('projects_page.seo.keywords')}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Thiết kế nội thất', url: '/thiet-ke-noi-that' },
+          { name: t('project_detail.breadcrumbs.home'), url: '/' },
+          { name: t('project_detail.breadcrumbs.current'), url: '/thiet-ke-noi-that' },
         ]}
       />
 
@@ -331,8 +333,8 @@ const ProjectsPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <Container className="relative z-10 text-center text-white">
-          <Badge variant="gold">KIẾN TẠO KHÔNG GIAN</Badge>
-          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>THIẾT KẾ NỘI THẤT</h1>
+          <Badge variant="gold">{t('projects_page.badge')}</Badge>
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>{t('projects_page.hero_title')}</h1>
         </Container>
       </section>
 
@@ -354,7 +356,7 @@ const ProjectsPage: React.FC = () => {
                     {/* Categories */}
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
-                        Danh mục
+                        {t('products.filters.category')}
                       </p>
                       <div className="space-y-1">
                         <button
@@ -365,7 +367,7 @@ const ProjectsPage: React.FC = () => {
                             : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                             }`}
                         >
-                          Tất cả
+                          {t('header.all')}
                         </button>
 
                         {categories.map((cat) => {
@@ -449,8 +451,8 @@ const ProjectsPage: React.FC = () => {
               <div ref={listRef} id="danh-sach">
                 <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
                   {isParentCategory
-                    ? `Danh mục con thuộc ${currentCategory.name}`
-                    : `Hiển thị ${projects.length} thiết kế nội thất ${searchQuery ? `cho "${searchQuery}"` : ''}`
+                    ? t('projects_page.child_categories_of', { name: currentCategory.name })
+                    : t('projects_page.showing_count', { count: projects.length, query: searchQuery ? t('products.for_query', { query: searchQuery }) : '' })
                   }
                 </div>
 
@@ -488,7 +490,7 @@ const ProjectsPage: React.FC = () => {
                   </div>
                 ) : projects.length === 0 ? (
                   <div className="py-20 text-center text-gray-400">
-                    <p className="text-lg">Không tìm thấy thiết kế nội thất nào phù hợp.</p>
+                    <p className="text-lg">{t('projects_page.empty')}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">

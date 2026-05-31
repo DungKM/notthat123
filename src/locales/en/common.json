@@ -20,7 +20,16 @@
     "continue_shopping": "Continue Shopping",
     "subtotal": "Subtotal",
     "total": "Total",
-    "checkout": "Checkout Now"
+    "checkout": "Checkout Now",
+    "item_fallback": "Product",
+    "toast": {
+      "added": "Product added to cart",
+      "removed": "Product removed from cart",
+      "stock_limit": "Only up to {{count}} items are available in stock"
+    },
+    "errors": {
+      "provider_required": "useCart must be used inside CartProvider"
+    }
   },
   "hero": {
     "badge": "Creating Living Spaces",
@@ -121,6 +130,7 @@
     "terms": "By placing your order, you agree to our",
     "terms_link": "Terms of Service",
     "warranty_link": "Warranty Policy",
+    "and": "and",
     "terms_suffix": "of Hochi Interior.",
     "remove_item_title": "Remove item",
     "remove_item_description": "Are you sure you want to remove this item?",
@@ -130,6 +140,7 @@
     "half_payment": "Pay in advance (50%)",
     "remaining_payment": "Remaining amount (50%)",
     "qr_title": "Scan QR to pay",
+    "qr_alt": "Payment QR code",
     "qr_missing": "QR image not available",
     "bank_label": "Bank:",
     "account_label": "Account number:",
@@ -274,18 +285,414 @@
     "form_apartment": "Apartment",
     "form_townhouse": "Townhouse",
     "form_content": "Consultation Details",
-    "form_submit": "REGISTER NOW"
+    "form_submit": "REGISTER NOW",
+    "form_submit_loading": "SUBMITTING...",
+    "project_type_content": "[Project type: {{type}}] - {{message}}",
+    "toast_success": "Consultation request submitted successfully. We will contact you soon!",
+    "errors": {
+      "full_name_required": "Please enter your full name!",
+      "phone_required": "Please enter your phone number!",
+      "phone_invalid": "Invalid phone number!"
+    }
+  },
+  "interest_modal": {
+    "title": "Register for consultation",
+    "description_prefix": "Please leave your information, and we will contact you with detailed consultation about",
+    "description_suffix": "for you.",
+    "free_note": "* Note: The consultation is completely free!",
+    "name_placeholder": "Full name *",
+    "phone_placeholder": "Phone number *",
+    "email_placeholder": "Email (Optional)",
+    "submit": "Submit information",
+    "toast_success": "Your information has been received. We will contact you soon!",
+    "toast_error": "Something went wrong. Please try again!",
+    "errors": {
+      "name_required": "Please enter your full name",
+      "phone_required": "Please enter your phone number",
+      "phone_invalid": "Phone number must have 10 digits",
+      "email_invalid": "Invalid email"
+    }
+  },
+  "languages": {
+    "vi": "Vietnamese",
+    "en": "English",
+    "zh": "Chinese"
+  },
+  "header": {
+    "select_category_detail": "Select a category to view details",
+    "no_child_categories": "No subcategories",
+    "view_all_projects_for": "View all {{name}} projects",
+    "view_all_for": "View all {{name}}",
+    "search_placeholder": "Search...",
+    "mobile_search_placeholder": "Search products, projects...",
+    "products": "Products",
+    "projects": "Projects",
+    "interior": "Interior",
+    "architecture": "Architecture",
+    "view_all_results": "View all {{count}} results",
+    "no_results": "No results found",
+    "try_other_keywords": "Try another keyword or view all",
+    "search_results_page": "Search results page",
+    "searching": "Searching...",
+    "no_matching_results": "No matching results found",
+    "search_for": "Search",
+    "popular_categories": "Popular categories",
+    "all": "All",
+    "select_parent_category": "Please select a parent category",
+    "view_category": "View {{name}}",
+    "your_orders": "Your orders",
+    "remove_item_from_cart_description": "Are you sure you want to remove this item from your cart?",
+    "collapse_subcategories": "Collapse subcategories",
+    "expand_subcategories": "Expand subcategories"
+  },
+  "about": {
+    "seo": {
+      "title": "About Us - Hochi Interior",
+      "description": "Hochi Interior - Over 10 years of experience in premium wooden interior design and construction in Hanoi. Closed production process, professional execution and long-term warranty.",
+      "keywords": "about hochi interior, furniture brand story, hanoi furniture workshop, 10 years interior experience"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "About Us"
+    },
+    "hero_title": "ABOUT US",
+    "story_badge": "BRAND STORY",
+    "story_title": "HOCHI INTERIOR",
+    "story_quote": "Born from a deep passion for materials and the art of shaping spaces, HOCHI does more than design interiors - we define a way of living.",
+    "story_p1": "With more than a decade of experience, HOCHI has established its position in premium interior design and construction in Vietnam. We carefully select and harmonize natural wood, premium plastics, metal, glass and modern materials to create luxurious, distinctive and timeless living spaces.",
+    "story_p2": "Every HOCHI project is a personal statement where the homeowner's taste, status and personality are expressed with refinement and inspiration.",
+    "story_p3": "With a closed production process that blends advanced technology and handcrafted artistry, HOCHI is committed to delivering value beyond furniture - a living experience worthy of your standards.",
+    "years_experience": "Years of Experience",
+    "why_title": "WHY CHOOSE US?",
+    "reasons": {
+      "material_title": "Premium materials",
+      "material_desc": "Every material is strictly selected for outstanding durability, refined aesthetics and long-lasting value.",
+      "design_title": "Bespoke design",
+      "design_desc": "Each space is designed around the homeowner's style and real needs.",
+      "construction_title": "Professional execution",
+      "construction_desc": "Skilled craftspeople, standardized drying process and internationally aligned installation standards."
+    }
+  },
+  "why_choose": {
+    "seo": {
+      "title": "Why Choose Us",
+      "description": "Outstanding advantages of Hochi Interior: premium materials, fast execution, talented craftspeople and reliable warranty."
+    },
+    "badge": "CORE VALUES",
+    "hero_title": "WHY CHOOSE US?",
+    "values": {
+      "quality_title": "Premium Quality",
+      "quality_desc": "Carefully selected premium materials meeting international standards, crafted with precision to create lasting value.",
+      "speed_title": "Fast Execution",
+      "speed_desc": "Modern production processes shorten construction timelines while preserving absolute craftsmanship.",
+      "expert_title": "Expert Team",
+      "expert_desc": "A team of experienced architects and artisans gives HOCHI more than a decade of expertise in interior design and craftsmanship, with deep understanding of styles from modern and minimalist to luxury and neo-classical.",
+      "warranty_title": "Reliable Warranty",
+      "warranty_desc": "A 1-year warranty for all HOCHI interior products, ensuring construction quality and peace of mind throughout use."
+    },
+    "process_badge": "PROFESSIONAL PROCESS",
+    "process_title_line1": "CRAFTED WITH CARE -",
+    "process_title_line2": "ELEVATING LIVING SPACES",
+    "process_items": [
+      "Carefully selected and standardized materials for stable, long-term durability.",
+      "Multi-layer high-tech coating for refined beauty, durability and safety.",
+      "Traditional joinery combined with CNC precision up to 0.1mm.",
+      "Turnkey installation and handover with dedicated 24/7 service."
+    ],
+    "quote": "We do not just sell furniture; we create dream living spaces where every homeowner finds true peace and distinction.",
+    "signature": "Director Ho Chi Luong"
+  },
+  "partner": {
+    "seo": {
+      "title": "Partners",
+      "description": "HOCHI is proud to work with trusted partners, bringing customers refined and seamless experiences."
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Partners"
+    },
+    "hero_alt": "Partners background",
+    "hero_title": "PARTNERS",
+    "section_title": "Trusted Partners",
+    "section_description": "We are proud to collaborate with reputable partners across many fields, delivering high-quality products and solutions that meet strict standards. With a sustainable development mindset, HOCHI values long-term partnership and shared value creation for customers in Vietnam.",
+    "partner_since": "Partner since {{year}}",
+    "description_fallback": "Detailed partner information is being updated...",
+    "select_prompt": "Please select a partner above to view details.",
+    "detail": {
+      "strategic_partner": "STRATEGIC PARTNER {{year}}",
+      "cooperation_note": "We believe this partnership will bring practical and lasting value. Beyond providing high-quality products, both sides aim to deliver excellent user experiences and outstanding after-sales service.",
+      "brand": "Brand",
+      "cooperation_year": "Cooperation year"
+    }
+  },
+  "video": {
+    "seo": {
+      "title": "Real Interior Construction Videos - Hochi Interior",
+      "description": "Watch real videos of premium wooden interior construction by Hochi Interior: villas, apartments and penthouses.",
+      "keywords": "interior video, interior construction video, hochi interior youtube, interior design video"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Video"
+    },
+    "card_label": "Project video",
+    "load_more": "LOAD MORE VIDEOS"
+  },
+  "products": {
+    "seo": {
+      "title": "Premium Wooden Furniture - Buy Furniture in Hanoi",
+      "description": "Shop premium wooden furniture in Hanoi: sofas, beds, kitchen cabinets, dining tables, TV shelves and wardrobes. Free delivery and installation. Hochi Interior.",
+      "keywords": "buy furniture, premium wooden furniture, hochi sofa, bed, kitchen cabinet, dining table, TV shelf, hanoi furniture, custom furniture"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Products"
+    },
+    "hero_title": "PRODUCTS",
+    "filters": {
+      "title": "Filters",
+      "category": "CATEGORY",
+      "all_products": "ALL PRODUCTS",
+      "price": "PRICE (VND)",
+      "clear_price": "Clear price filter",
+      "material": "MATERIAL",
+      "materials": ["Natural wood", "Engineered wood", "Metal", "Glass", "Fabric/Leather", "Plastic"]
+    },
+    "sort": {
+      "label": "Sort:",
+      "suggested": "Recommended",
+      "newest": "Newest arrivals",
+      "price_desc": "Price: High to low",
+      "price_asc": "Price: Low to high",
+      "name_asc": "Name: A - Z",
+      "name_desc": "Name: Z - A"
+    },
+    "list_title": "Furniture",
+    "showing_count": "Showing {{count}} items",
+    "for_query": "for \"{{query}}\"",
+    "empty": "No matching products found.",
+    "contact_price": "Contact"
+  },
+  "category_explorer": {
+    "hero_title": "EXPLORE CATEGORIES",
+    "hero_subtitle": "Search thousands of premium interior and exterior products organized by category.",
+    "search_label": "Search",
+    "reset_filter": "Reset filters",
+    "keyword": "Keyword",
+    "search_placeholder": "Search products...",
+    "loading_categories": "Loading categories...",
+    "products_for": "products for",
+    "no_results_for": "No results found for",
+    "back_to_categories": "← Back to categories",
+    "no_products_title": "No products found",
+    "no_products_desc": "No products match the keyword",
+    "view_all_categories": "View all categories",
+    "view_all_results": "View all results",
+    "results_for": "{{count}} results for \"{{query}}\"",
+    "select_category_title": "Please select a category",
+    "select_category_desc": "Choose a category from the filter on the left to explore matching product types.",
+    "view_list": "VIEW LIST",
+    "no_child_title": "No subcategories yet",
+    "no_child_desc": "This category is currently empty. Would you like to view all products in this category?",
+    "view_all_products": "View all products"
+  },
+  "search": {
+    "seo": {
+      "title": "Search",
+      "title_with_query": "Search results for \"{{query}}\"",
+      "description": "Search Hochi Interior products and projects"
+    },
+    "title": "Search",
+    "all_results": "All results",
+    "results_for": "results for",
+    "no_results_for": "No results found for",
+    "enter_keyword_title": "Enter a keyword to search",
+    "enter_keyword_desc": "Search interior products, construction projects and more.",
+    "try_suggestions": "Try another keyword or browse the suggestions below.",
+    "suggestions": ["Sofa", "Dining table", "Bed", "Wardrobe", "Villa"],
+    "view_all_products": "View all products",
+    "view_all_projects": "View all projects"
+  },
+  "detail": {
+    "loading": "Loading details...",
+    "interested": "Interested",
+    "image_count": "{{count}} images",
+    "suggestions_title": "SUGGESTED FOR YOU"
+  },
+  "project_detail": {
+    "not_found": "Project not found",
+    "back_to_list": "Back to project list",
+    "category_fallback": "Interior Design",
+    "seo_description_fallback": "Interior design {{name}} - Premium interior design and construction by Hochi Interior. View real photos and details.",
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Interior Design"
+    },
+    "gallery_title": "PROJECT GALLERY",
+    "related_badge": "RELATED PROJECTS",
+    "entity_type": "project"
+  },
+  "architecture_detail": {
+    "not_found": "Architecture design not found",
+    "back_to_list": "Back to design list",
+    "category_fallback": "Architecture Design",
+    "seo_description_fallback": "{{name}} design - Premium architecture design by Hochi Interior. View photos and details.",
+    "breadcrumbs": {
+      "home": "Home",
+      "current": "Architecture Design"
+    },
+    "gallery_title": "DESIGN GALLERY",
+    "related_badge": "RELATED DESIGNS",
+    "entity_type": "design"
+  },
+  "projects_page": {
+    "seo": {
+      "title": "Real Interior Design Projects - Interior Design & Construction",
+      "description": "Explore real interior design and construction projects by Hochi Interior: villas, penthouses, apartments, bedrooms, living rooms and more.",
+      "keywords": "interior projects, hochi interior projects, villa interior design, apartment interior construction, bedroom, living room, kitchen cabinet"
+    },
+    "badge": "CREATING SPACES",
+    "hero_title": "INTERIOR DESIGN",
+    "child_categories_of": "Subcategories of {{name}}",
+    "showing_count": "Showing {{count}} interior designs {{query}}",
+    "empty": "No matching interior designs found."
+  },
+  "architecture_page": {
+    "seo": {
+      "title": "Architecture Design - Hochi Design",
+      "description": "Explore outstanding Hochi architecture projects: villas, townhouses, commercial works and more. Creative design and professional execution.",
+      "keywords": "architecture design, villa architecture, townhouse architecture, hochi design, architecture projects"
+    },
+    "badge": "PREMIUM ARCHITECTURE",
+    "hero_title": "ARCHITECTURE DESIGN",
+    "showing_count": "Showing {{count}} designs {{query}}",
+    "project_count": "{{count}} projects",
+    "empty": "No matching designs found."
+  },
+  "home": {
+    "seo": {
+      "title": "Home",
+      "description": "Hochi Interior - Premium wooden furniture production and construction workshop in Hanoi. Custom design, made-to-measure furniture, free delivery and installation. Hotline: 0326 908 884.",
+      "keywords": "hochi interior, premium wooden furniture, hanoi furniture workshop, interior design, interior construction, walnut wood, kitchen cabinets, beds, sofa"
+    },
+    "breadcrumbs": {
+      "home": "Home"
+    },
+    "faq": {
+      "q1": "What does Hochi Interior specialize in producing?",
+      "a1": "Hochi Interior specializes in producing and installing premium wooden furniture: kitchen cabinets, beds, sofas, dining tables, TV shelves, wardrobes and more. Designs are customized to customer needs.",
+      "q2": "Does Hochi Interior offer home delivery?",
+      "a2": "Yes. Hochi Interior provides free delivery and installation for orders over 2 million VND in Hanoi, Ho Chi Minh City, Da Nang, Hai Phong, Binh Duong and Dong Nai.",
+      "q3": "How long does custom furniture production take?",
+      "a3": "Production takes 7-30 days depending on product complexity. In-stock products are delivered within 1-7 days. We provide free consultation and 3D design.",
+      "q4": "Does Hochi Interior accept made-to-measure orders?",
+      "a4": "Yes. We make furniture to each customer's dimensions and requirements, even for a single item. 3D design is free.",
+      "q5": "Where is the Hochi Interior workshop?",
+      "a5": "Hochi Interior has a production workshop in Hanoi. Contact hotline 0326 908 884 for consultation and detailed address information."
+    }
+  },
+  "product_detail": {
+    "delivery_alt": "Home delivery and installation",
+    "color_fallback": "Color",
+    "updating": "Updating",
+    "product_fallback": "Product",
+    "description_fallback": "Premium interior product details with modern design, durable materials and refined appearance for an elevated living space.",
+    "stock_count": "{{count}} products",
+    "order_required": "Made to order",
+    "loading": "Loading product information...",
+    "not_found": "Product not found!",
+    "brand": "Hochi Interior",
+    "see_more": "See more:",
+    "price_for": "Price for: {{size}}",
+    "like_title": "Favorite",
+    "unlike_title": "Remove favorite",
+    "size_heading": "Size (cm):",
+    "color_heading": "Color:",
+    "color_unavailable": "{{name}} - unavailable for this size",
+    "stock_status": "Stock status:",
+    "in_stock": "In stock",
+    "out_of_stock": "Out of stock",
+    "stock_limit": "Only up to {{count}} items are available in stock",
+    "increase_quantity": "Increase quantity",
+    "decrease_quantity": "Decrease quantity",
+    "sold_out": "Sold out",
+    "add_to_cart": "Add to cart",
+    "buy_now": "Buy now",
+    "call_consult": "Call for advice",
+    "no_image": "No image",
+    "policy_title": "DECORATIVE WOOD FURNITURE WORKSHOP - SINCE 2014",
+    "policy_1": "FREE delivery & installation for orders over 2 million VND in Hanoi, Ho Chi Minh City, Da Nang, Hai Phong, Binh Duong and Dong Nai.",
+    "policy_2": "Standard delivery time is estimated at 1-7 days",
+    "policy_3_strong": "Custom furniture accepted even for a single item",
+    "policy_3_suffix": "free 3D design",
+    "policy_4": "Prices include HKD electronic invoices",
+    "new_products": "New products",
+    "description_tab": "DESCRIPTION",
+    "collapse": "Collapse",
+    "expand": "Read more",
+    "related_products": "Similar products",
+    "entity_type": "product",
+    "toast": {
+      "liked": "Product liked",
+      "unliked": "Product unliked"
+    },
+    "specs": {
+      "material": "Material",
+      "style": "Style",
+      "stock": "Stock",
+      "warranty": "Warranty"
+    },
+    "seo": {
+      "keywords": "hochi interior, buy furniture, {{title}} hanoi"
+    }
+  },
+  "product_shop": {
+    "badge": "FEATURED PRODUCTS",
+    "title": "Best-selling products",
+    "description": "Explore the most loved premium oak furniture products with home delivery and installation.",
+    "view_all": "View all products",
+    "products": {
+      "bed_9431": "Premium modern oak bed GHS-9431",
+      "wardrobe_kids_55139": "Modern oak wardrobe for kids GHS-55139",
+      "sliding_wardrobe_55138": "Modern oak sliding wardrobe GHS-55138",
+      "upholstered_bed_9430": "Modern upholstered oak bed GHS-9430",
+      "natural_sliding_wardrobe_55137": "Natural wood sliding wardrobe GHS-55137"
+    },
+    "prices": {
+      "bed_9431": "13,500,000 VND",
+      "wardrobe_kids_55139": "12,900,000 VND",
+      "sliding_wardrobe_55138": "15,400,000 VND",
+      "upholstered_bed_9430": "14,500,000 VND",
+      "natural_sliding_wardrobe_55137": "10,500,000 VND"
+    }
+  },
+  "interior_categories": {
+    "title": "Interior categories",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "project_count": "{{count}} projects"
+  },
+  "floating": {
+    "call_aria": "Call {{phone}}",
+    "scroll_top": "Back to top"
   },
   "common": {
     "hotline": "Hotline",
     "contact_us": "Contact Us",
     "send_request": "Send Consultation Request",
     "language": "Language",
+    "loading": "Loading...",
+    "load_more": "View more",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
     "vnd": "VND",
     "see_more": "SEE MORE ›",
     "visit": "VISIT ›",
     "view_all_videos": "View all videos ›",
     "project_detail": "Project details ›"
+  },
+  "product_card": {
+    "view_detail": "VIEW DETAILS"
   },
   "showcase": {
     "badge": "ABOUT US",
@@ -301,7 +708,10 @@
     "title": "REAL PROJECTS",
     "years": "YEARS OF EXPERIENCE",
     "years_desc": "In the field of luxury villa and apartment interior design and construction. We are committed to delivering absolute satisfaction in aesthetics and functionality.",
-    "hotline_label": "CONSULTATION HOTLINE"
+    "hotline_label": "CONSULTATION HOTLINE",
+    "featured_project_alt": "Gamuda Villa",
+    "featured_project_title": "Gamuda Gardens Villa",
+    "secondary_project_alt": "Interior construction"
   },
   "feedback": {
     "title": "CUSTOMER REVIEWS",

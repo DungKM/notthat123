@@ -284,9 +284,9 @@ const Header: React.FC = () => {
   }, []);
 
   const languages = [
-    { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
-    { code: 'en', label: 'English', flag: '🇺🇸' },
-    { code: 'zh', label: '中文', flag: '🇨🇳' }
+    { code: 'vi', label: t('languages.vi'), flag: '🇻🇳' },
+    { code: 'en', label: t('languages.en'), flag: '🇺🇸' },
+    { code: 'zh', label: t('languages.zh'), flag: '🇨🇳' }
   ];
 
   const navLinks = [
@@ -411,11 +411,11 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="relative z-50 transition-transform hover:scale-105 mr-2 lg:mr-4 xl:mr-2 2xl:mr-8 flex-shrink-0">
             <div className="w-[90px] sm:w-[120px]">
-              <img
-                src="/assets/images/image-logo.png"
-                alt="Nội Thất Hochi"
-                className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? 'brightness-0 invert' : ''}`}
-              />
+                <img
+                  src="/assets/images/image-logo.png"
+                  alt={t('product_detail.brand')}
+                  className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? 'brightness-0 invert' : ''}`}
+                />
             </div>
           </Link>
 
@@ -529,12 +529,12 @@ const Header: React.FC = () => {
                                   <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center border border-dashed border-gray-200">
                                     <ArrowRightOutlined className="text-xl rotate-180 opacity-50" />
                                   </div>
-                                  <p className="text-[15px] font-medium">Vui lòng chọn danh mục để xem chi tiết</p>
+                                  <p className="text-[15px] font-medium">{t('header.select_category_detail')}</p>
                                 </div>
                               );
                             }
                             if (!currentCat.children || currentCat.children.length === 0) {
-                              return <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>;
+                              return <div className="text-gray-400 italic text-[14px]">{t('header.no_child_categories')}</div>;
                             }
                             return (
                               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
@@ -616,21 +616,21 @@ const Header: React.FC = () => {
                                   <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center border border-dashed border-gray-200">
                                     <ArrowRightOutlined className="text-xl rotate-180 opacity-50" />
                                   </div>
-                                  <p className="text-[15px] font-medium">Vui lòng chọn danh mục để xem chi tiết</p>
+                                  <p className="text-[15px] font-medium">{t('header.select_category_detail')}</p>
                                 </div>
                               );
                             }
                             if (!currentCat.children || currentCat.children.length === 0) {
                               return (
                                 <div>
-                                  <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
+                                  <div className="text-gray-400 italic text-[14px]">{t('header.no_child_categories')}</div>
                                   <div className="mt-4">
                                     <a
                                       href={`${ROUTES.CONG_TRINH}?category=${currentCat.slug || currentCat.id || currentCat._id}#danh-sach`}
                                       className="inline-flex items-center gap-2 text-[13px] font-bold text-showcase-primary hover:underline hover:text-[#C5A059]"
                                       onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                     >
-                                      Xem tất cả công trình {currentCat.name}
+                                      {t('header.view_all_projects_for', { name: currentCat.name })}
                                       <ArrowRightOutlined className="text-[10px]" />
                                     </a>
                                   </div>
@@ -717,21 +717,21 @@ const Header: React.FC = () => {
                                   <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center border border-dashed border-gray-200">
                                     <ArrowRightOutlined className="text-xl rotate-180 opacity-50" />
                                   </div>
-                                  <p className="text-[15px] font-medium">Vui lòng chọn danh mục để xem chi tiết</p>
+                                  <p className="text-[15px] font-medium">{t('header.select_category_detail')}</p>
                                 </div>
                               );
                             }
                             if (!currentCat.children || currentCat.children.length === 0) {
                               return (
                                 <div>
-                                  <div className="text-gray-400 italic text-[14px]">Không có danh mục con</div>
+                                  <div className="text-gray-400 italic text-[14px]">{t('header.no_child_categories')}</div>
                                   <div className="mt-4">
                                     <a
                                       href={`${ROUTES.THIET_KE_KIEN_TRUC}?category=${currentCat?.slug || currentCat?.id || currentCat?._id}#danh-sach`}
                                       className="inline-flex items-center gap-2 text-[13px] font-bold text-showcase-primary hover:underline hover:text-[#C5A059]"
                                       onClick={() => { setMegaMenuForceHide(true); setMegaMenuOpen(null); }}
                                     >
-                                      Xem tất cả {currentCat?.name}
+                                      {t('header.view_all_for', { name: currentCat?.name })}
                                       <ArrowRightOutlined className="text-[10px]" />
                                     </a>
                                   </div>
@@ -778,7 +778,7 @@ const Header: React.FC = () => {
               <div className={`flex items-center bg-white rounded-full px-4 py-2 border transition-all  ${isDarkHeader ? 'border-gray-200' : 'border-white/20 border-gray-800'}`}>
                 <input
                   type="text"
-                  placeholder="Tìm kiếm..."
+                  placeholder={t('header.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => { if (totalSearchResults > 0) setShowResults(true); }}
@@ -815,7 +815,7 @@ const Header: React.FC = () => {
                     {searchResults.products.length > 0 && (
                       <div>
                         <div className="flex items-center gap-2 px-4 pt-3 pb-1.5">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sản phẩm</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t('header.products')}</span>
                           <span className="text-[10px] font-bold text-showcase-primary bg-amber-50 px-1.5 py-0.5 rounded-full">{searchResults.products.length}</span>
                         </div>
                         {searchResults.products.map((item: any) => (
@@ -852,7 +852,7 @@ const Header: React.FC = () => {
                     {searchResults.constructions.length > 0 && (
                       <div>
                         <div className="flex items-center gap-2 px-4 pt-3 pb-1.5">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Công trình</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t('header.projects')}</span>
                           <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded-full">{searchResults.constructions.length}</span>
                         </div>
                         {searchResults.constructions.map((item: any) => (
@@ -892,7 +892,7 @@ const Header: React.FC = () => {
                       }}
                       className="w-full flex items-center justify-center gap-2 text-[12px] font-bold text-showcase-primary py-3 hover:bg-amber-50 transition-colors"
                     >
-                      Xem tất cả {totalSearchResults} kết quả
+                      {t('header.view_all_results', { count: totalSearchResults })}
                       <ArrowRightOutlined className="text-[10px]" />
                     </button>
                   </div>
@@ -904,8 +904,8 @@ const Header: React.FC = () => {
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden min-w-[320px]">
                   <div className="px-5 py-6 text-center">
                     <SearchOutlined className="text-2xl text-gray-300 mb-2" />
-                    <p className="text-[13px] font-semibold text-gray-600">Không tìm thấy kết quả</p>
-                    <p className="text-[11px] text-gray-400 mt-1">Thử từ khóa khác hoặc xem toàn bộ</p>
+                    <p className="text-[13px] font-semibold text-gray-600">{t('header.no_results')}</p>
+                    <p className="text-[11px] text-gray-400 mt-1">{t('header.try_other_keywords')}</p>
                   </div>
                   <div className="border-t border-gray-100">
                     <button
@@ -916,7 +916,7 @@ const Header: React.FC = () => {
                       }}
                       className="w-full flex items-center justify-center gap-2 text-[12px] font-bold text-gray-500 py-3 hover:bg-gray-50 transition-colors"
                     >
-                      Trang kết quả tìm kiếm
+                      {t('header.search_results_page')}
                       <ArrowRightOutlined className="text-[10px]" />
                     </button>
                   </div>
@@ -987,7 +987,7 @@ const Header: React.FC = () => {
                   <input
                     type="text"
                     autoFocus
-                    placeholder="Tìm kiếm sản phẩm, công trình..."
+                    placeholder={t('header.mobile_search_placeholder')}
                     value={mobileSearchQuery}
                     onChange={e => setMobileSearchQuery(e.target.value)}
                     onKeyDown={e => {
@@ -1013,7 +1013,7 @@ const Header: React.FC = () => {
                       {isMobileSearching && (
                         <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
                           <LoadingOutlined />
-                          <span>Đang tìm kiếm...</span>
+                          <span>{t('header.searching')}</span>
                         </div>
                       )}
 
@@ -1036,7 +1036,7 @@ const Header: React.FC = () => {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-800 truncate">{item.name}</p>
                             <p className="text-[11px] text-gray-400 uppercase tracking-wide">
-                              {item.__type === 'product' ? 'Sản phẩm' : 'Công trình'}
+                              {item.__type === 'product' ? t('header.products') : t('header.projects')}
                             </p>
                           </div>
                           <ArrowRightOutlined className="text-[11px] text-gray-300" />
@@ -1044,12 +1044,12 @@ const Header: React.FC = () => {
                       ))}
 
                       {!isMobileSearching && hasMobileSearched && mobileSuggestions.length === 0 && (
-                        <div className="px-4 py-3 text-sm text-gray-500">Không tìm thấy kết quả phù hợp</div>
+                        <div className="px-4 py-3 text-sm text-gray-500">{t('header.no_matching_results')}</div>
                       )}
                       {!isMobileSearching && !hasMobileSearched && mobileSearchQuery.trim() && (
                         <div className="px-4 py-3 flex items-center gap-2 text-sm text-gray-400">
                           <LoadingOutlined className="text-gray-300" />
-                          <span>Đang tìm kiếm...</span>
+                          <span>{t('header.searching')}</span>
                         </div>
                       )}
                     </div>
@@ -1065,14 +1065,14 @@ const Header: React.FC = () => {
                         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-amber-50 text-left transition-colors"
                       >
                         <SearchOutlined className="text-showcase-primary" />
-                        <span className="text-sm text-gray-700">Tìm kiếm <span className="font-bold text-gray-900">"{mobileSearchQuery}"</span></span>
+                        <span className="text-sm text-gray-700">{t('header.search_for')} <span className="font-bold text-gray-900">"{mobileSearchQuery}"</span></span>
                         <ArrowRightOutlined className="text-[11px] text-gray-400 ml-auto" />
                       </button>
                     </div>
                   </>
                 ) : (
                   <div className="bg-white border-t border-gray-100 p-4 rounded-b-2xl">
-                    <h3 className="text-[13px] font-bold text-gray-900 mb-3 uppercase tracking-wider">Danh mục phổ biến</h3>
+                    <h3 className="text-[13px] font-bold text-gray-900 mb-3 uppercase tracking-wider">{t('header.popular_categories')}</h3>
                     <div className="flex flex-wrap gap-2">
                       {productCategories.slice(0, 6).map((cat: any) => (
                         <button
@@ -1131,7 +1131,7 @@ const Header: React.FC = () => {
                     )}
                   </AnimatePresence>
                 </div>
-                <span className="font-bold uppercase text-[12px] tracking-wider hidden xl:block whitespace-nowrap">Giỏ hàng</span>
+                <span className="font-bold uppercase text-[12px] tracking-wider hidden xl:block whitespace-nowrap">{t('cart.title')}</span>
               </button>
             </div>
 
@@ -1158,7 +1158,7 @@ const Header: React.FC = () => {
                   : 'bg-gray-50 text-gray-500 border border-transparent'
                   }`}
               >
-                Sản phẩm
+                {t('header.products')}
               </button>
               <button
                 type="button"
@@ -1168,7 +1168,7 @@ const Header: React.FC = () => {
                   : 'bg-gray-50 text-gray-500 border border-transparent'
                   }`}
               >
-                Nội thất
+                {t('header.interior')}
               </button>
               <button
                 type="button"
@@ -1178,7 +1178,7 @@ const Header: React.FC = () => {
                   : 'bg-gray-50 text-gray-500 border border-transparent'
                   }`}
               >
-                Kiến trúc
+                {t('header.architecture')}
               </button>
             </div>
           </Container>
@@ -1221,7 +1221,7 @@ const Header: React.FC = () => {
                               }}
                               className="shrink-0 px-4 py-2 rounded-full border text-[12px] font-bold bg-gray-50 text-gray-800 border-gray-200 active:bg-gray-100 transition-colors"
                             >
-                              Tất cả
+                              {t('header.all')}
                             </button>
                             {parents.map((p: any) => {
                               const pid = String(p.id || p._id || p.slug || '');
@@ -1246,10 +1246,10 @@ const Header: React.FC = () => {
                             {!activeParent ? (
                               <div className="w-full flex flex-col items-center justify-center text-gray-400 py-4 space-y-2">
 
-                                <p className="text-[12px] font-medium">Vui lòng chọn danh mục cha</p>
+                                <p className="text-[12px] font-medium">{t('header.select_parent_category')}</p>
                               </div>
                             ) : children.length === 0 ? (
-                              <div className="text-[12px] text-gray-400 py-3">Không có danh mục con</div>
+                              <div className="text-[12px] text-gray-400 py-3">{t('header.no_child_categories')}</div>
                             ) : (
                               children.map((c: any) => {
                                 const cid = String(c.id || c._id || c.slug || '');
@@ -1297,7 +1297,7 @@ const Header: React.FC = () => {
                               }}
                               className="text-[10px] font-black text-showcase-primary flex items-center gap-1 uppercase tracking-widest active:opacity-70 transition-all py-1"
                             >
-                              Xem {activeParent?.name || 'tất cả'} <ArrowRightOutlined className="text-[9px]" />
+                              {t('header.view_category', { name: activeParent?.name || t('header.all').toLowerCase() })} <ArrowRightOutlined className="text-[9px]" />
                             </button>
                           </div>
                         </div>
@@ -1362,7 +1362,7 @@ const Header: React.FC = () => {
                         }}
                         className="w-full py-3 bg-white text-gray-700 border border-gray-200 font-bold hover:bg-showcase-primary/10 transition-all"
                       >
-                        Đơn hàng của bạn
+                        {t('header.your_orders')}
                       </button>
                       <button
                         onClick={() => {
@@ -1384,7 +1384,7 @@ const Header: React.FC = () => {
                       <div className="flex-1 flex flex-col">
                         <h4 className="text-[15px] font-medium !text-gray-900 line-clamp-2 leading-snug">{item.title}</h4>
                         {item.size && (
-                          <p className="text-[13px] text-gray-500 mt-1">Kích thước: {item.size}</p>
+                          <p className="text-[13px] text-gray-500 mt-1">{t('checkout.size_label')}: {item.size}</p>
                         )}
 
                         <div className="mt-3">
@@ -1454,10 +1454,10 @@ const Header: React.FC = () => {
                           </div>
 
                           {minQtyWarnings[item.id] && (
-                            <p className="mt-1.5 text-[11px] text-amber-600 font-medium">Số lượng đặt hàng tối thiểu 1</p>
+                            <p className="mt-1.5 text-[11px] text-amber-600 font-medium">{t('checkout.min_qty_warning')}</p>
                           )}
                           {item.stockQuantity !== undefined && item.quantity >= item.stockQuantity && (
-                            <h2 className="mt-1.5 text-[11px] text-red-500 font-medium">Sản phẩm chỉ còn {item.stockQuantity} cái</h2>
+                            <h2 className="mt-1.5 text-[11px] text-red-500 font-medium">{t('checkout.stock_warning', { count: item.stockQuantity })}</h2>
                           )}
                         </div>
 
@@ -1465,15 +1465,15 @@ const Header: React.FC = () => {
                           <button
                             onClick={(e) => { e.stopPropagation(); setItemToDelete(item.id); }}
                             className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors"
-                            title="Xoá sản phẩm"
+                            title={t('checkout.remove_item_title')}
                           >
                             <DeleteOutlined className="text-[15px]" />
-                            <span className="text-[13px]">Xóa</span>
+                            <span className="text-[13px]">{t('checkout.remove_item_label')}</span>
                           </button>
 
                           <div className="flex flex-col items-end">
                             <span className="text-[16px] font-black text-gray-900 leading-none">
-                              {item.subtotal.toLocaleString('vi-VN')} đ
+                              {item.subtotal.toLocaleString('vi-VN')} {t('common.vnd')}
                             </span>
                           </div>
                         </div>
@@ -1487,7 +1487,7 @@ const Header: React.FC = () => {
                 <div className="p-6 bg-gray-50 border-t space-y-4 border-stone-100">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-500 font-medium">{t('cart.total')}:</span>
-                    <span className="text-2xl font-bold text-showcase-primary">{totalAmount.toLocaleString('vi-VN')} đ</span>
+                    <span className="text-2xl font-bold text-showcase-primary">{totalAmount.toLocaleString('vi-VN')} {t('common.vnd')}</span>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
                     <button
@@ -1508,7 +1508,7 @@ const Header: React.FC = () => {
                       }}
                       className="w-full cursor-pointer py-4 bg-white text-gray-700 border border-gray-200 font-bold hover:bg-showcase-primary/10 transition-all"
                     >
-                      Đơn hàng của bạn
+                      {t('header.your_orders')}
                     </button>
                     <button
                       onClick={() => {
@@ -1548,14 +1548,14 @@ const Header: React.FC = () => {
                 <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
                   <DeleteOutlined className="text-2xl text-red-500" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Xoá sản phẩm</h3>
-                <p className="text-gray-500 text-sm mb-6">Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng không?</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{t('checkout.remove_item_title')}</h3>
+                <p className="text-gray-500 text-sm mb-6">{t('header.remove_item_from_cart_description')}</p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setItemToDelete(null)}
                     className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors"
                   >
-                    Huỷ bỏ
+                    {t('checkout.remove_item_cancel')}
                   </button>
                   <button
                     onClick={() => {
@@ -1566,7 +1566,7 @@ const Header: React.FC = () => {
                     }}
                     className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors"
                   >
-                    Xoá ngay
+                    {t('checkout.remove_item_confirm')}
                   </button>
                 </div>
               </div>
@@ -1685,7 +1685,7 @@ const Header: React.FC = () => {
                                     <button
                                       type="button"
                                       className="p-2 rounded-md text-gray-400 hover:text-showcase-primary hover:bg-gray-100 transition-colors"
-                                      aria-label={isExpanded ? 'Thu gọn danh mục con' : 'Mở danh mục con'}
+                                      aria-label={isExpanded ? t('header.collapse_subcategories') : t('header.expand_subcategories')}
                                       onClick={() => toggleMobileProductCategoryAccordion(catId)}
                                     >
                                       <DownOutlined
@@ -1793,7 +1793,7 @@ const Header: React.FC = () => {
             to={ROUTES.DOI_TAC}
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Đối tác</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">{t('nav.partners')}</span>
           </Link>
           <Link
             to={ROUTES.VIDEO}
@@ -1805,20 +1805,20 @@ const Header: React.FC = () => {
             to={ROUTES.LIEN_HE}
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Liên hệ</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">{t('nav.contact')}</span>
           </Link>
           <Link
             to={ROUTES.TUYEN_DUNG}
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Tuyển dụng</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">{t('nav.recruitment')}</span>
           </Link>
           <Link
             to={ROUTES.DANG_NHAP}
             target="_blank"
             className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:opacity-70"
           >
-            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Nội bộ</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">{t('nav.internal')}</span>
           </Link>
         </div>
       </div>

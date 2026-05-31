@@ -1,4 +1,5 @@
-import axios from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
+import i18n from '@/src/i18n';
 import { authService } from '@/src/auth/services/authService';
 import { getOrCreateSessionId } from '../utils/session';
 import { api_url } from './constants';
@@ -12,6 +13,42 @@ const api = axios.create({
   },
 });
 
+const CLIENT_LANG_PARAM_MAP: Record<string, string> = {
+  vi: 'vie',
+  'vi-vn': 'vie',
+  en: 'en',
+  zh: 'zh',
+  'zh-cn': 'zh',
+  'zh-tw': 'zh',
+};
+
+const getClientLangParam = () => {
+  const currentLanguage = (i18n.resolvedLanguage || i18n.language || 'vi').toLowerCase();
+  const baseLanguage = currentLanguage.split('-')[0];
+
+  return CLIENT_LANG_PARAM_MAP[currentLanguage] || CLIENT_LANG_PARAM_MAP[baseLanguage] || 'vie';
+};
+
+const attachClientLangParam = (config: InternalAxiosRequestConfig) => {
+  if (typeof config.url === 'string' && /(?:\?|&)lang=/.test(config.url)) return;
+
+  const lang = getClientLangParam();
+
+  if (config.params instanceof URLSearchParams) {
+    if (!config.params.has('lang')) {
+      config.params.set('lang', lang);
+    }
+    return;
+  }
+
+  if (config.params?.lang) return;
+
+  config.params = {
+    ...(config.params || {}),
+    lang,
+  };
+};
+
 // ─── Request Interceptor: Tự gắn token ───
 api.interceptors.request.use(
   (config) => {
@@ -22,6 +59,7 @@ api.interceptors.request.use(
 
     const sessionId = getOrCreateSessionId();
     config.headers['x-session-id'] = sessionId;
+    attachClientLangParam(config);
 
     // Nếu payload là FormData (upload file), xóa Content-Type
     // để trình duyệt tự set multipart/form-data kèm boundary

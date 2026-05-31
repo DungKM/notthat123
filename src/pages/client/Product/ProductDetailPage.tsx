@@ -17,21 +17,23 @@ import {
   PhoneOutlined,
 } from '@ant-design/icons';
 import SEO from '@/src/components/common/SEO';
-import { useCart } from '@/src/features/showcase/context/CartContext';
+import { useCart } from '../../../../features/showcase/context/CartContext';
 import deliveryLogo from '@/src/statics/logo_giao_hang.png';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import toast from 'react-hot-toast';
 import { useProductService } from '@/src/api/services';
 import { Image } from 'antd';
 import InterestModal from '@/src/components/common/InterestModal';
+import { useTranslation } from 'react-i18next';
 
 const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
+  const { t } = useTranslation();
   const image = product.images && product.images.length > 0
     ? product.images[0].url
     : 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800';
   const priceText = product.price && product.price > 0
-    ? `${product.price.toLocaleString()}đ`
-    : 'Liên hệ';
+    ? `${product.price.toLocaleString()} ${t('common.vnd')}`
+    : t('products.contact_price');
   return (
     <Link to={`/san-pham/${product.slug || product.id}?id=${product.id}`}
       className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
@@ -53,13 +55,14 @@ const RelatedProductCard: React.FC<{ product: any }> = ({ product }) => {
         <p className="text-[#a0522d] font-bold text-[14px] mt-1.5">{priceText}</p>
       </div>
       <div className="px-3 pb-3">
-        <img src={deliveryLogo} alt="Giao lắp tại nhà" className="w-full h-auto object-contain rounded-lg" />
+        <img src={deliveryLogo} alt={t('product_detail.delivery_alt')} className="w-full h-auto object-contain rounded-lg" />
       </div>
     </Link>
   );
 };
 
 const ProductDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>(); // Lấy slug thật từ URL
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -141,9 +144,9 @@ const ProductDetailPage: React.FC = () => {
         setIsLiked(newStatus);
         setLikeCount(Number(res.data.likeCount ?? (prevLiked ? Math.max(0, prevCount - 1) : prevCount + 1)));
         if (newStatus) {
-          toast.success('Đã thích sản phẩm');
+          toast.success(t('product_detail.toast.liked'));
         } else {
-          toast.success('Đã bỏ thích sản phẩm');
+          toast.success(t('product_detail.toast.unliked'));
         }
       }
     } catch {
@@ -204,7 +207,7 @@ const ProductDetailPage: React.FC = () => {
     .filter((v: any) => v.size === selectedSize)
     .map((v: any) => ({
       id: v.colorId?.id || v.colorId || '',
-      name: v.colorId?.name || 'Màu',
+      name: v.colorId?.name || t('product_detail.color_fallback'),
       image: v.image || null,
       price: v.price,
       stockQuantity: v.stockQuantity,
@@ -239,20 +242,20 @@ const ProductDetailPage: React.FC = () => {
   const product = apiProduct ? {
     id: apiProduct.id,
     slug: apiProduct.id,
-    title: apiProduct.name || 'Đang cập nhật',
-    category: apiProduct.categoryId?.name || 'Sản phẩm',
+    title: apiProduct.name || t('product_detail.updating'),
+    category: apiProduct.categoryId?.name || t('product_detail.product_fallback'),
     price: displayPrice,
-    priceText: displayPrice > 0 ? `${displayPrice.toLocaleString()} VND` : 'Liên hệ',
-    productCode: apiProduct.productCode || 'Đang cập nhật',
-    description: apiProduct.description || 'Chi tiết sản phẩm nội thất cao cấp với thiết kế hiện đại, chất liệu bền bỉ và đẹp mắt. Tôn vinh Không gian sống đẳng cấp.',
+    priceText: displayPrice > 0 ? `${displayPrice.toLocaleString()} ${t('common.vnd')}` : t('products.contact_price'),
+    productCode: apiProduct.productCode || t('product_detail.updating'),
+    description: apiProduct.description || t('product_detail.description_fallback'),
     stockQuantity: displayStock,
     sizes: variantSizes,
     images: allImages,
     specs: [
-      { label: 'Chất liệu', value: apiProduct.material || 'Đang cập nhật' },
-      { label: 'Phong cách', value: apiProduct.style || 'Đang cập nhật' },
-      { label: 'Tồn kho', value: displayStock ? `${displayStock} sản phẩm` : 'Đặt hàng' },
-      { label: 'Bảo hành', value: apiProduct.warranty || 'Đang cập nhật' },
+      { label: t('product_detail.specs.material'), value: apiProduct.material || t('product_detail.updating') },
+      { label: t('product_detail.specs.style'), value: apiProduct.style || t('product_detail.updating') },
+      { label: t('product_detail.specs.stock'), value: displayStock ? t('product_detail.stock_count', { count: displayStock }) : t('product_detail.order_required') },
+      { label: t('product_detail.specs.warranty'), value: apiProduct.warranty || t('product_detail.updating') },
     ],
     imageDetails: apiProduct.images && apiProduct.images.length > 0
       ? apiProduct.images.map((img: any) => ({ url: img.url, description: img.description || '' }))
@@ -289,9 +292,9 @@ const ProductDetailPage: React.FC = () => {
   return (
     <div className="bg-white overflow-x-hidden w-full">
       {loading && !product ? (
-        <div className="pt-40 pb-24 text-center text-gray-400">Đang tải thông tin sản phẩm...</div>
+        <div className="pt-40 pb-24 text-center text-gray-400">{t('product_detail.loading')}</div>
       ) : !product ? (
-        <div className="pt-40 pb-24 text-center text-red-400">Không tìm thấy sản phẩm!</div>
+        <div className="pt-40 pb-24 text-center text-red-400">{t('product_detail.not_found')}</div>
       ) : (
         <>
           <SEO
@@ -301,18 +304,18 @@ const ProductDetailPage: React.FC = () => {
             ogImage={product.images[0]}
             ogImageAlt={product.title}
             ogType="product"
-            keywords={`${product.title}, ${product.category}, nội thất hochi, mua nội thất, ${product.title} hà nội`}
+            keywords={`${product.title}, ${product.category}, ${t('product_detail.seo.keywords', { title: product.title })}`}
             productData={{
               price: product.price,
               currency: 'VND',
               availability: product.stockQuantity > 0 ? 'InStock' : 'OutOfStock',
-              brand: 'Nội Thất Hochi',
+              brand: t('product_detail.brand'),
               sku: product.productCode,
               image: product.images[0],
             }}
             breadcrumbs={[
-              { name: 'Trang chủ', url: '/' },
-              { name: 'Sản phẩm', url: '/san-pham' },
+              { name: t('products.breadcrumbs.home'), url: '/' },
+              { name: t('products.breadcrumbs.current'), url: '/san-pham' },
               { name: product.category, url: '/san-pham' },
               { name: product.title, url: `/san-pham/${slug}` },
             ]}
@@ -322,9 +325,9 @@ const ProductDetailPage: React.FC = () => {
             <Container className="max-w-7xl">
               {/* BREADCRUMB */}
               <div className="text-[13px] !text-gray-500 mb-6 font-medium">
-                <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
+                <Link to="/" className="hover:text-showcase-primary !text-gray-500">{t('products.breadcrumbs.home')}</Link>
                 <span className="mx-2">/</span>
-                <Link to="/san-pham/danh-sach" className="hover:text-showcase-primary !text-gray-500">Sản phẩm</Link>
+                <Link to="/san-pham/danh-sach" className="hover:text-showcase-primary !text-gray-500">{t('products.breadcrumbs.current')}</Link>
                 <span className="mx-2">/</span>
                 <span className="text-gray-900">{product.title}</span>
               </div>
@@ -404,7 +407,7 @@ const ProductDetailPage: React.FC = () => {
                           {product.title}
                         </h1>
                         <div className="text-[15px] text-gray-700 space-y-1.5">
-                          <p><strong>Xem thêm:</strong> <Link to="/san-pham" className="!text-gray-700 hover:text-showcase-primary">{product.category}</Link></p>
+                          <p><strong>{t('product_detail.see_more')}</strong> <Link to="/san-pham" className="!text-gray-700 hover:text-showcase-primary">{product.category}</Link></p>
                         </div>
                       </div>
 
@@ -413,12 +416,12 @@ const ProductDetailPage: React.FC = () => {
                         <div>
                           <div className="text-xl font-bold text-[#cca32e]">
                             {displayPrice > 0 && quantity
-                              ? `${(displayPrice * (Number(quantity) || 1)).toLocaleString()} VND`
-                              : 'Liên hệ'}
+                              ? `${(displayPrice * (Number(quantity) || 1)).toLocaleString()} ${t('common.vnd')}`
+                              : t('products.contact_price')}
                           </div>
                           {selectedVariant && variants.length > 1 && (
                             <div className="text-[12px] text-gray-400 mt-0.5">
-                              Giá cho: {selectedVariant.size}
+                              {t('product_detail.price_for', { size: selectedVariant.size })}
                               {selectedVariant.colorId?.name ? ` · ${selectedVariant.colorId.name}` : ''}
                             </div>
                           )}
@@ -427,7 +430,7 @@ const ProductDetailPage: React.FC = () => {
                           onClick={handleLike}
                           disabled={isLiking}
                           className={`flex items-center gap-1.5 text-2xl transition-transform active:scale-90 ${isLiked ? 'text-red-500' : 'text-gray-300 hover:text-red-400'} ${isLiking ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
-                          title={isLiked ? 'Bỏ thích' : 'Yêu thích'}
+                          title={isLiked ? t('product_detail.unlike_title') : t('product_detail.like_title')}
                         >
                           {isLiked ? <HeartFilled /> : <HeartOutlined />}
                           {likeCount > 0 && <span className="text-lg font-medium tracking-tight mb-0.5">{likeCount}</span>}
@@ -442,7 +445,7 @@ const ProductDetailPage: React.FC = () => {
                             onClick={() => setIsInterestModalOpen(true)}
                             className="h-9 px-6 bg-white border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
                           >
-                            Quan tâm
+                            {t('detail.interested')}
                           </button>
                         </div>
                       </div>
@@ -451,7 +454,7 @@ const ProductDetailPage: React.FC = () => {
                       {product.sizes && product.sizes.length > 0 && (
                         <div className="mb-6">
                           {/* Chọn kích thước */}
-                          <h3 className="text-[14px] font-bold text-gray-800 mb-3">Kích thước (cm):</h3>
+                          <h3 className="text-[14px] font-bold text-gray-800 mb-3">{t('product_detail.size_heading')}</h3>
                           <div className="flex flex-wrap gap-2.5 mb-4">
                             {product.sizes.map((s: string, idx: number) => (
                               <button
@@ -493,7 +496,7 @@ const ProductDetailPage: React.FC = () => {
                           {allColors.length > 0 && (
                             <div>
                               <h3 className="text-[14px] font-bold text-gray-800 mb-3">
-                                Màu sắc:
+                                {t('product_detail.color_heading')}
                                 {selectedVariant && (
                                   <span className="ml-2 text-[#cca32e] font-bold">
                                     {selectedVariant.colorId?.name || ''}
@@ -523,7 +526,7 @@ const ProductDetailPage: React.FC = () => {
                                           if (imgIndex !== -1) setActiveImgIndex(imgIndex);
                                         }
                                       }}
-                                      title={!isAvailable ? `${c.name} — không có với kích thước này` : c.name}
+                                      title={!isAvailable ? t('product_detail.color_unavailable', { name: c.name }) : c.name}
                                       className={`relative flex flex-col items-center gap-1.5 px-3 py-2 min-w-[72px] border-2 rounded-md transition-all
                                         ${
                                           !isAvailable
@@ -549,7 +552,7 @@ const ProductDetailPage: React.FC = () => {
                                           isActive ? 'border-[#cca32e]/40 bg-[#cca32e]/10 text-[#cca32e]' :
                                           'border-gray-200 bg-gray-50 text-gray-400'
                                         }`}>
-                                          No img
+                                          {t('product_detail.no_image')}
                                         </div>
                                       )}
                                       {/* Tên màu */}
@@ -574,11 +577,11 @@ const ProductDetailPage: React.FC = () => {
                       {/* Stock Status */}
                       <div className="mb-6 flex items-center gap-2 text-[14px] font-medium">
                         <CheckCircleFilled className="!text-[#cca32e] text-[16px]" />
-                        <span className="text-[#cca32e]">Tình trạng tồn kho:</span>
+                        <span className="text-[#cca32e]">{t('product_detail.stock_status')}</span>
                         {product.stockQuantity ? (
-                          <span className="text-gray-400">Còn hàng</span>
+                          <span className="text-gray-400">{t('product_detail.in_stock')}</span>
                         ) : (
-                          <span className="text-gray-400">Hết hàng</span>
+                          <span className="text-gray-400">{t('product_detail.out_of_stock')}</span>
                         )}
                       </div>
 
@@ -598,7 +601,7 @@ const ProductDetailPage: React.FC = () => {
                               if (isNaN(numVal)) return;
 
                               if (product?.stockQuantity && numVal > product.stockQuantity) {
-                                setStockWarning(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`);
+                                setStockWarning(t('product_detail.stock_limit', { count: product.stockQuantity }));
                                 setQuantity(product.stockQuantity);
                               } else {
                                 setStockWarning(null);
@@ -617,18 +620,18 @@ const ProductDetailPage: React.FC = () => {
                             <button disabled={!product.stockQuantity} onClick={() => setQuantity(q => {
                               const currentQ = Number(q) || 1;
                               if (product?.stockQuantity && currentQ >= product.stockQuantity) {
-                                setStockWarning(`Trong kho chỉ còn tối đa ${product.stockQuantity} sản phẩm`);
+                                setStockWarning(t('product_detail.stock_limit', { count: product.stockQuantity }));
                                 return product.stockQuantity;
                               }
                               setStockWarning(null);
                               return currentQ + 1;
-                            })} className={`flex-1 flex items-center justify-center border-b text-[10px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 border-gray-300 text-gray-600'}`} title="Tăng số lượng">
+                            })} className={`flex-1 flex items-center justify-center border-b text-[10px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 border-gray-300 text-gray-600'}`} title={t('product_detail.increase_quantity')}>
                               <span className="leading-none mt-1">+</span>
                             </button>
                             <button disabled={!product.stockQuantity} onClick={() => {
                               setStockWarning(null);
                               setQuantity(q => Math.max(1, (Number(q) || 1) - 1));
-                            }} className={`flex-1 flex items-center justify-center text-[12px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`} title="Giảm số lượng">
+                            }} className={`flex-1 flex items-center justify-center text-[12px] pb-0.5 ${!product.stockQuantity ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`} title={t('product_detail.decrease_quantity')}>
                               <span className="leading-none mb-1">-</span>
                             </button>
                           </div>
@@ -639,7 +642,7 @@ const ProductDetailPage: React.FC = () => {
                             disabled
                             className="h-10 flex-1 min-w-[100px] bg-gray-300 text-gray-500 font-bold rounded flex items-center justify-center gap-2 cursor-not-allowed text-[13px] tracking-wide"
                           >
-                            Đã bán hết
+                            {t('product_detail.sold_out')}
                           </button>
                         ) : (
                           <>
@@ -648,14 +651,14 @@ const ProductDetailPage: React.FC = () => {
                               className="h-10 flex-1 min-w-[100px] bg-[#cca32e] hover:bg-[#bea748] text-white font-bold rounded flex items-center justify-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
                             >
                               <ShoppingCartOutlined className="text-[16px]" />
-                              Thêm vào giỏ
+                              {t('product_detail.add_to_cart')}
                             </button>
 
                             <button
                               onClick={handleBuyNow}
                               className="h-10 flex-1 min-w-[80px] bg-[#e54d42] hover:bg-[#c93f35] text-white font-bold rounded transition-colors text-[13px] tracking-wide !cursor-pointer"
                             >
-                              Mua ngay
+                              {t('product_detail.buy_now')}
                             </button>
                           </>
                         )}
@@ -665,7 +668,7 @@ const ProductDetailPage: React.FC = () => {
                           className="h-10 flex-1 min-w-[80px] !bg-[#222] hover:bg-black !text-white font-bold rounded flex items-center justify-center gap-2 transition-colors text-[13px] tracking-wide !cursor-pointer"
                         >
                           <PhoneFilled className="text-[16px]" />
-                          Gọi tư vấn
+                          {t('product_detail.call_consult')}
                         </a>
                       </div>
 
@@ -678,24 +681,24 @@ const ProductDetailPage: React.FC = () => {
                       {/* Policy Box */}
                       <div className="border border-gray-100 rounded-lg p-5 bg-[#fafafa]">
                         <h3 className="text-[13px] font-bold text-[#8b5a2b] mb-4 uppercase tracking-wide">
-                          XƯỞNG NỘI THẤT GỖ TRANG TRÍ - SINCE 2014
+                          {t('product_detail.policy_title')}
                         </h3>
                         <ul className="space-y-3 text-[14px] text-gray-600">
                           <li className="flex items-start gap-3">
                             <CheckOutlined className="!text-green-500 mt-1 flex-shrink-0 text-[15px]" />
-                            <span className="leading-snug">Giao hàng & lắp đặt MIỄN PHÍ cho các đơn hàng &gt;2 triệu, gồm: Hà Nội, Hồ Chí Minh, Đà Nẵng, Hải Phòng, Bình Dương, Đồng Nai.</span>
+                            <span className="leading-snug">{t('product_detail.policy_1')}</span>
                           </li>
                           <li className="flex items-start gap-3">
                             <CheckOutlined className="!text-green-500 mt-1 flex-shrink-0 text-[15px]" />
-                            <span className="leading-snug">Thời gian giao hàng tiêu chuẩn dự kiến 1~7 ngày</span>
+                            <span className="leading-snug">{t('product_detail.policy_2')}</span>
                           </li>
                           <li className="flex items-start gap-3">
                             <CheckOutlined className="!text-green-500 mt-1 flex-shrink-0 text-[15px]" />
-                            <span className="leading-snug"><strong className="text-gray-800">Nhận đặt đóng đồ theo yêu cầu dù chỉ 1 món</strong> - miễn phí thiết kế 3D</span>
+                            <span className="leading-snug"><strong className="text-gray-800">{t('product_detail.policy_3_strong')}</strong> - {t('product_detail.policy_3_suffix')}</span>
                           </li>
                           <li className="flex items-start gap-3">
                             <CheckOutlined className="!text-green-500 mt-1 flex-shrink-0 text-[15px]" />
-                            <span className="leading-snug">Giá đã bao gồm hóa đơn điện tử HKD</span>
+                            <span className="leading-snug">{t('product_detail.policy_4')}</span>
                           </li>
                         </ul>
                       </div>
@@ -707,7 +710,7 @@ const ProductDetailPage: React.FC = () => {
                 {/* RIGHT SIDEBAR - SẢN PHẨM MỚI */}
                 <div className="w-full xl:w-[250px] shrink-0 hidden xl:block">
                   <div className="bg-[#cca32e] rounded-[30px] py-2 px-6 text-center mb-5 shadow-sm">
-                    <h3 className="text-white font-black text-[12px] uppercase tracking-widest">Sản phẩm mới</h3>
+                    <h3 className="text-white font-black text-[12px] uppercase tracking-widest">{t('product_detail.new_products')}</h3>
                   </div>
 
                   <div className="flex flex-col">
@@ -726,7 +729,7 @@ const ProductDetailPage: React.FC = () => {
                           </h4>
                           <div className="flex items-center gap-2 mt-auto">
                             <span className="text-gray-900 font-bold text-[14px]">
-                              {(rp.price || 0).toLocaleString()} VND
+                              {(rp.price || 0).toLocaleString()} {t('common.vnd')}
                             </span>
                           </div>
                         </div>
@@ -742,7 +745,7 @@ const ProductDetailPage: React.FC = () => {
                 {/* Tab Header */}
                 <div className="flex border-b border-gray-200">
                   <div className="bg-[#2f231f] text-white px-8 py-3 font-bold text-[13px] uppercase tracking-wider">
-                    MÔ TẢ
+                    {t('product_detail.description_tab')}
                   </div>
                 </div>
 
@@ -814,9 +817,9 @@ const ProductDetailPage: React.FC = () => {
                       className="inline-flex items-center gap-2 px-6 py-2 border border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-semibold rounded-full text-[13px] transition-all duration-200 cursor-pointer"
                     >
                       {isDescExpanded ? (
-                        <><span>Thu gọn</span><span className="text-[10px]">▲</span></>
+                        <><span>{t('product_detail.collapse')}</span><span className="text-[10px]">▲</span></>
                       ) : (
-                        <><span>Xem thêm nội dung</span><span className="text-[10px]">▼</span></>
+                        <><span>{t('product_detail.expand')}</span><span className="text-[10px]">▼</span></>
                       )}
                     </button>
                   </div>
@@ -827,7 +830,7 @@ const ProductDetailPage: React.FC = () => {
               <div className="mb-16 w-full mx-auto max-w-7xl">
                 <div className="text-center mb-8">
                   <h2 className="text-[24px] font-bold text-gray-900">
-                    Sản phẩm tương tự
+                    {t('product_detail.related_products')}
                   </h2>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -845,7 +848,7 @@ const ProductDetailPage: React.FC = () => {
             isOpen={isInterestModalOpen}
             onClose={() => setIsInterestModalOpen(false)}
             entityName={product.title}
-            entityTypeText="sản phẩm"
+            entityTypeText={t('product_detail.entity_type')}
             entityId={String(apiProduct?.id || '')}
             entityType="Product"
           />

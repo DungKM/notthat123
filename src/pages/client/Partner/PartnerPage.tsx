@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import Container from "@/src/features/showcase/components/ui/Container";
 import SEO from "@/src/components/common/SEO";
 import { usePartnerService } from "@/src/api/services";
+import { useTranslation } from "react-i18next";
 
 const PartnerPage: React.FC = () => {
+  const { t } = useTranslation();
   const { list: partners, getAll, loading } = usePartnerService();
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | number | null>(null);
 
@@ -15,11 +17,11 @@ const PartnerPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title="Đối tác"
-        description="HOCHI tự hào hợp tác cùng các đối tác uy tín, mang đến những trải nghiệm không điểm trừ cho khách hàng."
+        title={t('partner.seo.title')}
+        description={t('partner.seo.description')}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Đối tác', url: '/doi-tac' },
+          { name: t('partner.breadcrumbs.home'), url: '/' },
+          { name: t('partner.breadcrumbs.current'), url: '/doi-tac' },
         ]}
       />
 
@@ -28,7 +30,7 @@ const PartnerPage: React.FC = () => {
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=2000"
-            alt="Đối tác Background"
+            alt={t('partner.hero_alt')}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-[#0f172a]/80"></div>
@@ -46,7 +48,7 @@ const PartnerPage: React.FC = () => {
             className="text-3xl md:text-5xl font-bold uppercase tracking-widest leading-tight mt-4"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            ĐỐI TÁC
+            {t('partner.hero_title')}
           </h1>
         </Container>
       </section>
@@ -59,17 +61,17 @@ const PartnerPage: React.FC = () => {
               className="text-3xl md:text-4xl font-bold text-teal-950 mb-8 uppercase tracking-wider"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              Đối Tác Đồng Hành
+              {t('partner.section_title')}
             </h2>
             <p className="text-gray-500 leading-relaxed text-lg text-center mx-auto mb-16">
-              Chúng tôi tự hào hợp tác cùng các đối tác uy tín trong nhiều lĩnh vực, mang đến những sản phẩm và giải pháp chất lượng cao, đáp ứng các tiêu chuẩn khắt khe. Với định hướng phát triển bền vững, HOCHI luôn đề cao sự đồng hành lâu dài, cùng nhau kiến tạo giá trị và nâng tầm trải nghiệm cho khách hàng tại thị trường Việt Nam.
+              {t('partner.section_description')}
             </p>
 
             {/* Horizontal Logos / Cover Images List */}
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 w-full mb-12">
               {loading ? (
                 <div className="flex justify-center w-full py-4">
-          k        <div className="animate-spin rounded-full h-8 w-8 border-b-2 "></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 "></div>
                 </div>
               ) : partners.map((partner) => {
                 const isSelected = selectedPartnerId === partner.id;
@@ -124,17 +126,17 @@ const PartnerPage: React.FC = () => {
                          {partner.title}
                        </h3>
                        <div className="inline-block px-4 py-1.5 bg-orange-50 text-orange-600 font-semibold rounded-full text-sm mb-6">
-                         Đối tác từ năm {partner.cooperationYear || new Date().getFullYear()}
+                         {t('partner.partner_since', { year: partner.cooperationYear || new Date().getFullYear() })}
                        </div>
                        <p className="whitespace-pre-line text-gray-600 leading-relaxed text-base md:text-lg">
-                         {partner.description || 'Thông tin chi tiết về đối tác đang được cập nhật...'}
+                         {partner.description || t('partner.description_fallback')}
                        </p>
                     </div>
                   );
                 })()
               ) : (
                 <div className="py-20 text-center text-gray-400">
-                  <p className="text-lg">Vui lòng nhấp vào một đối tác ở trên để xem thông tin chi tiết.</p>
+                  <p className="text-lg">{t('partner.select_prompt')}</p>
                 </div>
               )}
             </div>
@@ -147,4 +149,3 @@ const PartnerPage: React.FC = () => {
 };
 
 export default PartnerPage;
-

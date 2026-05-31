@@ -20,7 +20,16 @@
     "continue_shopping": "Tiếp tục mua sắm",
     "subtotal": "Thành tiền",
     "total": "Tổng cộng",
-    "checkout": "Thanh toán ngay"
+    "checkout": "Thanh toán ngay",
+    "item_fallback": "Sản phẩm",
+    "toast": {
+      "added": "Đã thêm sản phẩm vào giỏ hàng",
+      "removed": "Xóa sản phẩm khỏi giỏ hàng thành công",
+      "stock_limit": "Trong kho chỉ còn tối đa {{count}} sản phẩm"
+    },
+    "errors": {
+      "provider_required": "useCart phải được dùng trong CartProvider"
+    }
   },
   "hero": {
     "badge": "Kiến Tạo Không Gian Sống",
@@ -122,6 +131,7 @@
     "terms": "Bằng cách bấm đặt hàng, bạn đồng ý với các",
     "terms_link": "Điều khoản dịch vụ",
     "warranty_link": "Chính sách bảo hành",
+    "and": "và",
     "terms_suffix": "của Nội Thất Hochi.",
     "remove_item_title": "Xoá sản phẩm",
     "remove_item_description": "Bạn có chắc chắn muốn xoá sản phẩm này?",
@@ -131,6 +141,7 @@
     "half_payment": "Thanh toán trước (50%)",
     "remaining_payment": "Số tiền còn lại (50%)",
     "qr_title": "Quét mã QR để thanh toán",
+    "qr_alt": "QR Code thanh toán",
     "qr_missing": "Chưa tải ảnh QR",
     "bank_label": "Ngân hàng:",
     "account_label": "Số tài khoản:",
@@ -275,18 +286,414 @@
     "form_apartment": "Chung cư",
     "form_townhouse": "Nhà phố",
     "form_content": "Nội dung cần tư vấn",
-    "form_submit": "ĐĂNG KÝ NGAY"
+    "form_submit": "ĐĂNG KÝ NGAY",
+    "form_submit_loading": "ĐANG GỬI...",
+    "project_type_content": "[Loại công trình: {{type}}] - {{message}}",
+    "toast_success": "Đăng ký tư vấn thành công. Chúng tôi sẽ sớm liên lạc với bạn!",
+    "errors": {
+      "full_name_required": "Vui lòng nhập họ tên!",
+      "phone_required": "Vui lòng nhập số điện thoại!",
+      "phone_invalid": "Số điện thoại không hợp lệ!"
+    }
+  },
+  "interest_modal": {
+    "title": "Đăng ký nhận tư vấn",
+    "description_prefix": "Vui lòng để lại thông tin, chúng tôi sẽ liên hệ tư vấn chi tiết về",
+    "description_suffix": "cho bạn.",
+    "free_note": "* Lưu ý: Quá trình tư vấn là hoàn toàn miễn phí!",
+    "name_placeholder": "Họ và tên *",
+    "phone_placeholder": "Số điện thoại *",
+    "email_placeholder": "Email (Tùy chọn)",
+    "submit": "Gửi thông tin",
+    "toast_success": "Ghi nhận thông tin thành công. Chúng tôi sẽ sớm liên hệ!",
+    "toast_error": "Có lỗi xảy ra, vui lòng thử lại!",
+    "errors": {
+      "name_required": "Vui lòng nhập họ tên",
+      "phone_required": "Vui lòng nhập số điện thoại",
+      "phone_invalid": "Số điện thoại phải có 10 số",
+      "email_invalid": "Email không hợp lệ"
+    }
+  },
+  "languages": {
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "zh": "中文"
+  },
+  "header": {
+    "select_category_detail": "Vui lòng chọn danh mục để xem chi tiết",
+    "no_child_categories": "Không có danh mục con",
+    "view_all_projects_for": "Xem tất cả công trình {{name}}",
+    "view_all_for": "Xem tất cả {{name}}",
+    "search_placeholder": "Tìm kiếm...",
+    "mobile_search_placeholder": "Tìm kiếm sản phẩm, công trình...",
+    "products": "Sản phẩm",
+    "projects": "Công trình",
+    "interior": "Nội thất",
+    "architecture": "Kiến trúc",
+    "view_all_results": "Xem tất cả {{count}} kết quả",
+    "no_results": "Không tìm thấy kết quả",
+    "try_other_keywords": "Thử từ khóa khác hoặc xem toàn bộ",
+    "search_results_page": "Trang kết quả tìm kiếm",
+    "searching": "Đang tìm kiếm...",
+    "no_matching_results": "Không tìm thấy kết quả phù hợp",
+    "search_for": "Tìm kiếm",
+    "popular_categories": "Danh mục phổ biến",
+    "all": "Tất cả",
+    "select_parent_category": "Vui lòng chọn danh mục cha",
+    "view_category": "Xem {{name}}",
+    "your_orders": "Đơn hàng của bạn",
+    "remove_item_from_cart_description": "Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng không?",
+    "collapse_subcategories": "Thu gọn danh mục con",
+    "expand_subcategories": "Mở danh mục con"
+  },
+  "about": {
+    "seo": {
+      "title": "Về chúng tôi - Nội Thất Hochi",
+      "description": "Nội Thất Hochi - Hơn 10 năm kinh nghiệm thiết kế và thi công nội thất gỗ cao cấp tại Hà Nội. Xưởng sản xuất khép kín, thi công chuyên nghiệp, bảo hành dài hạn.",
+      "keywords": "về nội thất hochi, câu chuyện thương hiệu nội thất, xưởng nội thất hà nội, 10 năm kinh nghiệm nội thất"
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Về chúng tôi"
+    },
+    "hero_title": "VỀ CHÚNG TÔI",
+    "story_badge": "CÂU CHUYỆN THƯƠNG HIỆU",
+    "story_title": "NỘI THẤT HOCHI",
+    "story_quote": "Khởi nguồn từ niềm đam mê bất tận với vẻ đẹp của vật liệu và nghệ thuật kiến tạo không gian, HOCHI không chỉ thiết kế nội thất - chúng tôi định hình phong cách sống.",
+    "story_p1": "Với hơn một thập kỷ kinh nghiệm, HOCHI khẳng định vị thế trong lĩnh vực thiết kế và thi công nội thất cao cấp tại Việt Nam. Chúng tôi tinh tuyển và kết hợp hoàn mỹ giữa gỗ tự nhiên, nhựa cao cấp, kim loại, kính cùng các vật liệu hiện đại, để tạo nên những không gian sống sang trọng, khác biệt và trường tồn theo thời gian.",
+    "story_p2": "Mỗi công trình của HOCHI là một tuyên ngôn cá nhân - nơi gu thẩm mỹ, đẳng cấp và cá tính của gia chủ được thể hiện một cách tinh tế và đầy cảm hứng.",
+    "story_p3": "Sở hữu quy trình sản xuất khép kín cùng sự giao thoa giữa công nghệ tiên tiến và nghệ thuật chế tác thủ công, HOCHI cam kết mang đến những giá trị vượt trên cả một sản phẩm nội thất - đó là trải nghiệm sống xứng tầm.",
+    "years_experience": "Năm Kinh Nghiệm",
+    "why_title": "VÌ SAO CHỌN CHÚNG TÔI?",
+    "reasons": {
+      "material_title": "Chất liệu đẳng cấp",
+      "material_desc": "Tất cả được chọn lọc khắt khe nhằm đảm bảo độ bền vượt trội, tính thẩm mỹ tinh tế và giá trị trường tồn theo thời gian.",
+      "design_title": "Thiết kế độc bản",
+      "design_desc": "Mỗi không gian được thiết kế dựa trên phong cách và nhu cầu thực tế của gia chủ.",
+      "construction_title": "Thi công chuyên nghiệp",
+      "construction_desc": "Đội ngũ nghệ nhân lành nghề cùng quy trình tẩm sấy và lắp đặt chuẩn quốc tế."
+    }
+  },
+  "why_choose": {
+    "seo": {
+      "title": "Vì sao chọn chúng tôi",
+      "description": "Ưu điểm vượt trội của Nội Thất Hochi: vật liệu cao cấp, thi công tốc độ, đội ngũ nghệ nhân tài hoa và chế độ bảo hành uy tín."
+    },
+    "badge": "GIÁ TRỊ CỐT LÕI",
+    "hero_title": "VÌ SAO CHỌN CHÚNG TÔI?",
+    "values": {
+      "quality_title": "Chất lượng Thượng hạng",
+      "quality_desc": "Tinh tuyển vật liệu thượng hạng đạt chuẩn quốc tế, chế tác chuẩn mực hoàn mỹ - kiến tạo giá trị bền vững vượt thời gian.",
+      "speed_title": "Thi công Tốc độ",
+      "speed_desc": "Quy trình sản xuất hiện đại giúp rút ngắn thời gian thi công so với thị trường mà vẫn đảm bảo độ tinh xảo tuyệt đối.",
+      "expert_title": "Đội ngũ Chuyên gia",
+      "expert_desc": "Quy tụ những kiến trúc sư và nghệ nhân giàu kinh nghiệm, HOCHI sở hữu hơn một thập kỷ tinh hoa trong thiết kế và chế tác nội thất, am hiểu sâu sắc nhiều phong cách - từ hiện đại, tối giản đến luxury và tân cổ điển - mang đến những không gian sống được cá nhân hóa đầy tinh tế và đẳng cấp.",
+      "warranty_title": "Bảo hành Uy tín",
+      "warranty_desc": "Cam kết bảo hành 1 năm cho toàn bộ sản phẩm nội thất HOCHI, đảm bảo chất lượng thi công và sự an tâm trong suốt quá trình sử dụng."
+    },
+    "process_badge": "QUY TRÌNH CHUYÊN NGHIỆP",
+    "process_title_line1": "CHẾ TÁC TỪ TÂM -",
+    "process_title_line2": "NÂNG TẦM ĐIỂM SỐNG",
+    "process_items": [
+      "Nguyên vật liệu tuyển chọn kỹ lưỡng, xử lý đạt chuẩn, đảm bảo độ bền ổn định lâu dài.",
+      "Phủ sơn nhiều lớp công nghệ cao, bền đẹp tinh tế và an toàn khi sử dụng.",
+      "Kết cấu mộng truyền thống kết hợp công nghệ CNC chính xác 0.1mm.",
+      "Lắp đặt và bàn giao chìa khóa trao tay với dịch vụ tận tâm 24/7."
+    ],
+    "quote": "Chúng tôi không chỉ bán nội thất, chúng tôi kiến tạo không gian sống mơ ước nơi mỗi gia chủ tìm thấy sự bình yên và đẳng cấp thực sự.",
+    "signature": "GĐ. Hồ Chí Lương"
+  },
+  "partner": {
+    "seo": {
+      "title": "Đối tác",
+      "description": "HOCHI tự hào hợp tác cùng các đối tác uy tín, mang đến những trải nghiệm không điểm trừ cho khách hàng."
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Đối tác"
+    },
+    "hero_alt": "Đối tác Background",
+    "hero_title": "ĐỐI TÁC",
+    "section_title": "Đối Tác Đồng Hành",
+    "section_description": "Chúng tôi tự hào hợp tác cùng các đối tác uy tín trong nhiều lĩnh vực, mang đến những sản phẩm và giải pháp chất lượng cao, đáp ứng các tiêu chuẩn khắt khe. Với định hướng phát triển bền vững, HOCHI luôn đề cao sự đồng hành lâu dài, cùng nhau kiến tạo giá trị và nâng tầm trải nghiệm cho khách hàng tại thị trường Việt Nam.",
+    "partner_since": "Đối tác từ năm {{year}}",
+    "description_fallback": "Thông tin chi tiết về đối tác đang được cập nhật...",
+    "select_prompt": "Vui lòng nhấp vào một đối tác ở trên để xem thông tin chi tiết.",
+    "detail": {
+      "strategic_partner": "ĐỐI TÁC CHIẾN LƯỢC {{year}}",
+      "cooperation_note": "Chúng tôi tin tưởng rằng mối quan hệ hợp tác này sẽ mang lại những giá trị thiết thực và lâu dài. Không chỉ cung cấp các sản phẩm chất lượng cao, hai bên còn hướng tới việc đem đến trải nghiệm người dùng tuyệt vời và các dịch vụ hậu mãi xuất sắc.",
+      "brand": "Thương hiệu",
+      "cooperation_year": "Năm hợp tác"
+    }
+  },
+  "video": {
+    "seo": {
+      "title": "Video thi công nội thất thực tế - Nội Thất Hochi",
+      "description": "Xem video thực tế thi công nội thất gỗ cao cấp của Nội Thất Hochi: biệt thự, căn hộ, penthouse. Xem kết quả rực rỡ từ những công trình thực tế.",
+      "keywords": "video nội thất, video thi công nội thất, youtube nội thất hochi, video thiết kế nội thất"
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Video"
+    },
+    "card_label": "Video công trình",
+    "load_more": "TẢI THÊM VIDEO"
+  },
+  "products": {
+    "seo": {
+      "title": "Sản phẩm nội thất gỗ cao cấp - Mua nội thất Hà Nội",
+      "description": "Mua sản phẩm nội thất gỗ cao cấp tại Hà Nội: sofa, giường ngủ, tủ bếp, bàn ăn, kệ TV, tủ quần áo. Chất liệu gỗ óc chó, gỗ MDF. Giao lắp miễn phí. Nội Thất Hochi.",
+      "keywords": "mua nội thất, nội thất gỗ cao cấp, sofa nội thất hochi, giường ngủ, tủ bếp, bàn ăn, kệ TV, nội thất hà nội, gỗ óc chó, gỗ MDF, đặt đồ theo yêu cầu"
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Sản phẩm"
+    },
+    "hero_title": "SẢN PHẨM",
+    "filters": {
+      "title": "Bộ lọc",
+      "category": "DANH MỤC",
+      "all_products": "TẤT CẢ SẢN PHẨM",
+      "price": "GIÁ (VNĐ)",
+      "clear_price": "Xóa lọc giá",
+      "material": "CHẤT LIỆU",
+      "materials": ["Gỗ tự nhiên", "Gỗ công nghiệp", "Kim loại", "Kính", "Vải/Da", "Nhựa"]
+    },
+    "sort": {
+      "label": "Sắp xếp:",
+      "suggested": "Tùy chọn gợi ý",
+      "newest": "Hàng mới về",
+      "price_desc": "Giá: Từ cao tới thấp",
+      "price_asc": "Giá: Từ thấp tới cao",
+      "name_asc": "Tên: Từ A - Z",
+      "name_desc": "Tên: Từ Z - A"
+    },
+    "list_title": "Đồ Nội Thất",
+    "showing_count": "Hiển thị {{count}} mặt hàng",
+    "for_query": "cho \"{{query}}\"",
+    "empty": "Không tìm thấy sản phẩm nào phù hợp.",
+    "contact_price": "Liên hệ"
+  },
+  "category_explorer": {
+    "hero_title": "KHÁM PHÁ DANH MỤC",
+    "hero_subtitle": "Tìm kiếm hàng ngàn sản phẩm nội ngoại thất cao cấp được phân loại rõ ràng.",
+    "search_label": "Tìm kiếm",
+    "reset_filter": "Đặt lại bộ lọc",
+    "keyword": "Từ khóa",
+    "search_placeholder": "Tìm kiếm sản phẩm...",
+    "loading_categories": "Đang tải danh mục...",
+    "products_for": "sản phẩm cho",
+    "no_results_for": "Không tìm thấy kết quả cho",
+    "back_to_categories": "← Quay lại danh mục",
+    "no_products_title": "Không tìm thấy sản phẩm",
+    "no_products_desc": "Không có sản phẩm nào phù hợp với từ khóa",
+    "view_all_categories": "Xem tất cả danh mục",
+    "view_all_results": "Xem tất cả kết quả",
+    "results_for": "{{count}} kết quả cho \"{{query}}\"",
+    "select_category_title": "Vui lòng chọn danh mục",
+    "select_category_desc": "Chọn một danh mục từ bộ lọc bên trái để khám phá các loại sản phẩm tương ứng.",
+    "view_list": "XEM DANH SÁCH",
+    "no_child_title": "Chưa có danh mục con",
+    "no_child_desc": "Danh mục này hiện đang trống, bạn có muốn xem tất cả sản phẩm thuộc danh mục này không?",
+    "view_all_products": "Xem toàn bộ sản phẩm"
+  },
+  "search": {
+    "seo": {
+      "title": "Tìm kiếm",
+      "title_with_query": "Kết quả tìm kiếm \"{{query}}\"",
+      "description": "Tìm kiếm sản phẩm và công trình nội thất Hochi"
+    },
+    "title": "Tìm kiếm",
+    "all_results": "Tất cả kết quả",
+    "results_for": "kết quả cho",
+    "no_results_for": "Không tìm thấy kết quả nào cho",
+    "enter_keyword_title": "Nhập từ khóa để tìm kiếm",
+    "enter_keyword_desc": "Tìm kiếm sản phẩm nội thất, công trình thi công và nhiều hơn nữa.",
+    "try_suggestions": "Thử từ khóa khác hoặc xem các gợi ý bên dưới.",
+    "suggestions": ["Sofa", "Bàn ăn", "Giường ngủ", "Tủ quần áo", "Biệt thự"],
+    "view_all_products": "Xem tất cả sản phẩm",
+    "view_all_projects": "Xem tất cả công trình"
+  },
+  "detail": {
+    "loading": "Đang tải thông tin chi tiết...",
+    "interested": "Quan tâm",
+    "image_count": "{{count}} hình ảnh",
+    "suggestions_title": "GỢI Ý DÀNH CHO BẠN"
+  },
+  "project_detail": {
+    "not_found": "Không tìm thấy công trình",
+    "back_to_list": "Quay lại danh sách công trình",
+    "category_fallback": "Thiết kế nội thất",
+    "seo_description_fallback": "Thiết kế nội thất {{name}} - Thiết kế và thi công nội thất cao cấp bởi Nội Thất Hochi. Xem ảnh thực tế và thông tin chi tiết.",
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Thiết kế nội thất"
+    },
+    "gallery_title": "GALLERY CÔNG TRÌNH",
+    "related_badge": "CÔNG TRÌNH LIÊN QUAN",
+    "entity_type": "công trình"
+  },
+  "architecture_detail": {
+    "not_found": "Không tìm thấy thiết kế kiến trúc",
+    "back_to_list": "Quay lại danh sách thiết kế",
+    "category_fallback": "Thiết kế kiến trúc",
+    "seo_description_fallback": "Thiết kế {{name}} - Thiết kế kiến trúc cao cấp bởi Nội Thất Hochi. Xem ảnh và thông tin chi tiết.",
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "current": "Thiết kế kiến trúc"
+    },
+    "gallery_title": "GALLERY THIẾT KẾ",
+    "related_badge": "THIẾT KẾ LIÊN QUAN",
+    "entity_type": "thiết kế"
+  },
+  "projects_page": {
+    "seo": {
+      "title": "Thiết kế nội thất thực tế - Thiết kế & Thi công Nội thất",
+      "description": "Khám phá các công trình thiết kế và thi công nội thất thực tế của Nội Thất Hochi: biệt thự, penthouse, căn hộ, phòng ngủ, phòng khách... Ảnh thực tế 100%.",
+      "keywords": "công trình nội thất, dự án nội thất hochi, thiết kế nội thất biệt thự, thi công nội thất căn hộ, phòng ngủ, phòng khách, tủ bếp"
+    },
+    "badge": "KIẾN TẠO KHÔNG GIAN",
+    "hero_title": "THIẾT KẾ NỘI THẤT",
+    "child_categories_of": "Danh mục con thuộc {{name}}",
+    "showing_count": "Hiển thị {{count}} thiết kế nội thất {{query}}",
+    "empty": "Không tìm thấy thiết kế nội thất nào phù hợp."
+  },
+  "architecture_page": {
+    "seo": {
+      "title": "Thiết kế kiến trúc - Hochi Design",
+      "description": "Khám phá các công trình thiết kế kiến trúc nổi bật của Hochi: biệt thự, nhà phố, công trình thương mại... Thiết kế sáng tạo, thi công chuyên nghiệp.",
+      "keywords": "thiết kế kiến trúc, kiến trúc biệt thự, kiến trúc nhà phố, hochi design, công trình kiến trúc"
+    },
+    "badge": "KIẾN TRÚC ĐỈNH CAO",
+    "hero_title": "THIẾT KẾ KIẾN TRÚC",
+    "showing_count": "Hiển thị {{count}} thiết kế {{query}}",
+    "project_count": "{{count}} công trình",
+    "empty": "Không tìm thấy thiết kế nào phù hợp."
+  },
+  "home": {
+    "seo": {
+      "title": "Trang chủ",
+      "description": "Nội Thất Hochi - Xưởng sản xuất và thi công nội thất gỗ cao cấp tại Hà Nội. Thiết kế theo yêu cầu, nhận đặt đồ theo kích thước. Giao lắp miễn phí. Hotline: 0326 908 884.",
+      "keywords": "nội thất hochi, nội thất gỗ cao cấp, xưởng nội thất hà nội, thiết kế nội thất, thi công nội thất, gỗ óc chó, tủ bếp, giường ngủ, sofa"
+    },
+    "breadcrumbs": {
+      "home": "Trang chủ"
+    },
+    "faq": {
+      "q1": "Nội Thất Hochi chuyên sản xuất gì?",
+      "a1": "Nội Thất Hochi chuyên sản xuất và thi công các sản phẩm nội thất gỗ cao cấp: tủ bếp, giường ngủ, sofa, bàn ăn, kệ TV, tủ quần áo... Thiết kế theo yêu cầu của khách hàng.",
+      "q2": "Nội Thất Hochi có giao hàng tận nơi không?",
+      "a2": "Có! Nội Thất Hochi giao hàng và lắp đặt miễn phí cho đơn hàng trên 2 triệu tại Hà Nội, TP.HCM, Đà Nẵng, Hải Phòng, Bình Dương, Đồng Nai.",
+      "q3": "Thời gian sản xuất nội thất theo yêu cầu là bao lâu?",
+      "a3": "Thời gian sản xuất từ 7-30 ngày tùy theo độ phức tạp của sản phẩm. Sản phẩm có sẵn giao trong 1-7 ngày. Chúng tôi tư vấn và thiết kế 3D miễn phí.",
+      "q4": "Nội Thất Hochi có nhận đặt theo kích thước không?",
+      "a4": "Có! Chúng tôi nhận đặt làm nội thất theo kích thước và yêu cầu riêng của từng khách hàng, dù chỉ 1 món. Miễn phí thiết kế 3D.",
+      "q5": "Địa chỉ xưởng Nội Thất Hochi ở đâu?",
+      "a5": "Nội Thất Hochi có xưởng sản xuất tại Hà Nội. Liên hệ hotline 0326 908 884 để được tư vấn và biết địa chỉ chi tiết."
+    }
+  },
+  "product_detail": {
+    "delivery_alt": "Giao lắp tại nhà",
+    "color_fallback": "Màu",
+    "updating": "Đang cập nhật",
+    "product_fallback": "Sản phẩm",
+    "description_fallback": "Chi tiết sản phẩm nội thất cao cấp với thiết kế hiện đại, chất liệu bền bỉ và đẹp mắt. Tôn vinh không gian sống đẳng cấp.",
+    "stock_count": "{{count}} sản phẩm",
+    "order_required": "Đặt hàng",
+    "loading": "Đang tải thông tin sản phẩm...",
+    "not_found": "Không tìm thấy sản phẩm!",
+    "brand": "Nội Thất Hochi",
+    "see_more": "Xem thêm:",
+    "price_for": "Giá cho: {{size}}",
+    "like_title": "Yêu thích",
+    "unlike_title": "Bỏ thích",
+    "size_heading": "Kích thước (cm):",
+    "color_heading": "Màu sắc:",
+    "color_unavailable": "{{name}} - không có với kích thước này",
+    "stock_status": "Tình trạng tồn kho:",
+    "in_stock": "Còn hàng",
+    "out_of_stock": "Hết hàng",
+    "stock_limit": "Trong kho chỉ còn tối đa {{count}} sản phẩm",
+    "increase_quantity": "Tăng số lượng",
+    "decrease_quantity": "Giảm số lượng",
+    "sold_out": "Đã bán hết",
+    "add_to_cart": "Thêm vào giỏ",
+    "buy_now": "Mua ngay",
+    "call_consult": "Gọi tư vấn",
+    "no_image": "Không ảnh",
+    "policy_title": "XƯỞNG NỘI THẤT GỖ TRANG TRÍ - SINCE 2014",
+    "policy_1": "Giao hàng & lắp đặt MIỄN PHÍ cho các đơn hàng >2 triệu, gồm: Hà Nội, Hồ Chí Minh, Đà Nẵng, Hải Phòng, Bình Dương, Đồng Nai.",
+    "policy_2": "Thời gian giao hàng tiêu chuẩn dự kiến 1~7 ngày",
+    "policy_3_strong": "Nhận đặt đóng đồ theo yêu cầu dù chỉ 1 món",
+    "policy_3_suffix": "miễn phí thiết kế 3D",
+    "policy_4": "Giá đã bao gồm hóa đơn điện tử HKD",
+    "new_products": "Sản phẩm mới",
+    "description_tab": "MÔ TẢ",
+    "collapse": "Thu gọn",
+    "expand": "Xem thêm nội dung",
+    "related_products": "Sản phẩm tương tự",
+    "entity_type": "sản phẩm",
+    "toast": {
+      "liked": "Đã thích sản phẩm",
+      "unliked": "Đã bỏ thích sản phẩm"
+    },
+    "specs": {
+      "material": "Chất liệu",
+      "style": "Phong cách",
+      "stock": "Tồn kho",
+      "warranty": "Bảo hành"
+    },
+    "seo": {
+      "keywords": "nội thất hochi, mua nội thất, {{title}} hà nội"
+    }
+  },
+  "product_shop": {
+    "badge": "SẢN PHẨM NỔI BẬT",
+    "title": "Sản phẩm bán chạy",
+    "description": "Khám phá những sản phẩm nội thất gỗ sồi cao cấp được yêu thích nhất, giao hàng và lắp đặt tận nhà.",
+    "view_all": "Xem tất cả sản phẩm",
+    "products": {
+      "bed_9431": "Giường ngủ hiện đại cao cấp gỗ sồi GHS-9431",
+      "wardrobe_kids_55139": "Tủ quần áo cho bé gỗ sồi hiện đại GHS-55139",
+      "sliding_wardrobe_55138": "Tủ quần áo cửa lùa gỗ sồi hiện đại GHS-55138",
+      "upholstered_bed_9430": "Giường ngủ bọc nệm gỗ sồi hiện đại GHS-9430",
+      "natural_sliding_wardrobe_55137": "Tủ quần áo cửa lùa gỗ tự nhiên GHS-55137"
+    },
+    "prices": {
+      "bed_9431": "13,500,000đ",
+      "wardrobe_kids_55139": "12,900,000đ",
+      "sliding_wardrobe_55138": "15,400,000đ",
+      "upholstered_bed_9430": "14,500,000đ",
+      "natural_sliding_wardrobe_55137": "10,500,000đ"
+    }
+  },
+  "interior_categories": {
+    "title": "Danh mục nội thất",
+    "previous_page": "Trang trước",
+    "next_page": "Trang sau",
+    "project_count": "{{count}} công trình"
+  },
+  "floating": {
+    "call_aria": "Gọi {{phone}}",
+    "scroll_top": "Lên đầu trang"
   },
   "common": {
     "hotline": "Hotline",
     "contact_us": "Liên hệ với chúng tôi",
     "send_request": "Gửi yêu cầu tư vấn",
     "language": "Ngôn ngữ",
+    "loading": "Đang tải...",
+    "load_more": "Xem thêm",
+    "confirm": "Xác nhận",
+    "cancel": "Hủy",
     "vnd": "vnđ",
     "see_more": "XEM THÊM ›",
     "visit": "THAM QUAN ›",
     "view_all_videos": "Xem tất cả video ›",
     "project_detail": "Chi tiết công trình ›"
+  },
+  "product_card": {
+    "view_detail": "XEM CHI TIẾT"
   },
   "showcase": {
     "badge": "VỀ CHÚNG TÔI",
@@ -302,7 +709,10 @@
     "title": "THIẾT KẾ NỘI THẤT",
     "years": "NĂM KINH NGHIỆM",
     "years_desc": "Trong lĩnh vực thiết kế và thi công nội thất biệt thự, chung cư cao cấp. Chúng tôi cam kết mang lại sự hài lòng tuyệt đối về thẩm mỹ và công năng.",
-    "hotline_label": "HOTLINE TƯ VẤN"
+    "hotline_label": "HOTLINE TƯ VẤN",
+    "featured_project_alt": "Biệt Thự Gamuda",
+    "featured_project_title": "Biệt Thự Gamuda Gardens",
+    "secondary_project_alt": "Thi công nội thất"
   },
   "feedback": {
     "title": "KHÁCH HÀNG NÓI GÌ",

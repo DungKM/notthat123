@@ -20,7 +20,16 @@
     "continue_shopping": "继续购物",
     "subtotal": "小计",
     "total": "合计",
-    "checkout": "立即结算"
+    "checkout": "立即结算",
+    "item_fallback": "产品",
+    "toast": {
+      "added": "产品已加入购物车",
+      "removed": "产品已从购物车删除",
+      "stock_limit": "库存最多只剩 {{count}} 件"
+    },
+    "errors": {
+      "provider_required": "useCart 必须在 CartProvider 中使用"
+    }
   },
   "hero": {
     "badge": "打造生活空间",
@@ -121,6 +130,7 @@
     "terms": "点击下单即表示您同意我们的",
     "terms_link": "服务条款",
     "warranty_link": "保修政策",
+    "and": "和",
     "terms_suffix": "属于HOCHI家居。",
     "remove_item_title": "删除商品",
     "remove_item_description": "确定要删除该商品吗？",
@@ -130,6 +140,7 @@
     "half_payment": "预付（50%）",
     "remaining_payment": "剩余金额（50%）",
     "qr_title": "扫码支付",
+    "qr_alt": "付款二维码",
     "qr_missing": "暂无二维码",
     "bank_label": "银行：",
     "account_label": "账号：",
@@ -274,18 +285,414 @@
     "form_apartment": "公寓",
     "form_townhouse": "联排别墅",
     "form_content": "咨询内容",
-    "form_submit": "立即注册"
+    "form_submit": "立即注册",
+    "form_submit_loading": "正在提交...",
+    "project_type_content": "[工程类型：{{type}}] - {{message}}",
+    "toast_success": "咨询登记成功。我们会尽快与您联系！",
+    "errors": {
+      "full_name_required": "请输入姓名！",
+      "phone_required": "请输入电话号码！",
+      "phone_invalid": "电话号码无效！"
+    }
+  },
+  "interest_modal": {
+    "title": "登记咨询",
+    "description_prefix": "请留下您的信息，我们将就以下内容为您提供详细咨询：",
+    "description_suffix": "。",
+    "free_note": "* 注意：咨询过程完全免费！",
+    "name_placeholder": "姓名 *",
+    "phone_placeholder": "电话号码 *",
+    "email_placeholder": "电子邮件（选填）",
+    "submit": "提交信息",
+    "toast_success": "您的信息已提交成功。我们会尽快联系您！",
+    "toast_error": "发生错误，请重试！",
+    "errors": {
+      "name_required": "请输入姓名",
+      "phone_required": "请输入电话号码",
+      "phone_invalid": "电话号码必须为10位数字",
+      "email_invalid": "电子邮件无效"
+    }
+  },
+  "languages": {
+    "vi": "越南语",
+    "en": "英语",
+    "zh": "中文"
+  },
+  "header": {
+    "select_category_detail": "请选择分类查看详情",
+    "no_child_categories": "暂无子分类",
+    "view_all_projects_for": "查看所有{{name}}项目",
+    "view_all_for": "查看所有{{name}}",
+    "search_placeholder": "搜索...",
+    "mobile_search_placeholder": "搜索产品、项目...",
+    "products": "产品",
+    "projects": "项目",
+    "interior": "室内",
+    "architecture": "建筑",
+    "view_all_results": "查看全部 {{count}} 个结果",
+    "no_results": "未找到结果",
+    "try_other_keywords": "请尝试其他关键词或查看全部",
+    "search_results_page": "搜索结果页",
+    "searching": "搜索中...",
+    "no_matching_results": "未找到匹配结果",
+    "search_for": "搜索",
+    "popular_categories": "热门分类",
+    "all": "全部",
+    "select_parent_category": "请选择父分类",
+    "view_category": "查看{{name}}",
+    "your_orders": "您的订单",
+    "remove_item_from_cart_description": "确定要从购物车中删除该商品吗？",
+    "collapse_subcategories": "收起子分类",
+    "expand_subcategories": "展开子分类"
+  },
+  "about": {
+    "seo": {
+      "title": "关于我们 - HOCHI家居",
+      "description": "HOCHI家居拥有10多年高端木质室内设计与施工经验，位于河内，具备封闭式生产体系、专业施工与长期保修服务。",
+      "keywords": "关于HOCHI家居, 家具品牌故事, 河内家具工厂, 10年室内设计经验"
+    },
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "关于我们"
+    },
+    "hero_title": "关于我们",
+    "story_badge": "品牌故事",
+    "story_title": "HOCHI家居",
+    "story_quote": "源于对材料之美与空间营造艺术的热爱，HOCHI不仅设计室内空间，更定义生活方式。",
+    "story_p1": "凭借十余年经验，HOCHI在越南高端室内设计与施工领域确立了自己的地位。我们严选并融合天然木材、高级塑材、金属、玻璃与现代材料，打造奢华、独特且历久弥新的生活空间。",
+    "story_p2": "HOCHI的每一个项目都是一份个人宣言，体现业主的审美、品位与个性。",
+    "story_p3": "依托封闭式生产流程，以及先进技术与手工工艺的融合，HOCHI承诺带来的不仅是一件家具，更是一种匹配品位的生活体验。",
+    "years_experience": "年经验",
+    "why_title": "为什么选择我们？",
+    "reasons": {
+      "material_title": "高端材料",
+      "material_desc": "所有材料均经过严格筛选，确保卓越耐用性、精致美感与长期价值。",
+      "design_title": "专属设计",
+      "design_desc": "每个空间都依据业主的风格与实际需求量身设计。",
+      "construction_title": "专业施工",
+      "construction_desc": "经验丰富的工匠团队，结合标准化干燥处理与国际化安装流程。"
+    }
+  },
+  "why_choose": {
+    "seo": {
+      "title": "为什么选择我们",
+      "description": "HOCHI家居的优势：高端材料、快速施工、专业工匠团队与可靠保修服务。"
+    },
+    "badge": "核心价值",
+    "hero_title": "为什么选择我们？",
+    "values": {
+      "quality_title": "高端品质",
+      "quality_desc": "严选符合国际标准的高端材料，以精湛工艺打造经久不衰的价值。",
+      "speed_title": "快速施工",
+      "speed_desc": "现代化生产流程帮助缩短施工周期，同时确保精致工艺。",
+      "expert_title": "专家团队",
+      "expert_desc": "经验丰富的建筑师与工匠团队，让HOCHI在室内设计与制作方面拥有十余年沉淀，熟悉从现代、极简到奢华、新古典等多种风格。",
+      "warranty_title": "可靠保修",
+      "warranty_desc": "HOCHI所有室内产品均享有1年保修，保障施工质量与使用安心。"
+    },
+    "process_badge": "专业流程",
+    "process_title_line1": "匠心制作 -",
+    "process_title_line2": "提升生活品位",
+    "process_items": [
+      "严选并标准化处理材料，确保长期稳定耐用。",
+      "多层高科技涂装，兼具精致美感、耐用性与安全性。",
+      "传统榫卯结构结合0.1mm CNC精密工艺。",
+      "交钥匙安装与交付，提供全天候贴心服务。"
+    ],
+    "quote": "我们不只是销售家具，而是打造梦想生活空间，让每位业主找到真正的宁静与品位。",
+    "signature": "总经理 胡志良"
+  },
+  "partner": {
+    "seo": {
+      "title": "合作伙伴",
+      "description": "HOCHI很荣幸与值得信赖的合作伙伴携手，为客户带来高品质体验。"
+    },
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "合作伙伴"
+    },
+    "hero_alt": "合作伙伴背景",
+    "hero_title": "合作伙伴",
+    "section_title": "同行伙伴",
+    "section_description": "我们自豪地与多个领域的信誉伙伴合作，提供高品质产品与解决方案，满足严格标准。秉持可持续发展方向，HOCHI重视长期合作，共同创造价值并提升越南市场客户体验。",
+    "partner_since": "{{year}}年起合作",
+    "description_fallback": "合作伙伴详细信息正在更新...",
+    "select_prompt": "请选择上方的合作伙伴查看详细信息。",
+    "detail": {
+      "strategic_partner": "{{year}} 战略合作伙伴",
+      "cooperation_note": "我们相信这段合作关系将带来切实且长久的价值。双方不仅提供高品质产品，也致力于带来优秀的用户体验与售后服务。",
+      "brand": "品牌",
+      "cooperation_year": "合作年份"
+    }
+  },
+  "video": {
+    "seo": {
+      "title": "真实室内施工视频 - HOCHI家居",
+      "description": "观看HOCHI家居高端木质室内施工真实视频：别墅、公寓、顶层公寓等项目。",
+      "keywords": "室内视频, 室内施工视频, HOCHI家居youtube, 室内设计视频"
+    },
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "视频"
+    },
+    "card_label": "项目视频",
+    "load_more": "加载更多视频"
+  },
+  "products": {
+    "seo": {
+      "title": "高端木质家具 - 河内家具购买",
+      "description": "在河内购买高端木质家具：沙发、床、橱柜、餐桌、电视柜、衣柜等。HOCHI家居提供配送与安装服务。",
+      "keywords": "购买家具, 高端木质家具, HOCHI沙发, 床, 橱柜, 餐桌, 电视柜, 河内家具, 定制家具"
+    },
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "产品"
+    },
+    "hero_title": "产品",
+    "filters": {
+      "title": "筛选",
+      "category": "分类",
+      "all_products": "全部产品",
+      "price": "价格 (VND)",
+      "clear_price": "清除价格筛选",
+      "material": "材料",
+      "materials": ["天然木材", "人造板材", "金属", "玻璃", "布艺/皮革", "塑料"]
+    },
+    "sort": {
+      "label": "排序：",
+      "suggested": "推荐",
+      "newest": "最新上架",
+      "price_desc": "价格：从高到低",
+      "price_asc": "价格：从低到高",
+      "name_asc": "名称：A - Z",
+      "name_desc": "名称：Z - A"
+    },
+    "list_title": "家具",
+    "showing_count": "显示 {{count}} 件商品",
+    "for_query": "关于“{{query}}”",
+    "empty": "未找到匹配产品。",
+    "contact_price": "联系咨询"
+  },
+  "category_explorer": {
+    "hero_title": "探索分类",
+    "hero_subtitle": "查找数千款分类清晰的高端室内外产品。",
+    "search_label": "搜索",
+    "reset_filter": "重置筛选",
+    "keyword": "关键词",
+    "search_placeholder": "搜索产品...",
+    "loading_categories": "分类加载中...",
+    "products_for": "件产品，关键词",
+    "no_results_for": "未找到结果，关键词",
+    "back_to_categories": "← 返回分类",
+    "no_products_title": "未找到产品",
+    "no_products_desc": "没有产品匹配关键词",
+    "view_all_categories": "查看所有分类",
+    "view_all_results": "查看所有结果",
+    "results_for": "“{{query}}”的 {{count}} 个结果",
+    "select_category_title": "请选择分类",
+    "select_category_desc": "从左侧筛选中选择分类，探索对应产品类型。",
+    "view_list": "查看列表",
+    "no_child_title": "暂无子分类",
+    "no_child_desc": "该分类目前为空，是否查看此分类下的所有产品？",
+    "view_all_products": "查看全部产品"
+  },
+  "search": {
+    "seo": {
+      "title": "搜索",
+      "title_with_query": "“{{query}}”的搜索结果",
+      "description": "搜索HOCHI家居产品和项目"
+    },
+    "title": "搜索",
+    "all_results": "全部结果",
+    "results_for": "个结果，关键词",
+    "no_results_for": "未找到结果，关键词",
+    "enter_keyword_title": "请输入关键词搜索",
+    "enter_keyword_desc": "搜索室内产品、施工项目等内容。",
+    "try_suggestions": "请尝试其他关键词或查看下方建议。",
+    "suggestions": ["沙发", "餐桌", "床", "衣柜", "别墅"],
+    "view_all_products": "查看所有产品",
+    "view_all_projects": "查看所有项目"
+  },
+  "detail": {
+    "loading": "正在加载详情...",
+    "interested": "感兴趣",
+    "image_count": "{{count}} 张图片",
+    "suggestions_title": "为您推荐"
+  },
+  "project_detail": {
+    "not_found": "未找到项目",
+    "back_to_list": "返回项目列表",
+    "category_fallback": "室内设计",
+    "seo_description_fallback": "{{name}}室内设计 - HOCHI家居高端室内设计与施工。查看真实图片和详细信息。",
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "室内设计"
+    },
+    "gallery_title": "项目图库",
+    "related_badge": "相关项目",
+    "entity_type": "项目"
+  },
+  "architecture_detail": {
+    "not_found": "未找到建筑设计",
+    "back_to_list": "返回设计列表",
+    "category_fallback": "建筑设计",
+    "seo_description_fallback": "{{name}}设计 - HOCHI家居高端建筑设计。查看图片和详细信息。",
+    "breadcrumbs": {
+      "home": "首页",
+      "current": "建筑设计"
+    },
+    "gallery_title": "设计图库",
+    "related_badge": "相关设计",
+    "entity_type": "设计"
+  },
+  "projects_page": {
+    "seo": {
+      "title": "真实室内设计项目 - 室内设计与施工",
+      "description": "探索HOCHI家居真实室内设计与施工项目：别墅、顶层公寓、公寓、卧室、客厅等。",
+      "keywords": "室内项目, HOCHI室内项目, 别墅室内设计, 公寓室内施工, 卧室, 客厅, 橱柜"
+    },
+    "badge": "打造空间",
+    "hero_title": "室内设计",
+    "child_categories_of": "{{name}}的子分类",
+    "showing_count": "显示 {{count}} 个室内设计 {{query}}",
+    "empty": "未找到匹配的室内设计。"
+  },
+  "architecture_page": {
+    "seo": {
+      "title": "建筑设计 - Hochi Design",
+      "description": "探索HOCHI优秀建筑设计项目：别墅、联排住宅、商业工程等。创意设计，专业施工。",
+      "keywords": "建筑设计, 别墅建筑, 住宅建筑, hochi design, 建筑项目"
+    },
+    "badge": "高端建筑",
+    "hero_title": "建筑设计",
+    "showing_count": "显示 {{count}} 个设计 {{query}}",
+    "project_count": "{{count}} 个项目",
+    "empty": "未找到匹配设计。"
+  },
+  "home": {
+    "seo": {
+      "title": "首页",
+      "description": "HOCHI家居 - 河内高端木质家具生产与施工工坊。按需设计，按尺寸定制，免费配送安装。热线：0326 908 884。",
+      "keywords": "HOCHI家居, 高端木质家具, 河内家具工坊, 室内设计, 室内施工, 胡桃木, 橱柜, 床, 沙发"
+    },
+    "breadcrumbs": {
+      "home": "首页"
+    },
+    "faq": {
+      "q1": "HOCHI家居主要生产什么？",
+      "a1": "HOCHI家居专注生产和施工高端木质家具：橱柜、床、沙发、餐桌、电视柜、衣柜等，并根据客户需求定制设计。",
+      "q2": "HOCHI家居是否提供上门配送？",
+      "a2": "提供。订单满200万越南盾，我们在河内、胡志明市、岘港、海防、平阳、同奈免费配送和安装。",
+      "q3": "定制家具生产需要多长时间？",
+      "a3": "生产时间通常为7-30天，取决于产品复杂度。现货产品1-7天内交付。我们提供免费咨询和3D设计。",
+      "q4": "HOCHI家居可以按尺寸定制吗？",
+      "a4": "可以。我们可按客户的尺寸和个性化需求定制家具，即使只有一件也可承接，并免费提供3D设计。",
+      "q5": "HOCHI家居工坊在哪里？",
+      "a5": "HOCHI家居在河内设有生产工坊。请联系热线0326 908 884获取咨询和详细地址。"
+    }
+  },
+  "product_detail": {
+    "delivery_alt": "上门配送安装",
+    "color_fallback": "颜色",
+    "updating": "正在更新",
+    "product_fallback": "产品",
+    "description_fallback": "高端室内产品详情，现代设计、耐用材料与精致外观，为生活空间提升品质。",
+    "stock_count": "{{count}} 件产品",
+    "order_required": "需下单定制",
+    "loading": "正在加载产品信息...",
+    "not_found": "未找到产品！",
+    "brand": "HOCHI家居",
+    "see_more": "查看更多：",
+    "price_for": "该尺寸价格：{{size}}",
+    "like_title": "收藏",
+    "unlike_title": "取消收藏",
+    "size_heading": "尺寸（cm）：",
+    "color_heading": "颜色：",
+    "color_unavailable": "{{name}} - 此尺寸不可选",
+    "stock_status": "库存状态：",
+    "in_stock": "有货",
+    "out_of_stock": "缺货",
+    "stock_limit": "库存最多只剩 {{count}} 件",
+    "increase_quantity": "增加数量",
+    "decrease_quantity": "减少数量",
+    "sold_out": "已售罄",
+    "add_to_cart": "加入购物车",
+    "buy_now": "立即购买",
+    "call_consult": "电话咨询",
+    "no_image": "无图片",
+    "policy_title": "装饰木家具工坊 - 始于2014",
+    "policy_1": "订单满200万越南盾免费配送和安装，覆盖河内、胡志明市、岘港、海防、平阳、同奈。",
+    "policy_2": "标准交付时间预计为1~7天",
+    "policy_3_strong": "接受按需定制，即使只有一件",
+    "policy_3_suffix": "免费3D设计",
+    "policy_4": "价格已包含HKD电子发票",
+    "new_products": "新品",
+    "description_tab": "描述",
+    "collapse": "收起",
+    "expand": "查看更多内容",
+    "related_products": "相似产品",
+    "entity_type": "产品",
+    "toast": {
+      "liked": "已收藏产品",
+      "unliked": "已取消收藏"
+    },
+    "specs": {
+      "material": "材料",
+      "style": "风格",
+      "stock": "库存",
+      "warranty": "保修"
+    },
+    "seo": {
+      "keywords": "HOCHI家居, 购买家具, {{title}} 河内"
+    }
+  },
+  "product_shop": {
+    "badge": "精选产品",
+    "title": "热销产品",
+    "description": "探索最受喜爱的高端橡木家具产品，支持上门配送和安装。",
+    "view_all": "查看所有产品",
+    "products": {
+      "bed_9431": "高端现代橡木床 GHS-9431",
+      "wardrobe_kids_55139": "儿童现代橡木衣柜 GHS-55139",
+      "sliding_wardrobe_55138": "现代橡木推拉门衣柜 GHS-55138",
+      "upholstered_bed_9430": "现代软包橡木床 GHS-9430",
+      "natural_sliding_wardrobe_55137": "天然木推拉门衣柜 GHS-55137"
+    },
+    "prices": {
+      "bed_9431": "13,500,000 越南盾",
+      "wardrobe_kids_55139": "12,900,000 越南盾",
+      "sliding_wardrobe_55138": "15,400,000 越南盾",
+      "upholstered_bed_9430": "14,500,000 越南盾",
+      "natural_sliding_wardrobe_55137": "10,500,000 越南盾"
+    }
+  },
+  "interior_categories": {
+    "title": "室内分类",
+    "previous_page": "上一页",
+    "next_page": "下一页",
+    "project_count": "{{count}} 个项目"
+  },
+  "floating": {
+    "call_aria": "拨打 {{phone}}",
+    "scroll_top": "返回顶部"
   },
   "common": {
     "hotline": "热线电话",
     "contact_us": "联系我们",
     "send_request": "发送咨询请求",
     "language": "语言",
+    "loading": "加载中...",
+    "load_more": "查看更多",
+    "confirm": "确认",
+    "cancel": "取消",
     "vnd": "越南盾",
     "see_more": "查看更多 ›",
     "visit": "参观 ›",
     "view_all_videos": "查看所有视频 ›",
     "project_detail": "工程详情 ›"
+  },
+  "product_card": {
+    "view_detail": "查看详情"
   },
   "showcase": {
     "badge": "关于我们",
@@ -301,7 +708,10 @@
     "title": "实际工程",
     "years": "年经验",
     "years_desc": "在豪华别墅和公寓室内设计与施工领域。我们致力于在美学和功能性方面提供绝对满意。",
-    "hotline_label": "咨询热线"
+    "hotline_label": "咨询热线",
+    "featured_project_alt": "Gamuda别墅",
+    "featured_project_title": "Gamuda Gardens别墅",
+    "secondary_project_alt": "室内施工"
   },
   "feedback": {
     "title": "客户评价",

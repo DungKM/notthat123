@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../ui/Badge';
+import { useTranslation } from 'react-i18next';
 
 interface ProductCardProps {
   slug: string;
@@ -29,6 +30,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   imageClassName = "h-55 sm:h-65 xl:h-75",
   titleClassName = "uppercase text-sm tracking-wide",
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Link to={`${basePath}/${slug}`} className="group block">
       <div className={`relative overflow-hidden rounded-xl bg-white ${imageClassName}`}>
@@ -60,7 +63,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/20 to-transparent p-6 opacity-0 group-hover:opacity-100">
           <div className="w-full bg-showcase-primary text-white py-3 rounded-md font-bold text-xs uppercase tracking-widest text-center hover:bg-white hover:text-black transition-all">
-            XEM CHI TIẾT
+            {t('product_card.view_detail')}
           </div>
         </div>
       </div>

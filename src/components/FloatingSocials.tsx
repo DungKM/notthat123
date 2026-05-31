@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { UpOutlined, PhoneOutlined } from "@ant-design/icons";
-import { useCart } from "@/src/features/showcase/context/CartContext";
+import { useCart } from "../features/showcase/context/CartContext";
+import { useTranslation } from "react-i18next";
 
 const FloatingSocials: React.FC = () => {
+  const { t } = useTranslation();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const { isCartOpen } = useCart();
   const [isMobileVisible, setIsMobileVisible] = useState(true);
@@ -44,7 +46,7 @@ const FloatingSocials: React.FC = () => {
       {/* Button số điện thoại bên trái */}
       <a
         href="tel:0326908884"
-        aria-label="Gọi 0326 908 884"
+        aria-label={t('floating.call_aria', { phone: '0326 908 884' })}
         className={`fixed flex left-4 md:left-6 z-999 items-center gap-2 bg-showcase-primary! text-white! px-4 py-3 rounded-full shadow-xl hover:scale-105 transition-all duration-300 animate-ripple ${isCartOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100'} ${window.innerWidth < 1024 ? mobileBottomClass : 'bottom-10'}`}
       >
         <PhoneOutlined className="text-xl" />
@@ -87,7 +89,7 @@ const FloatingSocials: React.FC = () => {
           <button
             onClick={handleScrollToTop}
             className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-showcase-primary text-white shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 transition-all duration-300 "
-            aria-label="Lên đầu trang"
+            aria-label={t('floating.scroll_top')}
           >
             <UpOutlined className="text-base md:text-lg" />
           </button>

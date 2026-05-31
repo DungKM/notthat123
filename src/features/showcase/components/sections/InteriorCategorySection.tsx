@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useConstructionCategoryService } from '@/src/api/services';
 import Container from '../ui/Container';
 import { ROUTES } from '@/src/routes/index';
+import { useTranslation } from 'react-i18next';
 const DESKTOP_ITEMS_PER_PAGE = 15; // 5 cột × 3 hàng
 const MOBILE_ITEMS_PER_PAGE = 8; // 2 cột × 4 hàng
 const MOBILE_BREAKPOINT = 639;
@@ -18,6 +19,7 @@ interface SubCategory {
 }
 
 const InteriorCategorySection: React.FC = () => {
+  const { t } = useTranslation();
   const { getAll } = useConstructionCategoryService();
   const navigate = useNavigate();
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
@@ -290,7 +292,7 @@ const InteriorCategorySection: React.FC = () => {
           className="text-3xl font-bold text-center text-gray-900 mb-10"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
-          Danh mục nội thất
+          {t('interior_categories.title')}
         </h2>
 
         <style dangerouslySetInnerHTML={{
@@ -307,7 +309,7 @@ const InteriorCategorySection: React.FC = () => {
                 type="button"
                 onClick={handlePrevPage}
                 disabled={!canGoPrev}
-                aria-label="Trang trước"
+                aria-label={t('interior_categories.previous_page')}
                 className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full border bg-white shadow-sm flex items-center justify-center transition-all ${canGoPrev ? 'text-gray-700 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary' : 'text-gray-300 border-gray-100 cursor-not-allowed'}`}
               >
                 <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
@@ -319,7 +321,7 @@ const InteriorCategorySection: React.FC = () => {
                 type="button"
                 onClick={handleNextPage}
                 disabled={!canGoNext}
-                aria-label="Trang sau"
+                aria-label={t('interior_categories.next_page')}
                 className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full border bg-white shadow-sm flex items-center justify-center transition-all ${canGoNext ? 'text-gray-700 border-gray-200 hover:border-showcase-primary hover:text-showcase-primary' : 'text-gray-300 border-gray-100 cursor-not-allowed'}`}
               >
                 <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
@@ -372,7 +374,7 @@ const InteriorCategorySection: React.FC = () => {
                         </p>
                         {(cat.constructionCount ?? 0) > 0 && (
                           <span className="text-[11px] text-gray-400 mt-0.5 block">
-                            {cat.constructionCount} công trình
+                            {t('interior_categories.project_count', { count: cat.constructionCount })}
                           </span>
                         )}
                       </div>

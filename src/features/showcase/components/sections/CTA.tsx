@@ -3,7 +3,6 @@ import Container from '../ui/Container';
 import Button from '../ui/Button';
 import { PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { message } from 'antd';
 import { useContactService } from '@/src/api/services';
 import toast from 'react-hot-toast';
 
@@ -35,15 +34,15 @@ const CTA: React.FC = () => {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Vui lòng nhập họ tên!';
+      newErrors.fullName = t('cta.errors.full_name_required');
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại!';
+      newErrors.phone = t('cta.errors.phone_required');
     } else {
       const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
       if (!phoneRegex.test(formData.phone.trim())) {
-        newErrors.phone = 'Số điện thoại không hợp lệ!';
+        newErrors.phone = t('cta.errors.phone_invalid');
       }
     }
 
@@ -60,10 +59,10 @@ const CTA: React.FC = () => {
           phone: formData.phone,
           email: '',
           address: formData.projectType, // Map project type to address or just pass it
-          content: formData.projectType ? `[Loại công trình: ${formData.projectType}] - ${formData.message}` : formData.message
+          content: formData.projectType ? t('cta.project_type_content', { type: formData.projectType, message: formData.message }) : formData.message
         });
         setFormData({ fullName: '', phone: '', projectType: '', message: '' });
-        toast.success('Đăng ký tư vấn thành công. Chúng tôi sẽ sớm liên lạc với bạn!');
+        toast.success(t('cta.toast_success'));
       } catch (error) {
         console.error('Submit contact error:', error);
       }
@@ -165,7 +164,7 @@ const CTA: React.FC = () => {
                 fullWidth
                 className="bg-showcase-primary border-none py-4 text-xs font-bold tracking-widest hover:scale-[1.02] hover:bg-showcase-hover disabled:opacity-75 disabled:cursor-not-allowed"
               >
-                {loading ? 'ĐANG GỬI...' : t('cta.form_submit')}
+                {loading ? t('cta.form_submit_loading') : t('cta.form_submit')}
               </Button>
             </form>
           </div>

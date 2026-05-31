@@ -9,9 +9,7 @@ import PaginationControls from '@/src/components/common/PaginationControls';
 import { useCategoryService, useProductService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
 import { Search, X, Filter, ChevronDown, ChevronUp } from 'lucide-react';
-
-const MOCK_MATERIALS = ['Gỗ tự nhiên', 'Gỗ công nghiệp', 'Kim loại', 'Kính', 'Vải/Da', 'Nhựa'];
-const MOCK_COLORS = ['Nâu', 'Đen', 'Trắng', 'Kem', 'Xám'];
+import { useTranslation } from 'react-i18next';
 
 const FilterSection = ({ title, defaultOpen = true, children }: { title: string, defaultOpen?: boolean, children: React.ReactNode }) => {
   const [open, setOpen] = useState(defaultOpen);
@@ -31,6 +29,7 @@ const FilterSection = ({ title, defaultOpen = true, children }: { title: string,
 };
 
 const ProductsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const initialSlug = searchParams.get('slug') || searchParams.get('category');
@@ -77,13 +76,14 @@ const ProductsPage: React.FC = () => {
     return () => { document.body.style.overflow = 'unset'; };
   }, [isMobileFilterOpen]);
 
+  const materials = t('products.filters.materials', { returnObjects: true }) as string[];
   const sortOptions = [
-    { value: '', label: 'Tùy chọn gợi ý' },
-    { value: 'newest', label: 'Hàng mới về' },
-    { value: 'price_desc', label: 'Giá: Từ cao tới thấp' },
-    { value: 'price_asc', label: 'Giá: Từ thấp tới cao' },
-    { value: 'name_asc', label: 'Tên: Từ A - Z' },
-    { value: 'name_desc', label: 'Tên: Từ Z - A' }
+    { value: '', label: t('products.sort.suggested') },
+    { value: 'newest', label: t('products.sort.newest') },
+    { value: 'price_desc', label: t('products.sort.price_desc') },
+    { value: 'price_asc', label: t('products.sort.price_asc') },
+    { value: 'name_asc', label: t('products.sort.name_asc') },
+    { value: 'name_desc', label: t('products.sort.name_desc') }
   ];
 
   // Scroll đến phần list khi navigate từ mobile menu với hash #danh-sach
@@ -235,13 +235,13 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
-        title="Sản phẩm nội thất gỗ cao cấp - Mua nội thất Hà Nội"
-        description="Mua sản phẩm nội thất gỗ cao cấp tại Hà Nội: sofa, giường ngủ, tủ bếp, bàn ăn, kệ TV, tủ quần áo. Chất liệu gỗ óc chó, gỗ MDF. Giao lắp miễn phí. Nội Thất Hochi."
+        title={t('products.seo.title')}
+        description={t('products.seo.description')}
         canonicalPath="/san-pham/danh-sach"
-        keywords="mua nội thất, nội thất gỗ cao cấp, sofa nội thất hochi, giường ngủ, tủ bếp, bàn ăn, kệ TV, nội thất hà nội, gỗ óc chó, gỗ MDF, đặt đồ theo yêu cầu"
+        keywords={t('products.seo.keywords')}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Sản phẩm', url: '/san-pham/danh-sach' },
+          { name: t('products.breadcrumbs.home'), url: '/' },
+          { name: t('products.breadcrumbs.current'), url: '/san-pham/danh-sach' },
         ]}
       />
 
@@ -257,11 +257,11 @@ const ProductsPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <Container className="relative z-10 text-center text-white">
-          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>SẢN PHẨM</h1>
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>{t('products.hero_title')}</h1>
           <div className="mt-4 text-sm font-medium opacity-80 flex items-center justify-center gap-2">
-            <Link to="/" className="!text-white hover:!text-gray-300 transition-colors">Trang chủ</Link>
+            <Link to="/" className="!text-white hover:!text-gray-300 transition-colors">{t('products.breadcrumbs.home')}</Link>
             <span className="!text-white">/</span>
-            <Link to="/san-pham/danh-sach" className="!text-white hover:!text-gray-300 transition-colors">Sản phẩm</Link>
+            <Link to="/san-pham/danh-sach" className="!text-white hover:!text-gray-300 transition-colors">{t('products.breadcrumbs.current')}</Link>
           </div>
         </Container>
       </section>
@@ -285,7 +285,7 @@ const ProductsPage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Filter className="w-5 h-5 text-gray-700" />
                   <h2 className="text-xl font-bold text-gray-900 uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Bộ lọc
+                    {t('products.filters.title')}
                   </h2>
                 </div>
                 <button className="lg:hidden p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors" onClick={() => setIsMobileFilterOpen(false)}>
@@ -321,10 +321,10 @@ const ProductsPage: React.FC = () => {
                   </div>
                 </div> */}
 
-                  <FilterSection title="DANH MỤC" defaultOpen={true}>
+                  <FilterSection title={t('products.filters.category')} defaultOpen={true}>
                     <div className="max-h-[320px]  overflow-y-auto pr-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 hover:[&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full transition-colors">
                       <CheckboxItem
-                        label="TẤT CẢ SẢN PHẨM"
+                        label={t('products.filters.all_products')}
                         checked={selectedCategories.length === 0}
                         onChange={() => { setSelectedCategories([]); setCurrentPage(1); }}
                       />
@@ -353,7 +353,7 @@ const ProductsPage: React.FC = () => {
                   </FilterSection>
 
                   {/* GIÁ Filter */}
-                  <FilterSection title="GIÁ (VNĐ)" defaultOpen={true}>
+                  <FilterSection title={t('products.filters.price')} defaultOpen={true}>
                     <div className="pt-1 pb-2">
                       {/* Input row */}
                       <div className="flex items-center gap-2 mb-4">
@@ -438,7 +438,7 @@ const ProductsPage: React.FC = () => {
                           onClick={() => setPriceRange([MIN_PRICE, MAX_PRICE])}
                           className="mt-3 text-[12px] text-showcase-primary hover:underline"
                         >
-                          Xóa lọc giá
+                          {t('products.filters.clear_price')}
                         </button>
                       )}
                     </div>
@@ -446,8 +446,8 @@ const ProductsPage: React.FC = () => {
 
 
 
-                  <FilterSection title="CHẤT LIỆU" defaultOpen={true}>
-                    {MOCK_MATERIALS.map((mat) => (
+                  <FilterSection title={t('products.filters.material')} defaultOpen={true}>
+                    {materials.map((mat) => (
                       <CheckboxItem
                         key={mat}
                         label={mat}
@@ -466,9 +466,9 @@ const ProductsPage: React.FC = () => {
               {/* Header Right Content (Sort & Title) */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-b border-gray-200 mb-6">
                 <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">Đồ Nội Thất</h2>
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">{t('products.list_title')}</h2>
                   <div className="text-sm text-gray-500 font-medium">
-                    Hiển thị {meta.total || apiProducts.length} mặt hàng {searchQuery && `cho "${searchQuery}"`}
+                    {t('products.showing_count', { count: meta.total || apiProducts.length })} {searchQuery && t('products.for_query', { query: searchQuery })}
                   </div>
                 </div>
 
@@ -483,13 +483,13 @@ const ProductsPage: React.FC = () => {
                   </button>
                   */}
 
-                  <span className="text-[13px] text-gray-600 font-semibold whitespace-nowrap hidden sm:inline-block">Sắp xếp:</span>
+                  <span className="text-[13px] text-gray-600 font-semibold whitespace-nowrap hidden sm:inline-block">{t('products.sort.label')}</span>
                   <div className="relative flex-1 sm:flex-none sm:w-[200px] hidden sm:block" ref={sortRef}>
                     <div
                       className="w-full flex items-center justify-between border border-gray-200 text-[13px] font-medium rounded-xl px-4 py-2.5 bg-white cursor-pointer text-gray-800 transition-all hover:bg-gray-50 shadow-sm"
                       onClick={() => setSortOpen(!sortOpen)}
                     >
-                      <span className="truncate pr-2 border-r border-gray-200">{sortOptions.find(opt => opt.value === sortBy)?.label || 'Tùy chọn gợi ý'}</span>
+                      <span className="truncate pr-2 border-r border-gray-200">{sortOptions.find(opt => opt.value === sortBy)?.label || t('products.sort.suggested')}</span>
                       <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
                     </div>
                     {sortOpen && (
@@ -521,7 +521,7 @@ const ProductsPage: React.FC = () => {
                 </div>
               ) : apiProducts.length === 0 ? (
                 <div className="py-20 text-center text-gray-400">
-                  <p className="text-lg">Không tìm thấy sản phẩm nào phù hợp.</p>
+                  <p className="text-lg">{t('products.empty')}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-6">
@@ -532,7 +532,7 @@ const ProductsPage: React.FC = () => {
                       slug={`${product.slug || product.id}?id=${product.id}`}
                       title={product.name}
                       category={product.categoryId?.name}
-                      price={product.price && product.price > 0 ? `${product.price.toLocaleString()} VNĐ` : 'Liên hệ'}
+                      price={product.price && product.price > 0 ? `${product.price.toLocaleString()} ${t('common.vnd')}` : t('products.contact_price')}
                       image={product.images && product.images.length > 0 ? product.images[0].url : 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800'}
                       likes={product.likeCount ?? product.likes}
                       isLiked={product.isLiked}

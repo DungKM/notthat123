@@ -58,7 +58,7 @@ const Testimonials: React.FC = () => {
                 <Card
                   key={proj._id || proj.id}
                   title={proj.name}
-                  subtitle="Dự án thực tế"
+                  subtitle={t('testimonials.real_project')}
                   image={coverImage}
                 >
                   <Link

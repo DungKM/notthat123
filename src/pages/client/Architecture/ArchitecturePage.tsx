@@ -7,6 +7,7 @@ import PaginationControls from '@/src/components/common/PaginationControls';
 import { Search, X, Filter, ChevronDown, ChevronRight } from 'lucide-react';
 import { useArchitectureService, useArchitectureCategoryService } from '@/src/api/services';
 import { useApi } from '@/src/hooks/useApi';
+import { useTranslation } from 'react-i18next';
 
 const SIBLING_ITEMS_PER_PAGE_MOBILE = 2;
 const SIBLING_ITEMS_PER_PAGE_DESKTOP = 3;
@@ -48,6 +49,7 @@ const SkeletonCard: React.FC = () => (
 // ====================== Architecture Page ======================
 
 const ArchitecturePage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const categoryParam = searchParams.get('category') || '';
@@ -368,13 +370,13 @@ const ArchitecturePage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <SEO
-        title="Thiết kế kiến trúc - Hochi Design"
-        description="Khám phá các công trình thiết kế kiến trúc nổi bật của Hochi: biệt thự, nhà phố, công trình thương mại... Thiết kế sáng tạo, thi công chuyên nghiệp."
+        title={t('architecture_page.seo.title')}
+        description={t('architecture_page.seo.description')}
         canonicalPath="/thiet-ke-kien-truc"
-        keywords="thiết kế kiến trúc, kiến trúc biệt thự, kiến trúc nhà phố, hochi design, công trình kiến trúc"
+        keywords={t('architecture_page.seo.keywords')}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Thiết kế kiến trúc', url: '/thiet-ke-kien-truc' },
+          { name: t('architecture_detail.breadcrumbs.home'), url: '/' },
+          { name: t('architecture_detail.breadcrumbs.current'), url: '/thiet-ke-kien-truc' },
         ]}
       />
 
@@ -390,8 +392,8 @@ const ArchitecturePage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <Container className="relative z-10 text-center text-white">
-          <Badge variant="gold">KIẾN TRÚC ĐỈNH CAO</Badge>
-          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>THIẾT KẾ KIẾN TRÚC</h1>
+          <Badge variant="gold">{t('architecture_page.badge')}</Badge>
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>{t('architecture_page.hero_title')}</h1>
         </Container>
       </section>
 
@@ -412,7 +414,7 @@ const ArchitecturePage: React.FC = () => {
                     {/* Categories */}
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2">
-                        Danh mục
+                        {t('products.filters.category')}
                       </p>
                       <div className="flex overflow-x-auto hide-scrollbar gap-2 lg:flex-col lg:gap-0 lg:space-y-1 pb-2 lg:pb-0">
                         <button
@@ -423,7 +425,7 @@ const ArchitecturePage: React.FC = () => {
                             : 'bg-white text-gray-700 border-gray-200 hover:border-showcase-primary/30 hover:bg-gray-50'
                             }`}
                         >
-                          Tất cả
+                          {t('header.all')}
                         </button>
 
                         {categories.map((cat) => {
@@ -508,8 +510,8 @@ const ArchitecturePage: React.FC = () => {
                     <>
                       <div className="mb-6 text-xs text-gray-400 font-medium uppercase tracking-widest">
                         {isParentCategory
-                          ? `Danh mục con thuộc ${currentCategory.name}`
-                          : `Hiển thị ${items.length} thiết kế ${searchQuery ? `cho "${searchQuery}"` : ''}`
+                          ? t('projects_page.child_categories_of', { name: currentCategory.name })
+                          : t('architecture_page.showing_count', { count: items.length, query: searchQuery ? t('products.for_query', { query: searchQuery }) : '' })
                         }
                       </div>
 
@@ -578,7 +580,7 @@ const ArchitecturePage: React.FC = () => {
                                               </p>
                                               {(child.constructionCount ?? 0) > 0 && (
                                                 <span className="text-[11px] text-gray-400 mt-0.5 block">
-                                                  {child.constructionCount} công trình
+                                                  {t('architecture_page.project_count', { count: child.constructionCount })}
                                                 </span>
                                               )}
                                             </div>
@@ -609,7 +611,7 @@ const ArchitecturePage: React.FC = () => {
                         })()
                       ) : items.length === 0 ? (
                         <div className="py-20 text-center text-gray-400">
-                          <p className="text-lg">Không tìm thấy thiết kế nào phù hợp.</p>
+                          <p className="text-lg">{t('architecture_page.empty')}</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10">

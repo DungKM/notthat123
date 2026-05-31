@@ -4,6 +4,7 @@ import Container from '@/src/features/showcase/components/ui/Container';
 import SEO from '@/src/components/common/SEO';
 import { useApi } from '@/src/hooks/useApi';
 import { SearchOutlined, ArrowRightOutlined, InboxOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 // Chỉ cho phép: chữ cái (bao gồm tiếng Việt), số, khoảng trắng, dấu gạch ngang, dấu phẩy, chấm
 const ALLOWED_CHARS_REGEX = /[^\p{L}\p{N}\s\-,.']/gu;
@@ -13,6 +14,7 @@ const sanitizeInput = (value: string): string => {
 };
 
 const SearchResultsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -74,8 +76,8 @@ const SearchResultsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
-        title={query ? `Kết quả tìm kiếm "${query}"` : 'Tìm kiếm'}
-        description="Tìm kiếm sản phẩm và công trình nội thất Hochi"
+        title={query ? t('search.seo.title_with_query', { query }) : t('search.seo.title')}
+        description={t('search.seo.description')}
         noIndex={true}
       />
 
@@ -89,9 +91,9 @@ const SearchResultsPage: React.FC = () => {
           />
         </div>
         <Container className="relative z-10 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400 mb-3">Tìm kiếm</p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400 mb-3">{t('search.title')}</p>
           <h1 className="text-3xl md:text-5xl font-black text-white mb-8 uppercase tracking-wide">
-            {query ? `"${query}"` : 'Tất cả kết quả'}
+            {query ? `"${query}"` : t('search.all_results')}
           </h1>
 
           {/* Search Input */}
@@ -121,8 +123,8 @@ const SearchResultsPage: React.FC = () => {
           {searched && !loading && query && (
             <p className="text-sm text-gray-400 mt-5">
               {total > 0
-                ? <><span className="text-white font-bold">{total}</span> kết quả cho <span className="text-amber-400 font-bold">"{query}"</span></>
-                : <>Không tìm thấy kết quả nào cho <span className="text-amber-400 font-bold">"{query}"</span></>}
+                ? <><span className="text-white font-bold">{total}</span> {t('search.results_for')} <span className="text-amber-400 font-bold">"{query}"</span></>
+                : <>{t('search.no_results_for')} <span className="text-amber-400 font-bold">"{query}"</span></>}
             </p>
           )}
         </Container>
@@ -133,7 +135,7 @@ const SearchResultsPage: React.FC = () => {
         {loading && (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="w-10 h-10 border-4 border-amber-200 border-t-amber-700 rounded-full animate-spin" />
-            <p className="text-gray-500 text-sm animate-pulse">Đang tìm kiếm...</p>
+            <p className="text-gray-500 text-sm animate-pulse">{t('header.searching')}</p>
           </div>
         )}
 
@@ -141,8 +143,8 @@ const SearchResultsPage: React.FC = () => {
         {!loading && !query && (
           <div className="text-center py-24">
             <SearchOutlined className="text-5xl text-gray-300 mb-4" />
-            <h3 className="text-xl font-bold text-gray-700 mb-2">Nhập từ khóa để tìm kiếm</h3>
-            <p className="text-gray-400 text-sm">Tìm kiếm sản phẩm nội thất, công trình thi công và nhiều hơn nữa.</p>
+            <h3 className="text-xl font-bold text-gray-700 mb-2">{t('search.enter_keyword_title')}</h3>
+            <p className="text-gray-400 text-sm">{t('search.enter_keyword_desc')}</p>
           </div>
         )}
 
@@ -150,10 +152,10 @@ const SearchResultsPage: React.FC = () => {
         {!loading && searched && total === 0 && query && (
           <div className="text-center py-24">
             <InboxOutlined className="text-5xl text-gray-300 mb-4" />
-            <h3 className="text-xl font-bold text-gray-700 mb-2">Không tìm thấy kết quả</h3>
-            <p className="text-gray-400 text-sm mb-8">Thử từ khóa khác hoặc xem các gợi ý bên dưới.</p>
+            <h3 className="text-xl font-bold text-gray-700 mb-2">{t('header.no_results')}</h3>
+            <p className="text-gray-400 text-sm mb-8">{t('search.try_suggestions')}</p>
             <div className="flex flex-wrap justify-center gap-3">
-              {['Sofa', 'Bàn ăn', 'Giường ngủ', 'Tủ quần áo', 'Biệt thự'].map(kw => (
+              {(t('search.suggestions', { returnObjects: true }) as string[]).map(kw => (
                 <button
                   key={kw}
                   onClick={() => setSearchParams({ q: kw })}
@@ -174,7 +176,7 @@ const SearchResultsPage: React.FC = () => {
             {results.products.length > 0 && (
               <section>
                 <div className="flex items-center gap-3 mb-6">
-                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide">Sản phẩm</h2>
+                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide">{t('header.products')}</h2>
                   <span className="text-sm font-bold text-amber-700 bg-amber-50 px-3 py-0.5 rounded-full border border-amber-100">
                     {results.products.length}
                   </span>
@@ -183,7 +185,7 @@ const SearchResultsPage: React.FC = () => {
                     to={`/san-pham/danh-sach?search=${encodeURIComponent(query)}`}
                     className="text-sm font-bold !text-amber-700 hover:!text-amber-800 flex items-center gap-1 whitespace-nowrap"
                   >
-                    Xem tất cả sản phẩm<ArrowRightOutlined className="text-[11px]" />
+                    {t('search.view_all_products')}<ArrowRightOutlined className="text-[11px]" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -206,7 +208,7 @@ const SearchResultsPage: React.FC = () => {
                           {item.name}
                         </p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Sản phẩm</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t('header.products')}</span>
                           <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover:text-amber-700 group-hover:translate-x-0.5 transition-all" />
                         </div>
                       </div>
@@ -220,7 +222,7 @@ const SearchResultsPage: React.FC = () => {
             {results.constructions.length > 0 && (
               <section>
                 <div className="flex items-center gap-3 mb-6">
-                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide">Công trình</h2>
+                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide">{t('header.projects')}</h2>
                   <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-0.5 rounded-full border border-blue-100">
                     {results.constructions.length}
                   </span>
@@ -229,7 +231,7 @@ const SearchResultsPage: React.FC = () => {
                     to={`/thiet-ke-noi-that?search=${encodeURIComponent(query)}`}
                     className="text-sm font-bold !text-blue-600 hover:!text-blue-700 flex items-center gap-1 whitespace-nowrap"
                   >
-                    Xem tất cả sản phẩm<ArrowRightOutlined className="text-[11px]" />
+                    {t('search.view_all_projects')}<ArrowRightOutlined className="text-[11px]" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -252,7 +254,7 @@ const SearchResultsPage: React.FC = () => {
                           {item.name}
                         </p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Công trình</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t('header.projects')}</span>
                           <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
                         </div>
                       </div>

@@ -9,8 +9,10 @@ import { useArchitectureService } from '@/src/api/services';
 import { Image } from 'antd';
 import InterestModal from '@/src/components/common/InterestModal';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const ArchitectureDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const idFromUrl = searchParams.get('id');
@@ -62,7 +64,7 @@ const ArchitectureDetailPage: React.FC = () => {
   if (loading && !project) {
     return (
       <div className="bg-white min-h-screen pt-40 pb-20 text-center">
-        <p className="text-gray-400 animate-pulse text-lg">Đang tải thông tin chi tiết...</p>
+        <p className="text-gray-400 animate-pulse text-lg">{t('detail.loading')}</p>
       </div>
     );
   }
@@ -70,15 +72,15 @@ const ArchitectureDetailPage: React.FC = () => {
   if (error || !project) {
     return (
       <div className="bg-white min-h-screen pt-40 pb-20 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Không tìm thấy thiết kế kiến trúc</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('architecture_detail.not_found')}</h2>
         <Link to="/thiet-ke-kien-truc" className="text-showcase-primary hover:underline flex items-center justify-center gap-2">
-          <ArrowLeftOutlined /> Quay lại danh sách thiết kế
+          <ArrowLeftOutlined /> {t('architecture_detail.back_to_list')}
         </Link>
       </div>
     );
   }
 
-  const categoryName = project.categoryId?.name || 'Thiết kế kiến trúc';
+  const categoryName = project.categoryId?.name || t('architecture_detail.category_fallback');
   const allImages = project.images && project.images.length > 0 ? project.images : [{ url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80' }];
   const currentImage = allImages[currentImageIndex].url;
   const coverImage = allImages[0].url;
@@ -101,14 +103,14 @@ const ArchitectureDetailPage: React.FC = () => {
     <div className="bg-white">
       <SEO
         title={project.name}
-        description={project.description || `Thiết kế ${project.name} - Thiết kế kiến trúc cao cấp bởi Nội Thất Hochi. Xem ảnh và thông tin chi tiết.`}
+        description={project.description || t('architecture_detail.seo_description_fallback', { name: project.name })}
         canonicalPath={`/thiet-ke-kien-truc/${slug}`}
         ogImage={coverImage}
         ogImageAlt={project.name}
         keywords={`${project.name}, ${categoryName}, thiết kế kiến trúc hochi, kiến trúc${project.location ? ', ' + project.location : ''}`}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Thiết kế kiến trúc', url: '/thiet-ke-kien-truc' },
+          { name: t('architecture_detail.breadcrumbs.home'), url: '/' },
+          { name: t('architecture_detail.breadcrumbs.current'), url: '/thiet-ke-kien-truc' },
           { name: categoryName, url: '/thiet-ke-kien-truc' },
           { name: project.name, url: `/thiet-ke-kien-truc/${slug}` },
         ]}
@@ -118,9 +120,9 @@ const ArchitectureDetailPage: React.FC = () => {
         <Container>
           {/* BREADCRUMB */}
           <div className="text-[13px] !text-gray-500 mb-6 font-medium">
-            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
+            <Link to="/" className="hover:text-showcase-primary !text-gray-500">{t('architecture_detail.breadcrumbs.home')}</Link>
             <span className="mx-2">/</span>
-            <Link to="/thiet-ke-kien-truc" className="hover:text-showcase-primary !text-gray-500">Thiết kế kiến trúc</Link>
+            <Link to="/thiet-ke-kien-truc" className="hover:text-showcase-primary !text-gray-500">{t('architecture_detail.breadcrumbs.current')}</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900">{project.name}</span>
           </div>
@@ -207,7 +209,7 @@ const ArchitectureDetailPage: React.FC = () => {
                           onClick={() => setIsInterestModalOpen(true)}
                           className="h-10 px-8 bg-white border-2 border-[#cca32e] text-[#cca32e] hover:bg-[#cca32e] hover:text-white font-bold rounded transition-colors text-[13px] tracking-wide cursor-pointer inline-flex items-center uppercase"
                         >
-                          Quan tâm
+                          {t('detail.interested')}
                         </button>
                       </div>
                     </div>
@@ -230,10 +232,10 @@ const ArchitectureDetailPage: React.FC = () => {
                             className="text-lg sm:text-xl font-bold uppercase tracking-[0.25em] text-teal-950"
                             style={{ fontFamily: "'Inter', sans-serif" }}
                           >
-                            GALLERY THIẾT KẾ
+                            {t('architecture_detail.gallery_title')}
                           </h2>
                           <span className="text-xs text-gray-400 font-medium">
-                            {gallery.length + 1} hình ảnh
+                            {t('detail.image_count', { count: gallery.length + 1 })}
                           </span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 [&_.ant-image]:!w-full [&_.ant-image]:!h-full [&_.ant-image-img]:!w-full [&_.ant-image-img]:!h-full [&_.ant-image-img]:!object-cover">
@@ -263,19 +265,19 @@ const ArchitectureDetailPage: React.FC = () => {
             {relatedProjects.length > 0 && (
               <section className="mt-20 md:mt-24 border-t border-gray-100 pt-12 md:pt-16">
                 <div className="text-center mb-10 space-y-4">
-                  <Badge variant="gold">THIẾT KẾ LIÊN QUAN</Badge>
+                  <Badge variant="gold">{t('architecture_detail.related_badge')}</Badge>
                   <h2
                     className="text-2xl md:text-3xl font-bold uppercase tracking-[0.25em] text-teal-950"
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
-                    GỢI Ý DÀNH CHO BẠN
+                    {t('detail.suggestions_title')}
                   </h2>
                   <div className="w-16 h-1 bg-showcase-primary mx-auto" />
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
                   {relatedProjects.slice(0, visibleRelatedCount).map((p) => {
-                    const pCatName = p.categoryId?.name || 'Thiết kế kiến trúc';
+                    const pCatName = p.categoryId?.name || t('architecture_detail.category_fallback');
                     const pCover = p.images && p.images.length > 0 ? p.images[0].url : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80';
                     return (
                       <ProductCard
@@ -301,7 +303,7 @@ const ArchitectureDetailPage: React.FC = () => {
                       onClick={() => setVisibleRelatedCount((prev) => prev + 6)}
                       className="inline-flex items-center justify-center rounded-xl border border-showcase-primary px-6 py-2.5 text-sm font-bold text-showcase-primary transition-colors hover:bg-showcase-primary hover:text-white"
                     >
-                      Xem thêm
+                      {t('common.load_more')}
                     </button>
                   </div>
                 )}
@@ -315,7 +317,7 @@ const ArchitectureDetailPage: React.FC = () => {
         isOpen={isInterestModalOpen}
         onClose={() => setIsInterestModalOpen(false)}
         entityName={project?.name || ''}
-        entityTypeText="thiết kế"
+        entityTypeText={t('architecture_detail.entity_type')}
         entityId={String(project?.id || project?._id || '')}
         entityType="Architecture"
       />

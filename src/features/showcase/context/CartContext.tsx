@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { useCartService } from '@/src/api/services';
 import toast from 'react-hot-toast';
+import i18n from '@/src/i18n';
 
 export interface CartItem {
   id: string; // Có thể là cartItemId hoặc productId tuỳ implementation
@@ -60,7 +61,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: it._id || lineKey, // Nếu không có cartItemId từ backend thì dùng key productId+size
           productId: pId, // Lưu lại productId thật
           slug: it.productId?.slug || pId,
-          title: it.productId?.name || 'Sản phẩm',
+          title: it.productId?.name || i18n.t('cart.item_fallback'),
           price: price,
           image: it.productId?.images?.[0]?.url || 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
           quantity: it.quantity,
@@ -131,11 +132,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (res?.success) {
         if (addedQuantity > 0) {
-          toast.success(res.message || 'Đã thêm sản phẩm vào giỏ hàng', { id: 'cart-toast' });
+          toast.success(res.message || i18n.t('cart.toast.added'), { id: 'cart-toast' });
         } else {
           // Trường hợp đã chạm giới hạn kho từ trước khi bấm thêm
           const max = item.stockQuantity;
-          toast.error(`Trong kho chỉ còn tối đa ${max} sản phẩm`, { id: 'cart-toast' });
+          toast.error(i18n.t('cart.toast.stock_limit', { count: max }), { id: 'cart-toast' });
         }
       }
 
@@ -164,7 +165,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }, {
         size: itemToRemove?.size,
       });
-      toast.success(res?.message || 'Xóa sản phẩm khỏi giỏ hàng thành công', { id: 'cart-toast' });
+      toast.success(res?.message || i18n.t('cart.toast.removed'), { id: 'cart-toast' });
       if (res?.data) updateCartStateFromAPI(res.data);
       else fetchCart();
     } catch (err) {
@@ -280,7 +281,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart phải được dùng trong CartProvider');
+    throw new Error(i18n.t('cart.errors.provider_required'));
   }
   return context;
 };

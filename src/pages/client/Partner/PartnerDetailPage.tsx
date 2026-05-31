@@ -5,7 +5,9 @@ import SEO from "@/src/components/common/SEO";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { usePartnerService } from "@/src/api/services";
+import { useTranslation } from "react-i18next";
 const PartnerDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const { data: partner, getById, loading } = usePartnerService();
   const [hasFetched, setHasFetched] = useState(false);
@@ -16,7 +18,7 @@ const PartnerDetailPage: React.FC = () => {
     }
   }, [slug, getById]);
 
-  if (loading || !hasFetched) return <div style={{ padding: 24, textAlign: 'center' }}>Đang tải dữ liệu...</div>;
+  if (loading || !hasFetched) return <div style={{ padding: 24, textAlign: 'center' }}>{t('common.loading')}</div>;
 
   if (!partner && hasFetched) {
     return <Navigate to="/doi-tac" replace />;
@@ -25,7 +27,7 @@ const PartnerDetailPage: React.FC = () => {
   return (
     <div className="bg-gray-50 flex flex-col">
       <SEO
-        title={`${partner.title} - Đối tác`}
+        title={`${partner.title} - ${t('partner.breadcrumbs.current')}`}
         description={partner.description || partner.title}
       />
 
@@ -33,9 +35,9 @@ const PartnerDetailPage: React.FC = () => {
         <Container>
           {/* BREADCRUMB */}
           <div className="text-[13px] !text-gray-500 mb-6 font-medium">
-            <Link to="/" className="hover:text-showcase-primary !text-gray-500">Trang chủ</Link>
+            <Link to="/" className="hover:text-showcase-primary !text-gray-500">{t('partner.breadcrumbs.home')}</Link>
             <span className="mx-2">/</span>
-            <Link to="/doi-tac" className="hover:text-showcase-primary !text-gray-500">Đối tác</Link>
+            <Link to="/doi-tac" className="hover:text-showcase-primary !text-gray-500">{t('partner.breadcrumbs.current')}</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900">{partner.title}</span>
           </div>
@@ -52,7 +54,7 @@ const PartnerDetailPage: React.FC = () => {
 
               <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
                 <span className="inline-block px-4 py-1.5 bg-orange-500 text-white rounded-full font-bold text-sm tracking-wider mb-4">
-                  ĐỐI TÁC CHIẾN LƯỢC {partner.cooperationYear}
+                  {t('partner.detail.strategic_partner', { year: partner.cooperationYear })}
                 </span>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 shadow-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {partner.title}
@@ -73,17 +75,17 @@ const PartnerDetailPage: React.FC = () => {
               <div className="prose prose-lg max-w-none text-gray-600 leading-loose">
                 <p>{partner.content}</p>
                 <p className="mt-6">
-                  Chúng tôi tin tưởng rằng mối quan hệ hợp tác này sẽ mang lại những giá trị thiết thực và lâu dài. Không chỉ cung cấp các sản phẩm chất lượng cao, hai bên còn hướng tới việc đem đến trải nghiệm người dùng tuyệt vời và các dịch vụ hậu mãi xuất sắc.
+                  {t('partner.detail.cooperation_note')}
                 </p>
               </div>
 
               <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                  <h3 className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">Thương hiệu</h3>
+                  <h3 className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">{t('partner.detail.brand')}</h3>
                   <p className="text-xl font-semibold text-teal-950">{partner.title}</p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                  <h3 className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">Năm hợp tác</h3>
+                  <h3 className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">{t('partner.detail.cooperation_year')}</h3>
                   <p className="text-xl font-semibold text-orange-500">{partner.cooperationYear}</p>
                 </div>
               </div>

@@ -26,12 +26,12 @@ const Features: React.FC = () => {
           <Link to="/video" className="lg:col-span-2 relative group cursor-pointer overflow-hidden rounded-2xl shadow-xl block">
             <img
               src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1200"
-              alt="Biệt Thự Gamuda"
+              alt={t('features.featured_project_alt')}
               className="w-full h-full aspect-video object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-all flex flex-col items-end justify-end p-6">
               <div className="text-left">
-                <h4 className="text-white font-sans text-2xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>Biệt Thự Gamuda Gardens</h4>
+                <h4 className="text-white font-sans text-2xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>{t('features.featured_project_title')}</h4>
               </div>
             </div>
           </Link>
@@ -54,7 +54,7 @@ const Features: React.FC = () => {
             <Link to="/video" className="relative group cursor-pointer overflow-hidden rounded-2xl shadow-lg flex-grow block">
               <img
                 src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=800"
-                alt="Thi Cong Noi That"
+                alt={t('features.secondary_project_alt')}
                 className="w-full h-full min-h-[200px] object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all" />

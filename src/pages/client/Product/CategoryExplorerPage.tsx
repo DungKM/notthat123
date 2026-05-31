@@ -5,6 +5,7 @@ import { useApi } from '@/src/hooks/useApi';
 import Container from '@/src/features/showcase/components/ui/Container';
 import { ArrowRightOutlined, SearchOutlined, FilterOutlined, InboxOutlined } from '@ant-design/icons';
 import { ROUTES } from '@/src/routes';
+import { useTranslation } from 'react-i18next';
 
 export const MOCK_PRODUCT_PLACEHOLDER = 'https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&q=80&w=800';
 
@@ -26,6 +27,7 @@ interface SearchResult {
 }
 
 const CategoryExplorerPage = () => {
+  const { t } = useTranslation();
   const { list: apiCategories, getAll } = useCategoryService();
   const { request: searchRequest } = useApi<SearchResult>('/search');
   const navigate = useNavigate();
@@ -114,9 +116,9 @@ const CategoryExplorerPage = () => {
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <Container className="relative z-10 text-center text-white">
-          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>KHÁM PHÁ DANH MỤC</h1>
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-widest mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>{t('category_explorer.hero_title')}</h1>
           <div className="mt-4 text-sm font-medium opacity-80 flex items-center justify-center gap-2">
-            <span>Tìm kiếm hàng ngàn sản phẩm nội ngoại thất cao cấp được phân loại rõ ràng.</span>
+            <span>{t('category_explorer.hero_subtitle')}</span>
           </div>
         </Container>
       </section>
@@ -129,12 +131,12 @@ const CategoryExplorerPage = () => {
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Tìm kiếm</p>
-                  <h2 className="text-xl font-black text-gray-900 mt-0.5">BỘ LỌC</h2>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{t('category_explorer.search_label')}</p>
+                  <h2 className="text-xl font-black text-gray-900 mt-0.5">{t('products.filters.title')}</h2>
                 </div>
                 <button
                   onClick={handleReset}
-                  title="Đặt lại bộ lọc"
+                  title={t('category_explorer.reset_filter')}
                   className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-showcase-primary hover:bg-amber-50 transition-colors"
                 >
                   <FilterOutlined />
@@ -143,7 +145,7 @@ const CategoryExplorerPage = () => {
 
               {/* Keyword Search */}
               <div className="mb-6">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Từ khóa</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">{t('category_explorer.keyword')}</label>
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <div className="relative flex-1">
                     <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
@@ -151,14 +153,14 @@ const CategoryExplorerPage = () => {
                       type="text"
                       value={inputValue}
                       onChange={e => setInputValue(sanitizeInput(e.target.value))}
-                      placeholder="Tìm kiếm sản phẩm..."
+                      placeholder={t('category_explorer.search_placeholder')}
                       className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition"
                     />
                   </div>
                   <button
                     type="submit"
                     className="px-3 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl transition-colors flex items-center justify-center"
-                    title="Tìm kiếm"
+                    title={t('category_explorer.search_label')}
                   >
                     <SearchOutlined />
                   </button>
@@ -170,13 +172,13 @@ const CategoryExplorerPage = () => {
 
               {/* Category Filter */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Danh mục</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('products.filters.category')}</label>
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => navigate(ROUTES.DANH_SACH_SAN_PHAM)}
                     className=" uppercase w-full text-left flex justify-between items-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-50"
                   >
-                    Tất cả
+                    {t('header.all')}
                   </button>
                   {parentCategories.map(cat => {
                     const catId = cat.id || cat._id;
@@ -230,7 +232,7 @@ const CategoryExplorerPage = () => {
                     );
                   })}
                   {parentCategories.length === 0 && (
-                    <p className="text-sm text-gray-400 italic">Đang tải danh mục...</p>
+                    <p className="text-sm text-gray-400 italic">{t('category_explorer.loading_categories')}</p>
                   )}
                 </div>
               </div>
@@ -247,19 +249,19 @@ const CategoryExplorerPage = () => {
                   {keyword && !isSearching && (
                     <span className="text-sm text-gray-500">
                       {searchResults.length > 0
-                        ? <><span className="font-bold text-gray-800">{searchResults.length}</span> sản phẩm cho <strong>"{keyword}"</strong></>
-                        : <>Không tìm thấy kết quả cho <strong>"{keyword}"</strong></>
+                        ? <><span className="font-bold text-gray-800">{searchResults.length}</span> {t('category_explorer.products_for')} <strong>"{keyword}"</strong></>
+                        : <>{t('category_explorer.no_results_for')} <strong>"{keyword}"</strong></>
                       }
                     </span>
                   )}
                   {isSearching && (
-                    <span className="text-sm text-gray-400 animate-pulse">Đang tìm kiếm...</span>
+                    <span className="text-sm text-gray-400 animate-pulse">{t('header.searching')}</span>
                   )}
                   <button
                     onClick={handleReset}
                     className="text-xs font-bold text-amber-700 hover:underline ml-auto"
                   >
-                    ← Quay lại danh mục
+                    {t('category_explorer.back_to_categories')}
                   </button>
                 </div>
 
@@ -267,7 +269,7 @@ const CategoryExplorerPage = () => {
                 {isSearching && (
                   <div className="flex flex-col items-center justify-center py-24 gap-4">
                     <div className="w-10 h-10 border-4 border-amber-200 border-t-amber-700 rounded-full animate-spin" />
-                    <p className="text-gray-500 text-sm animate-pulse">Đang tìm kiếm...</p>
+                    <p className="text-gray-500 text-sm animate-pulse">{t('header.searching')}</p>
                   </div>
                 )}
 
@@ -277,15 +279,15 @@ const CategoryExplorerPage = () => {
                     <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                       <InboxOutlined className="text-2xl text-gray-400" />
                     </div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-2">Không tìm thấy sản phẩm</h4>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">{t('category_explorer.no_products_title')}</h4>
                     <p className="text-gray-500 text-sm mb-6">
-                      Không có sản phẩm nào phù hợp với từ khóa <strong>"{keyword}"</strong>.
+                      {t('category_explorer.no_products_desc')} <strong>"{keyword}"</strong>.
                     </p>
                     <button
                       onClick={handleReset}
                       className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-showcase-primary transition-colors text-sm uppercase tracking-wider"
                     >
-                      Xem tất cả danh mục
+                      {t('category_explorer.view_all_categories')}
                     </button>
                   </div>
                 )}
@@ -312,7 +314,7 @@ const CategoryExplorerPage = () => {
                             {item.name}
                           </p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Sản phẩm</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t('header.products')}</span>
                             <ArrowRightOutlined className="text-[10px] text-gray-300 group-hover:text-amber-700 group-hover:translate-x-0.5 transition-all" />
                           </div>
                         </div>
@@ -328,7 +330,7 @@ const CategoryExplorerPage = () => {
                       to={`/san-pham/danh-sach?search=${encodeURIComponent(keyword)}`}
                       className="inline-flex items-center gap-2 px-8 py-3 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl transition-colors text-sm uppercase tracking-wider"
                     >
-                      Xem tất cả kết quả <ArrowRightOutlined />
+                      {t('category_explorer.view_all_results')} <ArrowRightOutlined />
                     </Link>
                   </div>
                 )}
@@ -341,7 +343,7 @@ const CategoryExplorerPage = () => {
                 <div className="flex items-center justify-between mb-8">
                   {keyword && (
                     <span className="text-sm text-gray-500">
-                      {allChildren.length} kết quả cho <strong>"{keyword}"</strong>
+                      {t('category_explorer.results_for', { count: allChildren.length, query: keyword })}
                     </span>
                   )}
                 </div>
@@ -352,10 +354,10 @@ const CategoryExplorerPage = () => {
                       <InboxOutlined className="text-2xl text-amber-500" />
                     </div>
                     <h4 className="text-lg font-bold text-gray-900 mb-2">
-                      Vui lòng chọn danh mục
+                      {t('category_explorer.select_category_title')}
                     </h4>
                     <p className="text-gray-500 text-sm">
-                      Chọn một danh mục từ bộ lọc bên trái để khám phá các loại sản phẩm tương ứng.
+                      {t('category_explorer.select_category_desc')}
                     </p>
                   </div>
                 ) : allChildren.length > 0 ? (
@@ -388,7 +390,7 @@ const CategoryExplorerPage = () => {
                           </div>
 
                           <div className="mt-6 flex items-center justify-between text-[11px] font-black uppercase tracking-widest text-gray-400 group-hover:text-showcase-primary transition-colors pt-4 border-t border-gray-50">
-                            <span>XEM DANH SÁCH</span>
+                            <span>{t('category_explorer.view_list')}</span>
                             <ArrowRightOutlined className="group-hover:translate-x-2 transition-transform duration-300" />
                           </div>
                         </div>
@@ -401,16 +403,16 @@ const CategoryExplorerPage = () => {
                       <InboxOutlined className="text-2xl text-gray-400" />
                     </div>
                     <h4 className="text-lg font-bold text-gray-900 mb-2">
-                      Chưa có danh mục con
+                      {t('category_explorer.no_child_title')}
                     </h4>
                     <p className="text-gray-500 text-sm">
-                      Danh mục này hiện đang trống, bạn có muốn xem tất cả sản phẩm thuộc danh mục này không?
+                      {t('category_explorer.no_child_desc')}
                     </p>
                     <button
                       onClick={() => navigate(`${ROUTES.DANH_SACH_SAN_PHAM}?slug=${activeParent?.slug}`)}
                       className="mt-6 px-8 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-showcase-primary transition-colors text-sm uppercase tracking-wider"
                     >
-                      Xem toàn bộ sản phẩm
+                      {t('category_explorer.view_all_products')}
                     </button>
                   </div>
                 )}

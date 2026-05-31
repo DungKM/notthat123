@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 /* ════════════════════════════════════════
    PageLoader — Loading component bán hàng
@@ -132,8 +133,11 @@ const PageLoader: React.FC<PageLoaderProps> = ({
   variant = 'fullpage',
   color = '#c8a96e',
   size = 80,
-  label = 'Đang tải...',
+  label,
 }) => {
+  const { t } = useTranslation();
+  const displayLabel = label ?? t('common.loading');
+
   return (
     <>
       <style>{styles}</style>
@@ -155,9 +159,9 @@ const PageLoader: React.FC<PageLoaderProps> = ({
           }}
         >
           <Spinner size={size} color={color} />
-          {label && (
+          {displayLabel && (
             <p style={{ fontSize: 15, color: '#aaa', fontWeight: 500, letterSpacing: '0.08em', marginTop: 4 }}>
-              {label}
+              {displayLabel}
             </p>
           )}
         </div>

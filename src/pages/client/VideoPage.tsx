@@ -4,6 +4,7 @@ import { PlayCircleFilled, CloseOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import SEO from '@/src/components/common/SEO';
 import { useVideoService } from '@/src/api/services';
+import { useTranslation } from 'react-i18next';
 
 const getYoutubeId = (url: string) => {
   if (!url) return null;
@@ -29,6 +30,7 @@ const VideoCardSkeleton = () => (
 );
 
 const VideoPage: React.FC = () => {
+  const { t } = useTranslation();
   const { list: videos, getAll, loading } = useVideoService();
   const [selectedVideoUrl, setSelectedVideoUrl] = React.useState<string | null>(null);
   const [limit, setLimit] = React.useState(9);
@@ -46,13 +48,13 @@ const VideoPage: React.FC = () => {
   return (
     <div className="bg-white">
       <SEO
-        title="Video thi công nội thất thực tế - Nội Thất Hochi"
-        description="Xem video thực tế thi công nội thất gỗ cao cấp của Nội Thất Hochi: biệt thự, căn hộ, penthouse. Xem kết quả rực rỡ từ những công trình thực tế."
+        title={t('video.seo.title')}
+        description={t('video.seo.description')}
         canonicalPath="/video"
-        keywords="video nội thất, video thi công nội thất, youtube nội thất hochi, video thiết kế nội thất"
+        keywords={t('video.seo.keywords')}
         breadcrumbs={[
-          { name: 'Trang chủ', url: '/' },
-          { name: 'Video', url: '/video' },
+          { name: t('video.breadcrumbs.home'), url: '/' },
+          { name: t('video.breadcrumbs.current'), url: '/video' },
         ]}
       />
 
@@ -106,7 +108,7 @@ const VideoPage: React.FC = () => {
                 </div>
                 <div className="p-6 space-y-2">
                   <h2 className="font-bold text-amber-700 group-hover:text-amber-800 transition-colors uppercase text-sm tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>{v.title}</h2>
-                  <p className="text-gray-500 text-xs font-light leading-relaxed">Video công trình</p>
+                  <p className="text-gray-500 text-xs font-light leading-relaxed">{t('video.card_label')}</p>
                 </div>
               </div>
             ))}
@@ -120,7 +122,7 @@ const VideoPage: React.FC = () => {
                 disabled={loading}
                 className="px-12 py-4 border-2 border-teal-900 text-teal-900 font-bold text-xs uppercase tracking-[0.3em] hover:bg-teal-900 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Đang tải...' : 'TẢI THÊM VIDEO'}
+                {loading ? t('common.loading') : t('video.load_more')}
               </button>
             </div>
           )}

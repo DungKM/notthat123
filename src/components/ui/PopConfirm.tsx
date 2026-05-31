@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 interface PopConfirmProps {
   title: string;
@@ -17,11 +18,12 @@ const PopConfirm: React.FC<PopConfirmProps> = ({
   description,
   onConfirm,
   onCancel,
-  okText = 'Xác nhận',
-  cancelText = 'Hủy',
+  okText,
+  cancelText,
   placement = 'top',
   children,
 }) => {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -149,7 +151,7 @@ const PopConfirm: React.FC<PopConfirmProps> = ({
               cursor: 'pointer', transition: 'background 0.15s',
             }}
           >
-            {cancelText}
+            {cancelText || t('common.cancel')}
           </button>
           <button
             className="pc-ok"
@@ -162,7 +164,7 @@ const PopConfirm: React.FC<PopConfirmProps> = ({
               boxShadow: '0 4px 12px rgba(238,90,36,0.3)',
             }}
           >
-            {okText}
+            {okText || t('common.confirm')}
           </button>
         </div>
       </div>

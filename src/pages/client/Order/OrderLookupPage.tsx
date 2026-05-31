@@ -348,7 +348,7 @@ const OrderLookupPage: React.FC = () => {
                                     <p className="font-medium text-gray-800 truncate">{item.productName || t('order_lookup.detail.item_fallback')}</p>
                                     <p className="text-gray-500">{item.size ? `(${item.size})` : ''}</p>
                                     <p className="text-gray-600 whitespace-nowrap">x{item.quantity || 0}</p>
-                                    <p className="font-semibold text-gray-900 whitespace-nowrap">{(item.subtotal || 0).toLocaleString('vi-VN')} đ</p>
+                                    <p className="font-semibold text-gray-900 whitespace-nowrap">{(item.subtotal || 0).toLocaleString('vi-VN')} {t('common.vnd')}</p>
                                   </div>
                                 ))}
                               </div>
@@ -358,7 +358,7 @@ const OrderLookupPage: React.FC = () => {
                           <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
                             <span className="text-sm text-gray-500">{t('order_lookup.detail.total_label')}</span>
                             <span className="text-lg font-black text-showcase-primary">
-                              {(orderDetail.totalAmount || 0).toLocaleString('vi-VN')} đ
+                              {(orderDetail.totalAmount || 0).toLocaleString('vi-VN')} {t('common.vnd')}
                             </span>
                           </div>
                         </>

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Container from '@/src/features/showcase/components/ui/Container';
-import { useCart } from '@/src/features/showcase/context/CartContext';
+import { useCart } from '../../features/showcase/context/CartContext';
 import { useOrderService, useSettingService } from '@/src/api/services';
 import api from '@/src/api/axiosInstance';
 import SEO from '@/src/components/common/SEO';
@@ -336,7 +336,7 @@ const CheckoutPage: React.FC = () => {
                         />
                         <span className="text-[13px] font-semibold text-teal-950">{method.name}</span>
                       </label>
-                    ) : (
+                    )) : (
                       <div className="text-sm text-gray-500 italic pb-2">{t('checkout.payment_loading')}</div>
                     )}
                   </div>
@@ -485,7 +485,7 @@ const CheckoutPage: React.FC = () => {
                                     <span className="text-[13px] font-medium">{t('checkout.remove_item_label')}</span>
                                   </button>
                                 </PopConfirm>
-                                <span className="text-lg font-black text-gray-900">{item.subtotal.toLocaleString('vi-VN')} đ</span>
+                                <span className="text-lg font-black text-gray-900">{item.subtotal.toLocaleString('vi-VN')} {t('common.vnd')}</span>
                               </div>
                             </div>
                           </div>
@@ -537,7 +537,7 @@ const CheckoutPage: React.FC = () => {
                               <div className="relative p-2 bg-white rounded-xl border-2 border-dashed border-showcase-primary/30 mx-auto">
                                 <img
                                   src={shopInfo.qrCodeUrl}
-                                  alt="QR Code Thanh Toán"
+                                  alt={t('checkout.qr_alt')}
                                   className="w-48 h-48 object-contain"
                                 />
                               </div>
@@ -567,7 +567,7 @@ const CheckoutPage: React.FC = () => {
                               )}
                               <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                                 <span className="text-xs font-medium text-gray-600">{t('checkout.transfer_amount_label')}</span>
-                                <span className="font-black text-red-600 text-[15px]">{(isHalfPayment ? totalAmount / 2 : totalAmount).toLocaleString('vi-VN')} đ</span>
+                                <span className="font-black text-red-600 text-[15px]">{(isHalfPayment ? totalAmount / 2 : totalAmount).toLocaleString('vi-VN')} {t('common.vnd')}</span>
                               </div>
                             </div>
                           </div>
@@ -585,7 +585,7 @@ const CheckoutPage: React.FC = () => {
                       </button>
 
                       <p className="text-center text-[10px] text-gray-400 mt-4 leading-relaxed px-4">
-                        {t('checkout.terms')} <span className="underline cursor-pointer">{t('checkout.terms_link')}</span> và <span className="underline cursor-pointer">{t('checkout.warranty_link')}</span> {t('checkout.terms_suffix')}
+                        {t('checkout.terms')} <span className="underline cursor-pointer">{t('checkout.terms_link')}</span> {t('checkout.and')} <span className="underline cursor-pointer">{t('checkout.warranty_link')}</span> {t('checkout.terms_suffix')}
                       </p>
                     </div>
                   )}

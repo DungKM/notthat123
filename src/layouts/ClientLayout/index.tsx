@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from '@/src/features/showcase/components/layout/Header';
-import Footer from '@/src/features/showcase/components/layout/Footer';
-import { CartProvider } from '@/src/features/showcase/context/CartContext';
+import Header from '../../features/showcase/components/layout/Header';
+import Footer from '../../features/showcase/components/layout/Footer';
+import { CartProvider } from '../../features/showcase/context/CartContext';
 
 const ClientLayout: React.FC = () => {
   return (
