@@ -17,7 +17,7 @@ import {
   PhoneOutlined,
 } from '@ant-design/icons';
 import SEO from '@/src/components/common/SEO';
-import { useCart } from '../../../../features/showcase/context/CartContext';
+import { useCart } from '../../../features/showcase/context/CartContext';
 import deliveryLogo from '@/src/statics/logo_giao_hang.png';
 import ProductCard from '@/src/features/showcase/components/ui/ProductCard';
 import toast from 'react-hot-toast';
