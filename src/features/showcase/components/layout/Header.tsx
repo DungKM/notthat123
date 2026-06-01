@@ -129,6 +129,15 @@ const Header: React.FC = () => {
 
   const currentLang = i18n.language?.toUpperCase().substring(0, 2) || 'VI';
 
+  const handleLanguageChange = React.useCallback(
+    async (code: string) => {
+      if (i18n.language === code) return;
+      await i18n.changeLanguage(code);
+      window.location.reload();
+    },
+    [i18n]
+  );
+
   // ─── Debounced Search ───
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -942,7 +951,7 @@ const Header: React.FC = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => i18n.changeLanguage(lang.code)}
+                      onClick={() => handleLanguageChange(lang.code)}
                       className="flex items-center justify-between w-full px-5 py-3 text-sm hover:bg-gray-50 transition-colors"
                     >
                       <span className="flex items-center gap-3">
@@ -1759,7 +1768,7 @@ const Header: React.FC = () => {
                       {languages.map((lang) => (
                         <button
                           key={lang.code}
-                          onClick={() => i18n.changeLanguage(lang.code)}
+                          onClick={() => handleLanguageChange(lang.code)}
                           className={`flex flex-col items-center gap-1 p-2.5 rounded-2xl border transition-all ${i18n.language === lang.code
                             ? 'bg-showcase-primary/10 border-showcase-primary text-showcase-primary'
                             : 'bg-gray-50 border-transparent text-gray-600'
