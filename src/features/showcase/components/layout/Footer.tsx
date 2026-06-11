@@ -1,18 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Container from '../ui/Container';
 import {
   PhoneOutlined,
-  MailOutlined,
   EnvironmentOutlined
 } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import FloatingSocials from '@/src/components/FloatingSocials';
 import { useTranslation } from 'react-i18next';
-import { useCompanyInfoQuery } from '@/src/hooks/useCompanyInfoQuery';
+import api from '@/src/api/axiosInstance';
 
 const Footer: React.FC = () => {
-  const { t } = useTranslation();
-  const { data: companyInfo } = useCompanyInfoQuery();
+  const { t, i18n } = useTranslation();
+  const [companyInfo, setCompanyInfo] = useState<any>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    api.get('/company-info')
+      .then((res: any) => {
+        if (cancelled) return;
+        setCompanyInfo(res?.data || res);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('Failed to load company info:', err);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [i18n.language]);
 
   return (
     <footer className="bg-white text-gray-800 pt-8 sm:pt-16 pb-6 sm:pb-8 border-t border-gray-100">

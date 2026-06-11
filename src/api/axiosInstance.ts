@@ -22,6 +22,12 @@ const CLIENT_LANG_PARAM_MAP: Record<string, string> = {
   'zh-tw': 'zh',
 };
 
+const isAdminContext = () => {
+  if (typeof window === 'undefined') return false;
+  const pathname = window.location.pathname;
+  return pathname.startsWith('/quan-tri') || pathname === '/login';
+};
+
 const getClientLangParam = () => {
   const currentLanguage = (i18n.resolvedLanguage || i18n.language || 'vi').toLowerCase();
   const baseLanguage = currentLanguage.split('-')[0];
@@ -29,10 +35,12 @@ const getClientLangParam = () => {
   return CLIENT_LANG_PARAM_MAP[currentLanguage] || CLIENT_LANG_PARAM_MAP[baseLanguage] || 'vie';
 };
 
+const getLangParam = () => (isAdminContext() ? 'vie' : getClientLangParam());
+
 const attachClientLangParam = (config: InternalAxiosRequestConfig) => {
   if (typeof config.url === 'string' && /(?:\?|&)lang=/.test(config.url)) return;
 
-  const lang = getClientLangParam();
+  const lang = getLangParam();
 
   if (config.params instanceof URLSearchParams) {
     if (!config.params.has('lang')) {
