@@ -420,11 +420,11 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="relative z-50 transition-transform hover:scale-105 mr-2 lg:mr-4 xl:mr-2 2xl:mr-8 flex-shrink-0">
             <div className="w-[90px] sm:w-[120px]">
-                <img
-                  src="/assets/images/image-logo.png"
-                  alt={t('product_detail.brand')}
-                  className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? 'brightness-0 invert' : ''}`}
-                />
+              <img
+                src="/assets/images/image-logo.png"
+                alt={t('product_detail.brand')}
+                className={`w-full h-auto object-contain transition-all duration-300 ${!isDarkHeader ? 'brightness-0 invert' : ''}`}
+              />
             </div>
           </Link>
 
@@ -965,6 +965,27 @@ const Header: React.FC = () => {
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Mobile Language Switcher */}
+            <div className="md:hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  const currentIndex = languages.findIndex(l => l.code === (i18n.language || 'vi'));
+                  const nextIndex = (currentIndex + 1) % languages.length;
+                  handleLanguageChange(languages[nextIndex].code);
+                }}
+                className={`group flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-300 ${isDarkHeader
+                  ? 'text-gray-800 border-gray-200 hover:bg-gray-50'
+                  : 'text-white border-white/30 hover:bg-white/10'
+                  }`}
+                title={t('common.language')}
+              >
+                <span className="text-lg">
+                  {languages.find(l => l.code === (i18n.language || 'vi'))?.flag || '🇻🇳'}
+                </span>
+              </button>
             </div>
 
             {/* Mobile Search Button */}
